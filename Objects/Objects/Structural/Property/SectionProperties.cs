@@ -8,7 +8,7 @@ using Objects.Structural.Materials;
 
 namespace Objects.Structural.Properties
 {
-    public class SectionProperties
+    public class SectionProperties : Base
     {
         public double area { get; set; }
         public double Iy { get; set; } // seccond moment of area about y-axis

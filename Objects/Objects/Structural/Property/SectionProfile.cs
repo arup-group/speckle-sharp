@@ -12,10 +12,14 @@ namespace Objects.Structural.Properties.Profiles
         public string name { get; set; }
         public ShapeType shapeType { get; set; }
         public List<SectionProfile> children { get; set; } // better name it subComponent?
-        public ConcreteProperties concreteProperties { get; set; }
-        public SectionProperties sectionProperties { get; set; }
         public double weight { get; set; } // section weight, ex. kg/m
         public string units { get; set; }
+        // optional derived section properties
+        public SectionProperties sectionProperties { get; set; }
+        // optional concrete parameters
+        public List<ReinforcementBar> longitudinalBars { get; set; } // the longitudinal reinforcement bars of the cross-section
+        public List<ReinforcementLink> links { get; set; } // the shear or torsion links of the cross-section
+        public double cover { get; set; } // the concrete cover
 
         public SectionProfile() { }
 
@@ -45,6 +49,34 @@ namespace Objects.Structural.Properties.Profiles
             }
         }
 
+        public class ConcreteRectangular : Rectangular
+        {
+            public double topCover { get; set; } // the top concrete cover
+            public double bottomCover { get; set; } // the bottom concrete cover
+            public double leftCover { get; set; } // the left concrete cover
+            public double rightCover { get; set; } // the right concrete cover
+
+            public RectangularConcrete() { }
+
+            [SchemaInfo("Rectangular", "Creates a Speckle structural rectangular concrete section profile with uniform cover", "Structural", "Section Profile")]
+            public RectangularConcrete(string name, double depth, double width, double uniformCover) : base(name, depth, width, 0, 0)
+            {
+                this.topCover = uniformCover;
+                this.bottomCover = uniformCover;
+                this.leftCover = uniformCover;
+                this.rightCover = uniformCover;
+            }
+
+            [SchemaInfo("Rectangular", "Creates a Speckle structural rectangular concrete section profile", "Structural", "Section Profile")]
+            public RectangularConcrete(string name, double depth, double width, double topCover, double bottomCover, double leftCover, double rightCover) : base(name, depth, width, 0, 0)
+            {
+                this.topCover = topCover;
+                this.bottomCover = bottomCover;
+                this.leftCover = leftCover;
+                this.rightCover = rightCover;
+            }
+        }
+
         public class Circular : SectionProfile
         {
             public double radius { get; set; }
@@ -58,6 +90,20 @@ namespace Objects.Structural.Properties.Profiles
                 this.radius = radius;
                 this.wallThickness = wallThickness;
                 this.shapeType = ShapeType.Circular;
+            }
+        }
+
+        public class CircularConcrete : Circular
+        {
+            public double cover { get; set; } // the concrete cover
+
+            public CircularConcrete()
+            { }
+
+            [SchemaInfo("Circular", "Creates a Speckle structural circular concrete section profile", "Structural", "Section Profile")]
+            public CircularConcrete(string name, double radius, double cover) : base(name, radius, 0)
+            {
+                this.cover = cover;
             }
         }
 
