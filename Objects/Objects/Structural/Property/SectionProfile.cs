@@ -184,6 +184,7 @@ namespace Objects.Structural.Properties.Profiles
         public Catalogue(string description)
         {
             this.description = description;
+            this.shapeType = ShapeType.Catalogue;
         }
 
         [SchemaInfo("Catalogue", "Creates a Speckle structural section profile", "Structural", "Section Profile")]
@@ -193,6 +194,7 @@ namespace Objects.Structural.Properties.Profiles
             this.catalogueName = catalogueName;
             this.sectionType = sectionType;
             this.sectionName = sectionName;
+            this.shapeType = ShapeType.Catalogue;
         }
     }
 
