@@ -7,26 +7,17 @@ using Speckle.Core.Models;
 
 namespace Objects.Structural.Properties
 {
-    public class ReinforcementBar
+    public class ReinforcementBar : Base
     {
         public double localY { get; set; } // local y-coordinate
         public double localZ { get; set; } // local z-coordinate
         public double diameter { get; set; } // diameter of bar or of single bar in bar bundle
-        public string unit { get; set; }
+        public string unit { get; set; } // unit of bar diameter
         Material rebarMaterial { get; set; }
         public int countPerBundle { get; set; } // the number of bundled bars
 
         public ReinforcementBar() { }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="localY">Local y-coordinate</param>
-        /// <param name="localZ">Local z-coordinate</param>
-        /// <param name="diameter">Diameter of bar</param>
-        /// <param name="unit">Bar diameter unit</param>
-        /// <param name="rebarMaterial"></param>
-        /// 
         [SchemaInfo("Reinforcement Bar", "Creates a Speckle structural reinforcement bar", "Structural", "Section Profile")]
         public ReinforcementBar(double localY, double localZ, double diameter, string unit, Material rebarMaterial)
         {
@@ -51,7 +42,7 @@ namespace Objects.Structural.Properties
     }
 
     // is a differentiation between shear and torsion links necessary?
-    public class ReinforcementLink
+    public class ReinforcementLink : Base
     {
         double diameter { get; set; } // diameter of bar
         double longitudinalSpacing { get; set; } // the longitudinal spacing of the links

@@ -7,18 +7,19 @@ using Objects.Structural.Materials;
 
 namespace Objects.Structural.Properties.Profiles
 {
-    public class SectionProfile : Base //section profile description
+    public class SectionProfile : Base
     {
         public string name { get; set; }
         public ShapeType shapeType { get; set; }
-        public List<SectionProfile> children { get; set; } // better name it subComponent?
         public double weight { get; set; } // section weight, ex. kg/m
         public string units { get; set; }
+        // optional nested section profiles
+        public List<SectionProfile> children { get; set; } = new List<SectionProfile>();
         // optional derived section properties
         public SectionProperties sectionProperties { get; set; }
         // optional concrete parameters
-        public List<ReinforcementBar> longitudinalBars { get; set; } // the longitudinal reinforcement bars of the cross-section
-        public List<ReinforcementLink> links { get; set; } // the shear or torsion links of the cross-section
+        public List<ReinforcementBar> longitudinalBars { get; set; } = new List<ReinforcementBar>(); // the longitudinal reinforcement bars of the cross-section
+        public List<ReinforcementLink> links { get; set; } = new List<ReinforcementLink>(); // the shear or torsion links of the cross-section
         public double cover { get; set; } // the concrete cover
 
         // deprecated 
@@ -28,6 +29,7 @@ namespace Objects.Structural.Properties.Profiles
         public double J { get; set; }
         public double Ky { get; set; }
         public double Kz { get; set; }
+
         public SectionProfile() { }
 
         // deprecated
@@ -222,6 +224,18 @@ namespace Objects.Structural.Properties.Profiles
             this.outline = outline;
             this.voids = voids;
             this.shapeType = ShapeType.Perimeter;
+        }
+    }
+
+    public class PerimeterConcrete : Perimeter
+    {
+        public List<double> covers { get; set; } = new List<double>();
+        public PerimeterConcrete() { }
+
+        [SchemaInfo("Perimeter", "Creates a Speckle structural concrete section profile defined by a perimeter curve and, if applicable, a list of void curves", "Structural", "Section Profile")]
+        public PerimeterConcrete(string name, ICurve outline, List<double> covers, List<ICurve> voids = null) : base(name, outline, voids)
+        {
+            this.covers = covers;
         }
     }
 
