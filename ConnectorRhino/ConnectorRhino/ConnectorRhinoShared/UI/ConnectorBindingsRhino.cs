@@ -257,10 +257,6 @@ namespace SpeckleRhino
       // give converter a way to access the base commit layer name
       RhinoDoc.ActiveDoc.Notes += "%%%" + commitLayerName;
 
-      var existingLayer = Doc.Layers.FindName(commitLayerName);
-      if (existingLayer != null)
-        Doc.Layers.Purge(existingLayer.Id, false);
-      
       // flatten the commit object to retrieve children objs
       int count = 0;
       var commitObjs = FlattenCommitObject(commitObject, converter, commitLayerName, state, ref count);
@@ -354,7 +350,7 @@ namespace SpeckleRhino
 
       if (convertedRH != null)
       {
-        if (convertedRH.IsValid)
+        if (convertedRH.IsValidWithLog(out string log))
         {
           Layer bakeLayer = Doc.GetLayer(layerPath, true);
           if (bakeLayer != null)
@@ -415,7 +411,7 @@ namespace SpeckleRhino
             state.Errors.Add(new Exception($"Could not create layer {layerPath} to bake objects into."));
         }
         else
-          state.Errors.Add(new Exception($"Failed to bake object {obj.id} of type {obj.speckle_type}: invalid object props"));
+          state.Errors.Add(new Exception($"Failed to bake object {obj.id} of type {obj.speckle_type}: {log}"));
       }
       else if (converted == null)
       {
@@ -435,7 +431,7 @@ namespace SpeckleRhino
       Exceptions.Clear();
 
       var commitObj = new Base();
-      
+
       int objCount = 0;
       bool renamedlayers = false;
 
@@ -487,7 +483,7 @@ namespace SpeckleRhino
             }
 
             foreach (var key in obj.Attributes.GetUserStrings().AllKeys)
-                converted[key] = obj.Attributes.GetUserString(key);
+              converted[key] = obj.Attributes.GetUserString(key);
 
             if (obj is InstanceObject)
               containerName = "Blocks";
@@ -504,7 +500,7 @@ namespace SpeckleRhino
         catch
         {
           int viewIndex = Doc.NamedViews.FindByName(applicationId); // try get view
-          ViewInfo view = (viewIndex >= 0) ? Doc.NamedViews[viewIndex] : null; 
+          ViewInfo view = (viewIndex >= 0) ? Doc.NamedViews[viewIndex] : null;
           if (view != null)
           {
             converted = converter.ConvertToSpeckle(view);

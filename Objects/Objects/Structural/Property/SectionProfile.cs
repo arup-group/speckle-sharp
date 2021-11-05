@@ -7,7 +7,7 @@ using Objects.Structural.Materials;
 
 namespace Objects.Structural.Properties.Profiles
 {
-    public class SectionProfile : Base // section profile description
+    public class SectionProfile : Base //section profile description
     {
         public string name { get; set; }
         public ShapeType shapeType { get; set; }
@@ -21,7 +21,28 @@ namespace Objects.Structural.Properties.Profiles
         public List<ReinforcementLink> links { get; set; } // the shear or torsion links of the cross-section
         public double cover { get; set; } // the concrete cover
 
+        // depracated fields
+        public double area { get; set; }
+        public double Iyy { get; set; }
+        public double Izz { get; set; }
+        public double J { get; set; }
+        public double Ky { get; set; }
+        public double Kz { get; set; }
         public SectionProfile() { }
+
+        // deprecated
+        public SectionProfile(string name, ShapeType shapeType, double area, double Iyy, double Izz, double J, double Ky, double Kz, double weight)
+        {
+            this.name = name;
+            this.shapeType = shapeType;
+            this.area = area;
+            this.Iyy = Izz;
+            this.Izz = Izz;
+            this.J = J;
+            this.Ky = Ky;
+            this.Kz = Kz;
+            this.weight = weight;
+        }
 
         public SectionProfile(string name)
         {
@@ -34,13 +55,11 @@ namespace Objects.Structural.Properties.Profiles
             public double width { get; set; }
             public double webThickness { get; set; } // tw 
             public double flangeThickness { get; set; } // tf
-
             public Rectangular() { }
 
             [SchemaInfo("Rectangular", "Creates a Speckle structural rectangular section profile", "Structural", "Section Profile")]
-            public Rectangular(string name, double depth, double width, double webThickness = 0, double flangeThickness = 0)
+            public Rectangular(string name, double depth, double width, double webThickness = 0, double flangeThickness = 0) : base(name)
             {
-                this.name = name;
                 this.depth = depth;
                 this.width = width;
                 this.webThickness = webThickness;
@@ -49,7 +68,7 @@ namespace Objects.Structural.Properties.Profiles
             }
         }
 
-        public class ConcreteRectangular : Rectangular
+        public class RectangularConcrete : Rectangular
         {
             public double topCover { get; set; } // the top concrete cover
             public double bottomCover { get; set; } // the bottom concrete cover
@@ -79,6 +98,7 @@ namespace Objects.Structural.Properties.Profiles
 
         public class Circular : SectionProfile
         {
+
             public double radius { get; set; }
             public double wallThickness { get; set; }
 
@@ -238,207 +258,21 @@ namespace Objects.Structural.Properties.Profiles
             }
         }
 
-        public class Cruciform : SectionProfile
+        public class Explicit : SectionProfile
         {
-            public double depth { get; set; }
-            public double width { get; set; }
-            public double webThickness { get; set; }
-            public double flangeThickness { get; set; }
+            public Explicit() { }
 
-            public Cruciform() { }
-
-            [SchemaInfo("Cruciform", "Creates a Speckle structural cruciform section profile", "Structural", "Section Profile")]
-            public Cruciform(string name, double depth, double width, double webThickness, double flangeThickness) : base(name)
+            [SchemaInfo("Explicit", "Creates a Speckle structural section profile based on explicitly defining geometric properties", "Structural", "Section Profile")]
+            public Explicit(string name, double area, double Iyy, double Izz, double J, double Ky, double Kz)
             {
-                this.depth = depth;
-                this.width = width;
-                this.webThickness = webThickness;
-                this.flangeThickness = flangeThickness;
-                this.shapeType = ShapeType.Cruciform;
-            }
-        }
-
-        public class Ellipse : SectionProfile
-        {
-            public double depth { get; set; }
-            public double width { get; set; }
-            public double wallThickness { get; set; }
-
-            public Ellipse() { }
-
-            [SchemaInfo("Ellipse", "Creates a Speckle structural ellipse section profile", "Structural", "Section Profile")]
-            public Ellipse(string name, double depth, double width, double wallThickness = 0) : base(name)
-            {
-                this.depth = depth;
-                this.width = width;
-                this.wallThickness = wallThickness;
-                this.shapeType = ShapeType.Ellipse;
-            }
-        }
-
-        public class CSection : SectionProfile
-        {
-            public double depth { get; set; }
-            public double width { get; set; }
-            public double wallThickness { get; set; }
-            public double lipDepth { get; set; }
-
-            public CSection() { }
-
-            [SchemaInfo("General C", "Creates a Speckle structural C section profile", "Structural", "Section Profile")]
-            public CSection(string name, double depth, double width, double wallThickness, double lipDepth) : base(name)
-            {
-                this.depth = depth;
-                this.width = width;
-                this.wallThickness = wallThickness;
-                this.lipDepth = lipDepth;
-                this.shapeType = ShapeType.C;
-            }
-        }
-
-        public class Z : SectionProfile
-        {
-            public double depth { get; set; }
-            public double topFlangeWidth { get; set; }
-            public double botFlangeWidth { get; set; }
-            public double wallThickness { get; set; }
-            public double topLipDepth { get; set; }
-            public double botLipDepth { get; set; }
-
-            public Z() { }
-
-            [SchemaInfo("General Z", "Creates a Speckle structural Z section profile", "Structural", "Section Profile")]
-            public Z(string name, double depth, double topFlangeWidth, double botFlangeWidth, double wallThickness, double topLipDepth, double botLipDepth) : base(name)
-            {
-                this.depth = depth;
-                this.topFlangeWidth = topFlangeWidth;
-                this.botFlangeWidth = botFlangeWidth;
-                this.wallThickness = wallThickness;
-                this.topLipDepth = topLipDepth;
-                this.botLipDepth = botLipDepth;
-                this.shapeType = ShapeType.Z;
-            }
-        }
-
-        public class IAssymetric : SectionProfile
-        {
-            public double depth { get; set; }
-            public double topFlangeWidth { get; set; }
-            public double botFlangeWidth { get; set; }
-            public double wallThickness { get; set; }
-            public double topFlangeThickness { get; set; }
-            public double botFlangeThickness { get; set; }
-
-            public IAssymetric() { }
-
-            [SchemaInfo("Assymetric I", "Creates a Speckle structural assymetric I section profile", "Structural", "Section Profile")]
-            public IAssymetric(string name, double depth, double topFlangeWidth, double botFlangeWidth, double wallThickness, double topFlangeThickness, double botFlangeThickness) : base(name)
-            {
-                this.depth = depth;
-                this.topFlangeWidth = topFlangeWidth;
-                this.botFlangeWidth = botFlangeWidth;
-                this.wallThickness = wallThickness;
-                this.topFlangeThickness = topFlangeThickness;
-                this.botFlangeThickness = botFlangeThickness;
-                this.shapeType = ShapeType.IAssymetric;
-            }
-        }
-
-        public class RectoEllipse : SectionProfile
-        {
-            public double depth { get; set; }
-            public double width { get; set; }
-            public double depthFlat { get; set; }
-            public double widthFlat { get; set; }
-
-            public RectoEllipse() { }
-
-            [SchemaInfo("Recto Ellipse", "Creates a Speckle structural rectangular profile with elliptical corners", "Structural", "Section Profile")]
-            public RectoEllipse(string name, double depth, double width, double depthFlat, double widthFlat) : base(name)
-            {
-                this.depth = depth;
-                this.width = width;
-                this.depthFlat = depthFlat;
-                this.widthFlat = widthFlat;
-                this.shapeType = ShapeType.RectoEllipse;
-            }
-        }
-
-        public class SecantPile : SectionProfile
-        {
-            public double diameter { get; set; }
-            public double pileCentres { get; set; }
-            public int pileCount { get; set; }
-            public bool isWall { get; set; }
-
-            public SecantPile() { }
-
-            [SchemaInfo("Secant Pile", "Creates a Speckle structural secant pile section profile", "Structural", "Section Profile")]
-            public SecantPile(string name, double diameter, double pileCentres, int pileCount, bool isWall) : base(name)
-            {
-                this.diameter = diameter;
-                this.pileCentres = pileCentres;
-                this.pileCount = pileCount;
-                this.isWall = isWall;
-                this.shapeType = ShapeType.SecantPile;
-            }
-        }
-
-        public class SheetPile : SectionProfile
-        {
-            public double depth { get; set; }
-            public double width { get; set; }
-            public double topFlangeWidth { get; set; }
-            public double botFlangeWidth { get; set; }
-            public double webThickness { get; set; }
-            public double flangeThickness { get; set; }
-
-            public SheetPile() { }
-
-            [SchemaInfo("Sheet Pile", "Creates a Speckle structural sheet pile section profile", "Structural", "Section Profile")]
-            public SheetPile(string name, double depth, double width, double topFlangeWidth, double botFlangeWidth, double webThickness, double flangeThickness) : base(name)
-            {
-                this.depth = depth;
-                this.width = width;
-                this.topFlangeWidth = topFlangeWidth;
-                this.botFlangeWidth = botFlangeWidth;
-                this.webThickness = webThickness;
-                this.flangeThickness = flangeThickness;
-                this.shapeType = ShapeType.SheetPile;
-            }
-        }
-
-        public class Stadium : SectionProfile
-        {
-            public double depth { get; set; }
-            public double width { get; set; }
-
-            public Stadium() { }
-
-            [SchemaInfo("Stadium", "Creates a Speckle structural stadium section profile. It is a profile consisting of a rectangle whose ends are capped off with semicircles", "Structural", "Section Profile")]
-            public Stadium(string name, double depth, double width) : base(name)
-            {
-                this.depth = depth;
-                this.width = width;
-                this.shapeType = ShapeType.Stadium;
-            }
-        }
-
-        public class Trapezoid : SectionProfile
-        {
-            public double depth { get; set; }
-            public double topWidth { get; set; }
-            public double botWidth { get; set; }
-
-            public Trapezoid() { }
-
-            [SchemaInfo("Trapezoid", "Creates a Speckle structural trapezoidal section profile", "Structural", "Section Profile")]
-            public Trapezoid(string name, double depth, double topWidth, double botWidth) : base(name)
-            {
-                this.depth = depth;
-                this.topWidth = topWidth;
-                this.botWidth = botWidth;
-                this.shapeType = ShapeType.Trapezoid;
+                this.name = name;
+                this.area = area;
+                this.Iyy = Iyy;
+                this.Izz = Izz;
+                this.J = J;
+                this.Ky = Ky;
+                this.Kz = Kz;
+                this.shapeType = ShapeType.Explicit;
             }
         }
     }
