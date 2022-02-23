@@ -139,6 +139,7 @@ namespace Speckle.Core.Logging
             { "server_id", hashedServer },
             { "token", MixpanelToken },
             { "hostApp", Setup.HostApplication },
+            { "hostAppVersion", Setup.VersionedHostApplication },
             { "core_version", Assembly.GetExecutingAssembly().GetName().Version.ToString()},
             { "ip",  GetIp() },
             { "$os",  GetOs() },

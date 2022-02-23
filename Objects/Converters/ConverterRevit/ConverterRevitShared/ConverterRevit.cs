@@ -15,15 +15,15 @@ namespace Objects.Converter.Revit
   public partial class ConverterRevit : ISpeckleConverter
   {
 #if REVIT2023
-    public static string RevitAppName = Applications.Revit2023;
+    public static string RevitAppName = VersionedHostApplications.Revit2023;
 #elif REVIT2022
-    public static string RevitAppName = Applications.Revit2022;
+    public static string RevitAppName = VersionedHostApplications.Revit2022;
 #elif REVIT2021
-    public static string RevitAppName = Applications.Revit2021;
+    public static string RevitAppName = VersionedHostApplications.Revit2021;
 #elif REVIT2020
-    public static string RevitAppName = Applications.Revit2020;
+    public static string RevitAppName = VersionedHostApplications.Revit2020;
 #else
-    public static string RevitAppName = Applications.Revit2019;
+    public static string RevitAppName = VersionedHostApplications.Revit2019;
 #endif
 
     #region ISpeckleConverter props
@@ -266,7 +266,9 @@ namespace Objects.Converter.Revit
 
       // NOTE: Only try generic method assignment if there is no existing render material from conversions;
       // we might want to try later on to capture it more intelligently from inside conversion routines.
-      if (returnObject != null && returnObject["renderMaterial"] == null)
+      if (returnObject != null
+          && returnObject["renderMaterial"] == null
+          && returnObject["displayValue"] == null)
       {
         var material = GetElementRenderMaterial(@object as DB.Element);
         returnObject["renderMaterial"] = material;
@@ -345,7 +347,7 @@ namespace Objects.Converter.Revit
 
         case BE.Structure o:
           Report.Log($"Created Structure {o.applicationId}");
-          return DirectShapeToNative(o.displayMesh);
+          return DirectShapeToNative(o.displayValue);
 
         //built elems
         case BER.AdaptiveComponent o:
