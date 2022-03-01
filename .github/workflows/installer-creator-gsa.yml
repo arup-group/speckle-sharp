@@ -95,12 +95,15 @@ jobs:
           
     - name: Install Azure Key Vault signtool
       run: dotnet tool install --global AzureSignTool --version 2.0.17
+      
+    - name: Check version of installed Azure Key Vault signtool
+      run: dotnet tool list --global      
         
     # https://github.com/vcsjones/AzureSignTool
     - name: Sign Installer
       shell: powershell
       run: |
-        AzureSignTool sign `
+        azuresigntool sign `
           --description-url "https://speckle.arup.com" `
           --azure-key-vault-url "https://oasysevkv.vault.azure.net/" `
           --azure-key-vault-client-id "${{ secrets.AZURE_CLIENT_ID }}" `
