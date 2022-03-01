@@ -92,6 +92,11 @@ jobs:
         $filename = (ls *.exe).Name
         echo "::set-output name=filename::$filename"          
       working-directory: Installer          
+       
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '2.1.x'      
           
     - name: Install Azure Key Vault signtool
       run: dotnet tool install --global AzureSignTool --version 2.0.17
