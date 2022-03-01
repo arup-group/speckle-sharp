@@ -99,6 +99,9 @@ jobs:
     - name: Check version of installed Azure Key Vault signtool
       run: dotnet tool list --global      
         
+    - name: Check dotnet versions
+      run: dotnet --info            
+        
     # https://github.com/vcsjones/AzureSignTool
     - name: Sign Installer
       shell: powershell
