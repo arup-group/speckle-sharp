@@ -365,8 +365,11 @@ namespace ConnectorGSA
               );
 
             var hash = $"{key}-{branch.name}";
-            mappingsTransportLocal.SaveObject(hash, JsonConvert.SerializeObject(mappingsCommitObject));
-            //mappingsTransportLocal.UpdateObject(hash, JsonConvert.SerializeObject(mappingsCommitObject));
+            var existingObjString = mappingsTransportLocal.GetObject(hash);
+            if (existingObjString != null)
+              mappingsTransportLocal.UpdateObject(hash, JsonConvert.SerializeObject(mappingsCommitObject));
+            else
+              mappingsTransportLocal.SaveObject(hash, JsonConvert.SerializeObject(mappingsCommitObject));
           }
         }
 

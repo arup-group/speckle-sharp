@@ -96,17 +96,10 @@ namespace Objects.Converter.Bentley
       return myPoint;
     }
 
-    public Point Point3dToSpeckle(DPoint3d pt, bool isScaled = true, string units = null)
+    public Point Point3dToSpeckle(DPoint3d pt, string units = null)
     {
       var u = units ?? ModelUnits;
-      if (isScaled)
-      {
-        return new Point(ScaleToSpeckle(pt.X, UoR), ScaleToSpeckle(pt.Y, UoR), ScaleToSpeckle(pt.Z, UoR), u);
-      }
-      else
-      {
-        return new Point(pt.X, pt.Y, pt.Z, u);
-      }
+      return new Point(ScaleToSpeckle(pt.X, UoR), ScaleToSpeckle(pt.Y, UoR), ScaleToSpeckle(pt.Z, UoR), u);
     }
 
     public Point Point3dToSpeckle(Point3d pt, string units = null)
@@ -236,7 +229,7 @@ namespace Objects.Converter.Bentley
         {
           vec.GetStartEnd(out DPoint3d startPoint, out DPoint3d endPoint);
           if (startPoint == endPoint)
-            return Point3dToSpeckle(startPoint, true, units);
+            return Point3dToSpeckle(startPoint, units);
 
           double length = vec.SumOfLengths() / UoR;
 
@@ -270,22 +263,20 @@ namespace Objects.Converter.Bentley
       return _line;
     }
 
-    public Line LineToSpeckle(DPoint3d start, DPoint3d end, bool isScaled = true, string units = null)
+    public Line LineToSpeckle(DPoint3d start, DPoint3d end, string units = null)
     {
       var u = units ?? ModelUnits;
-      var _line = new Line(Point3dToSpeckle(start, isScaled), Point3dToSpeckle(end, isScaled), u);
+      var _line = new Line(Point3dToSpeckle(start), Point3dToSpeckle(end), u);
       double deltaX = end.X - start.X;
       double deltaY = end.Y - start.Y;
       double deltaZ = end.Z - start.Z;
       double length = Math.Sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
-      _line.length = length;
-      if (isScaled)
-        _line.length /= UoR;
+      _line.length /= UoR;
       _line.domain = new Interval(0, length);
 
       var range = DRange3d.FromPoints(start, end);
       bool worldXY = range.Low.Z == 0 && range.High.Z == 0 ? true : false;
-      _line.bbox = BoxToSpeckle(range, worldXY, false);
+      _line.bbox = BoxToSpeckle(range, worldXY);
 
       return _line;
     }
@@ -356,7 +347,7 @@ namespace Objects.Converter.Bentley
       if (q != null)
       {
         CurveVector vec = q.GetCurveVector();
-        if(vec != null)
+        if (vec != null)
         {
           var primitive = vec.GetPrimitive(0);
           primitive.Length(out var length);
@@ -371,7 +362,7 @@ namespace Objects.Converter.Bentley
       return new Arc();
     }
 
-    public Arc CircularArcToSpeckle(DEllipse3d ellipse,  string units = null)
+    public Arc CircularArcToSpeckle(DEllipse3d ellipse, string units = null)
     {
       ellipse.IsCircular(out double radius, out DVector3d normal);
       var length = ellipse.ArcLength();
@@ -381,7 +372,7 @@ namespace Objects.Converter.Bentley
       var rotation = Angle.NormalizeRadiansToPositive(ellipse.Vector0.AngleXY.Radians);
 
       var startAngle = ellipse.StartAngle.Radians;
-      var endAngle = ellipse.EndAngle.Radians;  
+      var endAngle = ellipse.EndAngle.Radians;
 
       startAngle = startAngle + rotation;
       endAngle = endAngle + rotation;
@@ -507,7 +498,7 @@ namespace Objects.Converter.Bentley
       var vec = ellipse.GetCurveVector();
       vec.GetRange(out DRange3d range);
       vec.CentroidNormalArea(out DPoint3d center, out DVector3d normal, out double area);
-      double radius = (vec.SumOfLengths() / (Math.PI * 2))  / UoR;
+      double radius = (vec.SumOfLengths() / (Math.PI * 2)) / UoR;
 
       DPlane3d plane = new DPlane3d(center, new DVector3d(normal));
       var specklePlane = PlaneToSpeckle(plane);
@@ -613,7 +604,7 @@ namespace Objects.Converter.Bentley
       var specklePolyline = new Polyline();
 
       CurveVector curveVector = CurvePathQuery.ElementToCurveVector(lineString);
-      if(curveVector != null)
+      if (curveVector != null)
       {
         var vertices = new List<DPoint3d>();
         foreach (var primitive in curveVector)
@@ -727,7 +718,7 @@ namespace Objects.Converter.Bentley
           closed = vec.IsClosedPath;
         }
       }
-     
+
       var specklePolycurve = new Polycurve();
       specklePolycurve.units = units ?? ModelUnits;
       specklePolycurve.closed = closed;
@@ -1155,9 +1146,8 @@ namespace Objects.Converter.Bentley
       }
     }
 
-
     // Box
-    public Box BoxToSpeckle(DRange3d range, bool OrientToWorldXY = false, bool isScaled = true, string units = null)
+    public Box BoxToSpeckle(DRange3d range, bool OrientToWorldXY = false, string units = null)
     {
       try
       {
@@ -1167,19 +1157,9 @@ namespace Objects.Converter.Bentley
         var max = range.High;
 
         // get dimension intervals
-        Interval xSize, ySize, zSize;
-        if (isScaled)
-        {
-          xSize = new Interval(ScaleToSpeckle(min.X, UoR), ScaleToSpeckle(max.X, UoR));
-          ySize = new Interval(ScaleToSpeckle(min.Y, UoR), ScaleToSpeckle(max.Y, UoR));
-          zSize = new Interval(ScaleToSpeckle(min.Z, UoR), ScaleToSpeckle(max.Z, UoR));
-        }
-        else
-        {
-          xSize = new Interval(min.X, max.X);
-          ySize = new Interval(min.Y, max.Y);
-          zSize = new Interval(min.Z, max.Z);
-        }
+        Interval xSize = new Interval(ScaleToSpeckle(min.X, UoR), ScaleToSpeckle(max.X, UoR));
+        Interval ySize = new Interval(ScaleToSpeckle(min.Y, UoR), ScaleToSpeckle(max.Y, UoR));
+        Interval zSize = new Interval(ScaleToSpeckle(min.Z, UoR), ScaleToSpeckle(max.Z, UoR));
 
         // get box size info
         double area = 2 * ((xSize.Length * ySize.Length) + (xSize.Length * zSize.Length) + (ySize.Length * zSize.Length));
@@ -1188,15 +1168,8 @@ namespace Objects.Converter.Bentley
         if (OrientToWorldXY)
         {
           var origin = new DPoint3d(0, 0, 0);
-          DVector3d normal;
-          if (isScaled)
-          {
-            normal = new DVector3d(0, 0, 1 * UoR);
-          }
-          else
-          {
-            normal = new DVector3d(0, 0, 1);
-          }
+          DVector3d normal = normal = new DVector3d(0, 0, 1 * UoR);
+
           var plane = PlaneToSpeckle(new DPlane3d(origin, normal));
           box = new Box(plane, xSize, ySize, zSize, ModelUnits) { area = area, volume = volume };
         }
@@ -1329,7 +1302,7 @@ namespace Objects.Converter.Bentley
 
       // get faces
       var faces = new List<int>();
-      
+
       var _pointIndex = meshData.PointIndex.ToList();
       var _faceIndices = new List<int>();
       for (int i = 0; i < _pointIndex.Count(); i++)
@@ -1522,9 +1495,11 @@ namespace Objects.Converter.Bentley
         MeshProcessor meshProcessor = new MeshProcessor();
         ElementGraphicsOutput.Process(extendedElement, meshProcessor);
 
-        var mesh = meshProcessor.polyfaceHeader;        
+        var mesh = meshProcessor.polyfaceHeader;
         element["@displayValue"] = GetMeshFromPolyfaceHeader(mesh, u);
-      } else {
+      }
+      else
+      {
         Processor processor = new Processor();
         ElementGraphicsOutput.Process(extendedElement, processor);
 
@@ -1577,7 +1552,7 @@ namespace Objects.Converter.Bentley
     {
       var element = new Base();
       var u = units ?? ModelUnits;
-      
+
       var cellChildren = cellHeader.GetChildren();
       List<Base> children = new List<Base> { };
       foreach (var child in cellChildren)
@@ -1658,12 +1633,13 @@ namespace Objects.Converter.Bentley
         if (value.GetType().Name == "DPoint3d")
         {
           bentleyProperties[propertyName] = ConvertToSpeckle(value);
-        } else
+        }
+        else
         {
           bentleyProperties[propertyName] = value;
         }
       }
-     
+
       if (cellHeader is BrepCellHeaderElement) // smart solids
       {
         MeshProcessor meshProcessor = new MeshProcessor();
@@ -1671,7 +1647,8 @@ namespace Objects.Converter.Bentley
         var mesh = meshProcessor.polyfaceHeader;
         //element["@displayValue"] = GetMeshFromPolyfaceHeader(mesh, u);
         element = GetMeshFromPolyfaceHeader(mesh, u);
-      } else
+      }
+      else
       {
         Processor processor = new Processor();
         ElementGraphicsOutput.Process(cellHeader, processor);
@@ -1737,7 +1714,7 @@ namespace Objects.Converter.Bentley
             element = BeamToSpeckle(properties, u);
             break;
 
-        case (Category.CappingBeams):
+          case (Category.CappingBeams):
             element = CappingBeamToSpeckle(properties, u);
             break;
 
@@ -1749,7 +1726,7 @@ namespace Objects.Converter.Bentley
             element = PileToSpeckle(properties, u);
             break;
 
-        case (Category.FoundationSlabs):
+          case (Category.FoundationSlabs):
           case (Category.Slabs):
             element = SlabToSpeckle(properties, segments, u);
             break;
@@ -2074,7 +2051,7 @@ namespace Objects.Converter.Bentley
 
       public override BentleyStatus ProcessSurface(MSBsplineSurface surface)
       {
-        
+
         return BentleyStatus.Success;
       }
 
@@ -2160,7 +2137,7 @@ namespace Objects.Converter.Bentley
       Convert1.ElementToBody(out var entity, solid, true, true, true);
       SolidUtil.GetBodyFaces(out var subEntities, entity);
 
-      foreach(var e in subEntities)
+      foreach (var e in subEntities)
       {
         var subType = e.EntitySubType;
         Convert1.SubEntityToCurveVector(out var curves, e);
@@ -2174,7 +2151,7 @@ namespace Objects.Converter.Bentley
       brep["description"] = solid.Description;
       brep["typeName"] = solid.TypeName;
       brep["elementType"] = solid.ElementType;
-      
+
       if (solid is null) return null;
 
       var faceIndex = 0;
@@ -2454,7 +2431,7 @@ namespace Objects.Converter.Bentley
           if (index != 0)
           {
             _faceIndices.Add(Math.Abs(index) - 1);
-          }            
+          }
           else
           {
             if (_faceIndices.Count() == 4)

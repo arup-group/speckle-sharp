@@ -199,7 +199,7 @@ jobs:
           - [Revit 2019/2020/2021/2022](https://github.com/arup-group/speckle-sharp/tree/master/ConnectorRevit)
           - [Dynamo](https://github.com/arup-group/speckle-sharp/tree/master/ConnectorDynamo)
           - [AutoCAD 2021/2022 and Civil3D 2021/2022](https://github.com/arup-group/speckle-sharp/tree/master/ConnectorAutocadCivil)
-          - [ETABS 18/19](https://github.com/arup-group/speckle-sharp/tree/master/ConnectorCSI)
+          - [ETABS 19/SAP2000 23](https://github.com/arup-group/speckle-sharp/tree/master/ConnectorCSI)
           - [Oasys GSA 10.1](https://github.com/arup-group/speckle-sharp/tree/master/ConnectorGSA)
           - [MicroStation, OpenRoads, OpenRail, OpenBridge and OpenBuildings (CONNECT Edition)](https://github.com/arup-group/speckle-sharp/tree/master/ConnectorBentley)
           - [Excel](https://github.com/specklesystems/speckle-excel)

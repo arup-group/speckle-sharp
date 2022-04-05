@@ -782,8 +782,6 @@ namespace ConverterGSA
       var serializerV2 = new BaseObjectDeserializerV2();
       var data = serializerV2.Deserialize(objString);
 
-      var mappings = MappingData["mappings"];
-
       var mappingsList = ((List<object>)data["data"]).Select(m => m as Dictionary<string, object>).ToList();
       var mappingDict = mappingsList.Select(m => m as Dictionary<string, object>).ToList();
       var mapping = mappingDict.Where(x => (string)x["section"] == name).FirstOrDefault();
