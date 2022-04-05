@@ -9,10 +9,10 @@ using Objects.Structural.Properties;
 
 namespace Objects.Structural.Geometry
 {
-  public class Element1D : Base, IDisplayMesh, IDisplayValue<List<Mesh>>
+  public class Element1D : Base, IDisplayValue<List<Mesh>>
   {
     public string name { get; set; } //add unique id as base identifier, name can change too easily
-    public Line baseLine { get; set; }
+    public ICurve baseLine { get; set; }
 
     [DetachProperty]
     public Property1D property { get; set; }
@@ -61,8 +61,7 @@ namespace Objects.Structural.Geometry
     /// <param name="end2Offset"></param>
     /// <param name="localAxis"></param>
     [SchemaInfo("Element1D (from local axis)", "Creates a Speckle structural 1D element (from local axis)", "Structural", "Geometry")]
-    public Element1D(Line baseLine, Property1D property, MemberType memberType = MemberType.NotSet,
-        string name = null,
+    public Element1D(Line baseLine, Property1D property, ElementType1D type = ElementType1D.Beam, string name = null,
         [SchemaParamInfo("If null, restraint condition defaults to unreleased (fully fixed translations and rotations)")] Restraint end1Releases = null,
         [SchemaParamInfo("If null, restraint condition defaults to unreleased (fully fixed translations and rotations)")] Restraint end2Releases = null,
         [SchemaParamInfo("If null, defaults to no offsets")] Vector end1Offset = null,
@@ -70,7 +69,7 @@ namespace Objects.Structural.Geometry
     {
       this.baseLine = baseLine;
       this.property = property;
-      this.memberType = memberType;
+      this.type = type;
       this.name = name;
       this.end1Releases = end1Releases == null ? new Restraint("FFFFFF") : end1Releases;
       this.end2Releases = end2Releases == null ? new Restraint("FFFFFF") : end2Releases;
@@ -93,8 +92,7 @@ namespace Objects.Structural.Geometry
     /// <param name="orientationNode"></param>
     /// <param name="orientationAngle"></param>
     [SchemaInfo("Element1D (from orientation node and angle)", "Creates a Speckle structural 1D element (from orientation node and angle)", "Structural", "Geometry")]
-    public Element1D(Line baseLine, Property1D property, MemberType memberType = MemberType.NotSet,
-         string name = null,
+    public Element1D(Line baseLine, Property1D property, ElementType1D type = ElementType1D.Beam, string name = null,
          [SchemaParamInfo("If null, restraint condition defaults to unreleased (fully fixed translations and rotations)")] Restraint end1Releases = null,
          [SchemaParamInfo("If null, restraint condition defaults to unreleased (fully fixed translations and rotations)")] Restraint end2Releases = null,
          [SchemaParamInfo("If null, defaults to no offsets")] Vector end1Offset = null,
@@ -103,7 +101,7 @@ namespace Objects.Structural.Geometry
     {
       this.baseLine = baseLine;
       this.property = property;
-      this.memberType = memberType;
+      this.type = type;
       this.name = name;
       this.end1Releases = end1Releases == null ? new Restraint("FFFFFF") : end1Releases;
       this.end2Releases = end2Releases == null ? new Restraint("FFFFFF") : end2Releases;
@@ -114,8 +112,7 @@ namespace Objects.Structural.Geometry
     }
 
     [SchemaInfo("Element1D (from nodes)", "Creates a Speckle structural 1D element (from nodes)", "Structural", "Geometry")]
-    public Element1D(Node node1, Node node2, Property1D property, MemberType memberType = MemberType.NotSet,
-        string name = null,
+    public Element1D(Node node1, Node node2, Property1D property, ElementType1D type = ElementType1D.Beam, string name = null,
         [SchemaParamInfo("If null, restraint condition defaults to unreleased (fully fixed translations and rotations)")] Restraint end1Releases = null,
         [SchemaParamInfo("If null, restraint condition defaults to unreleased (fully fixed translations and rotations)")] Restraint end2Releases = null,
         [SchemaParamInfo("If null, defaults to no offsets")] Vector end1Offset = null,
@@ -123,7 +120,7 @@ namespace Objects.Structural.Geometry
     {
       this.baseLine = new Line(node1.basePoint, node2.basePoint);
       this.property = property;
-      this.memberType = memberType;
+      this.type = type;
       this.name = name;
       this.end1Releases = end1Releases == null ? new Restraint("FFFFFF") : end1Releases;
       this.end2Releases = end2Releases == null ? new Restraint("FFFFFF") : end2Releases;
@@ -131,7 +128,7 @@ namespace Objects.Structural.Geometry
       this.end2Offset = end2Offset == null ? new Vector(0, 0, 0) : end2Offset;
       this.localAxis = localAxis;
     }
-
+    
     #region Obsolete
     [JsonIgnore, Obsolete("Use " + nameof(displayValue) + " instead")]
     public Mesh displayMesh {

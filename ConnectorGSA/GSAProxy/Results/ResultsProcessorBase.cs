@@ -68,8 +68,12 @@ namespace Speckle.ConnectorGSA.Results
       numErrorRows = 0;
 
       // [ result_type, [ [ headers ], [ row, column ] ] ]
+      var config = new CsvHelper.Configuration.CsvConfiguration(cultureInfo: CultureInfo.InvariantCulture)
+      {
+        MissingFieldFound = null
+      };
 
-      using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+      using (var csv = new CsvReader(reader, config))
       {
         csv.Read();
         csv.ReadHeader();
@@ -182,7 +186,6 @@ namespace Speckle.ConnectorGSA.Results
       records = null;
       return false;
     }
-
 
     protected float? ApplyFactors(float? val, List<double> factors)
     {

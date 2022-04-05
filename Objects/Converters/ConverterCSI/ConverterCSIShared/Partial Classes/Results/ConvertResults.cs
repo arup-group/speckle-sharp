@@ -56,7 +56,7 @@ namespace Objects.Converter.CSI
 
       #endregion
 
-      ResultSetAll results = new ResultSetAll(AllResultSet1dToSpeckle(convertedFrameNames, convertedPierNames, convertedSpandrelNames), AreaResultSet2dToSpeckle(convertedAreaNames), new ResultSet3D(), new ResultGlobal(), AllResultSetNodesToSpeckle());
+      ResultSetAll results = new ResultSetAll(AllResultSet1dToSpeckle(convertedFrameNames, convertedPierNames, convertedSpandrelNames), AreaResultSet2dToSpeckle(convertedAreaNames), new ResultSet3D(), new ResultSetGlobal(), AllResultSetNodesToSpeckle());
 
       return results;
     }

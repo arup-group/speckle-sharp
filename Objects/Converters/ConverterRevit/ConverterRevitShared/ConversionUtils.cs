@@ -1,4 +1,5 @@
-﻿using Autodesk.Revit.DB;
+﻿using System.Text.RegularExpressions;
+using Autodesk.Revit.DB;
 using Objects.BuiltElements;
 using Objects.BuiltElements.Revit;
 using Objects.Geometry;
@@ -453,8 +454,7 @@ namespace Objects.Converter.Revit
       ExternalDefinitionCreationOptions options = new ExternalDefinitionCreationOptions(parameterName, parameterType);
       Definition definition = apiGroup.Definitions.Create(options);
 
-      var elementCategory = (BuiltInCategory)revitElement.Category.Id.IntegerValue; // i think this is redundant
-      Category category = Doc.Settings.Categories.get_Item(elementCategory);
+      Category category = revitElement.Category;
       CategorySet categories = Doc.Application.Create.NewCategorySet();
       categories.Insert(category);
 
@@ -465,7 +465,7 @@ namespace Objects.Converter.Revit
       BindingMap bindingMap = Doc.ParameterBindings;
 
       // Bind the definitions to the document
-      bool bindInstance = bindingMap.Insert(definition, instanceBinding, BuiltInParameterGroup.INVALID);
+      bool bindInstance = bindingMap.Insert(definition, instanceBinding, BuiltInParameterGroup.INVALID); // add in "other" group
 
       if (bindInstance)
       {
@@ -720,6 +720,21 @@ namespace Objects.Converter.Revit
       var splitNames = SubdividePropertyName(propertyName);
 
       return splitNames.LastOrDefault();
+    }
+
+    public Base AddSpeckleParameters(Base parameters, List<string> names, List<object> values)
+    {
+      if (names.Count != values.Count) return null;
+
+      if (parameters == null) parameters = new Base();
+
+      for(var i = 0; i < names.Count; i++)
+      {
+        var val = new Parameter(names[i], values[i]);
+        parameters[names[i]] = val;
+      }
+
+      return parameters;
     }
 
     public Base CreateSpeckleSectionParameter(string speckleColumnFamily, string speckleColumnType)

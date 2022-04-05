@@ -51,7 +51,9 @@ namespace Speckle.ConnectorGSA.Proxy
       { ResultType.Element2dProjectedStressBottom, "2D Element Projected Stress - Bottom" },
       { ResultType.Element2dProjectedStressMiddle, "2D Element Projected Stress - Middle" },
       { ResultType.Element2dProjectedStressTop, "2D Element Projected Stress - Top" },
-      { ResultType.AssemblyForcesAndMoments, "Assembly Forces and Moments" }
+      { ResultType.AssemblyForcesAndMoments, "Assembly Forces and Moments" },
+      { ResultType.TotalLoadsAndReactions, "Total Loads and Reactions" },
+      { ResultType.DynamicSummary, "Dynamic Summary" }
     };
 
     //These are the exceptions to the rule that, in GSA, all records that relate to each table (i.e. the set with mutually-exclusive indices) have the same keyword
@@ -1629,6 +1631,10 @@ namespace Speckle.ConnectorGSA.Proxy
       else if (group == ResultGroup.Node)
       {
         resultProcessors.Add(group, new ResultsNodeProcessor(Path.Combine(resultDir, @"result_node\result_node.csv"), unitData, allResultTypes, cases, elemIds));
+      }
+      else if (group == ResultGroup.Global)
+      {
+        resultProcessors.Add(group, new ResultsGlobalProcessor(Path.Combine(resultDir, @"result_global\result_global.csv"), unitData, allResultTypes, cases));
       }
       else
       {

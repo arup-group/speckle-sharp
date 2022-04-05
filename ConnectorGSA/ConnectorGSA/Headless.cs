@@ -54,10 +54,11 @@ namespace ConnectorGSA
         loggingProgress.Report(new MessageEventArgs(MessageIntent.TechnicalLog, MessageLevel.Error, e));
       };
 
+      Console.WriteLine("\n");
+
       cliMode = args[0];
       if (cliMode == "-h")
-      {
-        Console.WriteLine("\n");
+      {        
         Console.WriteLine("Usage: ConnectorGSA.exe <command>\n\n" +
           "where <command> is one of: receiver, sender\n\n");
         Console.Write("ConnectorGSA.exe <command> -h\thelp on <command>\n");
@@ -70,6 +71,7 @@ namespace ConnectorGSA
       }
 
       var sendReceive = (cliMode == "receiver") ? SendReceive.Receive : SendReceive.Send;
+      Console.WriteLine($"Setting up {cliMode} task...");
 
       #region create_argpairs
       for (int index = 1; index < args.Length; index += 2)
@@ -133,7 +135,7 @@ namespace ConnectorGSA
         }
       }
       #endregion
-
+      
       // Login
       if (argPairs.ContainsKey("server"))
       {
@@ -153,9 +155,26 @@ namespace ConnectorGSA
       }
       else
       {
-        userInfo = AccountManager.GetUserInfo(ApiToken, RestApi).Result;
-        account = AccountManager.GetAccounts().FirstOrDefault(a => a.userInfo.id == userInfo.id);
+        var userInfoTask = Task.Run(() => AccountManager.GetUserInfo(ApiToken, RestApi));
+        userInfoTask.Wait();
+
+        userInfo = userInfoTask.Result;
+        if (userInfo != null)
+        {
+          account = AccountManager.GetAccounts().FirstOrDefault(a => a.userInfo.id == userInfo.id);
+          if(account == null)
+          {
+            Console.WriteLine("Could not get account info - please check provided server url and/or token");
+            return false;
+          }
+        }          
+        else
+        {
+          Console.WriteLine("Could not get account info - please check provided server url and/or token");
+          return false;
+        }          
       }
+      Console.WriteLine($"Using server at {RestApi} and account with email {userInfo.email}");
 
       var client = new Client(account);
 
@@ -200,7 +219,12 @@ namespace ConnectorGSA
       }
 
       var kit = KitManager.GetDefaultKit();
-      var converter = kit.LoadConverter(Applications.GSA);
+      var converter = kit.LoadConverter(VersionedHostApplications.GSA);
+      if (converter == null)
+      {
+        Console.WriteLine($"Could not find any Kit!");
+        return false;
+      }
 
       var streamStates = new List<StreamState>();
       bool cliResult = false;
@@ -213,6 +237,8 @@ namespace ConnectorGSA
         //There seem to be some issues with HTTP requests down the line if this is run on the initial (UI) thread, so this ensures it runs on another thread
         cliResult = Task.Run(() =>
         {
+          Console.WriteLine($"Loading data from {filePath}");
+
           //Load data to cause merging
           Commands.LoadDataFromFile(null); //Ensure all nodes
 
@@ -224,11 +250,13 @@ namespace ConnectorGSA
               IsReceiving = true
             };
             streamState.RefreshStream(loggingProgress).Wait();
-            streamState.Stream.branch = client.StreamGetBranches(streamId, 1).Result.First();
-            var commitId = streamState.Stream.branch.commits.items.FirstOrDefault().referencedObject;
+            streamState.Stream.branch = client.StreamGetBranches(streamId, 1).Result.First(); //should default to main branch
+            var xx = client.StreamGetBranches(streamId).Result;
+            var commitId = streamState.Stream.branch.commits.items.FirstOrDefault().referencedObject; //get latest commit
             var transport = new ServerTransport(streamState.Client.Account, streamState.Stream.id);
 
             var received = Commands.Receive(commitId, streamState, transport, topLevelObjects).Result;
+            Console.WriteLine($"Received last commit from stream {streamId}");
 
             streamStates.Add(streamState);
           }
@@ -243,6 +271,7 @@ namespace ConnectorGSA
           foreach (var fg in flattenedGroups)
           {
             //These objects have already passed through a CanConvertToNative
+            Console.WriteLine($"Converting...");
             Commands.ConvertToNative(fg, converter, loggingProgress);
 
             if (converter.Report.ConversionErrors != null && converter.Report.ConversionErrors.Count > 0)
@@ -261,7 +290,7 @@ namespace ConnectorGSA
             ((GsaProxy)Instance.GsaModel.Proxy).WriteModel(gsaRecords, null, Instance.GsaModel.StreamLayer);
           }
 
-          Console.WriteLine("Receiving complete");
+          Console.WriteLine("Receiving complete!");
           Console.WriteLine($"New model file created: {saveAsFilePath}");
 
           return true;
@@ -272,8 +301,10 @@ namespace ConnectorGSA
         //There seem to be some issues with HTTP requests down the line if this is run on the initial (UI) thread, so this ensures it runs on another thread
         cliResult = Task.Run(() =>
         {
+          Console.WriteLine($"Loading data from {filePath}");
           Commands.LoadDataFromFile(proxyLoggingProgress, Instance.GsaModel.ResultGroups, Instance.GsaModel.ResultTypes, Instance.GsaModel.ResultCases); //Ensure all nodes
 
+          Console.WriteLine($"Converting...");
           var objs = Commands.ConvertToSpeckle(converter);
 
           objs.Reverse();
@@ -311,10 +342,20 @@ namespace ConnectorGSA
           streamStates.Add(streamState);
 
           var serverTransport = new ServerTransport(account, streamState.Stream.id);
-          var sent = Commands.SendCommit(commitObj, streamState, "", serverTransport).Result;
 
-          Console.WriteLine("Sending complete");
-          Console.WriteLine($"New stream created: {streamState.Stream.id}");
+          Console.WriteLine($"Sending to Speckle server...");
+          var sent = Commands.SendCommit(commitObj, streamState, "", serverTransport).Result;
+          if (sent.status)
+          {
+            Console.WriteLine("Sending complete!");
+            Console.WriteLine($"New stream created: {streamState.Stream.id}");
+            Console.WriteLine($"New commit created: {sent.commitId}");
+          } else
+          {
+            Console.WriteLine("Sending failed!");
+            return false;
+          }
+
 
           return true;
         }).Result;
@@ -452,6 +493,9 @@ namespace ConnectorGSA
     #region Log
     [DllImport("Kernel32.dll")]
     public static extern bool AttachConsole(int processId);
+
+    [DllImport("Kernel32.dll")]
+    public static extern bool FreeConsole();
 
     /// <summary>
     /// Message handler.

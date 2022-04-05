@@ -187,9 +187,16 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
         topoPortions.Add("P(" + string.Join(" ", record.PointNodeIndices) + ")");
       }
 
-      if (record.Polylines != null && record.Polylines.Count() > 0)
+      if (record.Polylines != null && record.Polylines.Count() > 0 && record.Polylines.Any(v => v != null && v.Count() > 0))
       {
-        topoPortions.Add("L(" + string.Join(" ", record.PointNodeIndices) + ")");
+        //topoPortions.Add("L(" + string.Join(" ", record.PointNodeIndices) + ")");
+
+        var topoAdditional = new List<string>();
+        foreach (var vList in record.Polylines.Where(v => v != null))
+        {
+          topoAdditional.Add("L(" + string.Join(" ", vList) + ")");
+        }
+        topoPortions.Add(string.Join(" ", topoAdditional));
       }
 
       if (record.AdditionalAreas != null && record.AdditionalAreas.Count() > 0 && record.AdditionalAreas.Any(v => v != null && v.Count() > 0))
@@ -197,7 +204,7 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
         var topoAdditional = new List<string>();
         foreach (var vList in record.AdditionalAreas.Where(v => v != null))
         {
-          topoAdditional.Add("V(" + string.Join(" ", vList) + ")");
+          topoAdditional.Add("A(" + string.Join(" ", vList) + ")");
         }
         topoPortions.Add(string.Join(" ", topoAdditional));
       }

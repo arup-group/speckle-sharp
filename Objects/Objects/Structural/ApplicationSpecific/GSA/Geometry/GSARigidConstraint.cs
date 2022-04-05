@@ -26,22 +26,89 @@ namespace Objects.Structural.GSA.Geometry
     [DetachProperty]
     public List<GSAStage> stages { get; set; }
     public LinkageType type { get; set; }
-    public Dictionary<AxisDirection6, List<AxisDirection6>> constraintCondition { get; set; }
+    //public Dictionary<AxisDirection6, List<AxisDirection6>> coupledDirections { get; set; }
+    public GSAConstraintCondition constraintCondition { get; set; }
     public GSARigidConstraint() { }
 
-    [SchemaInfo("GSARigidConstraint", "Creates a Speckle structural rigid restraint (a set of nodes constrained to move as a rigid body) for GSA", "GSA", "Geometry")]
-    public GSARigidConstraint(Node primaryNode, List<Node> constrainedNodes, Base parentMember, List<GSAStage> stages, LinkageType type, Dictionary<AxisDirection6, List<AxisDirection6>> constraintCondition, string name = null, int? nativeId = null)
+    [SchemaInfo("GSARigidConstraint (custom link)", "Creates a Speckle structural rigid restraint (a set of nodes constrained to move as a rigid body) for GSA", "GSA", "Geometry")]
+    public GSARigidConstraint(Node primaryNode, List<Node> constrainedNodes, GSAConstraintCondition coupledDirections, List<GSAStage> stageList = null, string name = null, int? nativeId = null)
     {
       this.name = name;
       this.nativeId = nativeId;
       this.primaryNode = primaryNode;
       this.constrainedNodes = constrainedNodes;
       this.parentMember = parentMember;
-      this.stages = stages;
+      this.stages = stageList;
+      this.type = LinkageType.Custom;
+      this.constraintCondition = coupledDirections;
+    }
+
+    [SchemaInfo("GSARigidConstraint", "Creates a Speckle structural rigid restraint (a set of nodes constrained to move as a rigid body) for GSA", "GSA", "Geometry")]
+    public GSARigidConstraint(Node primaryNode, List<Node> constrainedNodes, LinkageType type, List<GSAStage> stageList = null, string name = null, int? nativeId = null)
+    {
+      this.name = name;
+      this.nativeId = nativeId;
+      this.primaryNode = primaryNode;
+      this.constrainedNodes = constrainedNodes;
+      this.stages = stageList;
       this.type = type;
-      this.constraintCondition = constraintCondition;
     }
   }
+
+  public class GSAConstraintCondition : Base
+  {
+    public List<string> X { get; set; }
+    public List<string> Y { get; set; }
+    public List<string> Z { get; set; }
+    public List<string> XX { get; set; }
+    public List<string> YY { get; set; }
+    public List<string> ZZ { get; set; }
+    public GSAConstraintCondition() { }
+
+    [SchemaInfo("GSAConstraintCondition", "Creates a custom link description for a rigid constraint (ie. to be used with rigid contraints with custom linkage type)", "GSA", "Geometry")]
+    public GSAConstraintCondition([SchemaParamInfo("A list of directions the X direction is coupled with (should be x, yy and/or zz)")] List<string> X = null,
+      [SchemaParamInfo("A list of directions the Y direction is coupled with (should be y, xx and/or zz)")] List<string> Y = null,
+      [SchemaParamInfo("A list of directions the Z direction is coupled with (should be z, xx and/or yy)")] List<string> Z = null,
+      [SchemaParamInfo("A list of directions the XX direction is coupled with (should be xx)")] List<string> XX = null,
+      [SchemaParamInfo("A list of directions the YY direction is coupled with (should be yy)")] List<string> YY = null,
+      [SchemaParamInfo("A list of directions the ZZ direction is coupled with (should be zz)")] List<string> ZZ = null)
+    {
+      this.X = X;
+      this.Y = Y;
+      this.Z = Z;
+      this.XX = XX;
+      this.YY = YY;
+      this.ZZ = ZZ;
+    }
+  }
+
+
+  //public class GSAConstraintCondition : Base
+  //{
+  //  public List<AxisDirection6> X { get; set; }
+  //  public List<AxisDirection6> Y { get; set; }
+  //  public List<AxisDirection6> Z { get; set; }
+  //  public List<AxisDirection6> XX { get; set; }
+  //  public List<AxisDirection6> YY { get; set; }
+  //  public List<AxisDirection6> ZZ { get; set; }
+  //  public GSAConstraintCondition() { }
+
+  //  [SchemaInfo("GSAConstraintCondition", "Creates a custom link description for a rigid constraint (ie. to be used with rigid contraints with custom linkage type)", "GSA", "Geometry")]
+  //  public GSAConstraintCondition([SchemaParamInfo("A list of directions the X direction is coupled with (should be x, yy and/or zz)")] List<AxisDirection6> X = null,
+  //    [SchemaParamInfo("A list of directions the Y direction is coupled with (should be y, xx and/or zz)")] List<AxisDirection6> Y = null,
+  //    [SchemaParamInfo("A list of directions the Z direction is coupled with (should be z, xx and/or yy)")] List<AxisDirection6> Z = null,
+  //    [SchemaParamInfo("A list of directions the XX direction is coupled with (should be xx)")] List<AxisDirection6> XX = null,
+  //    [SchemaParamInfo("A list of directions the YY direction is coupled with (should be yy)")] List<AxisDirection6> YY = null,
+  //    [SchemaParamInfo("A list of directions the ZZ direction is coupled with (should be zz)")] List<AxisDirection6> ZZ = null)
+  //  {
+  //    this.X = X;
+  //    this.Y = Y;
+  //    this.Z = Z;
+  //    this.XX = XX;
+  //    this.YY = YY;
+  //    this.ZZ = ZZ;
+  //  }
+  //}
 
   public enum AxisDirection6
   {

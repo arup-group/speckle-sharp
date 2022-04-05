@@ -118,9 +118,10 @@ namespace analytics
 
         var hash = objs[0].ToString();
         var storedContent = System.Text.Json.JsonSerializer.Deserialize<SqliteContent>(objs[1].ToString());
+        var serverName = storedContent.serverInfo.name;
 
         // If the url is already stored update hash to be server name
-        if (storedContent != null && storedContent.serverInfo.url != hash)
+        if (storedContent != null && hash != serverName)
         {
           var updateCommand = connection.CreateCommand();
           updateCommand.CommandText =
@@ -133,7 +134,7 @@ namespace analytics
           Console.WriteLine(connection.State);
 
           updateCommand.Parameters.AddWithValue("@hash", hash);
-          updateCommand.Parameters.AddWithValue("@server", storedContent.id);
+          updateCommand.Parameters.AddWithValue("@server", serverName);
           updateCommand.ExecuteNonQuery();
         }
       }

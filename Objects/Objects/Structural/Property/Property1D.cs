@@ -2,7 +2,6 @@
 using Speckle.Core.Kits;
 using Speckle.Core.Models;
 using System.Collections.Generic;
-using Objects.Structural.Geometry;
 using Objects.Structural.Materials;
 using Objects.Structural.Properties.Profiles;
 
@@ -10,8 +9,6 @@ namespace Objects.Structural.Properties
 {
     public class Property1D : Property
     {
-        public MemberType memberType { get; set; }
-
         [DetachProperty]
         public Material material { get; set; }
 

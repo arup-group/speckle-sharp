@@ -172,6 +172,34 @@ namespace ConverterGSA
       }
     }
 
+    public static ElementType1D ToSpeckle(this AnalysisType gsaType)
+    {
+      switch (gsaType)
+      {
+        case AnalysisType.BAR: return ElementType1D.Bar;
+        case AnalysisType.CABLE: return ElementType1D.Cable;
+        case AnalysisType.DAMPER: return ElementType1D.Damper;
+        case AnalysisType.LINK: return ElementType1D.Link;
+        case AnalysisType.ROD: return ElementType1D.Rod;
+        case AnalysisType.SPACER: return ElementType1D.Spacer;
+        case AnalysisType.SPRING: return ElementType1D.Spring;
+        case AnalysisType.STRUT: return ElementType1D.Strut;
+        case AnalysisType.TIE: return ElementType1D.Tie;
+        default: return ElementType1D.Beam;
+      }
+    }
+
+    public static AnalysisType2D ToSpeckle2d(this AnalysisType gsaType)
+    {
+      switch (gsaType)
+      {
+        case AnalysisType.LINEAR: return AnalysisType2D.Linear;
+        case AnalysisType.QUADRATIC: return AnalysisType2D.Quadratic;
+        case AnalysisType.RIGID: return AnalysisType2D.RigidXY;
+        default: return AnalysisType2D.Linear;
+      }
+    }
+
     public static MemberType ToSpeckle(this Section1dType gsaType)
     {
       switch (gsaType)

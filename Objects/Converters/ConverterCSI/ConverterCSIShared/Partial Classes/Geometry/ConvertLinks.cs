@@ -40,8 +40,8 @@ namespace Objects.Converter.CSI
       string units = ModelUnits();
 
       var speckleStructLink = new CSIElement1D();
-
       speckleStructLink.type = ElementType1D.Link;
+      speckleStructLink.memberType = MemberType.Generic1D;
       speckleStructLink.name = name;
       string pointI, pointJ;
       pointI = pointJ = null;
@@ -65,8 +65,6 @@ namespace Objects.Converter.CSI
       bool advanced = false;
       Model.LinkObj.GetLocalAxes(name, ref localAxis, ref advanced);
       speckleStructLink.orientationAngle = localAxis;
-
-      speckleStructLink.type = ElementType1D.Link;
       string linkProp = null;
       Model.LinkObj.GetProperty(name, ref linkProp);
       speckleStructLink.property = LinkPropertyToSpeckle(linkProp);

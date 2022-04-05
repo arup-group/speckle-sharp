@@ -41,11 +41,11 @@ namespace Speckle.ConnectorGSA.Results
       var factorsLengthTime = GetFactors(ResultUnitType.Length, ResultUnitType.Time);
 
       record.Ux = resultTypes.Contains(ResultType.NodalDisplacements) ? ApplyFactors(record.Ux, factorsLength) : null;
-      record.Ux = resultTypes.Contains(ResultType.NodalDisplacements) ? ApplyFactors(record.Uy, factorsLength) : null;
-      record.Ux = resultTypes.Contains(ResultType.NodalDisplacements) ? ApplyFactors(record.Uz, factorsLength) : null;
-      record.Ux = resultTypes.Contains(ResultType.NodalDisplacements) ? ApplyFactors(record.Rxx, factorsLength) : null;
-      record.Ux = resultTypes.Contains(ResultType.NodalDisplacements) ? ApplyFactors(record.Ryy, factorsLength) : null;
-      record.Ux = resultTypes.Contains(ResultType.NodalDisplacements) ? ApplyFactors(record.Rzz, factorsLength) : null;
+      record.Uy = resultTypes.Contains(ResultType.NodalDisplacements) ? ApplyFactors(record.Uy, factorsLength) : null;
+      record.Uz = resultTypes.Contains(ResultType.NodalDisplacements) ? ApplyFactors(record.Uz, factorsLength) : null;
+      record.Rxx = resultTypes.Contains(ResultType.NodalDisplacements) ? ApplyFactors(record.Rxx, factorsLength) : null;
+      record.Ryy = resultTypes.Contains(ResultType.NodalDisplacements) ? ApplyFactors(record.Ryy, factorsLength) : null;
+      record.Rzz = resultTypes.Contains(ResultType.NodalDisplacements) ? ApplyFactors(record.Rzz, factorsLength) : null;
       //TO DO: review if |r| needs scaling even though it's calculated - it seems to use rotation factor, which isn't part of its inputs
 
       record.Vx = resultTypes.Contains(ResultType.NodalVelocity) ? ApplyFactors(record.Vx, factorsLengthTime) : null;

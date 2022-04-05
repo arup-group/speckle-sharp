@@ -14,7 +14,7 @@ namespace Objects.Structural.GSA.Analysis
     [SchemaInfo("GSACombinationCase", "Creates a GSA combination case", "GSA", "Loading")]
     public GSACombinationCase(string name,
         [SchemaParamInfo("A list of load cases")] List<Base> loadCases,
-        [SchemaParamInfo("A list of load factors (to be mapped to provided load cases)")] List<double> loadFactors, int? nativeId = null)
+        [SchemaParamInfo("A list of load factors (to be mapped to provided load cases)")] List<double> loadFactors, CombinationType combinationType = CombinationType.LinearAdd, int? nativeId = null)
     {
       this.nativeId = nativeId;
       this.name = name;
@@ -24,6 +24,7 @@ namespace Objects.Structural.GSA.Analysis
 
       this.loadFactors = loadFactors;
       this.loadCases = loadCases;
+      this.combinationType = combinationType;
       this.nativeId = nativeId;
     }
   }

@@ -119,12 +119,14 @@
     <Compile Include="Results\CsvAssembly.cs" />
     <Compile Include="Results\CsvElem1d.cs" />
     <Compile Include="Results\CsvElem2d.cs" />
+    <Compile Include="Results\CsvGlobal.cs" />
     <Compile Include="Results\CsvNode.cs" />
     <Compile Include="Results\Enums.cs" />
     <Compile Include="Results\IResultsProcessor.cs" />
     <Compile Include="Results\Results1dProcessor.cs" />
     <Compile Include="Results\Results2dProcessor.cs" />
     <Compile Include="Results\ResultsAssemblyProcessor.cs" />
+    <Compile Include="Results\ResultsGlobalProcessor.cs" />
     <Compile Include="Results\ResultsNodeProcessor.cs" />
     <Compile Include="Results\ResultsProcessorBase.cs" />
   </ItemGroup>

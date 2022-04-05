@@ -69,7 +69,8 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
       }
       else
       {
-        return "";
+        //For now assume that an empty list means "all"
+        return "all";
       }
     }
     private string AddStage()
@@ -80,7 +81,8 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
       }
       else
       {
-        return "";
+        //For now assume that an empty list means "all"
+        return "all";
       }
     }
     #endregion

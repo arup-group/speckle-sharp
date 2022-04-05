@@ -28,7 +28,9 @@ namespace ConnectorGSA.Models
         new ResultSettingItem("2D Element Projected Stress - Bottom", ResultType.Element2dProjectedStressBottom, false),
         new ResultSettingItem("2D Element Projected Stress - Middle", ResultType.Element2dProjectedStressMiddle, false),
         new ResultSettingItem("2D Element Projected Stress - Top", ResultType.Element2dProjectedStressTop, false),
-        new ResultSettingItem("Assembly Forces and Moments", ResultType.AssemblyForcesAndMoments, true)
+        new ResultSettingItem("Assembly Forces and Moments", ResultType.AssemblyForcesAndMoments, true),
+        new ResultSettingItem("Total Loads & Reactions", ResultType.TotalLoadsAndReactions, false),
+        new ResultSettingItem("Dynamic Summary", ResultType.DynamicSummary, false),
       };
     }
   }

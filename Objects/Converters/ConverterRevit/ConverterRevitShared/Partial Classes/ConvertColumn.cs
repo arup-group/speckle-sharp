@@ -40,10 +40,12 @@ namespace Objects.Converter.Revit
 
       var speckleRevitColumn = speckleColumn as RevitColumn;
 
-      // If family name or type not present in Revit model, add speckle section info as instance parameter
+      // If family name or type not present in Revit model, add speckle section info as instance parameters
       if (familySymbol.FamilyName != speckleRevitColumn.family || familySymbol.Name != speckleRevitColumn.type)
       {
-        speckleRevitColumn.parameters = CreateSpeckleSectionParameter(speckleRevitColumn.family, speckleRevitColumn.type);
+        var paramNames = new List<string> { "Section Family", "Section Type" };
+        var paramValues = new List<object> { speckleRevitColumn.family, speckleRevitColumn.type };
+        speckleRevitColumn.parameters = AddSpeckleParameters(speckleRevitColumn.parameters, paramNames, paramValues);
       }
 
       if (speckleRevitColumn != null)
@@ -253,7 +255,6 @@ namespace Objects.Converter.Revit
       speckleColumn.facingFlipped = revitColumn.FacingFlipped;
       speckleColumn.handFlipped = revitColumn.HandFlipped;
       speckleColumn.isSlanted = revitColumn.IsSlantedColumn;
-      //speckleColumn.structural = revitColumn.StructuralType == StructuralType.Column;
 
       //geometry
       var baseGeometry = LocationToSpeckle(revitColumn);

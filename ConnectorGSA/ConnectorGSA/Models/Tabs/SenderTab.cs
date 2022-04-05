@@ -17,7 +17,7 @@ namespace ConnectorGSA.Models
 
     private string documentTitle = "";
 
-    public SenderTab() : base(GSALayer.Both)
+    public SenderTab() : base(GSALayer.Design)
     {
 
     }

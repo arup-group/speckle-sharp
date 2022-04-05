@@ -14,9 +14,10 @@ namespace ConnectorGSATestsHeadless
   {
     //private string rxStreamId = "44ac187897";
     //private string rxStreamId = "789a7f35e6";
-    private string rxStreamId = "9937956209";
-    private string rxServerUrl = "https://speckle.xyz";
-      
+    private string rxStreamId = "44913bae98";
+    private string rxServerUrl = "https://v2.staging-speckle.arup.com/";
+    private string apiToken = "312abe069a6f5f73007693de8a05aed27b05a820c1";
+
     private string saveAsAlternativeFilepath(string fn)
     {
       return Path.Combine(TestDataDirectory, fn.Split('.').First() + "_test.gwb");
@@ -35,9 +36,8 @@ namespace ConnectorGSATestsHeadless
     {
       var headless = new Headless();
       var cliResult = headless.RunCLI("sender",
-        "--server", v2ServerUrl,
+
         "--file", Path.Combine(TestDataDirectory, modelWithoutResultsFile),
-        "--saveAs", saveAsAlternativeFilepath(modelWithoutResultsFile),
         "--designLayerOnly");
 
       Assert.True(cliResult);

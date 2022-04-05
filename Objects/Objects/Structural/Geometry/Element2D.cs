@@ -9,12 +9,12 @@ using Objects.Structural.Properties;
 
 namespace Objects.Structural.Geometry
 {
-  public class Element2D : Base, IDisplayMesh, IDisplayValue<List<Mesh>>
+  public class Element2D : Base, IDisplayValue<List<Mesh>>
   {
     public string name { get; set; }
 
     [DetachProperty]
-    public ICurve outline { get; set; }
+    public List<ICurve> outline { get; set; }
 
     [DetachProperty]
     public Property2D property { get; set; }

@@ -6,13 +6,14 @@ using Objects.Geometry;
 using Objects.Structural.Properties;
 using Objects.Structural.Properties.Profiles;
 using Objects.Structural.Materials;
+using Objects.Structural.Geometry;
 
 namespace Objects.Structural.GSA.Properties
 {
   public class GSAProperty1D : Property1D
   {
     public int? nativeId { get; set; }
-
+    public MemberType memberType { get; set; }
     [DetachProperty]
     public Material designMaterial { get; set; }
     public double additionalMass { get; set; }

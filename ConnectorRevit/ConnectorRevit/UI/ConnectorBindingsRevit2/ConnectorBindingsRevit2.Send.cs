@@ -34,8 +34,11 @@ namespace Speckle.ConnectorRevit.UI
       {
         if (setting.Slug == "section-mapping")
         {
-          var mappingKey = await GetSectionMappingData(state, progress);
-          setting.Selection = mappingKey;
+          if(setting.Selection != null)
+          {
+            var mappingKey = await GetSectionMappingData(state, progress);
+            setting.Selection = mappingKey;
+          }
         }
         settings.Add(setting.Slug, setting.Selection);
       }

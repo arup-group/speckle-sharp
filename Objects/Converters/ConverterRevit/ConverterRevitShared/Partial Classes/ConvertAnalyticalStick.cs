@@ -106,15 +106,19 @@ namespace Objects.Converter.Revit
       {
         case "Analytical Columns":
           speckleElement1D.memberType = MemberType.Column;
+          speckleElement1D.type = ElementType1D.Column;
           break;
         case "Analytical Beams":
           speckleElement1D.memberType = MemberType.Beam;
+          speckleElement1D.type = ElementType1D.Beam;
           break;
         case "Analytical Braces":
           speckleElement1D.memberType = MemberType.Beam;
+          speckleElement1D.type = ElementType1D.Brace;
           break;
         default:
           speckleElement1D.memberType = MemberType.Generic1D;
+          speckleElement1D.type = ElementType1D.Beam;
           break;
       }
 
@@ -180,16 +184,15 @@ namespace Objects.Converter.Revit
       var speckleSection = new SectionProfile();
 
       var stickFamily = (Autodesk.Revit.DB.FamilyInstance)revitStick.Document.GetElement(revitStick.GetElementId());
-      var stickType = stickFamily.Symbol.Name;
+      var stickFamilyName = stickFamily.Symbol.FamilyName;
+      var stickFamilyType = stickFamily.Symbol.Name;
+      var familyAndTypeName = $"{stickFamilyName}:{stickFamilyType}"; 
 
       var section = stickFamily.Symbol.GetStructuralSection();
       if (section != null)
       {
-        var familiy = stickFamily.Symbol.FamilyName;
-        var type = stickType;
-
-        var speckleSectionName = UseMappings ? GetProfileNameFromMapping(familiy, type, speckleElement1D.memberType != MemberType.Column) : null;
-        var sectionName = speckleSectionName ?? section.StructuralSectionShapeName;
+        var speckleSectionName = UseMappings ? GetProfileNameFromMapping(stickFamilyName, stickFamilyType, speckleElement1D.memberType != MemberType.Column) : null;
+        var sectionName = speckleSectionName ?? familyAndTypeName;
         speckleSection.name = sectionName;
 
         // If section general shape enum is not defined, us section shape enum to derive profile
@@ -373,7 +376,7 @@ namespace Objects.Converter.Revit
 
       prop.profile = speckleSection;
       prop.material = speckleMaterial;
-      prop.name = $"{stickFamily.Symbol.FamilyName}:{stickFamily.Name}";
+      prop.name = familyAndTypeName;
       prop.applicationId = stickFamily.Symbol.UniqueId;
 
       var structuralElement = Doc.GetElement(revitStick.GetElementId());
@@ -382,6 +385,7 @@ namespace Objects.Converter.Revit
       if (revitStick is AnalyticalModelColumn)
       {
         speckleElement1D.memberType = MemberType.Column;
+        speckleElement1D.type = ElementType1D.Column;
         var locationMark = GetParamValue<string>(structuralElement, BuiltInParameter.COLUMN_LOCATION_MARK);
         if (locationMark == null)
           speckleElement1D.name = mark;
@@ -390,7 +394,6 @@ namespace Objects.Converter.Revit
       }
       else
       {
-        prop.memberType = MemberType.Beam;
         speckleElement1D.name = mark;
       }
 
@@ -405,7 +408,7 @@ namespace Objects.Converter.Revit
     {
       return new ISection()
       {
-        name = name ?? "I Section",
+        name = name ?? section.StructuralSectionShapeName,
         shapeType = Structural.ShapeType.I,
         depth = ScaleToSpeckle((double)typeof(DB.Structure.StructuralSections.StructuralSectionGeneralI).GetProperty("Height").GetValue(section)),
         width = ScaleToSpeckle((double)typeof(DB.Structure.StructuralSections.StructuralSectionGeneralI).GetProperty("Width").GetValue(section)),
@@ -423,7 +426,7 @@ namespace Objects.Converter.Revit
     {
       return new Tee()
       {
-        name = name ?? "Tee Section",
+        name = name ?? section.StructuralSectionShapeName,
         shapeType = Structural.ShapeType.Tee,
         depth = ScaleToSpeckle((double)typeof(DB.Structure.StructuralSections.StructuralSectionGeneralT).GetProperty("Height").GetValue(section)),
         width = ScaleToSpeckle((double)typeof(DB.Structure.StructuralSections.StructuralSectionGeneralT).GetProperty("Width").GetValue(section)),
@@ -443,7 +446,7 @@ namespace Objects.Converter.Revit
 
       return new Rectangular()
       {
-        name = name ?? "Rectangular Hollow Section",
+        name = name ?? section.StructuralSectionShapeName,
         shapeType = Structural.ShapeType.Rectangular,
         depth = ScaleToSpeckle((double)typeof(DB.Structure.StructuralSections.StructuralSectionGeneralH).GetProperty("Height").GetValue(section)),
         width = ScaleToSpeckle((double)typeof(DB.Structure.StructuralSections.StructuralSectionGeneralH).GetProperty("Width").GetValue(section)),
@@ -461,7 +464,7 @@ namespace Objects.Converter.Revit
     {
       return new Rectangular()
       {
-        name = name ?? "Rectangular Section",
+        name = name ?? section.StructuralSectionShapeName,
         shapeType = Structural.ShapeType.Rectangular,
         depth = ScaleToSpeckle((double)typeof(DB.Structure.StructuralSections.StructuralSectionGeneralF).GetProperty("Height").GetValue(section)),
         width = ScaleToSpeckle((double)typeof(DB.Structure.StructuralSections.StructuralSectionGeneralF).GetProperty("Width").GetValue(section)),
@@ -477,7 +480,7 @@ namespace Objects.Converter.Revit
     {
       return new Circular()
       {
-        name = name ?? "Circular Hollow Section",
+        name = name ?? section.StructuralSectionShapeName,
         shapeType = Structural.ShapeType.Circular,
         radius = ScaleToSpeckle((double)typeof(DB.Structure.StructuralSections.StructuralSectionGeneralR).GetProperty("Diameter").GetValue(section) / 2),
         wallThickness = ScaleToSpeckle((double)typeof(DB.Structure.StructuralSections.StructuralSectionGeneralR).GetProperty("WallNominalThickness").GetValue(section)),
@@ -493,7 +496,7 @@ namespace Objects.Converter.Revit
     {
       return new Circular()
       {
-        name = name ?? "Circular Section",
+        name = name ?? section.StructuralSectionShapeName,
         shapeType = Structural.ShapeType.Circular,
         radius = ScaleToSpeckle((double)typeof(DB.Structure.StructuralSections.StructuralSectionGeneralS).GetProperty("Diameter").GetValue(section) / 2),
         area = ScaleToSpeckle((double)typeof(DB.Structure.StructuralSections.StructuralSectionGeneralS).GetProperty("SectionArea").GetValue(section)),
@@ -508,7 +511,7 @@ namespace Objects.Converter.Revit
     {
       return new Angle()
       {
-        name = name ?? "",
+        name = name ?? section.StructuralSectionShapeName,
         shapeType = Structural.ShapeType.Angle,
         depth = ScaleToSpeckle((double)typeof(DB.Structure.StructuralSections.StructuralSectionGeneralW).GetProperty("Height").GetValue(section)),
         width = ScaleToSpeckle((double)typeof(DB.Structure.StructuralSections.StructuralSectionGeneralW).GetProperty("Width").GetValue(section)),
@@ -526,7 +529,7 @@ namespace Objects.Converter.Revit
     {
       return new Channel()
       {
-        name = name ?? "",
+        name = name ?? section.StructuralSectionShapeName,
         shapeType = Structural.ShapeType.Channel,
         depth = ScaleToSpeckle((double)typeof(DB.Structure.StructuralSections.StructuralSectionGeneralU).GetProperty("Height").GetValue(section)),
         width = ScaleToSpeckle((double)typeof(DB.Structure.StructuralSections.StructuralSectionGeneralU).GetProperty("Width").GetValue(section)),

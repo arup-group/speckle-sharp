@@ -15,11 +15,11 @@ namespace Objects.Structural.GSA.Geometry
     public string colour { get; set; }
     public string action { get; set; }
     public bool isDummy { get; set; }
-    public ElementType1D type { get; set; }
+    //public ElementType1D type { get; set; }
     public GSAElement1D() { }
 
     [SchemaInfo("GSAElement1D (from local axis)", "Creates a Speckle structural 1D element for GSA (from local axis)", "GSA", "Geometry")]
-    public GSAElement1D(Line baseLine, Property1D property, ElementType1D type, string name = null,
+    public GSAElement1D(ICurve baseLine, Property1D property, ElementType1D type = ElementType1D.Beam, string name = null,
         [SchemaParamInfo("If null, restraint condition defaults to unreleased (fully fixed translations and rotations)")] Restraint end1Releases = null,
         [SchemaParamInfo("If null, restraint condition defaults to unreleased (fully fixed translations and rotations)")] Restraint end2Releases = null,
         [SchemaParamInfo("If null, defaults to no offsets")] Vector end1Offset = null,
@@ -35,11 +35,10 @@ namespace Objects.Structural.GSA.Geometry
       this.end1Offset = end1Offset == null ? new Vector(0, 0, 0) : end1Offset;
       this.end2Offset = end2Offset == null ? new Vector(0, 0, 0) : end2Offset;
       this.localAxis = localAxis;
-      this.memberType = MemberType.NotSet;
     }
 
     [SchemaInfo("GSAElement1D (from orientation node and angle)", "Creates a Speckle structural 1D element for GSA (from orientation node and angle)", "GSA", "Geometry")]
-    public GSAElement1D(Line baseLine, Property1D property, ElementType1D type, string name = null,
+    public GSAElement1D(ICurve baseLine, Property1D property, ElementType1D type = ElementType1D.Beam, string name = null,
         [SchemaParamInfo("If null, restraint condition defaults to unreleased (fully fixed translations and rotations)")] Restraint end1Releases = null,
         [SchemaParamInfo("If null, restraint condition defaults to unreleased (fully fixed translations and rotations)")] Restraint end2Releases = null,
         [SchemaParamInfo("If null, defaults to no offsets")] Vector end1Offset = null,
@@ -57,7 +56,6 @@ namespace Objects.Structural.GSA.Geometry
       this.end2Offset = end2Offset == null ? new Vector(0, 0, 0) : end2Offset;
       this.orientationNode = orientationNode;
       this.orientationAngle = orientationAngle;
-      this.memberType = MemberType.NotSet;
     }
   }
 }
