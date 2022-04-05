@@ -772,7 +772,7 @@ namespace Objects.Converter.Revit
 
       var key = isFraming ? $"familyFraming" : "familyColumn";
       var section = sectionDict.Where(x => (string)x[key] == family && (string)x["familyType"] == type).FirstOrDefault();
-      var profileName = section != null ? (string)section["speckleSectionType"] : null;
+      var profileName = section != null ? (string)section["speckleSection"] : null;
 
       return profileName;
     }
