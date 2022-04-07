@@ -330,6 +330,13 @@ namespace Objects.Converter.Bentley
           return BrepToNative(o);
 
 #if (OPENBUILDINGS)
+        case RevitBeam o:
+           Report.Log($"Created Revit Beam {o.id}");
+           return RevitBeamToNative(o);
+
+        case RevitFloor o:
+          Report.Log($"Created Revit Floor {o.id}");
+          return RevitFloorToNative(o);
 
         case RevitWall o:
            Report.Log($"Created Revit Wall {o.id}");
@@ -410,6 +417,9 @@ namespace Objects.Converter.Bentley
         case Curve _:
         case Box _:
         case Mesh _:
+        case RevitBeam _:
+        case RevitColumn _:
+        case RevitFloor _:
         case RevitWall _:
           //case Surface _:
           //case Alignment _:
