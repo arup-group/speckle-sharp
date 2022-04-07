@@ -1,4 +1,5 @@
 ﻿#if (OPENBUILDINGS)
+using Bentley.Building.Api;
 using Bentley.DgnPlatformNET;
 using Bentley.DgnPlatformNET.DgnEC;
 using Bentley.DgnPlatformNET.Elements;
@@ -8,9 +9,6 @@ using Bentley.ECObjects.Schema;
 using Bentley.ECObjects.XML;
 using Bentley.GeometryNET;
 using Bentley.MstnPlatformNET;
-
-using Bentley.Building.Api;
-
 using Objects.Geometry;
 using Objects.Primitive;
 using Speckle.Core.Logging;
@@ -719,6 +717,20 @@ namespace Objects.Converter.Bentley
       return floor;
     }
 
+    private List<ICurve> RotateZ(List<ICurve> segments, double angle)
+    {
+      List<ICurve> rotatedSegments = new List<ICurve>();
+      foreach (ICurve segment in segments)
+      {
+        Line line = (Line)segment;
+        Line rotatedLine = new Line();
+        rotatedLine.start = RotateZ(line.start, angle);
+        rotatedLine.end = RotateZ(line.end, angle);
+        rotatedSegments.Add(rotatedLine);
+      }
+      return rotatedSegments;
+    }
+
     public RevitWall WallToSpeckle(Dictionary<string, object> properties, List<ICurve> segments, string units = null)
     {
       RevitWall wall = new RevitWall();
@@ -729,24 +741,18 @@ namespace Objects.Converter.Bentley
       // for some reason the ElementID is a long
       int elementId = (int)(double)GetProperty(properties, "ElementID");
 
-      Dictionary<int, List<ICurve>> elevationMap = new Dictionary<int, List<ICurve>>();
+      // rotate wall into xz plane
+      double angle = (double)GetProperty(properties, "RotationZ");
+      List<ICurve> rotatedSegments = RotateZ(segments, -angle);
+
+      Dictionary<int, List<ICurve>> yMap = new Dictionary<int, List<ICurve>>();
+      int maxY = int.MinValue;
 
       // this should take the used units into account
       double epsilon = 0.001;
 
-      // only simple walls supported so far
-      if (segments.Count != 12)
-      {
-        throw new SpeckleException("Wall geoemtry not supported!");
-      }
-
-      // sort segments by segment.length
-      List<ICurve> sortedSegments = segments.OrderBy(segment => segment.length).ToList();
-
-      // drop long edges
-      sortedSegments.RemoveRange(4, 8);
-
-      foreach (ICurve segment in sortedSegments)
+      List<ICurve> shortEdges = new List<ICurve>();
+      foreach (ICurve segment in rotatedSegments)
       {
         Line line = (Line)segment;
         Point start = line.start;
@@ -756,44 +762,132 @@ namespace Objects.Converter.Bentley
         double dy = Math.Abs(start.y - end.y);
         double dz = Math.Abs(start.z - end.z);
 
-        // drop vertical edges
-        if (dx < epsilon && dy < epsilon)
+        // collect segments in y-direction (wall thickness)
+        // segments are not neccessary perfectly in y-direction!
+        if (dz < epsilon && dx < 2 * Math.Abs(dy))
         {
-          // there should be none
+          shortEdges.Add(line);
           continue;
         }
 
-        if (dz > epsilon)
+        if (dy > epsilon)
         {
-          throw new SpeckleException("Wall geoemtry not supported!");
+          throw new SpeckleException("Wall geometry not supported!");
+        }
+
+        int y = (int)Math.Round(start.y / epsilon);
+        if (y > maxY)
+        {
+          maxY = y;
+        }
+        if (yMap.ContainsKey(y))
+        {
+          yMap[y].Add(line);
         }
         else
         {
-          int currentElevation = (int)Math.Round(start.z / epsilon);
-          if (elevationMap.ContainsKey(currentElevation))
-          {
-            elevationMap[currentElevation].Add(line);
-          }
-          else
-          {
-            List<ICurve> lines = new List<ICurve>() { line };
-            elevationMap.Add(currentElevation, lines);
-          }
+          yMap.Add(y, new List<ICurve>() { line });
         }
       }
 
-      if (elevationMap.Count != 2)
+      if (yMap.Count != 2)
       {
-        throw new SpeckleException("Inclined walls not supported!");
+        throw new SpeckleException("Wall geometry not supported!");
       }
 
+
+      List<ICurve> lines = yMap[maxY];
+
+      // assuming that outline comes before the openings
+      Polycurve outline = CreateClosedPolyCurve(lines, u);
+
+      // all lines that are not part of the outline must be part of a void
+      List<ICurve> voids = new List<ICurve>();
+      while (lines.Count > 0)
+      {
+        Polycurve opening = CreateClosedPolyCurve(lines);
+        voids.Add(opening);
+      }
+
+
+
+      Dictionary<int, List<ICurve>> elevationMap = new Dictionary<int, List<ICurve>>();
+
+      // only simple walls supported so far
+      if (segments.Count > 12)
+      {
+        segments.RemoveRange(0, segments.Count - 12);
+      }
+
+
+      // sort short segments by z coordinate
+      List<ICurve> sortedShortEdges = shortEdges.OrderBy(segment => ((Line)segment).start.z).ToList();
+
+      double elevation = ((Line)sortedShortEdges[0]).start.z;
+      double topElevation = ((Line)sortedShortEdges[sortedShortEdges.Count - 1]).start.z;
+
+      sortedShortEdges = shortEdges.OrderBy(segment => ((Line)segment).start.x).ToList();
+
+      ICurve edge1 = segments.Where(segment => ((Line)segment).start.x == ((Line)sortedShortEdges[0]).start.x).OrderBy(segment => ((Line)segment).start.z).ToList()[0];
+      ICurve edge2 = segments.Where(segment => ((Line)segment).start.x == ((Line)sortedShortEdges[sortedShortEdges.Count - 1]).start.x).OrderBy(segment => ((Line)segment).start.z).ToList()[0];
+
+      Line baseLine = CreateWallBaseLine(RotateZ(new List<ICurve>() { edge1, edge2 }, angle), u);
+
+
+
+
+
+      // sort segments by segment.length
+      //List<ICurve> sortedSegments = segments.OrderBy(segment => segment.length).ToList();
+
+      //// drop long edges
+      //sortedSegments.RemoveRange(4, 8);
+
+      //foreach (ICurve segment in sortedSegments)
+      //{
+      //  Line line = (Line)segment;
+      //  Point start = line.start;
+      //  Point end = line.end;
+
+      //  double dx = Math.Abs(start.x - end.x);
+      //  double dy = Math.Abs(start.y - end.y);
+      //  double dz = Math.Abs(start.z - end.z);
+
+      //  // drop vertical edges
+      //  if (dx < epsilon && dy < epsilon)
+      //  {
+      //    // there should be none
+      //    continue;
+      //  }
+
+      //  if (dz > epsilon)
+      //  {
+      //    throw new SpeckleException("Wall geoemtry not supported!");
+      //  }
+      //  else
+      //  {
+      //    int currentElevation = (int)Math.Round(start.z / epsilon);
+      //    if (elevationMap.ContainsKey(currentElevation))
+      //    {
+      //      elevationMap[currentElevation].Add(line);
+      //    }
+      //    else
+      //    {
+      //      List<ICurve> lines = new List<ICurve>() { line };
+      //      elevationMap.Add(currentElevation, lines);
+      //    }
+      //  }
+      //}
+
+      //if (elevationMap.Count != 2)
+      //{
+      //  throw new SpeckleException("Inclined walls not supported!");
+      //}
+
       // sort by elevations
-      List<int> sortedElevations = elevationMap.Keys.OrderBy(lines => lines).ToList();
+      //List<int> sortedElevations = elevationMap.Keys.OrderBy(lines => lines).ToList();
 
-      Line baseLine = CreateWallBaseLine(elevationMap[sortedElevations[0]], u);
 
-      double elevation = sortedElevations[0] * epsilon;
-      double topElevation = sortedElevations[1] * epsilon;
       double height = topElevation - elevation;
 
       Level level = CreateLevel(elevation, u);
