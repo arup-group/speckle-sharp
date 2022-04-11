@@ -56,7 +56,37 @@ namespace Objects.Structural.GSA.Geometry
       }
 
       this.outline = outline;
+    }
 
+    [SchemaInfo("GSAMember2D (from polyline)", "Creates a Speckle structural 2D member for GSA", "GSA", "Geometry")]
+    public GSAMember2D([SchemaParamInfo("A polyline which represents the perimeter of a member")] Polyline perimeter,
+        Property2D property, MemberType2D memberType = MemberType2D.Generic2D, AnalysisType2D analysisType = AnalysisType2D.Linear,
+        [SchemaParamInfo("A list of polylines which represent the voids within a member")] List<Polyline> voids = null,
+        double offset = 0, double orientationAngle = 0, string name = null, int? nativeId = null, bool isDummy = false)
+    {
+      this.nativeId = nativeId;
+      this.name = name;     
+      this.topology = GetNodesFromPolyline(perimeter);           
+      this.property = property;
+      this.memberType = (MemberType)Enum.Parse(typeof(MemberType), memberType.ToString());
+      this.analysisType = analysisType;
+
+      var outlineLoops = new List<ICurve>() { perimeter };
+      if (voids != null)
+      {
+        var voidLoops = new List<List<Node>>() { };
+        foreach (var v in voids)
+        {
+          voidLoops.Add(GetNodesFromPolyline(v));
+          outlineLoops.Add(v);
+        }
+        this.voids = voidLoops;
+      }
+
+      this.offset = offset;
+      this.orientationAngle = orientationAngle;
+      this.isDummy = isDummy;
+      this.outline = outlineLoops;
     }
   }
 }

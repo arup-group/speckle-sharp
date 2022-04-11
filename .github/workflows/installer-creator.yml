@@ -73,6 +73,12 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.2
       
+    - name: Update Version
+      shell: powershell
+      working-directory: ConnectorGSA/ConnectorGSA/Properties
+      run: |
+        (Get-content .\AssemblyInfo.cs) -replace '1\.0\.0\.0', '${{ steps.calculateTagVersion.outputs.tag }}' | Out-File -encoding ASCII .\AssemblyInfo.cs      
+      
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore all the applications
       shell: cmd
@@ -108,7 +114,7 @@ jobs:
       working-directory: Installer/Analytics
 
     - name: Analytics CLI - Compile CLI
-      run: dotnet build --configuration Release --runtime win-x64
+      run: msbuild analytics.sln /p:Configuration=Release 
       working-directory: Installer/Analytics     
 
     - name: Excel Addin Request CLI - Restore NuGets
@@ -121,19 +127,11 @@ jobs:
 
     - name: Restore SpeckleConnectionManager
       run: dotnet restore        
-      working-directory: Installer/ConnectionManager/SpeckleConnectionManager
+      working-directory: Installer/ConnectionManager
 
-    - name: Build SpeckleConnectionManager
-      run: dotnet publish -c Release -r win10-x64 --self-contained true -p:Version=${{ github.event.inputs.version }}
-      working-directory: Installer/ConnectionManager/SpeckleConnectionManager
-
-    - name: Restore SpeckleConnectionManagerUI
-      run: dotnet restore        
-      working-directory: Installer/ConnectionManager/SpeckleConnectionManagerUI
-
-    - name: Build SpeckleConnectionManagerUI
-      run: dotnet publish -c Release -r win10-x64 --self-contained true -p:Version=${{ github.event.inputs.version }}       
-      working-directory: Installer/ConnectionManager/SpeckleConnectionManagerUI
+    - name: Build SpeckleConnectionManager and SpeckleConnectionManagerUI
+      run: dotnet build -c Release -p:Version=${{ github.event.inputs.version }}
+      working-directory: Installer/ConnectionManager
 
     - name: Create Installer
       id: installer

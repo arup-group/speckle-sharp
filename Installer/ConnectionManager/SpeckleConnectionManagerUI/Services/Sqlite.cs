@@ -9,9 +9,9 @@ namespace SpeckleConnectionManagerUI.Services
 {
     public class Sqlite
     {
-        public static List<SqliteContent> GetData()
+        public static List<Speckle.Core.Credentials.Account> GetData()
         {
-            List<SqliteContent?> entries = new List<SqliteContent>();
+            List<Speckle.Core.Credentials.Account?> entries = new List<Speckle.Core.Credentials.Account>();
 
             using (SqliteConnection db =
                 new SqliteConnection($"Filename={Constants.DatabasePath}"))
@@ -33,7 +33,7 @@ namespace SpeckleConnectionManagerUI.Services
                 while (query.Read())
                 {
                     var row = query.GetString(0);
-                    entries.Add(JsonSerializer.Deserialize<SqliteContent>(row));
+                    entries.Add(JsonSerializer.Deserialize<Speckle.Core.Credentials.Account>(row));
                 }
 
                 db.Close();
@@ -75,7 +75,7 @@ namespace SpeckleConnectionManagerUI.Services
                     var objs = new object[3];
                     query.GetValues(objs);
                     var hash = objs[0].ToString();
-                    var storedContent = JsonSerializer.Deserialize<SqliteContent>(objs[1].ToString());
+                    var storedContent = JsonSerializer.Deserialize<Speckle.Core.Credentials.Account>(objs[1].ToString());
 
                     // If the url is already stored update otherwise create a new entry.
                     if (storedContent != null)

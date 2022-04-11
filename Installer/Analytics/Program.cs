@@ -106,6 +106,15 @@ namespace analytics
       var connection = new SqliteConnection($"Data Source={dbPath}");
       connection.Open();
 
+      List<string> hashes = new List<string>();
+      SqliteCommand selectHashCommand = new SqliteCommand
+          ("SELECT hash from objects", connection);
+      SqliteDataReader hashQuery = selectHashCommand.ExecuteReader();
+      while (hashQuery.Read())
+      {
+        hashes.Add(Convert.ToString(hashQuery["hash"]));
+      }
+
       SqliteCommand selectCommand = new SqliteCommand
           ("SELECT * from objects", connection);
 
@@ -117,25 +126,89 @@ namespace analytics
         query.GetValues(objs);
 
         var hash = objs[0].ToString();
-        var storedContent = System.Text.Json.JsonSerializer.Deserialize<SqliteContent>(objs[1].ToString());
-        var serverName = storedContent.serverInfo.name;
+        var storedContent = System.Text.Json.JsonSerializer.Deserialize<Speckle.Core.Credentials.Account>(objs[1].ToString());
 
-        // If the url is already stored update hash to be server name
-        if (storedContent != null && hash != serverName)
+        if (storedContent != null)
         {
-          var updateCommand = connection.CreateCommand();
-          updateCommand.CommandText =
-              @"
+          // If the url is already stored with a server name as hash, update hash 
+          var serverName = storedContent.serverInfo.name;
+          if (hash == serverName || hash != storedContent.id)
+          {
+            var account = new Speckle.Core.Credentials.Account()
+            {
+              token = storedContent.token,
+              refreshToken = storedContent.refreshToken,
+              isDefault = storedContent.isDefault,
+              serverInfo = storedContent.serverInfo,
+              userInfo = storedContent.userInfo
+            };
+            
+            var updateorRemoveCommand = connection.CreateCommand();
+            
+            if (hash == serverName)
+            {
+              if (hashes.Contains(account.id))
+              {
+                // If hash already exists, remove record
+                updateorRemoveCommand.CommandText =
+                    @"
+                DELETE from objects 
+                WHERE hash = @server
+              ";
+                updateorRemoveCommand.Parameters.AddWithValue("@server", serverName);
+              } else
+              {
+                updateorRemoveCommand.CommandText =
+                    @"
                 UPDATE objects
-                SET hash = @server
-                WHERE hash = @hash
+                SET hash = @hash, content = @content
+                WHERE hash = @server
               ";
 
-          Console.WriteLine(connection.State);
+                var updatedContent = System.Text.Json.JsonSerializer.Serialize(account);
+                updateorRemoveCommand.Parameters.AddWithValue("@hash", account.id);
+                updateorRemoveCommand.Parameters.AddWithValue("@content", updatedContent);
+                updateorRemoveCommand.Parameters.AddWithValue("@server", serverName);
+              }
+            }
+            else if (account.id != storedContent.id) {
+              // If hash and account content (id) is out of sync, update record
+              updateorRemoveCommand.CommandText =
+                    @"
+                UPDATE objects
+                SET content = @content
+                WHERE hash = @hash
+              ";
+              var updatedContent = System.Text.Json.JsonSerializer.Serialize(account);
+              updateorRemoveCommand.Parameters.AddWithValue("@hash", hash);
+              updateorRemoveCommand.Parameters.AddWithValue("@content", updatedContent);
+            }
+            else
+            {
+              updateorRemoveCommand.CommandText =
+                  @"
+                UPDATE objects
+                SET hash = @hash, content = @content
+                WHERE hash = @server
+              ";
 
-          updateCommand.Parameters.AddWithValue("@hash", hash);
-          updateCommand.Parameters.AddWithValue("@server", serverName);
-          updateCommand.ExecuteNonQuery();
+              var updatedContent = System.Text.Json.JsonSerializer.Serialize(account);
+              updateorRemoveCommand.Parameters.AddWithValue("@hash", account.id);
+              updateorRemoveCommand.Parameters.AddWithValue("@content", updatedContent);
+              updateorRemoveCommand.Parameters.AddWithValue("@server", serverName);
+            }
+
+            Console.WriteLine(connection.State);
+
+            try
+            {
+              updateorRemoveCommand.ExecuteNonQuery();
+            }
+            catch (SqliteException ex)
+            {
+              Console.WriteLine(ex.Message);
+            }
+          }
         }
       }
 
@@ -155,22 +228,6 @@ namespace analytics
       }
 
       connection.Close();
-    }
-
-    public class ServerInfo
-    {
-      public String name { get; set; }
-      public String url { get; set; }
-    }
-
-    public class SqliteContent
-    {
-      public string id { get; set; }
-      public bool isDefault { get; set; } = false;
-      public string token { get; set; }
-      public object user { get; set; }
-      public ServerInfo serverInfo { get; set; }
-      public string refreshToken { get; set; }
     }
   }
 }

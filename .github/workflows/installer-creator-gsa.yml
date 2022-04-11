@@ -65,6 +65,18 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.2
 
+    - name: Calculate tag version
+      id: calculate-tag-version
+      run: |
+        $tag = "${{ github.event.inputs.version }}.$($env:GITHUB_RUN_ID%65536)"
+        echo "::set-output name=tag::$tag"
+
+    - name: Update Version
+      shell: powershell
+      working-directory: ConnectorGSA/ConnectorGSA/Properties
+      run: |
+        (Get-content .\AssemblyInfo.cs) -replace '1\.0\.0\.0', '${{ steps.calculate-tag-version.outputs.tag }}' | Out-File -encoding ASCII .\AssemblyInfo.cs
+
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore all the applications
       shell: cmd
@@ -88,7 +100,7 @@ jobs:
     - name: create Installer
       id: installer
       run: | 
-        iscc /dAppVersion="${{ github.event.inputs.version }}.$($env:GITHUB_RUN_ID%65536)" speckle-v2-installer-gsa.iss
+        iscc /dAppVersion="${{ steps.calculate-tag-version.outputs.tag }}" speckle-v2-installer-gsa.iss
         $filename = (ls *.exe).Name
         echo "::set-output name=filename::$filename"          
       working-directory: Installer          
@@ -124,12 +136,6 @@ jobs:
         name: ${{ steps.installer.outputs.filename }}
         path: ./Installer/${{ steps.installer.outputs.filename }}
         retention-days: 1
-
-    - name: Calculate tag version
-      id: calculate-tag-version
-      run: |
-        $tag = "${{ github.event.inputs.version }}.$($env:GITHUB_RUN_ID%65536)"
-        echo "::set-output name=tag::$tag"
         
     - name: Create Release
       if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'

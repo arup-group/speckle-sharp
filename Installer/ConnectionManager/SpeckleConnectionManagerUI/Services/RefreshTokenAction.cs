@@ -14,6 +14,17 @@ namespace SpeckleConnectionManagerUI.Services
 {
   class RefreshTokenAction
   {
+    public class Info
+    {
+      public Speckle.Core.Credentials.UserInfo user { get; set; }
+      public Speckle.Core.Credentials.ServerInfo serverInfo { get; set; }
+    }
+
+    public class InfoData
+    {
+      public Info data { get; set; }
+    }
+
     public async Task<string> Run()
     {
       HttpClient client = new();
@@ -47,7 +58,7 @@ namespace SpeckleConnectionManagerUI.Services
         entries.Add(new Row
         {
           hash = objs[0].ToString(),
-          content = JsonSerializer.Deserialize<SqliteContent>(objs[1].ToString())
+          content = JsonSerializer.Deserialize<Speckle.Core.Credentials.Account>(objs[1].ToString())
         });
       }
 
@@ -55,17 +66,41 @@ namespace SpeckleConnectionManagerUI.Services
       foreach (var entry in entries)
       {
         var content = entry.content;
+        var isDefault = entry.content.isDefault;
         var url = content.serverInfo.url;
         Console.WriteLine($"Auth token: {content.token}");
         client.DefaultRequestHeaders.Add("Authorization", $"Bearer {content.token}");
 
-        HttpResponseMessage response = null;
+        HttpResponseMessage response;
         try {
           response = await client.PostAsJsonAsync($"{url}/auth/token", new
           {
             appId = "sdm",
             appSecret = "sdm",
             refreshToken = content.refreshToken,
+          });
+        }
+        catch {
+          client.DefaultRequestHeaders.Remove("Authorization");
+          continue;
+        }
+        Console.WriteLine(response.StatusCode);
+        if (response.StatusCode != HttpStatusCode.OK)
+        {
+          continue;
+        }
+        var tokens = await response.Content.ReadFromJsonAsync<Tokens>();
+        content.token = tokens.token;
+        content.refreshToken = tokens.refreshToken;
+
+        Console.WriteLine(tokens.token);
+
+        HttpResponseMessage info;
+        try
+        {
+          info = await client.PostAsJsonAsync($"{url}/graphql", new
+          {
+            query = "{\n  user {\n    id\n    name\n    email\n    company\n    avatar\n} serverInfo {\n name \n company \n canonicalUrl \n }\n}\n"
           });
         }
         catch {
@@ -79,13 +114,29 @@ namespace SpeckleConnectionManagerUI.Services
         {
           continue;
         }
-        var tokens = await response.Content.ReadFromJsonAsync<Tokens>();
-        content.token = tokens.token;
-        content.refreshToken = tokens.refreshToken;
 
-        Console.WriteLine(tokens.token);
+        var infoContent = await info.Content.ReadFromJsonAsync<InfoData>();
 
-        var command = connection.CreateCommand();
+        if (infoContent == null) return "";
+
+        var serverInfo = infoContent.data.serverInfo;
+        serverInfo.url = url;
+
+        var userInfo = infoContent.data.user;
+
+        var updateContent = new Speckle.Core.Credentials.Account()
+        {
+          token = tokens.token,
+          refreshToken = tokens.refreshToken,
+          isDefault = isDefault,
+          serverInfo = serverInfo,
+          userInfo = userInfo
+        };
+
+        string jsonString = JsonSerializer.Serialize(updateContent);
+
+        var command = connection.CreateCommand();       
+
         command.CommandText =
           @"
             UPDATE objects
@@ -95,8 +146,8 @@ namespace SpeckleConnectionManagerUI.Services
 
         Console.WriteLine(connection.State);
 
-        command.Parameters.AddWithValue("@hash", content.GetHashCode());
-        command.Parameters.AddWithValue("@content", JsonSerializer.Serialize(content));
+        command.Parameters.AddWithValue("@hash", content.id);
+        command.Parameters.AddWithValue("@content", jsonString);
         command.ExecuteNonQuery();
         Console.WriteLine($"Updated {entry.hash}");
       };

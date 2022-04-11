@@ -32,7 +32,6 @@ using Objects.Structural.Results;
 using Speckle.Core.Models;
 using Objects.Structural.GSA.Analysis;
 using Objects.Structural.GSA.Bridge;
-using Piwik.Tracker;
 using ActionType = Objects.Structural.Loading.ActionType;
 
 namespace ConverterGSATests

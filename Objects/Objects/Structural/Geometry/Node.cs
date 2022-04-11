@@ -34,6 +34,7 @@ namespace Objects.Structural.Geometry
     {
       this.basePoint = basePoint;
     }
+
     [SchemaInfo("Node", "Creates a Speckle structural node with spring, mass and/or damper properties", "Structural", "Geometry")]
     public Node(Point basePoint,
         string name = null,

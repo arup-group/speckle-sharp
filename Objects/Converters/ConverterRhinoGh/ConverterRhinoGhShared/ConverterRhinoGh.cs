@@ -611,7 +611,7 @@ namespace Objects.Converter.RhinoGh
           break;
 
         case Objects.Structural.Geometry.Element1D o:
-          rhinoObj = element1DToNative(o);
+          rhinoObj = Element1DToNative(o);
           Report.Log($"Created Element1D with line {o.id}");
           break;
 

@@ -63,7 +63,7 @@ namespace SpeckleConnectionManager
 
       var info = await client.PostAsJsonAsync($"{savedUrl}/graphql", new
       {
-        query = "{\n  user {\n    id\n    email\n    name\n company \n} serverInfo {\n name \n company \n canonicalUrl \n }\n}\n"
+        query = "{\n  user {\n    id\n    name\n    email\n    company\n    avatar\n} serverInfo {\n name \n company \n canonicalUrl \n }\n}\n"
       });
 
       if (info.StatusCode != HttpStatusCode.OK)
@@ -79,14 +79,15 @@ namespace SpeckleConnectionManager
       var serverInfo = infoContent.data.serverInfo;
       serverInfo.url = savedUrl;
 
-      var content = new
+      var userInfo = infoContent.data.user;
+
+      var content = new Speckle.Core.Credentials.Account()
       {
-        id = infoContent.data.serverInfo.name,
+        token = tokens.token,
+        refreshToken = tokens.refreshToken,
         isDefault = false,
-        tokens.token,
-        userInfo = infoContent.data.user,
-        infoContent.data.serverInfo,
-        tokens.refreshToken
+        serverInfo = serverInfo,
+        userInfo = userInfo
       };
 
       string jsonString = JsonSerializer.Serialize(content);
@@ -114,20 +115,21 @@ namespace SpeckleConnectionManager
         var objs = new object[3];
         query.GetValues(objs);
         var hash = objs[0].ToString();
-        var storedContent = JsonSerializer.Deserialize<SqliteContent>(objs[1].ToString());
+        var storedContent = JsonSerializer.Deserialize<Speckle.Core.Credentials.Account>(objs[1].ToString());
 
         // If the url is already stored update otherwise create a new entry.
-        if (storedContent != null && storedContent.serverInfo.url == content.serverInfo.url)
+        if (storedContent != null && storedContent.id == content.id)
         {
           var updateCommand = connection.CreateCommand();
           updateCommand.CommandText =
-            @"
-                UPDATE objects
-                SET content = @content
-                WHERE hash = @hash
-            ";
+              @"
+                        UPDATE objects
+                        SET content = @content
+                        WHERE hash = @hash
+                    ";
 
           Console.WriteLine(connection.State);
+          content.isDefault = storedContent.isDefault;
 
           updateCommand.Parameters.AddWithValue("@hash", hash);
           updateCommand.Parameters.AddWithValue("@content", JsonSerializer.Serialize(content));
@@ -192,8 +194,8 @@ namespace SpeckleConnectionManager
 
   public class Info
   {
-    public object user { get; set; }
-    public ServerInfo serverInfo { get; set; }
+    public Speckle.Core.Credentials.UserInfo user { get; set; }
+    public Speckle.Core.Credentials.ServerInfo serverInfo { get; set; }
   }
 
   public class ServerInfo
@@ -217,4 +219,5 @@ namespace SpeckleConnectionManager
     public ServerInfo serverInfo { get; set; }
     public string refreshToken { get; set; }
   }
+
 }

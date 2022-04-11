@@ -70,7 +70,7 @@
     <Message Text="Restoring T4 tool..." Importance="high" />
     <Exec Command="dotnet tool restore" />
     <Message Text="Generating T4 templates..." Importance="high" />
-    <Exec Command="dotnet t4 -o $(SolutionDir)ConnectorGrasshopper\SchemaBuilder\SchemaBuilderGen.cs $(SolutionDir)ConnectorGrasshopper\SchemaBuilder\SchemaBuilderGen.tt -P=$(SolutionDir)ConnectorGrasshopper\SchemaBuilder" />
+    <Exec Command="dotnet t4 -o &quot;$(SolutionDir)ConnectorGrasshopper\SchemaBuilder\SchemaBuilderGen.cs&quot; &quot;$(SolutionDir)ConnectorGrasshopper\SchemaBuilder\SchemaBuilderGen.tt&quot; -P=&quot;$(SolutionDir)ConnectorGrasshopper\SchemaBuilder&quot;" />
   </Target>
   
   <Target Name="Clean">
