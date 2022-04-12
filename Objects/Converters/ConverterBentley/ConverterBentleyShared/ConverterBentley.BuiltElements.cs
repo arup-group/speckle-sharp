@@ -28,6 +28,7 @@ using Interval = Objects.Primitive.Interval;
 using Level = Objects.BuiltElements.Level;
 using Line = Objects.Geometry.Line;
 using Mesh = Objects.Geometry.Mesh;
+using Opening = Objects.BuiltElements.Opening;
 using Parameter = Objects.BuiltElements.Revit.Parameter;
 using Plane = Objects.Geometry.Plane;
 using Point = Objects.Geometry.Point;
@@ -36,6 +37,7 @@ using RevitBeam = Objects.BuiltElements.Revit.RevitBeam;
 using RevitColumn = Objects.BuiltElements.Revit.RevitColumn;
 using RevitFloor = Objects.BuiltElements.Revit.RevitFloor;
 using RevitWall = Objects.BuiltElements.Revit.RevitWall;
+using RevitWallOpening = Objects.BuiltElements.Revit.RevitWallOpening;
 using Surface = Objects.Geometry.Surface;
 using Vector = Objects.Geometry.Vector;
 
@@ -45,7 +47,12 @@ namespace Objects.Converter.Bentley
   {
     private static int Decimals = 3;
 
-    private Dictionary<int, Level> levels = new Dictionary<int, Level>();
+    // this should take the used units into account
+    private static double Epsilon = 0.001;
+
+    private Dictionary<int, Level> Levels = new Dictionary<int, Level>();
+
+    private List<RevitWall> Walls = new List<RevitWall>();
 
     public RevitBeam BeamToSpeckle(Dictionary<string, object> properties, string units = null)
     {
@@ -127,13 +134,13 @@ namespace Objects.Converter.Bentley
       elevation = Math.Round(elevation, Decimals);
 
       int levelKey = (int)(elevation * Math.Pow(10, Decimals));
-      levels.TryGetValue(levelKey, out Level level);
+      Levels.TryGetValue(levelKey, out Level level);
 
       if (level == null)
       {
         level = new Level("Level " + elevation + u, elevation);
         level.units = u;
-        levels.Add(levelKey, level);
+        Levels.Add(levelKey, level);
       }
       return level;
     }
@@ -251,28 +258,14 @@ namespace Objects.Converter.Bentley
       Polycurve polyCurve = new Polycurve(u);
 
       // sort lines
-      List<ICurve> segments = Sort(lines);
-      polyCurve.segments = segments;
 
-      //polyCurve.domain
-      polyCurve.closed = true;
-      //polyCurve.bbox
-      //polyCurve.area
-      //polyCurve.length
-
-      return polyCurve;
-    }
-
-    private List<ICurve> Sort(List<ICurve> lines)
-    {
-      double eps = 0.001;
-
-      List<ICurve> sortedLines = new List<ICurve>();
+      List<ICurve> segments = new List<ICurve>();
       if (lines.Count > 0)
       {
         Line firstSegment = lines[0] as Line;
+        Point currentStart = firstSegment.start;
         Point currentEnd = firstSegment.end;
-        sortedLines.Add(firstSegment);
+        segments.Add(firstSegment);
         lines.Remove(firstSegment);
         int i = 0;
         while (lines.Count > 0)
@@ -286,13 +279,20 @@ namespace Objects.Converter.Bentley
           Point nextStart = ((Line)nextSegment).start;
           Point nextEnd = ((Line)nextSegment).end;
 
-          double dx = Math.Abs(nextStart.x - currentEnd.x);
-          double dy = Math.Abs(nextStart.y - currentEnd.y);
-          double dz = Math.Abs(nextStart.z - currentEnd.z);
-
-          if (dx < eps && dy < eps && dz < eps)
+          double dx1 = Math.Abs(currentStart.x - nextEnd.x);
+          double dy1 = Math.Abs(currentStart.y - nextEnd.y);
+          double dz1 = Math.Abs(currentStart.z - nextEnd.z);
+          if (dx1 < Epsilon && dy1 < Epsilon && dz1 < Epsilon)
           {
-            sortedLines.Add(nextSegment);
+            continue;
+          }
+
+          double dx2 = Math.Abs(nextStart.x - currentEnd.x);
+          double dy2 = Math.Abs(nextStart.y - currentEnd.y);
+          double dz2 = Math.Abs(nextStart.z - currentEnd.z);
+          if (dx2 < Epsilon && dy2 < Epsilon && dz2 < Epsilon)
+          {
+            segments.Add(nextSegment);
             lines.Remove(nextSegment);
 
             currentEnd = ((Line)nextSegment).end;
@@ -300,7 +300,25 @@ namespace Objects.Converter.Bentley
           }
         }
       }
-      return sortedLines;
+      if (segments.Count > 2)
+      {
+        double dx = Math.Abs(((Line)segments[0]).start.x - ((Line)segments[segments.Count - 1]).end.x);
+        double dy = Math.Abs(((Line)segments[0]).start.y - ((Line)segments[segments.Count - 1]).end.y);
+        double dz = Math.Abs(((Line)segments[0]).start.z - ((Line)segments[segments.Count - 1]).end.z);
+        if (dx < Epsilon && dy < Epsilon && dz < Epsilon)
+        {
+          polyCurve.segments = segments;
+          //polyCurve.domain
+          polyCurve.closed = true;
+          //polyCurve.bbox
+          //polyCurve.area
+          //polyCurve.length
+
+          return polyCurve;
+        }
+      }
+      lines.AddRange(segments);
+      return null;
     }
 
     public Line CreateWallBaseLine(List<ICurve> shortEdges, string units = null)
@@ -331,6 +349,7 @@ namespace Objects.Converter.Bentley
       Point end = new Point(x2, y2, z2, u);
 
       Line baseLine = new Line(start, end, u);
+
       return baseLine;
     }
 
@@ -357,6 +376,119 @@ namespace Objects.Converter.Bentley
       familyInstance.category = "Structural Foundations";
       familyInstance.elementId = elementId.ToString();
       return familyInstance;
+    }
+
+    public RevitWallOpening OpeningToSpeckle(Dictionary<string, object> properties, List<ICurve> segments, string units = null)
+    {
+      var u = units ?? ModelUnits;
+
+      //List<ICurve> lines = new List<ICurve>();
+      //foreach(Line line in segments)
+      //{
+      //  Point start = line.start;
+      //  Point end = line.end;
+
+      //  double dx = end.x - start.x;
+      //  double dy = end.y - start.y;
+      //  double dz = end.z - start.z;
+
+      //  if (Math.Abs(dx) < Epsilon && Math.Abs(dy) < Epsilon && Math.Abs(dz) < Epsilon)
+      //    continue;
+      //  else
+      //    lines.Add(line);
+      //}
+
+      double angle = (double)GetProperty(properties, "RotationZ");
+      // for some reason the ElementID is a long
+      int elementId = (int)(double)GetProperty(properties, "ElementID");
+      DPoint3d rangeLow = (DPoint3d)GetProperty(properties, "RangeLow");
+      DPoint3d rangeHigh = (DPoint3d)GetProperty(properties, "RangeHigh");
+
+      // 4 -- 3
+      // |    |
+      // 1 -- 2
+      Point p1 = Point3dToSpeckle(rangeLow, u);
+      Point p3 = Point3dToSpeckle(rangeHigh, u);
+
+      // rotate opening into xz plane
+      p1 = RotateZ(p1, -angle);
+      p3 = RotateZ(p3, -angle);
+
+      double y = (p1.y + p3.y) / 2;
+
+      p1.y = y;
+      p3.y = y;
+
+      Point p2 = new Point(p3.x, y, p1.z);
+      Point p4 = new Point(p1.x, y, p3.z);
+
+      // rotate back
+      p1 = RotateZ(p1, angle);
+      p2 = RotateZ(p2, angle);
+      p3 = RotateZ(p3, angle);
+      p4 = RotateZ(p4, angle);
+
+      Polyline outline = new Polyline(new List<double>() { p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, p3.x, p3.y, p3.z, p4.x, p4.y, p4.z }, u)
+      {
+        closed = true
+      };
+
+      // find host
+      RevitWall host = null;
+      foreach (RevitWall wall in Walls)
+      {
+        double wallAngle = (double)wall["angle"];
+        if (Math.Abs(angle - wallAngle) > Epsilon)
+        {
+          continue;
+        }
+
+        Line baseLine = (Line)wall.baseLine;
+        Point start = baseLine.start;
+        Point end = baseLine.end;
+
+        double minX = Math.Min(start.x, end.x);
+        double maxX = Math.Max(start.x, end.x);
+        double minY = Math.Min(start.y, end.y);
+        double maxY = Math.Max(start.y, end.y);
+
+        if (p1.x < minX || p1.x > maxX)
+          continue;
+        if (p1.y < minY || p1.y > maxY)
+          continue;
+
+        double deltaX = maxX - minX;
+        double deltaY = maxY - minY;
+
+        // normalize
+        double p1x = (p1.x - minX) / deltaX;
+        double p1y = (p1.y - minY) / deltaY;
+        if (p1x < 0 || p1x > 1 || p1y < 0 || p1y > 1)
+          continue;
+        if (Math.Abs(p1x - p1y) > Epsilon)
+          continue;
+        double p2x = (p2.x - minX) / deltaX;
+        double p2y = (p2.y - minY) / deltaY;
+        if (p2x < 0 || p2x > 1 || p2y < 0 || p2y > 1)
+          continue;
+        if (Math.Abs(p2x - p2y) > Epsilon)
+          continue;
+
+        host = wall;
+      }
+
+      if (host == null)
+        throw new SpeckleException("Host element could not be found for opening " + elementId);
+
+      RevitWallOpening opening = new RevitWallOpening
+      {
+        outline = outline,
+        units = u,
+        host = host,
+        elementId = elementId.ToString()
+      };
+
+      return opening;
     }
 
     public FamilyInstance PileToSpeckle(Dictionary<string, object> properties, string units = null)
@@ -387,9 +519,11 @@ namespace Objects.Converter.Bentley
 
       bool facingFlipped = false;
       bool handFlipped = false;
-      FamilyInstance familyInstance = new FamilyInstance(basePoint, family, type, level, rotationZ, facingFlipped, handFlipped, new List<Parameter>());
-      familyInstance.category = "Structural Foundations";
-      familyInstance.elementId = elementId.ToString();
+      FamilyInstance familyInstance = new FamilyInstance(basePoint, family, type, level, rotationZ, facingFlipped, handFlipped, new List<Parameter>())
+      {
+        category = "Structural Foundations",
+        elementId = elementId.ToString()
+      };
       return familyInstance;
     }
 
@@ -631,7 +765,6 @@ namespace Objects.Converter.Bentley
 
     public RevitFloor SlabToSpeckle(Dictionary<string, object> properties, List<ICurve> segments, string units = null)
     {
-      RevitFloor floor = new RevitFloor();
       var u = units ?? ModelUnits;
 
       string part = (string)GetProperty(properties, "PART");
@@ -642,8 +775,6 @@ namespace Objects.Converter.Bentley
       Dictionary<int, List<ICurve>> elevationMap = new Dictionary<int, List<ICurve>>();
       int maxElevation = int.MinValue;
 
-      // this should take the used units into account
-      double epsilon = 0.001;
 
       foreach (ICurve segment in segments)
       {
@@ -656,17 +787,17 @@ namespace Objects.Converter.Bentley
         double dz = Math.Abs(start.z - end.z);
 
         // drop vertical segments
-        if (dx < epsilon && dy < epsilon)
+        if (dx < Epsilon && dy < Epsilon)
         {
           continue;
         }
 
-        if (dz > epsilon)
+        if (dz > Epsilon)
         {
           throw new SpeckleException("Inclined slabs not supported!");
         }
 
-        int elevation = (int)Math.Round(start.z / epsilon);
+        int elevation = (int)Math.Round(start.z / Epsilon);
         if (elevation > maxElevation)
         {
           maxElevation = elevation;
@@ -702,17 +833,20 @@ namespace Objects.Converter.Bentley
         voids.Add(opening);
       }
 
-      floor.outline = outline;
-      floor.voids = voids;
-      //floor.elements
-      floor.units = u;
-      floor.type = part;
-      floor.family = family;
-      floor.elementId = elementId.ToString();
-      floor.level = level;
-      floor.structural = true;
-      floor.slope = 0;
-      //floor.slopeDirection
+      RevitFloor floor = new RevitFloor
+      {
+        outline = outline,
+        voids = voids,
+        //floor.elements
+        units = u,
+        type = part,
+        family = family,
+        elementId = elementId.ToString(),
+        level = level,
+        structural = true,
+        slope = 0
+        //floor.slopeDirection
+      };
 
       return floor;
     }
@@ -723,9 +857,11 @@ namespace Objects.Converter.Bentley
       foreach (ICurve segment in segments)
       {
         Line line = (Line)segment;
-        Line rotatedLine = new Line();
-        rotatedLine.start = RotateZ(line.start, angle);
-        rotatedLine.end = RotateZ(line.end, angle);
+        Line rotatedLine = new Line
+        {
+          start = RotateZ(line.start, angle),
+          end = RotateZ(line.end, angle)
+        };
         rotatedSegments.Add(rotatedLine);
       }
       return rotatedSegments;
@@ -733,8 +869,6 @@ namespace Objects.Converter.Bentley
 
     public RevitWall WallToSpeckle(Dictionary<string, object> properties, List<ICurve> segments, string units = null)
     {
-      RevitWall wall = new RevitWall();
-
       var u = units ?? ModelUnits;
       string part = (string)GetProperty(properties, "PART");
       string family = "Basic Wall";
@@ -748,9 +882,7 @@ namespace Objects.Converter.Bentley
       Dictionary<int, List<ICurve>> yMap = new Dictionary<int, List<ICurve>>();
       int maxY = int.MinValue;
 
-      // this should take the used units into account
-      double epsilon = 0.001;
-
+      // collect short edges and sort the rest of the edges by inner/outer surface
       List<ICurve> shortEdges = new List<ICurve>();
       foreach (ICurve segment in rotatedSegments)
       {
@@ -764,18 +896,18 @@ namespace Objects.Converter.Bentley
 
         // collect segments in y-direction (wall thickness)
         // segments are not neccessary perfectly in y-direction!
-        if (dz < epsilon && dx < 2 * Math.Abs(dy))
+        if (dz < Epsilon && dx < 2 * Math.Abs(dy))
         {
           shortEdges.Add(line);
           continue;
         }
 
-        if (dy > epsilon)
+        if (dy > Epsilon)
         {
           throw new SpeckleException("Wall geometry not supported!");
         }
 
-        int y = (int)Math.Round(start.y / epsilon);
+        int y = (int)Math.Round(start.y / Epsilon);
         if (y > maxY)
         {
           maxY = y;
@@ -789,34 +921,9 @@ namespace Objects.Converter.Bentley
           yMap.Add(y, new List<ICurve>() { line });
         }
       }
-
       if (yMap.Count != 2)
       {
         throw new SpeckleException("Wall geometry not supported!");
-      }
-
-
-      List<ICurve> lines = yMap[maxY];
-
-      // assuming that outline comes before the openings
-      Polycurve outline = CreateClosedPolyCurve(lines, u);
-
-      // all lines that are not part of the outline must be part of a void
-      List<ICurve> voids = new List<ICurve>();
-      while (lines.Count > 0)
-      {
-        Polycurve opening = CreateClosedPolyCurve(lines);
-        voids.Add(opening);
-      }
-
-
-
-      Dictionary<int, List<ICurve>> elevationMap = new Dictionary<int, List<ICurve>>();
-
-      // only simple walls supported so far
-      if (segments.Count > 12)
-      {
-        segments.RemoveRange(0, segments.Count - 12);
       }
 
 
@@ -828,14 +935,106 @@ namespace Objects.Converter.Bentley
 
       sortedShortEdges = shortEdges.OrderBy(segment => ((Line)segment).start.x).ToList();
 
-      ICurve edge1 = segments.Where(segment => ((Line)segment).start.x == ((Line)sortedShortEdges[0]).start.x).OrderBy(segment => ((Line)segment).start.z).ToList()[0];
-      ICurve edge2 = segments.Where(segment => ((Line)segment).start.x == ((Line)sortedShortEdges[sortedShortEdges.Count - 1]).start.x).OrderBy(segment => ((Line)segment).start.z).ToList()[0];
+      double minX1 = ((Line)sortedShortEdges[0]).start.x;
+      double maxX1 = ((Line)sortedShortEdges[sortedShortEdges.Count - 1]).start.x;
+      double minX2 = ((Line)sortedShortEdges[0]).end.x;
+      double maxX2 = ((Line)sortedShortEdges[sortedShortEdges.Count - 1]).end.x;
+      double minX = Math.Max(minX1, minX2);
+      double maxX = Math.Min(maxX1, maxX2);
 
+      List<ICurve> foo = sortedShortEdges.Where(segment => ((Line)segment).start.x == minX).ToList();
+
+      ICurve edge1 = sortedShortEdges.Where(segment => Math.Abs(((Line)segment).start.x - minX1) < Epsilon).OrderBy(segment => ((Line)segment).start.z).ToList()[0];
+      ICurve edge2 = sortedShortEdges.Where(segment => Math.Abs(((Line)segment).start.x - maxX1) < Epsilon).OrderBy(segment => ((Line)segment).start.z).ToList()[0];
+
+      // rotate edges back and create base line
       Line baseLine = CreateWallBaseLine(RotateZ(new List<ICurve>() { edge1, edge2 }, angle), u);
 
+      // openings
+      // identify lines that are not part of the wall outline
+      List<ICurve> linesNotOutline = new List<ICurve>();
+      foreach (ICurve line in yMap[maxY])
+      {
+        Point start = ((Line)line).start;
+        Point end = ((Line)line).end;
+
+        if (start.x - minX < Epsilon || maxX - start.x < Epsilon)
+        {
+          if (end.x - minX < Epsilon || maxX - end.x < Epsilon)
+            continue;
+        }
+        linesNotOutline.Add(line);
+      }
+
+      //lines = RotateZ(lines, angle);
+
+
+      // remove orphan lines
+      int i = 0;
+      List<ICurve> lines = new List<ICurve>();
+      foreach (Line line1 in linesNotOutline)
+      {
+        bool orphanStart = true;
+        bool orphanEnd = true;
+
+        for (int j = 0; j < linesNotOutline.Count; j++)
+        {
+          if (j == i)
+          {
+            continue;
+          }
+          else
+          {
+            Line line2 = (Line)linesNotOutline[j];
+
+            double dx1 = Math.Abs(((Line)line1).end.x - ((Line)line2).start.x);
+            double dy1 = Math.Abs(((Line)line1).end.y - ((Line)line2).start.y);
+            double dz1 = Math.Abs(((Line)line1).end.z - ((Line)line2).start.z);
+            if (dx1 < Epsilon && dy1 < Epsilon && dz1 < Epsilon)
+            {
+              orphanEnd = false;
+              continue;
+            }
+
+            double dx2 = Math.Abs(((Line)line2).end.x - ((Line)line1).start.x);
+            double dy2 = Math.Abs(((Line)line2).end.y - ((Line)line1).start.y);
+            double dz2 = Math.Abs(((Line)line2).end.z - ((Line)line1).start.z);
+            if (dx2 < Epsilon && dy2 < Epsilon && dz2 < Epsilon)
+            {
+              orphanStart = false;
+              continue;
+            }
+          }
+        }
+        if (orphanStart && orphanEnd)
+          lines.Add(line1);
+        i++;
+      }
+
+      List<ICurve> voids = new List<ICurve>();
+      //while (lines.Count > 0)
+      //{
+      //  Polycurve opening = CreateClosedPolyCurve(linesNotOutline);
+      //  if (opening != null)
+      //    voids.Add(opening);
+      //}
+
+      // store opening as RevitWallOpening
+      // alternative: FamilyInstance with type = Opening
+      //wall.elements = new List<Base>();
+      //foreach (ICurve voidOutline in voids)
+      //{
+      //  RevitWallOpening opening = new RevitWallOpening();
+      //  opening.outline = voidOutline;
+      //  opening.units = u;
+      //  opening.host = wall;
+
+      //  wall.elements.Add(opening);
+      //}
 
 
 
+      //Dictionary<int, List<ICurve>> elevationMap = new Dictionary<int, List<ICurve>>();
 
       // sort segments by segment.length
       //List<ICurve> sortedSegments = segments.OrderBy(segment => segment.length).ToList();
@@ -893,19 +1092,24 @@ namespace Objects.Converter.Bentley
       Level level = CreateLevel(elevation, u);
       Level topLevel = CreateLevel(topElevation, u);
 
-      wall.height = height;
-      //wall.elements = 
-      wall.baseLine = baseLine;
-      wall.units = u;
-      wall.family = family;
-      wall.type = part;
-      wall.baseOffset = 0;
-      wall.topOffset = 0;
-      wall.flipped = false;
-      wall.structural = true;
-      wall.level = level;
-      wall.topLevel = topLevel;
-      wall.elementId = elementId.ToString();
+      RevitWall wall = new RevitWall
+      {
+        height = height,
+        //wall.elements = 
+        baseLine = baseLine,
+        units = u,
+        family = family,
+        type = part,
+        baseOffset = 0,
+        topOffset = 0,
+        flipped = false,
+        structural = true,
+        level = level,
+        topLevel = topLevel,
+        elementId = elementId.ToString()
+      };
+
+      Walls.Add(wall);
 
       return wall;
     }
@@ -923,6 +1127,7 @@ namespace Objects.Converter.Bentley
       Columns,
       FoundationSlabs,
       None,
+      Opening,
       Piles,
       Slabs,
       Walls

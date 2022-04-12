@@ -1692,9 +1692,6 @@ namespace Objects.Converter.Bentley
             }
           }
         }
-
-        element["segments"] = segments;
-
 #if (OPENBUILDINGS)
         string part = (string)properties["PART"];
         Category category = FindCategory(part);
@@ -1722,6 +1719,10 @@ namespace Objects.Converter.Bentley
             element = ColumnToSpeckle(properties, u);
             break;
 
+          case (Category.Opening):
+            element = OpeningToSpeckle(properties, segments, u);
+            break;
+
           case (Category.Piles):
             element = PileToSpeckle(properties, u);
             break;
@@ -1740,6 +1741,8 @@ namespace Objects.Converter.Bentley
             break;
         }
 #endif
+
+        //element["segments"] = segments;
       }
       element["@properties"] = bentleyProperties;
       return element;
@@ -1899,6 +1902,10 @@ namespace Objects.Converter.Bentley
       else if (part.Contains("Column"))
       {
         category = Category.Columns;
+      }
+      else if (part.Contains("Opening"))
+      {
+        category = Category.Opening;
       }
       else if (part.Contains("Pile"))
       {
