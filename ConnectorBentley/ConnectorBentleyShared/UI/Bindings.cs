@@ -611,6 +611,9 @@ namespace Speckle.ConnectorBentley.UI
     delegate List<NamedModelEntity> GetCivilObjectsDelegate(StreamState state);
     delegate string GetCivilObjectNameDelegate(object commitObject);
 #endif
+#if (OPENBUILDINGS)
+    delegate DgnECManager DgnECManagerDelegate();
+#endif
 
     public override async Task<StreamState> SendStream(StreamState state)
     {
@@ -723,6 +726,28 @@ namespace Speckle.ConnectorBentley.UI
           }
         }
       }
+      // sort OBD objects before conversion
+      foreach (var obj in objs)
+      {
+        if (obj is Type2Element element)
+        {
+          DgnECManagerDelegate managerDelegate = delegate { return DgnECManager.Manager; };
+          DgnECManager manager = managerDelegate();
+
+          var properties = manager.GetElementProperties(element, ECQueryProcessFlags.SearchAllClasses);
+
+          foreach (var property in properties)
+          {
+            IECPropertyValue propertyValue = property.GetPropertyValue("PART");
+            if (propertyValue != null)
+            {
+              propertyValue.TryGetStringValue(out string value);
+
+
+            }
+          }
+        }
+      }
 #endif
 
       foreach (var obj in objs)
@@ -829,7 +854,6 @@ namespace Speckle.ConnectorBentley.UI
         UpdateProgress(conversionProgressDict, state.Progress);
 
         converted.applicationId = objId;
-        //converted[""]
 
         convertedCount++;
       }

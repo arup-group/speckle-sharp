@@ -263,9 +263,7 @@ namespace Objects.Converter.Bentley
       List<ICurve> segments = Sort(lines);
 
       if (segments.Count < 3)
-      {
-        // todo
-      }
+        throw new SpeckleException("Curve outline for opening must be a polyline with at least three unique points.");
 
       polyCurve.segments = segments;
 
