@@ -729,24 +729,24 @@ namespace Speckle.ConnectorBentley.UI
       // sort OBD objects before conversion
       foreach (var obj in objs)
       {
-        if (obj is Type2Element element)
-        {
-          DgnECManagerDelegate managerDelegate = delegate { return DgnECManager.Manager; };
-          DgnECManager manager = managerDelegate();
+        //if (obj is Type2Element element)
+        //{
+        //  // todo: delegate?
+        //  DgnECManagerDelegate managerDelegate = delegate { return DgnECManager.Manager; };
+        //  DgnECManager manager = managerDelegate();
 
-          var properties = manager.GetElementProperties(element, ECQueryProcessFlags.SearchAllClasses);
+        //  var properties = manager.GetElementProperties(element, ECQueryProcessFlags.SearchAllClasses);
 
-          foreach (var property in properties)
-          {
-            IECPropertyValue propertyValue = property.GetPropertyValue("PART");
-            if (propertyValue != null)
-            {
-              propertyValue.TryGetStringValue(out string value);
+        //  foreach (var property in properties)
+        //  {
+        //    IECPropertyValue propertyValue = property.GetPropertyValue("PART");
+        //    if (propertyValue != null)
+        //    {
+        //      propertyValue.TryGetStringValue(out string value);
 
-
-            }
-          }
-        }
+        //    }
+        //  }
+        //}
       }
 #endif
 
