@@ -1742,7 +1742,7 @@ namespace Objects.Converter.Bentley
         }
 #endif
 
-        //element["segments"] = segments;
+        element["segments"] = segments;
       }
       element["@properties"] = bentleyProperties;
       return element;

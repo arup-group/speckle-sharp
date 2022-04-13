@@ -814,6 +814,13 @@ namespace Speckle.ConnectorBentley.UI
         }
         */
 
+#if OPENBUILDINGS
+        if (containerName == "Unknown" && converted["containerName"] != null)
+        {
+          containerName = (string)converted["containerName"];
+        }
+#endif
+
         if (commitObj[$"@{containerName}"] == null)
           commitObj[$"@{containerName}"] = new List<Base>();
         ((List<Base>)commitObj[$"@{containerName}"]).Add(converted);

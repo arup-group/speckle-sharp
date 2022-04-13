@@ -79,6 +79,7 @@ namespace Objects.Converter.Bentley
       beam.elementId = elementId.ToString();
       //beam.displayMesh
       beam.units = u;
+      beam["containerName"] = "Structural Framing";
 
       return beam;
     }
@@ -124,6 +125,7 @@ namespace Objects.Converter.Bentley
       column.elementId = elementId.ToString();
       //column.displayMesh
       column.units = u;
+      column["containerName"] = "Structural Columns";
 
       return column;
     }
@@ -375,6 +377,8 @@ namespace Objects.Converter.Bentley
       FamilyInstance familyInstance = new FamilyInstance(basePoint, family, type, level, rotationZ, facingFlipped, handFlipped, new List<Parameter>());
       familyInstance.category = "Structural Foundations";
       familyInstance.elementId = elementId.ToString();
+      familyInstance["containerName"] = "Structural Foundations";
+
       return familyInstance;
     }
 
@@ -463,18 +467,22 @@ namespace Objects.Converter.Bentley
         // normalize
         double p1x = (p1.x - minX) / deltaX;
         double p1y = (p1.y - minY) / deltaY;
+
         if (p1x < 0 || p1x > 1 || p1y < 0 || p1y > 1)
           continue;
-        if (Math.Abs(p1x - p1y) > Epsilon)
+        if (Math.Abs(deltaX / deltaY - p1y / p1x) < Epsilon)
           continue;
+
         double p2x = (p2.x - minX) / deltaX;
         double p2y = (p2.y - minY) / deltaY;
+
         if (p2x < 0 || p2x > 1 || p2y < 0 || p2y > 1)
           continue;
-        if (Math.Abs(p2x - p2y) > Epsilon)
+        if (Math.Abs(deltaX / deltaY - p2y / p2x) < Epsilon)
           continue;
 
         host = wall;
+        wall.elements.Add(host);
       }
 
       if (host == null)
@@ -487,6 +495,7 @@ namespace Objects.Converter.Bentley
         host = host,
         elementId = elementId.ToString()
       };
+      opening["containerName"] = "Openings";
 
       return opening;
     }
@@ -524,6 +533,8 @@ namespace Objects.Converter.Bentley
         category = "Structural Foundations",
         elementId = elementId.ToString()
       };
+      familyInstance["containerName"] = "Structural Foundations";
+
       return familyInstance;
     }
 
@@ -775,7 +786,6 @@ namespace Objects.Converter.Bentley
       Dictionary<int, List<ICurve>> elevationMap = new Dictionary<int, List<ICurve>>();
       int maxElevation = int.MinValue;
 
-
       foreach (ICurve segment in segments)
       {
         Line line = (Line)segment;
@@ -847,6 +857,7 @@ namespace Objects.Converter.Bentley
         slope = 0
         //floor.slopeDirection
       };
+      floor["containerName"] = "Floors";
 
       return floor;
     }
@@ -1106,8 +1117,11 @@ namespace Objects.Converter.Bentley
         structural = true,
         level = level,
         topLevel = topLevel,
-        elementId = elementId.ToString()
+        elementId = elementId.ToString(),
+        elements = new List<Base>()
       };
+      wall["angle"] = angle;
+      wall["containerName"] = "Walls";
 
       Walls.Add(wall);
 
