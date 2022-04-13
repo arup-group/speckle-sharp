@@ -451,7 +451,6 @@ namespace Objects.Converter.Bentley
           continue;
 
         host = wall;
-        wall.elements.Add(host);
       }
 
       // rotate back
@@ -476,6 +475,9 @@ namespace Objects.Converter.Bentley
         elementId = elementId.ToString()
       };
       opening["containerName"] = "Openings";
+
+      // add opening to hosting wall
+      host.elements.Add(opening);
 
       return opening;
     }
