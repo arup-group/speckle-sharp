@@ -386,79 +386,55 @@ namespace Objects.Converter.Bentley
     {
       var u = units ?? ModelUnits;
 
-      //List<ICurve> lines = new List<ICurve>();
-      //foreach(Line line in segments)
-      //{
-      //  Point start = line.start;
-      //  Point end = line.end;
-
-      //  double dx = end.x - start.x;
-      //  double dy = end.y - start.y;
-      //  double dz = end.z - start.z;
-
-      //  if (Math.Abs(dx) < Epsilon && Math.Abs(dy) < Epsilon && Math.Abs(dz) < Epsilon)
-      //    continue;
-      //  else
-      //    lines.Add(line);
-      //}
-
       double angle = (double)GetProperty(properties, "RotationZ");
       // for some reason the ElementID is a long
       int elementId = (int)(double)GetProperty(properties, "ElementID");
-      DPoint3d rangeLow = (DPoint3d)GetProperty(properties, "RangeLow");
-      DPoint3d rangeHigh = (DPoint3d)GetProperty(properties, "RangeHigh");
+      //DPoint3d rangeLow = (DPoint3d)GetProperty(properties, "RangeLow");
+      //DPoint3d rangeHigh = (DPoint3d)GetProperty(properties, "RangeHigh");
+      double length = (double)GetProperty(properties, "Penetrations__x002F____x0040__Length"); // height
+      double width = (double)GetProperty(properties, "Penetrations__x002F____x0040__Width");
+      //double radius = (double)GetProperty(properties, "Penetrations__x002F____x0040__Radius");
+
+      DPoint3d origin = (DPoint3d)GetProperty(properties, "Origin");
 
       // 4 -- 3
       // |    |
       // 1 -- 2
-      Point p1 = Point3dToSpeckle(rangeLow, u);
-      Point p3 = Point3dToSpeckle(rangeHigh, u);
+      Point p1 = Point3dToSpeckle(origin, u);
 
       // rotate opening into xz plane
       p1 = RotateZ(p1, -angle);
-      p3 = RotateZ(p3, -angle);
 
-      double y = (p1.y + p3.y) / 2;
-
-      p1.y = y;
-      p3.y = y;
-
-      Point p2 = new Point(p3.x, y, p1.z);
-      Point p4 = new Point(p1.x, y, p3.z);
-
-      // rotate back
-      p1 = RotateZ(p1, angle);
-      p2 = RotateZ(p2, angle);
-      p3 = RotateZ(p3, angle);
-      p4 = RotateZ(p4, angle);
-
-      Polyline outline = new Polyline(new List<double>() { p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, p3.x, p3.y, p3.z, p4.x, p4.y, p4.z }, u)
-      {
-        closed = true
-      };
+      Point p2 = new Point(p1.x + width, p1.y, p1.z);
+      Point p3 = new Point(p1.x + width, p1.y, p1.z + length);
+      Point p4 = new Point(p1.x, p1.y, p1.z + length);
 
       // find host
       RevitWall host = null;
       foreach (RevitWall wall in Walls)
       {
         double wallAngle = (double)wall["angle"];
+        double wallWidth = (double)wall["width"];
+
         if (Math.Abs(angle - wallAngle) > Epsilon)
         {
           continue;
         }
 
         Line baseLine = (Line)wall.baseLine;
-        Point start = baseLine.start;
-        Point end = baseLine.end;
+        Point start = RotateZ(baseLine.start, -angle);
+        Point end = RotateZ(baseLine.end, -angle);
 
         double minX = Math.Min(start.x, end.x);
         double maxX = Math.Max(start.x, end.x);
-        double minY = Math.Min(start.y, end.y);
-        double maxY = Math.Max(start.y, end.y);
 
-        if (p1.x < minX || p1.x > maxX)
+        // we don´t know on which side of the wall we are
+        double minY = Math.Min(start.y, end.y) - width;
+        double maxY = Math.Max(start.y, end.y) + width;
+
+        if (p1.x < minX + Epsilon || p1.x > maxX - Epsilon)
           continue;
-        if (p1.y < minY || p1.y > maxY)
+        if (p1.y < minY + Epsilon || p1.y > maxY - Epsilon)
           continue;
 
         double deltaX = maxX - minX;
@@ -484,6 +460,17 @@ namespace Objects.Converter.Bentley
         host = wall;
         wall.elements.Add(host);
       }
+
+      // rotate back
+      p1 = RotateZ(p1, angle);
+      p2 = RotateZ(p2, angle);
+      p3 = RotateZ(p3, angle);
+      p4 = RotateZ(p4, angle);
+
+      Polyline outline = new Polyline(new List<double>() { p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, p3.x, p3.y, p3.z, p4.x, p4.y, p4.z }, u)
+      {
+        closed = true
+      };
 
       if (host == null)
         throw new SpeckleException("Host element could not be found for opening " + elementId);
@@ -886,6 +873,9 @@ namespace Objects.Converter.Bentley
       // for some reason the ElementID is a long
       int elementId = (int)(double)GetProperty(properties, "ElementID");
 
+      double height = (double)GetProperty(properties, "Wall_Application__x002F____x0040__Height");
+      double width = (double)GetProperty(properties, "Wall_Application__x002F____x0040__Width");
+
       // rotate wall into xz plane
       double angle = (double)GetProperty(properties, "RotationZ");
       List<ICurve> rotatedSegments = RotateZ(segments, -angle);
@@ -1097,9 +1087,6 @@ namespace Objects.Converter.Bentley
       // sort by elevations
       //List<int> sortedElevations = elevationMap.Keys.OrderBy(lines => lines).ToList();
 
-
-      double height = topElevation - elevation;
-
       Level level = CreateLevel(elevation, u);
       Level topLevel = CreateLevel(topElevation, u);
 
@@ -1122,6 +1109,7 @@ namespace Objects.Converter.Bentley
       };
       wall["angle"] = angle;
       wall["containerName"] = "Walls";
+      wall["width"] = width;
 
       Walls.Add(wall);
 
