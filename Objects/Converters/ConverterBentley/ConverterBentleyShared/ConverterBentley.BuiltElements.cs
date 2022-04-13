@@ -260,14 +260,34 @@ namespace Objects.Converter.Bentley
       Polycurve polyCurve = new Polycurve(u);
 
       // sort lines
+      List<ICurve> segments = Sort(lines);
 
-      List<ICurve> segments = new List<ICurve>();
+      if (segments.Count < 3)
+      {
+        // todo
+      }
+
+      polyCurve.segments = segments;
+
+      //polyCurve.domain
+      polyCurve.closed = true;
+      //polyCurve.bbox
+      //polyCurve.area
+      //polyCurve.length
+
+      return polyCurve;
+    }
+
+    private List<ICurve> Sort(List<ICurve> lines)
+    {
+      double eps = 0.001;
+
+      List<ICurve> sortedLines = new List<ICurve>();
       if (lines.Count > 0)
       {
         Line firstSegment = lines[0] as Line;
-        Point currentStart = firstSegment.start;
         Point currentEnd = firstSegment.end;
-        segments.Add(firstSegment);
+        sortedLines.Add(firstSegment);
         lines.Remove(firstSegment);
         int i = 0;
         while (lines.Count > 0)
@@ -281,20 +301,13 @@ namespace Objects.Converter.Bentley
           Point nextStart = ((Line)nextSegment).start;
           Point nextEnd = ((Line)nextSegment).end;
 
-          double dx1 = Math.Abs(currentStart.x - nextEnd.x);
-          double dy1 = Math.Abs(currentStart.y - nextEnd.y);
-          double dz1 = Math.Abs(currentStart.z - nextEnd.z);
-          if (dx1 < Epsilon && dy1 < Epsilon && dz1 < Epsilon)
-          {
-            continue;
-          }
+          double dx = Math.Abs(nextStart.x - currentEnd.x);
+          double dy = Math.Abs(nextStart.y - currentEnd.y);
+          double dz = Math.Abs(nextStart.z - currentEnd.z);
 
-          double dx2 = Math.Abs(nextStart.x - currentEnd.x);
-          double dy2 = Math.Abs(nextStart.y - currentEnd.y);
-          double dz2 = Math.Abs(nextStart.z - currentEnd.z);
-          if (dx2 < Epsilon && dy2 < Epsilon && dz2 < Epsilon)
+          if (dx < eps && dy < eps && dz < eps)
           {
-            segments.Add(nextSegment);
+            sortedLines.Add(nextSegment);
             lines.Remove(nextSegment);
 
             currentEnd = ((Line)nextSegment).end;
@@ -302,25 +315,7 @@ namespace Objects.Converter.Bentley
           }
         }
       }
-      if (segments.Count > 2)
-      {
-        double dx = Math.Abs(((Line)segments[0]).start.x - ((Line)segments[segments.Count - 1]).end.x);
-        double dy = Math.Abs(((Line)segments[0]).start.y - ((Line)segments[segments.Count - 1]).end.y);
-        double dz = Math.Abs(((Line)segments[0]).start.z - ((Line)segments[segments.Count - 1]).end.z);
-        if (dx < Epsilon && dy < Epsilon && dz < Epsilon)
-        {
-          polyCurve.segments = segments;
-          //polyCurve.domain
-          polyCurve.closed = true;
-          //polyCurve.bbox
-          //polyCurve.area
-          //polyCurve.length
-
-          return polyCurve;
-        }
-      }
-      lines.AddRange(segments);
-      return null;
+      return sortedLines;
     }
 
     public Line CreateWallBaseLine(List<ICurve> shortEdges, string units = null)
