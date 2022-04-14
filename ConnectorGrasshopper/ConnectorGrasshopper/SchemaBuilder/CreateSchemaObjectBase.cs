@@ -61,11 +61,11 @@ namespace ConnectorGrasshopper
       catch (Exception e)
       {
       }
-      
+
       var objectItem = schemaConversionHeader.DropDownItems.Add("Convert as Schema object.") as ToolStripMenuItem;
       objectItem.Checked = !UseSchemaTag;
       objectItem.ToolTipText = "The default behaviour. Output will be the specified object schema.";
-      
+
       var tagItem = schemaConversionHeader.DropDownItems.Add($"Convert as {mainParam?.Name ?? "geometry"} with {Name} attached") as ToolStripMenuItem;
       tagItem.Checked = UseSchemaTag;
       tagItem.Enabled = mainParam != null;
@@ -167,7 +167,7 @@ namespace ConnectorGrasshopper
 
       if (!UserSetSchemaTag)
         UseSchemaTag = SpeckleGHSettings.UseSchemaTag;
-      
+
       if (SelectedConstructor != null)
       {
         base.AddedToDocument(document);
@@ -277,12 +277,21 @@ namespace ConnectorGrasshopper
       if (param.IsOptional)
         newInputParam.SetPersistentData(param.DefaultValue);
 
-      // check if input needs to be a list or item access
+      // check if input needs to be a tree, list or item access
       bool isCollection = typeof(System.Collections.IEnumerable).IsAssignableFrom(propType) &&
                           propType != typeof(string) && !propType.Name.ToLower().Contains("dictionary");
       if (isCollection == true)
       {
-        newInputParam.Access = GH_ParamAccess.list;
+        // make input a tree if it is a nested list
+        var genericListType = propType.GetGenericArguments().Single();
+        if (typeof(System.Collections.IEnumerable).IsAssignableFrom(genericListType))
+        {
+          newInputParam.Access = GH_ParamAccess.tree;
+        }
+        else
+        {
+          newInputParam.Access = GH_ParamAccess.list;
+        }
       }
       else
       {
@@ -341,11 +350,11 @@ namespace ConnectorGrasshopper
         return;
       }
 
-      if(DA.Iteration == 0)
+      if (DA.Iteration == 0)
       {
         Logging.Analytics.TrackEvent(Logging.Analytics.Events.NodeRun, new Dictionary<string, object>() { { "name", "Grasshopper BIM" }, { "node", Name } });
       }
-      
+
       var units = Units.GetUnitsFromString(Rhino.RhinoDoc.ActiveDoc.GetUnitSystemName(true, false, false, false));
 
       List<object> cParamsValues = new List<object>();
@@ -384,6 +393,74 @@ namespace ConnectorGrasshopper
           var extractRealInputValue = ExtractRealInputValue(inputValue);
           objectProp = GetObjectProp(param, extractRealInputValue, cParam.ParameterType);
         }
+        else if (param.Access == GH_ParamAccess.tree)
+        {          
+          var propValues = new List<object>();
+          var inputValues = new List<object>();
+          var valueTree = new Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.IGH_Goo>();
+          DA.GetDataTree(i, out valueTree);
+          if (!valueTree.IsEmpty && !param.Optional)
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Input tree `" + param.Name + "` is empty.");
+            return;
+          }
+
+          int branchIndex = 0;
+          foreach (var list in valueTree.Branches)
+          {
+            var path = valueTree.Paths[branchIndex];
+            var pathItems = new List<object>() { };
+            foreach (var item in list)
+            {
+              pathItems.Add(ExtractRealInputValue(item));
+            }
+            
+            inputValues.Add(pathItems);
+            branchIndex++;
+          }
+
+          try
+          {           
+            foreach (var inputValue in inputValues)
+            {
+              var inputValueType = inputValue.GetType();
+              var isList = inputValueType.IsGenericType && (inputValueType.GetGenericTypeDefinition() == typeof(List<>));
+              if (isList)
+              {
+                var inputValueList = (List<object>)inputValue;
+                if(inputValueList != null)
+                {
+                  var firstValue = inputValueList.FirstOrDefault();
+                  var isSameType = inputValueList.All(p => p.GetType() == firstValue.GetType());
+                  if (isSameType)
+                  {
+                    var containedType = firstValue.GetType();
+                    var castItems = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(containedType));
+                    foreach (var item in inputValueList)
+                    {
+                      castItems.Add(item);
+                    }
+                    propValues.Add(castItems);
+                  }
+                } else
+                {
+                  return;
+                }
+              } else
+              {
+                var extractRealInputValue = ExtractRealInputValue(inputValue);
+                propValues.Add(GetObjectProp(param, extractRealInputValue, cParam.ParameterType));
+              }
+            }
+
+            objectProp = GetObjectListProp(param, propValues, cParam.ParameterType);
+          }
+          catch (Exception e)
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.InnerException?.Message ?? e.Message);
+            return;
+          }
+        }
 
         cParamsValues.Add(objectProp);
         if (CustomAttributeData.GetCustomAttributes(cParam)
@@ -399,12 +476,12 @@ namespace ConnectorGrasshopper
         ((Base)schemaObject).applicationId = $"{Seed}-{SelectedConstructor.DeclaringType.FullName}-{DA.Iteration}";
 
         // Check to ensure default rhino geometric units are not assigned to inappropriate structural objects
-        var isExcludedStructural = excludedFromUnitsClasses.Any(keyword => schemaObject.GetType().Namespace.ToLower().Contains(keyword)) 
+        var isExcludedStructural = excludedFromUnitsClasses.Any(keyword => schemaObject.GetType().Namespace.ToLower().Contains(keyword))
           && excludedFromUnitsNamespaces.Any(keyword => schemaObject.GetType().Namespace.ToLower().Contains(keyword));
 
         if ((((Base)schemaObject)["units"] == null || ((Base)schemaObject)["units"] == "") && (!isExcludedStructural))
           ((Base)schemaObject)["units"] = units;
-      } 
+      }
       catch (Exception e)
       {
 
@@ -428,8 +505,8 @@ namespace ConnectorGrasshopper
 
           commitObj = ((Base)mainSchemaObj).ShallowCopy();
           commitObj["@SpeckleSchema"] = schemaObject;
-          if(commitObj["units"]==null || commitObj["units"] == "")
-          commitObj["units"] = units;
+          if (commitObj["units"] == null || commitObj["units"] == "")
+            commitObj["units"] = units;
         }
         catch (Exception e)
         {
@@ -471,6 +548,15 @@ namespace ConnectorGrasshopper
         var propertyInfo = type.GetProperty("Value");
         var value = propertyInfo.GetValue(inputValue);
         return value;
+      }
+
+      if (inputValue is List<Grasshopper.Kernel.Types.IGH_Goo>)
+      {
+        var inputValueList = inputValue as List<Grasshopper.Kernel.Types.IGH_Goo>;
+        foreach (var value in inputValueList)
+        {
+          ExtractRealInputValue(value);
+        }
       }
 
       return inputValue;

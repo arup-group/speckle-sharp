@@ -36,11 +36,9 @@
 # For a complete CI/CD sample to get started with GitHub Action workflows for Desktop Applications,
 # refer to https://github.com/microsoft/github-actions-for-desktop-apps
 
-name: Create Installer for GSA, Rhino and Gh Connectors
+name: Create Installer
 
 on:
-  push:
-    tags: 'v*.*.*'
   workflow_dispatch:
     inputs:
       version:
@@ -50,72 +48,68 @@ on:
 jobs:
   build:
     runs-on: windows-2019 # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
+    env:
+        GH_PKG_USER: ${{ secrets.GH_PKG_USER }} 
+        GH_PKG_TOKEN: ${{ secrets.GH_PKG_TOKEN }}                     
     steps:
     - name: Checkout
       uses: actions/checkout@v2
       with:
         fetch-depth: 2
-        
+
     - name: Calculate tag version
       id: calculateTagVersion
       shell: powershell
       run: |
         $tag = "${{ github.event.inputs.version }}.$($env:GITHUB_RUN_ID%65536)"
-        echo "::set-output name=tag::$tag"        
-        
+        echo "::set-output name=tag::$tag"
+
     - name: Install the latest version of nuget
       uses: nuget/setup-nuget@v1
       with:
-        nuget-version: 'latest'       
-        
+        nuget-version: 'latest'
+
     # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.2
-      
-    - name: Update Version
-      shell: powershell
-      working-directory: ConnectorGSA/ConnectorGSA/Properties
-      run: |
-        (Get-content .\AssemblyInfo.cs) -replace '1\.0\.0\.0', '${{ steps.calculateTagVersion.outputs.tag }}' | Out-File -encoding ASCII .\AssemblyInfo.cs           
+           
+    - name: Analytics CLI - Restore NuGets
+      run: dotnet restore        
+      working-directory: Installer/Analytics
 
-    # Restore the application to populate the obj folder with RuntimeIdentifiers
-    - name: Restore all the applications
-      shell: cmd
-      run: |
-        for %%x in (Objects, ConnectorGSA, ConnectorRhino, ConnectorGrasshopper) do (
-          cd %%x && msbuild %%x.sln /t:Restore /p:Configuration=Release /p:WarningLevel=0 /p:IsDesktopBuild=false && cd ../ 
-        )
-      env:
-        GH_PKG_USER: ${{ secrets.GH_PKG_USER }} 
-        GH_PKG_TOKEN: ${{ secrets.GH_PKG_TOKEN }}          
-        
-    # Restore the application to populate the obj folder with RuntimeIdentifiers
-    - name: Build all Solutions
-      shell: cmd
-      run: |
-        SET _version=${{ github.event.inputs.version }}
-        for %%x in (Objects, ConnectorGSA, ConnectorRhino, ConnectorGrasshopper) do (
-          cd %%x && msbuild %%x.sln /p:Configuration=Release /p:WarningLevel=0 /p:IsDesktopBuild=false /p:AssemblyVersionNumber=%_version% /p:AssemblyInformationalVersion=%_version% /p:Version=%_version% && cd ../ 
-        )               
-        
-    - name: create Installer
+    - name: Analytics CLI - Compile CLI
+      run: msbuild analytics.sln /p:Configuration=Release 
+      working-directory: Installer/Analytics     
+
+    - name: Restore SpeckleConnectionManager
+      run: dotnet restore        
+      working-directory: Installer/ConnectionManager
+
+    - name: Build SpeckleConnectionManager and SpeckleConnectionManagerUI
+      run: dotnet build -c Release -p:Version=${{ github.event.inputs.version }}
+      working-directory: Installer/ConnectionManager
+
+    - name: Create Installer
       id: installer
       run: | 
-        iscc /dAppVersion="${{ steps.calculateTagVersion.outputs.tag }}"  speckle-v2-installer-gsarhinogh.iss
+        iscc /dAppVersion="${{ steps.calculateTagVersion.outputs.tag }}" speckle-v2-installer-connmanager.iss
         $filename = (ls *.exe).Name
-        echo "::set-output name=filename::$filename"          
-      working-directory: Installer          
-          
+        echo "::set-output name=filename::$filename"
+      env:
+        ENABLE_TELEMETRY_DOMAIN: arup     
+        POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}               
+      working-directory: Installer       
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '2.1.x'                          
-          
+        dotnet-version: '2.1.x'   
+
     - name: Install Azure Key Vault signtool
       run: dotnet tool install --global AzureSignTool --version 2.0.17
       env:
         GH_PKG_USER: ${{ secrets.GH_PKG_USER }} 
-        GH_PKG_TOKEN: ${{ secrets.GH_PKG_TOKEN }}  
+        GH_PKG_TOKEN: ${{ secrets.GH_PKG_TOKEN }}          
         
     # https://github.com/vcsjones/AzureSignTool
     - name: Sign Installer
@@ -129,35 +123,11 @@ jobs:
           --azure-key-vault-certificate "OasysCodeSigning" `
           --timestamp-rfc3161 "http://timestamp.digicert.com" `
           --verbose `
-          ${{ github.workspace }}\Installer\${{ steps.installer.outputs.filename }}           
-          
+          ${{ github.workspace }}\Installer\${{ steps.installer.outputs.filename }}
+
     - name: Upload a Build Artifact      
       uses: actions/upload-artifact@v2
       with:
         name: ${{ steps.installer.outputs.filename }}
         path: ./Installer/${{ steps.installer.outputs.filename }}
         retention-days: 1
-        
-    - name: Create Release
-      id: create-release
-      uses: actions/create-release@latest
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
-      with:
-        tag_name: ${{ steps.calculateTagVersion.outputs.tag }}
-        release_name: gsarhinogh/${{ steps.calculateTagVersion.outputs.tag }}
-        body: |
-          Automated release of Speckle v2 Connector for Oasys GSA 10.1, Rhino 6/7 and Grasshopper
-        draft: false
-        prerelease: true
-
-    - name: Upload Release Asset
-      id: upload-release-asset 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create-release.outputs.upload_url }}  
-        asset_path: ./Installer/${{ steps.installer.outputs.filename }}
-        asset_name: ${{ steps.installer.outputs.filename }}
-        asset_content_type: application/vnd.microsoft.portable-executable

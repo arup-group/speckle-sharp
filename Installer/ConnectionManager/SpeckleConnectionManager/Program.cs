@@ -129,6 +129,7 @@ namespace SpeckleConnectionManager
                     ";
 
           Console.WriteLine(connection.State);
+          content.isDefault = storedContent.isDefault;
 
           updateCommand.Parameters.AddWithValue("@hash", hash);
           updateCommand.Parameters.AddWithValue("@content", JsonSerializer.Serialize(content));

@@ -56,6 +56,43 @@ namespace Objects.Structural.Geometry
       this.orientationAngle = orientationAngle;
     }
 
+
+    [SchemaInfo("Element2D (from polyline)", "Creates a Speckle structural 2D element (based on a list of edge ie. external, geometry defining nodes)", "Structural", "Geometry")]
+    public Element2D(Polyline perimeter, Property2D property, MemberType memberType = MemberType.NotSet, List<Polyline> voids = null, double offset = 0, double orientationAngle = 0)
+    {
+      this.topology = GetNodesFromPolyline(perimeter);
+      this.property = property;
+      this.memberType = memberType;
+      this.offset = offset;
+      this.orientationAngle = orientationAngle;
+
+      var outlineLoops = new List<ICurve>() { perimeter };
+      if (voids != null)
+      {
+        var voidLoops = new List<List<Node>>() { };
+        foreach (var v in voids)
+        {
+          voidLoops.Add(GetNodesFromPolyline(v));
+          outlineLoops.Add(v);
+        }
+        this.voids = voidLoops;
+      }
+
+      this.outline = outlineLoops;
+    }
+
+    public static List<Node> GetNodesFromPolyline(Polyline outline)
+    {
+      if (outline == null)
+        return null;
+
+      var points = outline.GetPoints();
+      var nodesPoints = points.First() == points.Last() ? points.Take(points.Count - 1).ToList() : points;
+      var nodes = nodesPoints.Select(p => new Node(p, null, null, null, null, null, null)).ToList();
+      nodes.ForEach(n => n.units = outline.units);
+      return nodes;
+    }
+
     #region Obsolete
     [JsonIgnore, Obsolete("Use " + nameof(displayValue) + " instead")]
     public Mesh displayMesh

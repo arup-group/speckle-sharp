@@ -66,6 +66,7 @@ namespace SpeckleConnectionManagerUI.Services
       foreach (var entry in entries)
       {
         var content = entry.content;
+        var isDefault = entry.content.isDefault;
         var url = content.serverInfo.url;
         Console.WriteLine($"Auth token: {content.token}");
         client.DefaultRequestHeaders.Add("Authorization", $"Bearer {content.token}");
@@ -127,7 +128,7 @@ namespace SpeckleConnectionManagerUI.Services
         {
           token = tokens.token,
           refreshToken = tokens.refreshToken,
-          isDefault = false,
+          isDefault = isDefault,
           serverInfo = serverInfo,
           userInfo = userInfo
         };

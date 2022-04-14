@@ -734,6 +734,19 @@ public class Element2DSchemaComponent: CreateSchemaObjectBase {
 }
 
 // This is generated code:
+public class Element2D1SchemaComponent: CreateSchemaObjectBase {
+     
+    public Element2D1SchemaComponent(): base("Element2D (from polyline)", "Element2D (from polyline)", "Creates a Speckle structural 2D element (based on a list of edge ie. external, geometry defining nodes)", "Speckle 2 Structural", "Geometry") { }
+    
+    public override Guid ComponentGuid => new Guid("e56d73d9-2e14-2114-0de4-cbcc4d6cef3e");
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Geometry.Element2D.ctor(Objects.Geometry.Polyline,Objects.Structural.Properties.Property2D,Objects.Structural.Geometry.MemberType,System.Collections.Generic.List`1[Objects.Geometry.Polyline],System.Double,System.Double)","Objects.Structural.Geometry.Element2D");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
 public class Element3DSchemaComponent: CreateSchemaObjectBase {
      
     public Element3DSchemaComponent(): base("Element3D", "Element3D", "Creates a Speckle structural 3D element", "Speckle 2 Structural", "Geometry") { }
@@ -1319,6 +1332,19 @@ public class GSAMember2DSchemaComponent: CreateSchemaObjectBase {
 }
 
 // This is generated code:
+public class GSAMember2D1SchemaComponent: CreateSchemaObjectBase {
+     
+    public GSAMember2D1SchemaComponent(): base("GSAMember2D (from polyline)", "GSAMember2D (from polyline)", "Creates a Speckle structural 2D member for GSA", "Speckle 2 GSA", "Geometry") { }
+    
+    public override Guid ComponentGuid => new Guid("782e51ae-a3ba-89df-0150-076a456f7e71");
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAMember2D.ctor(Objects.Geometry.Polyline,Objects.Structural.Properties.Property2D,Objects.Structural.Geometry.MemberType2D,Objects.Structural.Geometry.AnalysisType2D,System.Collections.Generic.List`1[Objects.Geometry.Polyline],System.Double,System.Double,System.String,System.Nullable`1[System.Int32],System.Boolean)","Objects.Structural.GSA.Geometry.GSAMember2D");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
 public class GSANodeSchemaComponent: CreateSchemaObjectBase {
      
     public GSANodeSchemaComponent(): base("GSANode", "GSANode", "Creates a Speckle structural node for GSA", "Speckle 2 GSA", "Geometry") { }
@@ -1691,6 +1717,19 @@ public class Material1SchemaComponent: CreateSchemaObjectBase {
     
     public override void AddedToDocument(GH_Document document){
         SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Materials.Material.ctor(System.String,Objects.Structural.MaterialType,System.String,System.String,System.String,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double)","Objects.Structural.Materials.Material");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class ModelSchemaComponent: CreateSchemaObjectBase {
+     
+    public ModelSchemaComponent(): base("Model", "Model", "Creates a Speckle structural model object", "Speckle 2 Structural", "Analysis") { }
+    
+    public override Guid ComponentGuid => new Guid("af7f27db-7897-fcad-1839-3b5213188ef8");
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Analysis.Model.ctor(Objects.Structural.Analysis.ModelInfo,System.Collections.Generic.List`1[Speckle.Core.Models.Base],System.Collections.Generic.List`1[Speckle.Core.Models.Base],System.Collections.Generic.List`1[Speckle.Core.Models.Base],System.Collections.Generic.List`1[Speckle.Core.Models.Base],System.Collections.Generic.List`1[Speckle.Core.Models.Base],System.Collections.Generic.List`1[Speckle.Core.Models.Base])","Objects.Structural.Analysis.Model");
         base.AddedToDocument(document);
     }
 }

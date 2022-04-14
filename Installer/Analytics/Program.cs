@@ -138,7 +138,7 @@ namespace analytics
             {
               token = storedContent.token,
               refreshToken = storedContent.refreshToken,
-              isDefault = false,
+              isDefault = storedContent.isDefault,
               serverInfo = storedContent.serverInfo,
               userInfo = storedContent.userInfo
             };

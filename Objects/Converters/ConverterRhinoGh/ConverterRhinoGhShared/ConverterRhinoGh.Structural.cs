@@ -27,10 +27,9 @@ namespace Objects.Converter.RhinoGh
 {
   public partial class ConverterRhinoGh
   {
-    RH.Curve element1DToNative(Element1D element1d)
+    RH.Curve Element1DToNative(Element1D element1d)
     {
       return CurveToNative(element1d.baseLine);
     }
-
   }
 }

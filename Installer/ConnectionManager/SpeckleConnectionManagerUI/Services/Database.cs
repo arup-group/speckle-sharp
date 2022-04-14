@@ -37,7 +37,7 @@ namespace SpeckleConnectionManagerUI.Services
             };
 
       var connectedServerUrls = connectStatuses.Select(x => x.ServerUrl).ToList();
-      var connectedServerMaxIdentifier = connectStatuses.Select(x => x.Identifier).Max();
+      var connectedServerMaxIdentifier = connectedServerUrls.Count > 0 ? connectStatuses.Select(x => x.Identifier).Max() : 0;
 
       foreach (var defaultConnectStatus in defaultConnectStatuses)
       {
