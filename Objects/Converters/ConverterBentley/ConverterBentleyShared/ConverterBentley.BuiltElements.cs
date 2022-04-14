@@ -519,185 +519,7 @@ namespace Objects.Converter.Bentley
 
       return familyInstance;
     }
-
-    public Element RevitBeamToNative(RevitBeam beam)
-    {
-      if (beam.baseLine is Line baseLine)
-      {
-        DPoint3d start = Point3dToNative(baseLine.start);
-        DPoint3d end = Point3dToNative(baseLine.end);
-
-
-        //string type = revitColumn.type;
-
-        TFCatalogList datagroup = new TFCatalogList();
-        datagroup.Init("");
-        ITFCatalog catalog = datagroup as ITFCatalog;
-
-        ITFCatalogTypeList typeList;
-        catalog.GetAllCatalogTypesList(0, out typeList);
-
-        string family = beam.family;
-        string type = beam.type;
-
-        ITFCatalogItemList itemList;
-        //catalog.GetCatalogItemByNames(family, type, 0, out itemList);
-        //catalog.GetCatalogItemByNames("Beam", type, 0, out itemList);
-        catalog.GetCatalogItemByNames("Concrete Beam", type, 0, out itemList);
-
-        //catalog.GetCatalogItemsByTypeName(family, 0, out itemList);
-        //catalog.GetCatalogItemsByTypeName("Beam", 0, out itemList);
-
-        //catalog.GetCatalogItemByNames("Foundation | Concrete Pile", "ARP_Pile_-_Contiguous_Concrete_1500", 0, out itemList);
-        //catalog.GetCatalogItemsByTypeName("Foundation | Concrete Pile", 0, out itemList);
-
-        //catalog.GetCatalogItemByNames("Slab", "ARP_Slab_-_Foundation_Concrete_2000", 0, out itemList);
-        //catalog.GetCatalogItemByNames("Slab", "ARP_Slab_-_Floor_Concrete_600", 0, out itemList);
-        //catalog.GetCatalogItemsByTypeName("Slab", 0, out itemList);
-
-        TFLoadableList form = new TFLoadableList();
-
-
-        form.InitFromCatalogItem(TFdLoadableType.TFdLoadableTypeEnum_UserDefined, itemList, 0);
-
-        //form.SetWallType(TFdLoadableWallType.TFdLoadableWallType_Line, 0);
-        start.ScaleInPlace(1.0 / UoR);
-        end.ScaleInPlace(1.0 / UoR);
-        //form.SetEndPoints(ref start, ref opposite, 0);
-
-        Element element;
-
-        form.GetElementWritten(out element, Session.Instance.GetActiveDgnModelRef(), 0);
-
-        return element;
-      }
-      else
-      {
-        throw new SpeckleException("Only simple lines as base lines supported.");
-      }
-    }
-
-    public Element RevitColumnToNative(RevitColumn column)
-    {
-      if (column.baseLine is Line baseLine)
-      {
-        DPoint3d start = Point3dToNative(baseLine.start);
-        DPoint3d end = Point3dToNative(baseLine.end);
-
-
-        TFCatalogList datagroup = new TFCatalogList();
-        datagroup.Init("");
-        ITFCatalog catalog = datagroup as ITFCatalog;
-
-        ITFCatalogTypeList typeList;
-        catalog.GetAllCatalogTypesList(0, out typeList);
-
-        string family = column.family;
-        string type = column.type;
-
-        ITFCatalogItemList itemList;
-        catalog.GetCatalogItemByNames(family, type, 0, out itemList);
-
-        // if no catalog item is found, use a random one
-        if (itemList == null)
-          catalog.GetCatalogItemsByTypeName("Wall", 0, out itemList);
-
-
-
-
-
-
-
-        //string type = revitColumn.type;
-
-        //LineElement element = LineToNative(baseLine);
-
-
-        Element element = new CellHeaderElement(Model, "cell", new DPoint3d(), DMatrix3d.Identity, new List<Element>() { });
-
-        DPoint3d baseOrigin = new DPoint3d(0, 0, 0);
-        DPoint3d topOrigin = new DPoint3d(0, 0, 2);
-
-        DVector3d vectorX = new DVector3d(1, 1, 0);
-        DVector3d vectorY = new DVector3d(1, 1, 0);
-
-        double baseX = 5;
-        double baseY = 6;
-        double topX = 5;
-        double topY = 6;
-        DgnBoxDetail odata = new DgnBoxDetail(baseOrigin, topOrigin, vectorX, vectorY, baseX, baseY, topX, topY, true);
-        SolidPrimitive sample = SolidPrimitive.CreateDgnBox(odata);
-
-        element = DraftingElementSchema.ToElement(Model, sample, null);
-        //element.AddToModel();
-
-
-        return element;
-      }
-      else
-      {
-        throw new SpeckleException("Only lines as base lines supported.");
-      }
-    }
-
-    public Element RevitFloorToNative(RevitFloor floor)
-    {
-      DisplayableElement outline = CurveToNative(floor.outline);
-
-      TFPolyList polyList = new TFPolyList();
-      // tolerance is the maximum distance in UORs between the actual curve and the approximating vectors for curved elements
-      int foo = polyList.InitFromElement(outline, Tolerance * UoR, "0");
-      //foo = polyList.InitFromDescr(outline, Tolerance, "0");
-
-      // doesn´t seem to work, since area is 0
-      polyList.GetArea(0, out double area);
-
-      //foo = polyList.InitFromElement2(outline, 0, "0");
-      //polyList.GetArea(0, out area);
-
-      //Array points;
-      //polyList.InitFromPoints(points, "0");
-
-
-      Level level = floor.level;
-
-
-      TFCatalogList datagroup = new TFCatalogList();
-      datagroup.Init("");
-      ITFCatalog catalog = datagroup as ITFCatalog;
-
-      catalog.GetAllCatalogTypesList(0, out ITFCatalogTypeList typeList);
-
-      string family = floor.family;
-      string type = floor.type;
-
-      catalog.GetCatalogItemByNames(family, type, 0, out ITFCatalogItemList itemList);
-
-      // if no catalog item is found, use a random one
-      if (itemList == null)
-        catalog.GetCatalogItemsByTypeName("Slab", 0, out itemList);
-      if (itemList == null)
-        catalog.GetCatalogItemsByTypeName("Floor", 0, out itemList);
-
-      TFLoadableFloorList form = new TFLoadableFloorList();
-
-      form.InitFromCatalogItem(itemList, 0);
-      form.SetFloorType(TFdLoadableFloorType.TFdLoadableFloorType_SimpleFloor, 0); // floor type to verify
-
-      form.SetPoly(polyList, 0);
-      form.SetElevation(level.elevation, 0);
-
-      form.GetElementWritten(out Element element, Session.Instance.GetActiveDgnModelRef(), 0);
-
-
-      // alternative?
-      //TFFormRecipeSlabList recipe = new TFFormRecipeSlabList();
-
-
-
-      return element;
-    }
-
+    
     public Element RevitWallToNative(RevitWall wall)
     {
       if (wall.baseLine is Line baseLine)
@@ -922,7 +744,6 @@ namespace Objects.Converter.Bentley
         throw new SpeckleException("Wall geometry not supported!");
       }
 
-
       // sort short segments by z coordinate
       List<ICurve> sortedShortEdges = shortEdges.OrderBy(segment => ((Line)segment).start.z).ToList();
 
@@ -961,9 +782,6 @@ namespace Objects.Converter.Bentley
         }
         linesNotOutline.Add(line);
       }
-
-      //lines = RotateZ(lines, angle);
-
 
       // remove orphan lines
       int i = 0;
@@ -1006,81 +824,6 @@ namespace Objects.Converter.Bentley
           lines.Add(line1);
         i++;
       }
-
-      List<ICurve> voids = new List<ICurve>();
-      //while (lines.Count > 0)
-      //{
-      //  Polycurve opening = CreateClosedPolyCurve(linesNotOutline);
-      //  if (opening != null)
-      //    voids.Add(opening);
-      //}
-
-      // store opening as RevitWallOpening
-      // alternative: FamilyInstance with type = Opening
-      //wall.elements = new List<Base>();
-      //foreach (ICurve voidOutline in voids)
-      //{
-      //  RevitWallOpening opening = new RevitWallOpening();
-      //  opening.outline = voidOutline;
-      //  opening.units = u;
-      //  opening.host = wall;
-
-      //  wall.elements.Add(opening);
-      //}
-
-
-
-      //Dictionary<int, List<ICurve>> elevationMap = new Dictionary<int, List<ICurve>>();
-
-      // sort segments by segment.length
-      //List<ICurve> sortedSegments = segments.OrderBy(segment => segment.length).ToList();
-
-      //// drop long edges
-      //sortedSegments.RemoveRange(4, 8);
-
-      //foreach (ICurve segment in sortedSegments)
-      //{
-      //  Line line = (Line)segment;
-      //  Point start = line.start;
-      //  Point end = line.end;
-
-      //  double dx = Math.Abs(start.x - end.x);
-      //  double dy = Math.Abs(start.y - end.y);
-      //  double dz = Math.Abs(start.z - end.z);
-
-      //  // drop vertical edges
-      //  if (dx < epsilon && dy < epsilon)
-      //  {
-      //    // there should be none
-      //    continue;
-      //  }
-
-      //  if (dz > epsilon)
-      //  {
-      //    throw new SpeckleException("Wall geoemtry not supported!");
-      //  }
-      //  else
-      //  {
-      //    int currentElevation = (int)Math.Round(start.z / epsilon);
-      //    if (elevationMap.ContainsKey(currentElevation))
-      //    {
-      //      elevationMap[currentElevation].Add(line);
-      //    }
-      //    else
-      //    {
-      //      List<ICurve> lines = new List<ICurve>() { line };
-      //      elevationMap.Add(currentElevation, lines);
-      //    }
-      //  }
-      //}
-
-      //if (elevationMap.Count != 2)
-      //{
-      //  throw new SpeckleException("Inclined walls not supported!");
-      //}
-
-      // sort by elevations
-      //List<int> sortedElevations = elevationMap.Keys.OrderBy(lines => lines).ToList();
 
       Level level = CreateLevel(elevation, u);
       Level topLevel = CreateLevel(topElevation, u);
