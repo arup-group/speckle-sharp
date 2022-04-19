@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace ConnectorGSA
 {
   [JsonObject(MemberSerialization.OptIn)]
-  public class StreamState
+  public class StreamStateOld
   {
     private string branchName = "main";
     private Client _client;
@@ -54,12 +54,12 @@ namespace ConnectorGSA
 
     public string Name { get; internal set; }
 
-    public StreamState()
+    public StreamStateOld()
     {
 
     }
 
-    public bool Equals(StreamState other)
+    public bool Equals(StreamStateOld other)
     {
       if (Stream != null && other.Stream != null && Client != null && other.Client != null)
       {
@@ -72,7 +72,7 @@ namespace ConnectorGSA
     }
 
     [JsonConstructor]
-    public StreamState(string userId, string serverUrl)
+    public StreamStateOld(string userId, string serverUrl)
     {
       var account = AccountManager.GetAccounts().FirstOrDefault(a => a.userInfo.id == userId || a.id == userId);
 

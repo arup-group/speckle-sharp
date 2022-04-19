@@ -29,7 +29,7 @@ namespace ConverterGSA
   public partial class ConverterGSA : ISpeckleConverter
   {
     #region ISpeckleConverter props
-    public static string AppName = Applications.GSA;
+    public static string AppName = VersionedHostApplications.GSA;
     public string Description => "Default Speckle Kit for GSA";
 
     public string Name => nameof(ConverterGSA);
@@ -40,27 +40,27 @@ namespace ConverterGSA
 
     public Dictionary<string, string> Settings { get; private set; } = new Dictionary<string, string>();
 
-    private static SQLiteTransport MappingStorage = new SQLiteTransport(scope: "Mappings");
+    //private static SQLiteTransport MappingStorage = new SQLiteTransport(scope: "Mappings");
 
-    private bool _useMappings;
-    private bool UseMappings
-    {
-      get { return Settings.ContainsKey("section-mapping") && Settings["section-mapping"] != null; }
-    }
+    //private bool _useMappings;
+    //private bool UseMappings
+    //{
+    //  get { return Settings.ContainsKey("section-mapping") && Settings["section-mapping"] != null; }
+    //}
 
-    private Base _mappingData;
-    private Base MappingData
-    {
-      get 
-      {
-        if (_mappingData == null)
-        {
-          // get from settings
-          _mappingData = UseMappings ? GetMappingData() : null;
-        }
-        return _mappingData;
-      }
-    }
+    //private Base _mappingData;
+    //private Base MappingData
+    //{
+    //  get 
+    //  {
+    //    if (_mappingData == null)
+    //    {
+    //      // get from settings
+    //      _mappingData = UseMappings ? GetMappingData() : null;
+    //    }
+    //    return _mappingData;
+    //  }
+    //}
 
     public ProgressReport Report { get; private set; } = new ProgressReport();
 
@@ -788,76 +788,7 @@ namespace ConverterGSA
       throw new NotImplementedException();
     }
 
-    #region Section Mapping
 
-    private Dictionary<string, string> GetMappingFromProfileName(string name, string target = "gsa", bool isFraming = true)
-    {
-      Dictionary<string, string> mappingData = new Dictionary<string, string>();
-
-      var key = Settings["section-mapping"];
-      var hash = $"{key}-mappings";
-      var objString = MappingStorage.GetObject(hash);
-
-      var objBase = JsonConvert.DeserializeObject<Base>(objString);
-      var serializerV2 = new BaseObjectDeserializerV2();
-      var data = serializerV2.Deserialize(objString);
-
-      var mappingsList = ((List<object>)data["data"]).Select(m => m as Dictionary<string, object>).ToList();
-      var mappingDict = mappingsList.Select(m => m as Dictionary<string, object>).ToList();
-      var mapping = mappingDict.Where(x => (string)x["section"] == name).FirstOrDefault();
-      if (mapping != null && mapping.ContainsKey(target))
-      {
-        var targetSection = MappingData[target] as Base;
-        var sectionList = ((List<object>)targetSection["data"]).Select(m => m as Dictionary<string, object>).ToList();
-        var sectionDict = sectionList.Select(m => m as Dictionary<string, object>).ToList();
-        var section = sectionDict.Where(x => (long)x["key"] == (long)mapping[target]).FirstOrDefault();
-
-        foreach (var sectionParameter in section)
-        {
-          mappingData.Add(sectionParameter.Key, sectionParameter.Value.ToString());
-        }
-      }
-      else
-      {
-        return null;
-      }
-
-      return mappingData;
-    }
-
-    private Base GetMappingData()
-    {
-      var key = Settings["section-mapping"];
-      const string mappingsBranch = "mappings";
-      const string sectionBranchPrefix = "sections";
-
-      var mappingData = new Base();
-
-      var hashes = MappingStorage.GetAllHashes();
-      var matches = hashes.Where(h => h.Contains(key)).ToList();
-      foreach (var match in matches)
-      {
-        var objString = MappingStorage.GetObject(match);
-        var serializerV2 = new BaseObjectDeserializerV2();
-        var data = serializerV2.Deserialize(objString);
-
-        if (match.Contains($"{key}-{mappingsBranch}"))
-        {
-          mappingData[$"{mappingsBranch}"] = data;
-        }
-        else if (match.Contains(sectionBranchPrefix))
-        {
-          var name = match.Replace($"{key}-{sectionBranchPrefix}/", "");
-          mappingData[$"{name}"] = data;
-        }
-      }
-
-      Report.Log($"Using section mapping data from stream: {key}");
-
-      return mappingData;
-
-    }
-    #endregion
 
     #region private_classes
     internal class ToSpeckleResult

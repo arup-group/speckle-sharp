@@ -147,7 +147,7 @@ namespace ConnectorGSATests
       try
       {
         var sid = ((GsaProxy)Instance.GsaModel.Proxy).GetTopLevelSid();
-        var ss = JsonConvert.DeserializeObject<List<StreamState>>(sid);
+        var ss = JsonConvert.DeserializeObject<List<StreamStateOld>>(sid);
       }
       catch (Exception ex)
       {

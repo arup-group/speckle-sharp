@@ -13,6 +13,9 @@
   d:DesignWidth="400"
   mc:Ignorable="d">
 
+  <UserControl.Styles>
+    <StyleInclude Source="/Styles/ChipListBox.xaml" />
+  </UserControl.Styles>
   <Grid RowDefinitions="auto, auto">
 
     <Expander
@@ -97,6 +100,7 @@
             </DataTemplate>
           </ComboBox.ItemTemplate>
         </ComboBox>
+        
         <!--  FILTER INFO  -->
         <Grid
           Grid.Row="1"
@@ -104,11 +108,31 @@
           Margin="0,15">
           <ContentControl Content="{Binding #FilterCombo.SelectedItem.FilterView}" />
         </Grid>
-        <!--  ADVANCED SETTINGS  -->
-        <Button
+        
+        <Grid
           Grid.Row="2"
           Grid.ColumnSpan="4"
-          Margin="5"
+          Margin="0,15,0,15">
+          <TextBlock
+                  Grid.Column="1"
+                  Margin="0,0,0,30"
+                  Text="Layer to send:"
+                  TextTrimming="CharacterEllipsis" />
+          <StackPanel Grid.Column="2" VerticalAlignment="Center">
+            <ListBox
+              x:Name="ItemsListBox"
+              Margin="0,0,0,15"
+              Items="{Binding GSALayers}"
+              Selection="{Binding SelectedLayer}"
+              SelectionMode="Single, Toggle" />
+          </StackPanel>
+        </Grid>
+        
+        <!--  ADVANCED SETTINGS  -->
+        <Button
+          Grid.Row="3"
+          Grid.ColumnSpan="4"
+          Margin="0,90,0,15"
           HorizontalAlignment="Center"
           HorizontalContentAlignment="Center"
           assists:ShadowAssist.ShadowDepth="Depth0"
@@ -126,6 +150,7 @@
               TextTrimming="CharacterEllipsis" />
           </Grid>
         </Button>
+
 
       </Grid>
 

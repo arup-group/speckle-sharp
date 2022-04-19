@@ -175,6 +175,13 @@ namespace DesktopUI2.ViewModels
       get => Accounts != null && Accounts.Any();
     }
 
+
+    public bool HasGSAFile { get; set; }
+
+    public string FilePath { get; set; }
+
+    public string FileStatus { get; set; }
+
     #endregion
 
     public HomeViewModel(IScreen screen)
@@ -513,6 +520,52 @@ namespace DesktopUI2.ViewModels
         catch (Exception e)
         {
           Dialogs.ShowDialog("Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
+        }
+      }
+    }
+
+
+    public async void NewFileCommand()
+    {
+      try
+      {
+        Bindings.NewFile();
+        HasGSAFile = true;
+        //((GsaProxy)Speckle.GSA.API.Instance.GsaModel.Proxy).NewFile(true);
+
+        //ConnectorGSA.Commands.OpenFile(path, true);
+        //FilePath = path;
+        FileStatus = "new"; // GsaLoadedFileType.ExistingFile;
+      }
+      catch (Exception e)
+      {
+        Dialogs.ShowDialog("Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
+      }
+    }
+
+
+    public async void OpenFileCommand()
+    {
+      var dialog = new OpenFileDialog();
+      dialog.Filters.Add(new FileDialogFilter() { Name = "GSA Files", Extensions = { "gwb", "gwa" } });
+      var result = await dialog.ShowAsync(MainWindow.Instance);
+
+      if (result != null)
+      {
+        var path = result.FirstOrDefault();
+        if (!string.IsNullOrEmpty(path))
+        {
+          try
+          {
+            Bindings.OpenFile(path);
+            HasGSAFile = true;
+            FilePath = path;
+            FileStatus = "existing"; // GsaLoadedFileType.ExistingFile;
+          }
+          catch (Exception e)
+          {
+            Dialogs.ShowDialog("Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
+          }
         }
       }
     }

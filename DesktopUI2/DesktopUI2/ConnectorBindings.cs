@@ -21,6 +21,9 @@ namespace DesktopUI2
     public string ConnectorName =>
       System.Reflection.Assembly.GetAssembly(GetType()).GetNameAndVersion().Name;
 
+    public abstract string Layer { get; set; }
+    public abstract string Units { get; set; }
+
     //public List<StreamState> SavedStreamStates = new List<StreamState>();
 
     #region delegates
@@ -153,6 +156,9 @@ namespace DesktopUI2
     public abstract List<MenuItem> GetCustomStreamMenuItems();
 
     public abstract List<ISetting> GetSettings();
+
+    public abstract void NewFile();
+    public abstract void OpenFile(string filePath);
 
     #endregion
   }

@@ -256,17 +256,22 @@
                 </m:FloatingButton>
               </Grid>
             </m:ColorZone>
-
-
           </Grid>
         </Grid>
-
       </ScrollViewer>
-
     </Grid>
+
+    <TextBlock
+      Grid.Row="2"
+      Margin="0,120,0,18"
+      FontSize="14"
+      FontWeight="Medium"
+      Background="Pink"
+      Text="Current selection:" />
+
     <!--  SEND/RECEIVE  -->
     <TabControl
-      Grid.Row="2"
+      Grid.Row="3"
       Background="{DynamicResource MaterialDesignCardBackground}"
       SelectedIndex="{Binding IsReceiver}">
 

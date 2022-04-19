@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Speckle.GSA.API.GwaSchema;
 using Speckle.ConnectorGSA.Proxy.GwaParsers;
 using Speckle.GSA.API.CsvSchema;
+using DesktopUI2.ViewModels;
 
 namespace Speckle.ConnectorGSA.Proxy
 {
@@ -592,7 +593,7 @@ namespace Speckle.ConnectorGSA.Proxy
     }
 
     //Tuple: keyword | index | Application ID | GWA command | Set or Set At
-    public bool GetGwaData(GSALayer layer, IProgress<string> loggingProgress, out List<GsaRecord> records, IProgress<int> incrementProgress = null)
+    public bool GetGwaData(GSALayer layer, ProgressViewModel progress, out List<GsaRecord> records, IProgress<int> incrementProgress = null)
     {
       if (!InitialiseIfNecessary())
       {
@@ -677,9 +678,9 @@ namespace Speckle.ConnectorGSA.Proxy
                   {
                     retRecords.Add(parser.Record);
                   }
-                  else if (loggingProgress != null)
-                  {
-                    loggingProgress.Report(FormulateParsingErrorContext(parser.Record, schemaType.Name));
+                  else if (progress != null)
+                  {               
+                    progress.Report.LogOperationError(new Exception(FormulateParsingErrorContext(parser.Record, schemaType.Name)));
                   }
                 }
               }
@@ -800,9 +801,9 @@ namespace Speckle.ConnectorGSA.Proxy
                         }
                       }
                     }
-                    else if (loggingProgress != null)
+                    else if (progress != null)
                     {
-                      loggingProgress.Report(FormulateParsingErrorContext(parser.Record, schemaType.Name));
+                      progress.Report.LogOperationError(new Exception(FormulateParsingErrorContext(parser.Record, schemaType.Name)));
                     }
                   }
                 }
@@ -910,9 +911,9 @@ namespace Speckle.ConnectorGSA.Proxy
                     }
                   }
                 }
-                else if (loggingProgress != null)
+                else if (progress != null)
                 {
-                  loggingProgress.Report(FormulateParsingErrorContext(parser.Record, schemaType.Name));
+                  progress.Report.LogOperationError(new Exception(FormulateParsingErrorContext(parser.Record, schemaType.Name)));
                 }
               }
             }
@@ -1010,7 +1011,7 @@ namespace Speckle.ConnectorGSA.Proxy
 
     #region writing_gwa
 
-    public void WriteModel(List<GsaRecord> gsaRecords, IProgress<string> loggingProgress, GSALayer layer = GSALayer.Both)
+    public void WriteModel(List<GsaRecord> gsaRecords, ProgressViewModel progress, GSALayer layer = GSALayer.Both)
     {
       var parsersToUseBySchemaType = new Dictionary<Type, List<IGwaParser>>();
       foreach (var r in gsaRecords)
@@ -1052,8 +1053,8 @@ namespace Speckle.ConnectorGSA.Proxy
               }
               catch (Exception ex)
               {
-                loggingProgress.Report("Unable to generate GWA for " + t.Name 
-                  + (string.IsNullOrEmpty(op.Record.ApplicationId) ? "" : " with applicationID = " + op.Record.ApplicationId));
+                progress.Report.LogOperationError(new Exception("Unable to generate GWA for " + t.Name 
+                  + (string.IsNullOrEmpty(op.Record.ApplicationId) ? "" : " with applicationID = " + op.Record.ApplicationId)));
               }
             }
           }
@@ -1066,9 +1067,9 @@ namespace Speckle.ConnectorGSA.Proxy
       }
       catch (Exception ex)
       {
-        if (loggingProgress != null)
+        if (progress != null)
         {
-          loggingProgress.Report("Unable to write to the GSA model: " + ex.Message);
+          progress.Report.LogOperationError(new Exception("Unable to write to the GSA model: " + ex.Message));
         }
       }
     }

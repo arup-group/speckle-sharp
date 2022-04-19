@@ -192,6 +192,12 @@
     <Compile Update="Views\Filters\PropertyFilterView.xaml.cs">
       <DependentUpon>PropertyFilterView.xaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\Pages\NewOrOpenFileView.axaml.cs">
+      <DependentUpon>NewOrOpenFileView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Pages\StreamEditView - Copy.xaml.cs">
+      <DependentUpon>StreamEditView.xaml</DependentUpon>
+    </Compile>
     <Compile Update="Views\Pages\StreamEditView.xaml.cs">
       <DependentUpon>StreamEditView.xaml</DependentUpon>
     </Compile>

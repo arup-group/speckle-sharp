@@ -12,7 +12,7 @@ namespace ConnectorGSA.Models
     public StreamMethod StreamMethod { get; set; } = StreamMethod.Single;
     public StreamList StreamList { get; set; } = new StreamList();
 
-    protected List<StreamState> StreamStates = new List<StreamState>();
+    protected List<StreamStateOld> StreamStates = new List<StreamStateOld>();
 
     public double PollingRateMilliseconds { get; set; } = 2000;
     public TabBase(GSALayer defaultLayer)
@@ -42,7 +42,7 @@ namespace ConnectorGSA.Models
       return true;
     }
 
-    public bool RemoveStreamState(StreamState r)
+    public bool RemoveStreamState(StreamStateOld r)
     {
       var matching = StreamStates.Where(ssr => ssr.StreamId.Equals(r.StreamId, System.StringComparison.InvariantCultureIgnoreCase)).ToList();
       if (matching.Count > 0)

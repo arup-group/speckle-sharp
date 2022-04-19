@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Metadata;
+using Avalonia.Controls.Selection;
 using DesktopUI2.Models;
 using DesktopUI2.Models.Settings;
 using DesktopUI2.Views;
@@ -254,6 +255,28 @@ namespace DesktopUI2.ViewModels
       set => this.RaiseAndSetIfChanged(ref _previewImage, value);
     }
 
+    public List<string> GSALayers { get; set; } = new List<string> { "Design", "Analysis", "Both" };
+
+    public SelectionModel<string> SelectedLayer { get; }
+
+    public double CoincidentNodeAllowance { get; set; } = 10;
+
+    public List<string> Units { get; set; } = new List<string> { "Millimetres", "Metres", "Inches" };
+
+    //public SelectionModel<string> SelectedUnits { get; }
+
+
+    private string _selectedUnits = "Millimetres";
+    public string SelectedUnits
+    {
+      get => _selectedUnits;
+      set
+      {
+        this.RaiseAndSetIfChanged(ref _selectedUnits, value);
+        Bindings.Units = value;
+      }
+    }
+
     #endregion
 
     private string Url
@@ -287,6 +310,17 @@ namespace DesktopUI2.ViewModels
       //refresh stream, branches, filters etc
       Init();
     }
+
+    void SelectedLayerSelectionChanged(object sender, SelectionModelSelectionChangedEventArgs e)
+    {
+      Bindings.Layer = (string)e.SelectedItems.FirstOrDefault();
+    }
+
+    void SelectedUnitsSelectionChanged(object sender, SelectionModelSelectionChangedEventArgs e)
+    {
+      Bindings.Units = (string)e.SelectedItems.FirstOrDefault();
+    }
+
     public StreamViewModel(StreamState streamState, IScreen hostScreen, ICommand removeSavedStreamCommand)
     {
       StreamState = streamState;
@@ -323,6 +357,12 @@ namespace DesktopUI2.ViewModels
       updateTextTimer.Elapsed += UpdateTextTimer_Elapsed;
       updateTextTimer.Interval = TimeSpan.FromMinutes(1).TotalMilliseconds;
       updateTextTimer.Enabled = true;
+
+      SelectedLayer = new SelectionModel<string>();
+      SelectedLayer.SingleSelect = true;
+      SelectedLayer.Select(0);
+
+      SelectedLayer.SelectionChanged += SelectedLayerSelectionChanged;
     }
 
     private void Init()
@@ -771,7 +811,7 @@ namespace DesktopUI2.ViewModels
     }
 
 
-
+    [DependsOn(nameof(DesktopUI2.ViewModels.HomeViewModel.HasGSAFile))]
     [DependsOn(nameof(SelectedBranch))]
     [DependsOn(nameof(SelectedFilter))]
     [DependsOn(nameof(IsReceiver))]
@@ -780,6 +820,7 @@ namespace DesktopUI2.ViewModels
       return IsReady();
     }
 
+    [DependsOn(nameof(DesktopUI2.ViewModels.HomeViewModel.HasGSAFile))]
     [DependsOn(nameof(SelectedBranch))]
     [DependsOn(nameof(SelectedCommit))]
     [DependsOn(nameof(IsReceiver))]
@@ -793,6 +834,8 @@ namespace DesktopUI2.ViewModels
       if (NoAccess)
         return false;
       if (SelectedBranch == null)
+        return false;
+      if (!HomeViewModel.Instance.HasGSAFile)
         return false;
 
       if (!IsReceiver)

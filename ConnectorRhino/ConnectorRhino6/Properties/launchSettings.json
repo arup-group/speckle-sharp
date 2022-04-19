@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ConnectorRhino6": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Program Files\\Rhino 6\\System\\Rhino.exe"
+    }
+  }
+}
