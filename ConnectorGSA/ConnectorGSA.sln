@@ -31,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DesktopUI2", "..\DesktopUI2
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DesktopUI2.Launcher", "..\DesktopUI2\DesktopUI2.Launcher\DesktopUI2.Launcher.csproj", "{61FC8B36-7586-4D29-BC34-0EFB52A2DCB5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectorGSA2", "ConsoleApp1\ConnectorGSA2.csproj", "{D9E51925-DA3A-49BE-B728-6E8401E63EE1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConnectorGSA2", "ConnectorGSA2\ConnectorGSA2.csproj", "{8C36DDC3-B8B8-4FC5-A566-3220D3167A51}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -87,10 +87,10 @@ Global
 		{61FC8B36-7586-4D29-BC34-0EFB52A2DCB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61FC8B36-7586-4D29-BC34-0EFB52A2DCB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61FC8B36-7586-4D29-BC34-0EFB52A2DCB5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D9E51925-DA3A-49BE-B728-6E8401E63EE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D9E51925-DA3A-49BE-B728-6E8401E63EE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D9E51925-DA3A-49BE-B728-6E8401E63EE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D9E51925-DA3A-49BE-B728-6E8401E63EE1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C36DDC3-B8B8-4FC5-A566-3220D3167A51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C36DDC3-B8B8-4FC5-A566-3220D3167A51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C36DDC3-B8B8-4FC5-A566-3220D3167A51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C36DDC3-B8B8-4FC5-A566-3220D3167A51}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
