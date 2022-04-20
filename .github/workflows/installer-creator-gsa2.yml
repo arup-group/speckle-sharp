@@ -94,10 +94,16 @@ jobs:
     - name: ConnectorGSA2 - Restore NuGets
       run: dotnet restore        
       working-directory: ConnectorGSA/ConnectorGSA2  
-
+      env:
+        GH_PKG_USER: ${{ secrets.GH_PKG_USER }} 
+        GH_PKG_TOKEN: ${{ secrets.GH_PKG_TOKEN }}     
+        
     - name: ConnectorGSA2 - Compile
       run: dotnet build ConnectorGSA2.csproj --configuration Release
       working-directory: ConnectorGSA/ConnectorGSA2      
+      env:
+        GH_PKG_USER: ${{ secrets.GH_PKG_USER }} 
+        GH_PKG_TOKEN: ${{ secrets.GH_PKG_TOKEN }}     
         
     - name: create Installer
       id: installer
