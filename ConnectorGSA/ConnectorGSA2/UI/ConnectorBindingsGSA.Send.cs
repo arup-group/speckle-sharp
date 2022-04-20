@@ -225,18 +225,6 @@ namespace ConnectorGSA.UI
         progress.Report.LogOperationError(new Exception("Unable to send data to stream"));
       }
 
-      if (progress.Report.ConversionErrorsCount > 0 && progress.Report.OperationErrorsCount > 0)
-      {
-        foreach (var se in progress.Report.ConversionErrors)
-        {
-          progress.Report.LogConversionError(se);
-        }
-        foreach (var se in progress.Report.OperationErrors)
-        {
-          progress.Report.LogOperationError(se);
-        }
-      }
-
       duration = DateTime.Now - startTime;
       if (duration.Seconds > 0)
       {

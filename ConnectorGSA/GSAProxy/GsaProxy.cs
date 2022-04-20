@@ -14,6 +14,7 @@ using Speckle.GSA.API.GwaSchema;
 using Speckle.ConnectorGSA.Proxy.GwaParsers;
 using Speckle.GSA.API.CsvSchema;
 using DesktopUI2.ViewModels;
+using System.Collections.Concurrent;
 
 namespace Speckle.ConnectorGSA.Proxy
 {
@@ -601,6 +602,9 @@ namespace Speckle.ConnectorGSA.Proxy
         return false;
       }
 
+      var parseProgressDict = new ConcurrentDictionary<string, int>();
+      parseProgressDict["Parsing"] = 0;
+
       var retRecords = new List<GsaRecord>();
 
       foreach (var gen in nativeTypeDependencyGenerations[layer])
@@ -674,14 +678,18 @@ namespace Speckle.ConnectorGSA.Proxy
                 {
                   var schemaType = ktd.GetSchemaType(kw);
                   var parser = (IGwaParser)Activator.CreateInstance(ktd.GetParserType(schemaType));
-                  if (parser.FromGwa(gwa))
-                  {
-                    retRecords.Add(parser.Record);
-                  }
-                  else if (progress != null)
-                  {               
-                    progress.Report.LogOperationError(new Exception(FormulateParsingErrorContext(parser.Record, schemaType.Name)));
-                  }
+                if (parser.FromGwa(gwa))
+                {
+                  retRecords.Add(parser.Record);
+                  if(parser.Record.Index.HasValue) 
+                    progress.Report.Log($"Parsed GWA data for {schemaType.Name} at index: {parser.Record.Index.Value}");
+                  else
+                    progress.Report.Log($"Parsed GWA data for {schemaType.Name}");
+                }
+                else if (progress != null)
+                {
+                  progress.Report.LogOperationError(new Exception(FormulateParsingErrorContext(parser.Record, schemaType.Name)));
+                }
                 }
               }
             }
@@ -800,6 +808,10 @@ namespace Speckle.ConnectorGSA.Proxy
                           tempKeywordIndexCache[keyword.Value].Add(index.Value);
                         }
                       }
+                      if (parser.Record.Index.HasValue)
+                        progress.Report.Log($"Parsed GWA data for {schemaType.Name} at index: {parser.Record.Index.Value}");
+                      else
+                        progress.Report.Log($"Parsed GWA data for {schemaType.Name}");
                     }
                     else if (progress != null)
                     {
@@ -813,8 +825,11 @@ namespace Speckle.ConnectorGSA.Proxy
 
           if (incrementProgress != null)
           {
-            incrementProgress.Report(1);
+            incrementProgress.Report(1);            
           }
+
+          parseProgressDict["Parsing"]++;
+          progress.Update(parseProgressDict);
         }
         #endregion
 
@@ -910,6 +925,10 @@ namespace Speckle.ConnectorGSA.Proxy
                       tempKeywordIndexCache[setAtKeywords[i]].Add(j);
                     }
                   }
+                  if (parser.Record.Index.HasValue)
+                    progress.Report.Log($"Parsed GWA data for {schemaType.Name} at index: {parser.Record.Index.Value}");
+                  else
+                    progress.Report.Log($"Parsed GWA data for {schemaType.Name}");
                 }
                 else if (progress != null)
                 {
@@ -922,6 +941,8 @@ namespace Speckle.ConnectorGSA.Proxy
           {
             incrementProgress.Report(1);
           }
+          parseProgressDict["Parsing"]++;
+          progress.Update(parseProgressDict);
         }
         #endregion
       }
@@ -932,7 +953,7 @@ namespace Speckle.ConnectorGSA.Proxy
 
     private string FormulateParsingErrorContext(GsaRecord gsaRecord, string typeName)
     {
-      var errorMessage = "Parsing the GWA data for: " + typeName;
+      var errorMessage = "Error parsing the GWA data for: " + typeName;
       if (gsaRecord != null)
       {
         if (gsaRecord.Index.HasValue)

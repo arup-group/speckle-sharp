@@ -276,11 +276,10 @@ namespace ConnectorGSA
         {
           progress.Report.LogOperationError(e);
           progress.CancellationTokenSource.Cancel();
-        }
+        },
+        disposeTransports: true
         );
 
-      if (progress.Report.OperationErrorsCount != 0)
-        return null;
 
       if (progress.CancellationTokenSource.Token.IsCancellationRequested)
         return null;
@@ -631,7 +630,7 @@ namespace ConnectorGSA
       
       try
       {
-        if (((GsaProxy)Instance.GsaModel.Proxy).GetGwaData(Instance.GsaModel.StreamLayer, progress, out var records))
+        if (((GsaProxy)Instance.GsaModel.Proxy).GetGwaData(Instance.GsaModel.StreamLayer, progress, out var records, null))
         {
           for (int i = 0; i < records.Count(); i++)
           {

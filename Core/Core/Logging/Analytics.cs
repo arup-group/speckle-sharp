@@ -95,7 +95,7 @@ namespace Speckle.Core.Logging
     public static void TrackEvent(Account account, Events eventName, Dictionary<string, object> customProperties = null)
     {
       if (account == null)
-        TrackEvent("unknown", "https://speckle.xyz/", eventName, customProperties);
+        TrackEvent("unknown", "https://v2.speckle.arup.com/", eventName, customProperties);
       else
         TrackEvent(account.userInfo.email, account.serverInfo.url, eventName, customProperties);
     }
