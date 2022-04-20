@@ -33,6 +33,10 @@ namespace Objects.Structural.Analysis
     [Chunkable(1000)]
     public List<Base> materials { get; set; } //materials list
 
+    [DetachProperty]
+    [Chunkable(250)]
+    public List<Base> generalData { get; set; }
+
     // add "other" - ex. assemblies, grid lines, grid planes, storeys etc? alignment/paths?
 
     public string layerDescription { get; set; } //design layer, analysis layer
