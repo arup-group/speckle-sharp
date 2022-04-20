@@ -459,7 +459,11 @@ namespace Objects.Converter.Bentley
       p3 = RotateZ(p3, angle);
       p4 = RotateZ(p4, angle);
 
-      Polyline outline = new Polyline(new List<double>() { p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, p3.x, p3.y, p3.z, p4.x, p4.y, p4.z }, u)
+      // Revit expects 5 points for some reason, see https://github.com/specklesystems/speckle-sharp/issues/1200
+      Point p5 = new Point(p1.x + width, p1.y, p1.z);
+      p5 = RotateZ(p5, angle);
+
+      Polyline outline = new Polyline(new List<double>() { p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, p3.x, p3.y, p3.z, p4.x, p4.y, p4.z, p5.x, p5.y, p5.z }, u)
       {
         closed = true
       };
