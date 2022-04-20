@@ -520,56 +520,87 @@ namespace Objects.Converter.Bentley
       return familyInstance;
     }
 
-    public Element RevitBeamToNative(RevitBeam beam)
+    public object RevitBeamToNative(RevitBeam beam)
     {
       if (beam.baseLine is Line baseLine)
       {
         DPoint3d start = Point3dToNative(baseLine.start);
         DPoint3d end = Point3dToNative(baseLine.end);
 
-
-        //string type = revitColumn.type;
+        string family = beam.family;
+        string type = beam.type;
 
         TFCatalogList datagroup = new TFCatalogList();
         datagroup.Init("");
         ITFCatalog catalog = datagroup as ITFCatalog;
 
-        ITFCatalogTypeList typeList;
-        catalog.GetAllCatalogTypesList(0, out typeList);
+        catalog.GetCatalogItemByNames(family, type, 0, out ITFCatalogItemList catalogItemList);
 
-        string family = beam.family;
-        string type = beam.type;
+        // if no catalog item is found, use Concrete Beam..
+        if (catalogItemList == null)
+          catalog.GetCatalogItemsByTypeName("Concrete Beam", 0, out catalogItemList);
 
-        ITFCatalogItemList itemList;
-        //catalog.GetCatalogItemByNames(family, type, 0, out itemList);
-        //catalog.GetCatalogItemByNames("Beam", type, 0, out itemList);
-        catalog.GetCatalogItemByNames("Concrete Beam", type, 0, out itemList);
+        // ..otherwise a random one
+        if (catalogItemList == null)
+        {
+          ITFCatalogList tfCatalog = new TFCatalogList();
+          tfCatalog.AsTFCatalog.GetAllCatalogTypesList(0, out ITFCatalogTypeList catalogTypes);
 
-        //catalog.GetCatalogItemsByTypeName(family, 0, out itemList);
-        //catalog.GetCatalogItemsByTypeName("Beam", 0, out itemList);
+          while (catalogTypes != null)
+          {
+            catalogTypes.AsTFCatalogType.ImplementsInterface("StructuralFramingCommon", 0, out bool isStructuralCatalog);
+            if (isStructuralCatalog)
+            {
+              catalogTypes.AsTFCatalogType.GetName(0, out string catalogTypeName);
+              tfCatalog.AsTFCatalog.GetCatalogItemsByTypeName(catalogTypeName, 0, out catalogItemList);
 
-        //catalog.GetCatalogItemByNames("Foundation | Concrete Pile", "ARP_Pile_-_Contiguous_Concrete_1500", 0, out itemList);
-        //catalog.GetCatalogItemsByTypeName("Foundation | Concrete Pile", 0, out itemList);
+              //while (catalogItemList != null)
+              //{
+              //catalogItemList.GetNext("", out catalogItemList);
+              //}
+            }
+            catalogTypes.GetNext("", out catalogTypes);
+          }
+        }
 
-        //catalog.GetCatalogItemByNames("Slab", "ARP_Slab_-_Foundation_Concrete_2000", 0, out itemList);
-        //catalog.GetCatalogItemByNames("Slab", "ARP_Slab_-_Floor_Concrete_600", 0, out itemList);
-        //catalog.GetCatalogItemsByTypeName("Slab", 0, out itemList);
 
-        TFLoadableList form = new TFLoadableList();
+        // sections
+        ISTFSectionList sectionList = new STFSectionList();
+        sectionList.InitFromTFSecMgrByType(STFdSectionType.tfdSectionType_WideFlange, "");
+        ISTFSectionList nextSection;
+        sectionList.GetNext("", out nextSection);
+        if (nextSection != null)
+          sectionList = nextSection;
 
 
-        form.InitFromCatalogItem(TFdLoadableType.TFdLoadableTypeEnum_UserDefined, itemList, 0);
 
-        //form.SetWallType(TFdLoadableWallType.TFdLoadableWallType_Line, 0);
+
+        ITFCatalogItem catalogItem = catalogItemList.AsTFCatalogItem;
+        ISTFSection section = sectionList.AsSTFSection;
+
+
+
+
+        STFLinearMemberList linearMemberList = new STFLinearMemberList();
+        ISTFLinearMember linearMember = linearMemberList.AsSTFLinearMember;
+        linearMember.InitFromCatalogItem(catalogItem, 0);
+
+        string sectionName;
+        section.GetName(0, out sectionName);
+        linearMember.SetSectionName(sectionName, 0);
+
         start.ScaleInPlace(1.0 / UoR);
         end.ScaleInPlace(1.0 / UoR);
-        //form.SetEndPoints(ref start, ref opposite, 0);
 
-        Element element;
+        linearMember.SetPQPoints(ref start, ref end, 0);
 
-        form.GetElementWritten(out element, Session.Instance.GetActiveDgnModelRef(), 0);
 
-        return element;
+
+        linearMember.AddToDgnExt(Model, false, 0);
+
+
+
+        return linearMember;
       }
       else
       {

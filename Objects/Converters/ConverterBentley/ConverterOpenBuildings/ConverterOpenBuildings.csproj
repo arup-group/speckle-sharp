@@ -36,6 +36,11 @@
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
+    <Reference Include="Bentley.Building.Structural.Api">
+      <HintPath>$(ProgramW6432)\Bentley\OpenBuildings CONNECT Edition\OpenBuildingsDesigner\Assemblies\Bentley.Building.Structural.Api.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
     <Reference Include="Bentley.EC.Persistence3, Version=1.0.0.0, Culture=neutral, PublicKeyToken=4bf6c96a266e58d4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(ProgramW6432)\Bentley\MicroStation CONNECT Edition\MicroStation\Assemblies\ECFramework\Bentley.EC.Persistence3.dll</HintPath>

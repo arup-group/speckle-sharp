@@ -50,6 +50,9 @@
     <Reference Include="Bentley.Building.Api">
       <HintPath>$(ProgramW6432)\Bentley\OpenBuildings CONNECT Edition\OpenBuildingsDesigner\Assemblies\Bentley.Building.Api.dll</HintPath>
     </Reference>
+    <Reference Include="Bentley.Building.Structural.Api">
+      <HintPath>$(ProgramW6432)\Bentley\OpenBuildings CONNECT Edition\OpenBuildingsDesigner\Assemblies\Bentley.Building.Structural.Api.dll</HintPath>
+    </Reference>
     <Reference Include="Bentley.DgnDisplayNet, Version=1.0.0.0, Culture=neutral, PublicKeyToken=9bfed12b64a9b7df, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(ProgramW6432)\Bentley\OpenBuildings CONNECT Edition\OpenBuildingsDesigner\Bentley.DgnDisplayNet.dll</HintPath>
