@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using Speckle.Core.Transports;
 using Speckle.Core.Serialisation;
 using Speckle.Newtonsoft.Json;
+using Objects.Structural.ApplicationSpecific.GSA.GeneralData;
 
 namespace ConverterGSA
 {
@@ -116,7 +117,8 @@ namespace ConverterGSA
       Loads,
       Restraints,
       Properties,
-      Materials
+      Materials,
+      GeneralData
     }
 
     private static List<ModelAspect> modelAspectValues = Enum.GetValues(typeof(ModelAspect)).Cast<ModelAspect>().ToList();
@@ -138,7 +140,8 @@ namespace ConverterGSA
       { ModelAspect.Restraints, new List<Type>() { typeof(Objects.Structural.Geometry.Restraint) } },
       { ModelAspect.Properties, new List<Type>()
         { typeof(GSAProperty1D), typeof(GSAProperty2D), typeof(SectionProfile), typeof(PropertyMass), typeof(PropertySpring), typeof(PropertyDamper), typeof(Property3D) } },
-      { ModelAspect.Materials, new List<Type>() { typeof(GSAMaterial), typeof(GSAConcrete), typeof(GSASteel) } }
+      { ModelAspect.Materials, new List<Type>() { typeof(GSAMaterial), typeof(GSAConcrete), typeof(GSASteel) } },
+      { ModelAspect.GeneralData, new List<Type>() { typeof(GSAList)} }
     };
     #endregion
 
@@ -769,6 +772,16 @@ namespace ConverterGSA
           }
           model.materials.AddRange(objsByType[sType]);
         }
+        if (modelGroups[ModelAspect.GeneralData].Contains(sType))
+        {
+          if (model.generalData == null)
+          {
+            model.generalData = new List<Base>();
+          }
+
+          model.generalData.AddRange(objsByType[sType]);
+        }
+
         numObjs += objsByType[sType].Count();
       }
       return (numObjs > 0);
