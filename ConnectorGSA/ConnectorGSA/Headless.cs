@@ -226,7 +226,7 @@ namespace ConnectorGSA
         return false;
       }
 
-      var streamStates = new List<StreamState>();
+      var streamStates = new List<StreamStateOld>();
       bool cliResult = false;
       if (sendReceive == SendReceive.Receive)
       {
@@ -244,7 +244,7 @@ namespace ConnectorGSA
 
           foreach (var streamId in streamIds)
           {
-            var streamState = new StreamState(userInfo.id, RestApi)
+            var streamState = new StreamStateOld(userInfo.id, RestApi)
             {
               Stream = new Speckle.Core.Api.Stream() { id = streamId },
               IsReceiving = true
@@ -338,7 +338,7 @@ namespace ConnectorGSA
 
 
           var stream = NewStream(client, "GSA data", "GSA data").Result;
-          var streamState = new StreamState(userInfo.id, RestApi) { Stream = stream, IsSending = true };
+          var streamState = new StreamStateOld(userInfo.id, RestApi) { Stream = stream, IsSending = true };
           streamStates.Add(streamState);
 
           var serverTransport = new ServerTransport(account, streamState.Stream.id);

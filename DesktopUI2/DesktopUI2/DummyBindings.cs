@@ -346,5 +346,20 @@ namespace DesktopUI2
     {
       //done!
     }
+
+    public override void NewFile()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override void OpenFile(string filePath)
+    {
+      throw new NotImplementedException();
+    }
+
+    public override string Layer { get; set; }
+
+    public override string Units { get; set; }
+
   }
 }

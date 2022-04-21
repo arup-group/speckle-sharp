@@ -11,7 +11,7 @@ using System.Text;
 
 namespace DesktopUI2.ViewModels
 {
-  public class SettingViewModel : ReactiveObject
+  public class SettingsViewModel : ReactiveObject
   {
     private ISetting _setting;
 
@@ -40,7 +40,7 @@ namespace DesktopUI2.ViewModels
       }
     }
 
-    public SettingViewModel(ISetting setting)
+    public SettingsViewModel(ISetting setting)
     {
       Setting = setting;
       SettingView = setting.View;

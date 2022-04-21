@@ -88,7 +88,7 @@
     <Compile Include="Models\Tabs\TabBase.cs" />
     <Compile Include="Models\Tabs\TabCoordinator.cs" />
     <Compile Include="StatusEventArgs.cs" />
-    <Compile Include="StreamState.cs" />
+    <Compile Include="StreamStateOld.cs" />
     <Compile Include="Utilities\DelegateCommand.cs" />
     <Compile Include="Utilities\EnterKeyDownEventTrigger.cs" />
     <Compile Include="Utilities\EnumConverter.cs" />
@@ -167,9 +167,6 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf">
       <Version>1.1.37</Version>
-    </PackageReference>
-    <PackageReference Include="Newtonsoft.Json">
-      <Version>13.0.1</Version>
     </PackageReference>
     <PackageReference Include="Serilog">
       <Version>2.10.0</Version>

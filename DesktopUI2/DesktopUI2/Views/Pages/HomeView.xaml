@@ -233,8 +233,51 @@
       IsVisible="{Binding HasAccounts}"
       RowDefinitions="auto,auto, auto,auto, *">
 
+      <!--  NEW/OPEN FILE  -->
+      <Grid
+        Grid.Row="0"
+        Margin="0,0,0,10"
+        ColumnDefinitions="*,*">
+        <Button
+          Margin="0,0,7,0"
+          Classes="Flat"
+          Command="{Binding NewFileCommand}">
+          <Grid Margin="0" ColumnDefinitions="auto,*">
+            <icons:MaterialIcon VerticalAlignment="Center" Kind="Create" />
+            <TextBlock
+              Grid.Column="1"
+              Margin="8,0"
+              Padding="0"
+              VerticalAlignment="Center"
+              Text="New File"
+              TextTrimming="CharacterEllipsis" />
+          </Grid>
+        </Button>
+        <Button
+          Grid.Column="1"
+          Margin="7,0,0,0"
+          Classes="Flat"
+          Command="{Binding OpenFileCommand}">
+          <Grid ColumnDefinitions="auto,*">
+            <icons:MaterialIcon VerticalAlignment="Center" Kind="FileEditOutline" />
+            <TextBlock
+              Grid.Column="1"
+              Margin="8,0"
+              VerticalAlignment="Center"
+              Text="Open File"
+              TextTrimming="CharacterEllipsis" />
+          </Grid>
+        </Button>
+      </Grid>
+      <Grid
+        Grid.Row="2"
+        Margin="0,10,0,0"
+        IsVisible="{Binding InProgress}">
+        <ProgressBar IsIndeterminate="True" />
+      </Grid>
+
       <!--  SEARCH STREAMS  -->
-      <Grid Grid.Row="0" Margin="0">
+      <Grid Grid.Row="1" Margin="0">
         <m:Card Padding="0">
           <TextBox
             Margin="0"
@@ -265,7 +308,7 @@
 
       <!--  CREATE/ADD STREAMS  -->
       <Grid
-        Grid.Row="1"
+        Grid.Row="2"
         Margin="0,15,0,0"
         ColumnDefinitions="*,*">
         <Button
@@ -308,7 +351,7 @@
 
 
       <ScrollViewer
-        Grid.Row="4"
+        Grid.Row="5"
         Padding="0,0,13,5"
         IsEnabled="{Binding InProgress, Converter={x:Static BoolConverters.Not}, FallbackValue=True}">
         <StackPanel Margin="5" Orientation="Vertical">

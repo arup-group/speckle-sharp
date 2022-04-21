@@ -176,8 +176,8 @@ namespace ConnectorGSA.ViewModels
 
     private readonly Progress<double> percentageProgress = new Progress<double>();
     private readonly Progress<MessageEventArgs> loggingProgress = new Progress<MessageEventArgs>();
-    private readonly Progress<StreamState> streamCreationProgress = new Progress<StreamState>();
-    private readonly Progress<StreamState> streamDeletionProgress = new Progress<StreamState>();
+    private readonly Progress<StreamStateOld> streamCreationProgress = new Progress<StreamStateOld>();
+    private readonly Progress<StreamStateOld> streamDeletionProgress = new Progress<StreamStateOld>();
     private readonly Progress<string> statusProgress = new Progress<string>();
     private List<DelegateCommandBase> cmds; //Filled in using Reflection and used in bulk updating of CanExecute bindings
 
@@ -340,7 +340,7 @@ namespace ConnectorGSA.ViewModels
             var account = ((GsaModel)Instance.GsaModel).Account;
 
             Coordinator.ReceiverTab.StreamList.StreamListItems.Add(new StreamListItem(p, null));
-            Coordinator.ReceiverTab.ReceiverStreamStates.Add(new StreamState(account.userInfo.id, account.serverInfo.url) 
+            Coordinator.ReceiverTab.ReceiverStreamStates.Add(new StreamStateOld(account.userInfo.id, account.serverInfo.url) 
               { 
                 Stream = new Speckle.Core.Api.Stream() { id = p }, 
                 IsReceiving = true 
@@ -541,7 +541,7 @@ namespace ConnectorGSA.ViewModels
 
     #region progress_fns
 
-    private void ProcessStreamCreationProgress(object sender, StreamState r)
+    private void ProcessStreamCreationProgress(object sender, StreamStateOld r)
     {
       //This is only releveant for sending since no streams are created when receiving
       if (!Coordinator.SenderTab.StreamList.StreamListItems.Any(s => s.StreamId.Equals(r.StreamId, StringComparison.InvariantCultureIgnoreCase)))
@@ -552,7 +552,7 @@ namespace ConnectorGSA.ViewModels
       }
     }
 
-    private void ProcessStreamDeletionProgress(object sender, StreamState r)
+    private void ProcessStreamDeletionProgress(object sender, StreamStateOld r)
     {
       //This is only releveant for sending since no streams are deleted when receiving
       var matching = Coordinator.SenderTab.StreamList.StreamListItems.Where(sli => sli.StreamId.Equals(r.StreamId, StringComparison.InvariantCultureIgnoreCase)).ToList();

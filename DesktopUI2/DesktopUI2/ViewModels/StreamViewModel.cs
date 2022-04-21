@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Metadata;
+using Avalonia.Controls.Selection;
 using DesktopUI2.Models;
 using DesktopUI2.Models.Settings;
 using DesktopUI2.Views;
@@ -23,6 +24,7 @@ using System.Reactive;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Stream = Speckle.Core.Api.Stream;
+using DesktopUI2.Views.Windows.Dialogs;
 
 namespace DesktopUI2.ViewModels
 {
@@ -254,6 +256,28 @@ namespace DesktopUI2.ViewModels
       set => this.RaiseAndSetIfChanged(ref _previewImage, value);
     }
 
+    public List<string> GSALayers { get; set; } = new List<string> { "Design", "Analysis", "Both" };
+
+    public SelectionModel<string> SelectedLayer { get; }
+
+    public double CoincidentNodeAllowance { get; set; } = 10;
+
+    public List<string> Units { get; set; } = new List<string> { "Millimetres", "Metres", "Inches" };
+
+    //public SelectionModel<string> SelectedUnits { get; }
+
+
+    private string _selectedUnits = "Millimetres";
+    public string SelectedUnits
+    {
+      get => _selectedUnits;
+      set
+      {
+        this.RaiseAndSetIfChanged(ref _selectedUnits, value);
+        Bindings.Units = value;
+      }
+    }
+
     #endregion
 
     private string Url
@@ -287,6 +311,17 @@ namespace DesktopUI2.ViewModels
       //refresh stream, branches, filters etc
       Init();
     }
+
+    void SelectedLayerSelectionChanged(object sender, SelectionModelSelectionChangedEventArgs e)
+    {
+      Bindings.Layer = (string)e.SelectedItems.FirstOrDefault();
+    }
+
+    void SelectedUnitsSelectionChanged(object sender, SelectionModelSelectionChangedEventArgs e)
+    {
+      Bindings.Units = (string)e.SelectedItems.FirstOrDefault();
+    }
+
     public StreamViewModel(StreamState streamState, IScreen hostScreen, ICommand removeSavedStreamCommand)
     {
       StreamState = streamState;
@@ -323,6 +358,12 @@ namespace DesktopUI2.ViewModels
       updateTextTimer.Elapsed += UpdateTextTimer_Elapsed;
       updateTextTimer.Interval = TimeSpan.FromMinutes(1).TotalMilliseconds;
       updateTextTimer.Enabled = true;
+
+      SelectedLayer = new SelectionModel<string>();
+      SelectedLayer.SingleSelect = true;
+      SelectedLayer.Select(0);
+
+      SelectedLayer.SelectionChanged += SelectedLayerSelectionChanged;
     }
 
     private void Init()
@@ -576,7 +617,14 @@ namespace DesktopUI2.ViewModels
       HomeViewModel.Instance.AddSavedStream(this);
 
       Reset();
+      Progress.ProgressTitle = "Sending to Speckle 🚀";
       Progress.IsProgressing = true;
+
+      var dialog = new QuickOpsDialog();
+      dialog.DataContext = Progress;
+      dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+      dialog.ShowDialog(MainWindow.Instance);
+
       var commitId = await Task.Run(() => Bindings.SendStream(StreamState, Progress));
       Progress.IsProgressing = false;
 
@@ -587,7 +635,8 @@ namespace DesktopUI2.ViewModels
 
         Notification = $"Sent successfully, view online";
         NotificationUrl = $"{StreamState.ServerUrl}/streams/{StreamState.StreamId}/commits/{commitId}";
-      }
+      } else
+        dialog.Close();
 
       if (Progress.Report.ConversionErrorsCount > 0 || Progress.Report.OperationErrorsCount > 0)
         ShowReport = true;
@@ -602,7 +651,15 @@ namespace DesktopUI2.ViewModels
       HomeViewModel.Instance.AddSavedStream(this);
 
       Reset();
+
+      Progress.ProgressTitle = "Receiving from Speckle 🚀";
       Progress.IsProgressing = true;
+
+      var dialog = new QuickOpsDialog();
+      dialog.DataContext = Progress;
+      dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+      dialog.ShowDialog(MainWindow.Instance);
+
       await Task.Run(() => Bindings.ReceiveStream(StreamState, Progress));
       Progress.IsProgressing = false;
 
@@ -611,6 +668,8 @@ namespace DesktopUI2.ViewModels
         LastUsed = DateTime.Now.ToString();
         Analytics.TrackEvent(StreamState.Client.Account, Analytics.Events.Receive);
       }
+      else
+        dialog.Close(); // if user cancelled close automatically
 
       if (Progress.Report.ConversionErrorsCount > 0 || Progress.Report.OperationErrorsCount > 0)
         ShowReport = true;
@@ -771,7 +830,7 @@ namespace DesktopUI2.ViewModels
     }
 
 
-
+    [DependsOn(nameof(DesktopUI2.ViewModels.HomeViewModel.HasGSAFile))]
     [DependsOn(nameof(SelectedBranch))]
     [DependsOn(nameof(SelectedFilter))]
     [DependsOn(nameof(IsReceiver))]
@@ -780,6 +839,7 @@ namespace DesktopUI2.ViewModels
       return IsReady();
     }
 
+    [DependsOn(nameof(DesktopUI2.ViewModels.HomeViewModel.HasGSAFile))]
     [DependsOn(nameof(SelectedBranch))]
     [DependsOn(nameof(SelectedCommit))]
     [DependsOn(nameof(IsReceiver))]
@@ -793,6 +853,8 @@ namespace DesktopUI2.ViewModels
       if (NoAccess)
         return false;
       if (SelectedBranch == null)
+        return false;
+      if (!HomeViewModel.Instance.HasGSAFile)
         return false;
 
       if (!IsReceiver)

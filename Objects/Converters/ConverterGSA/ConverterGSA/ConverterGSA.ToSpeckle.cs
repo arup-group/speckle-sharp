@@ -184,6 +184,8 @@ namespace ConverterGSA
       if (gsaNode.MassPropertyIndex.IsIndex()) speckleNode.massProperty = GetPropertyMassFromIndex(gsaNode.MassPropertyIndex.Value);
       if (gsaNode.SpringPropertyIndex.IsIndex()) speckleNode.springProperty = GetPropertySpringFromIndex(gsaNode.SpringPropertyIndex.Value);
 
+      Report.Log($"Converted Node {speckleNode.nativeId}");
+
       if (GsaNodeResultToSpeckle(gsaNode.Index.Value, speckleNode, out var speckleResults))
       {
         return new ToSpeckleResult(layerAgnosticObject: speckleNode, resultObjects: speckleResults.Select(i => (Base)i));
@@ -343,6 +345,8 @@ namespace ConverterGSA
       //SpeckleObject:
       //  public string units
 
+      Report.Log($"Converted Element1D {speckleElement1d.nativeId}");
+
       return speckleElement1d;
     }
 
@@ -381,6 +385,8 @@ namespace ConverterGSA
       if (gsaEl.Index.IsIndex()) speckleElement2d.applicationId = Instance.GsaModel.Cache.GetApplicationId<GsaEl>(gsaEl.Index.Value);
       if (gsaEl.PropertyIndex.IsIndex()) speckleElement2d.property = GetProperty2dFromIndex(gsaEl.PropertyIndex.Value);
       if (gsaEl.ParentIndex.IsIndex()) speckleElement2d.parent = GetMemberFromIndex(gsaEl.ParentIndex.Value);
+
+      Report.Log($"Converted Element2D {speckleElement2d.nativeId}");
 
       return speckleElement2d;
 
@@ -528,6 +534,8 @@ namespace ConverterGSA
       {
         speckleMember1d["PointRestraints"] = gsaMemb.PointRestraints.Select(s => new RestraintDefinition() { All = s.All, Index = s.Index, Restraint = s.Restraint }).ToList();
       }
+
+      Report.Log($"Converted Member 1D {speckleMember1d.nativeId}");
 
       return speckleMember1d;
 
@@ -771,6 +779,8 @@ namespace ConverterGSA
       };
       if (gsaLoadCase.Index.IsIndex()) speckleLoadCase.applicationId = Instance.GsaModel.Cache.GetApplicationId<GsaLoadCase>(gsaLoadCase.Index.Value);
       if (gsaLoadCase.Source.IsIndex()) speckleLoadCase.group = gsaLoadCase.Source.ToString();
+
+      Report.Log($"Converted Load Case {speckleLoadCase.nativeId}");
 
       return new ToSpeckleResult(speckleLoadCase);
     }
@@ -1538,6 +1548,8 @@ namespace ConverterGSA
       {
         speckleProperty1D.profile = fns[gsaSectionComp.ProfileGroup](gsaSectionComp.ProfileDetails);
       }
+
+      Report.Log($"Converted Section Property {speckleProperty1D.nativeId}");
 
       return new ToSpeckleResult(speckleProperty1D);
       //TODO:
