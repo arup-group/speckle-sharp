@@ -83,8 +83,8 @@ namespace ConnectorGSA.Launcher
 
     private static void AppMain(Application app, string[] args)
     {
-      var viewModel = new MainWindowViewModel(Bindings);
-      MainWindow = new MainWindow { DataContext = viewModel };
+      var viewModel = new MainWindowViewModelStandalone(Bindings);
+      MainWindow = new MainWindowStandalone { DataContext = viewModel };
       MainWindow.Closed += SpeckleWindowClosed;
       MainWindow.Closing += SpeckleWindowClosed;
       app.Run(MainWindow);

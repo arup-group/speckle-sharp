@@ -17,7 +17,7 @@ using Speckle.Newtonsoft.Json;
 
 namespace ConnectorGSA.UI
 {
-  public partial class ConnectorBindingsGSA : ConnectorBindings
+  public partial class ConnectorBindingsGSA : ConnectorBindingsStandalone
   {
     public override List<string> GetSelectedObjects()
     {
@@ -44,19 +44,19 @@ namespace ConnectorGSA.UI
         switch (filter.Slug)
         {
           case "manual":
-            selection.Add("all");
+            selection.Add("everything");
             return selection;
 
           case "all":
-            selection.Add("all");
+            selection.Add("everything");
             return selection;
 
           case "type":
-            selection.Add("all");
+            selection.Add("everything");
             return selection;
 
           case "layer":
-            selection.Add("all");
+            selection.Add("everything");
             return selection;
         }
       }

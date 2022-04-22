@@ -287,7 +287,7 @@ namespace ConnectorGSA
           //The cache is filled with natives
           if (Instance.GsaModel.Cache.GetNatives(out var gsaRecords))
           {
-            ((GsaProxy)Instance.GsaModel.Proxy).WriteModel(gsaRecords, null, Instance.GsaModel.StreamLayer);
+            ((GsaProxy)Instance.GsaModel.Proxy).WriteModel(gsaRecords, new Progress<string>(), Instance.GsaModel.StreamLayer);
           }
 
           Console.WriteLine("Receiving complete!");

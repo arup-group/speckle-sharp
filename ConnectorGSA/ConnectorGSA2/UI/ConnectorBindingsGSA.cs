@@ -18,7 +18,7 @@ using Speckle.GSA.API;
 
 namespace ConnectorGSA.UI
 {
-  public partial class ConnectorBindingsGSA : ConnectorBindings
+  public partial class ConnectorBindingsGSA : ConnectorBindingsStandalone
   {
     public GsaModel Model; //{ get => Instance.GsaModel; }
 

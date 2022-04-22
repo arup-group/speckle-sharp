@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace DesktopUI2
 {
-  public class DummyBindings : ConnectorBindings
+  public class DummyBindingsStandalone : ConnectorBindingsStandalone
   {
     Random rnd = new Random();
 
@@ -346,6 +346,20 @@ namespace DesktopUI2
     {
       //done!
     }
+
+    public override void NewFile()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override void OpenFile(string filePath)
+    {
+      throw new NotImplementedException();
+    }
+
+    public override string Layer { get; set; }
+
+    public override string Units { get; set; }
 
   }
 }
