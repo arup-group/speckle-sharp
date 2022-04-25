@@ -60,12 +60,12 @@ namespace Speckle.ConnectorGSA.Proxy
 
     //These are the exceptions to the rule that, in GSA, all records that relate to each table (i.e. the set with mutually-exclusive indices) have the same keyword
     public static Dictionary<GwaKeyword, GwaKeyword[]> IrregularKeywordGroups = new Dictionary<GwaKeyword, GwaKeyword[]> {
-      { 
-        GwaKeyword.LOAD_BEAM, 
-        new GwaKeyword[] 
-        { 
-          GwaKeyword.LOAD_BEAM_POINT, GwaKeyword.LOAD_BEAM_UDL, GwaKeyword.LOAD_BEAM_LINE, GwaKeyword.LOAD_BEAM_PATCH, GwaKeyword.LOAD_BEAM_TRILIN 
-        } 
+      {
+        GwaKeyword.LOAD_BEAM,
+        new GwaKeyword[]
+        {
+          GwaKeyword.LOAD_BEAM_POINT, GwaKeyword.LOAD_BEAM_UDL, GwaKeyword.LOAD_BEAM_LINE, GwaKeyword.LOAD_BEAM_PATCH, GwaKeyword.LOAD_BEAM_TRILIN
+        }
       }
     };
 
@@ -216,7 +216,7 @@ namespace Speckle.ConnectorGSA.Proxy
       {
         return false;
       }
-      lock(syncLock)
+      lock (syncLock)
       {
         if (GSAObject != null)
         {
@@ -239,7 +239,7 @@ namespace Speckle.ConnectorGSA.Proxy
               .Split(new char[] { '\n' })[0]
               .Split(new char[] { GwaDelimiter }, StringSplitOptions.RemoveEmptyEntries)[1]);
         }
-        catch 
+        catch
         {
         }
 
@@ -288,7 +288,7 @@ namespace Speckle.ConnectorGSA.Proxy
     /// </summary>
     public void Close()
     {
-      lock(syncLock)
+      lock (syncLock)
       {
         try
         {
@@ -385,7 +385,7 @@ namespace Speckle.ConnectorGSA.Proxy
       try
       {
         object result;
-        lock(syncLock)
+        lock (syncLock)
         {
           result = GSAObject.GwaCommand(string.Join(GwaDelimiter.ToString(), new[] { "GET", "LIST", list }));
         }
@@ -402,7 +402,7 @@ namespace Speckle.ConnectorGSA.Proxy
       {
         try
         {
-          lock(syncLock)
+          lock (syncLock)
           {
             GSAObject.EntitiesInList("\"" + list + "\"", (GsaEntity)type, out int[] itemTemp);
             return (itemTemp == null) ? new List<int>() : itemTemp.ToList();
@@ -432,6 +432,27 @@ namespace Speckle.ConnectorGSA.Proxy
       return (entities != null && entities.Count() > 0)
         ? entities.ToList()
         : new List<int>();
+    }
+
+    public void ParseListDefinitionParameter(string parameter, out string prefix, out int index)
+    {
+      var indexString = "";
+      prefix = "";
+
+      foreach (var ch in parameter.ToCharArray())
+      {
+        if (Char.IsDigit(ch))
+        {
+          indexString += ch;
+        }
+
+        else
+        {
+          prefix += ch;
+        }
+      }
+
+      index = Convert.ToInt32(indexString);
     }
     #endregion
 
@@ -593,6 +614,56 @@ namespace Speckle.ConnectorGSA.Proxy
       return "";
     }
 
+
+    public bool GetGwaListData(GSALayer layer, out List<GsaList> records)
+    {
+      if (!InitialiseIfNecessary())
+      {
+        records = null;
+        return false;
+      }
+
+      var retRecords = new List<GsaList>();
+
+      var kw = GwaKeyword.LIST;
+
+      var newCommand = $"GET_ALL\t{kw}";
+
+      string[] gwaLines;
+
+      try
+      {
+        lock (syncLock)
+        {
+          gwaLines = ((string)GSAObject.GwaCommand(newCommand)).Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        }
+      }
+      catch
+      {
+        gwaLines = new string[0];
+      }
+
+      foreach(var gwa in gwaLines)
+      {
+
+      var ktd = typeInfo[layer][typeInfoIndicesByKeyword[layer][kw]];
+
+        if (ktd != null)
+        {
+          var schemaType = ktd.GetSchemaType(kw);
+          var parser = (IGwaParser)Activator.CreateInstance(ktd.GetParserType(schemaType));
+          if (parser.FromGwa(gwa))
+          {
+            retRecords.Add((GsaList)parser.Record);
+          }
+        }
+      }
+
+      records = retRecords;
+
+      return true;
+    } 
+    
     //Tuple: keyword | index | Application ID | GWA command | Set or Set At
     public bool GetGwaData(GSALayer layer, ProgressViewModel progress, out List<GsaRecord> records, IProgress<int> incrementProgress = null)
     {

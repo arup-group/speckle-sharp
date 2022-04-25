@@ -155,7 +155,7 @@ namespace ConnectorGSA.UI
       List<Base> objs = null;
       try
       {
-        objs = Commands.ConvertToSpeckle(converter);
+        objs = Commands.ConvertToSpeckle(converter, selectedObjects);
       }
       catch (Exception ex)
       {

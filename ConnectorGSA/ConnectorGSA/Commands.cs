@@ -58,7 +58,9 @@ namespace ConnectorGSA
         {
           streamsForAccount = await client.StreamsGet(50);  //Undocumented limitation servers cannot seem to return more than 50 items
         }
+#pragma warning disable CS0168 // The variable 'ex' is declared but never used
         catch (Exception ex)
+#pragma warning restore CS0168 // The variable 'ex' is declared but never used
         {
           loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, "Unable to get stream list"));
         }
@@ -164,7 +166,9 @@ namespace ConnectorGSA
       {
         allSs = JsonConvert.DeserializeObject<List<StreamStateOld>>(sid);
       }
+#pragma warning disable CS0168 // The variable 'ex' is declared but never used
       catch (JsonException ex)
+#pragma warning restore CS0168 // The variable 'ex' is declared but never used
       {
         //Could not deserialise, probably because it has a v1-format of stream information.  In this case, ignore the info
 
@@ -530,7 +534,9 @@ namespace ConnectorGSA
       //The cache is filled with natives
       if (Instance.GsaModel.Cache.GetNatives(out var gsaRecords))
       {
-        ((GsaProxy)Instance.GsaModel.Proxy).WriteModel(gsaRecords, proxyLoggingProgress);
+#pragma warning disable CS0012 // The type 'ProgressViewModel' is defined in an assembly that is not referenced. You must add a reference to assembly 'DesktopUI2, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+        //((GsaProxy)Instance.GsaModel.Proxy).WriteModel(gsaRecords, proxyLoggingProgress);
+#pragma warning restore CS0012 // The type 'ProgressViewModel' is defined in an assembly that is not referenced. You must add a reference to assembly 'DesktopUI2, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
       }
 
       percentageProgress.Report(100);
@@ -621,16 +627,18 @@ namespace ConnectorGSA
 
       try
       {
-        if (((GsaProxy)Instance.GsaModel.Proxy).GetGwaData(Instance.GsaModel.StreamLayer, gwaLoggingProgress, out var records))
-        {
-          for (int i = 0; i < records.Count(); i++)
-          {
-            if (!Instance.GsaModel.Cache.Upsert(records[i]))
-            {
-              errored.Add(i, records[i]);
-            }
-          }
-        }
+#pragma warning disable CS0012 // The type 'ProgressViewModel' is defined in an assembly that is not referenced. You must add a reference to assembly 'DesktopUI2, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+//        if (((GsaProxy)Instance.GsaModel.Proxy).GetGwaData(Instance.GsaModel.StreamLayer, gwaLoggingProgress, out var records))
+//#pragma warning restore CS0012 // The type 'ProgressViewModel' is defined in an assembly that is not referenced. You must add a reference to assembly 'DesktopUI2, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+//        {
+//          for (int i = 0; i < records.Count(); i++)
+//          {
+//            if (!Instance.GsaModel.Cache.Upsert(records[i]))
+//            {
+//              errored.Add(i, records[i]);
+//            }
+//          }
+//        }
         return true;
       }
       catch
@@ -714,7 +722,9 @@ namespace ConnectorGSA
       return objects;
     }
 
+#pragma warning disable CS1998 // This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread.
     internal static async Task<List<StreamStateOld>> GetStreamList(TabCoordinator coordinator, SpeckleAccountForUI account, Progress<MessageEventArgs> loggingProgress)
+#pragma warning restore CS1998 // This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread.
     {
       return new List<StreamStateOld>();
     }
@@ -832,7 +842,9 @@ namespace ConnectorGSA
       return changed;
     }
 
+#pragma warning disable CS1998 // This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread.
     internal static async Task<bool> CloneStream(TabCoordinator coordinator, string streamId, Progress<MessageEventArgs> loggingProgress)
+#pragma warning restore CS1998 // This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread.
     {
       var messenger = new ProgressMessenger(loggingProgress);
 
@@ -852,7 +864,9 @@ namespace ConnectorGSA
     private static async Task<bool> Send(TabCoordinator coordinator, StreamStateOld ss, IProgress<MessageEventArgs> loggingProgress, IProgress<string> statusProgress, IProgress<double> percentageProgress)
     {
       var kit = KitManager.GetDefaultKit();
+#pragma warning disable CS0618 // 'Applications' is obsolete: 'Use VersionedHostApplications or HostApplications instead.'
       var converter = kit.LoadConverter(Applications.GSA);
+#pragma warning restore CS0618 // 'Applications' is obsolete: 'Use VersionedHostApplications or HostApplications instead.'
       var account = ((GsaModel)Instance.GsaModel).Account;
       var percentage = 0;
       var perecentageProgressLock = new object();
@@ -964,7 +978,9 @@ namespace ConnectorGSA
       {
         objs = Commands.ConvertToSpeckle(converter);
       }
+#pragma warning disable CS0168 // The variable 'ex' is declared but never used
       catch (Exception ex)
+#pragma warning restore CS0168 // The variable 'ex' is declared but never used
       {
 
       }
@@ -1115,7 +1131,9 @@ namespace ConnectorGSA
         return await client.StreamGet(streamId);
 
       }
+#pragma warning disable CS0168 // The variable 'e' is declared but never used
       catch (Exception e)
+#pragma warning restore CS0168 // The variable 'e' is declared but never used
       {
         try
         {

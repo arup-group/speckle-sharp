@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31424.327
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectorGSA", "ConnectorGSA\ConnectorGSA.csproj", "{1BA03BE5-F893-46A3-B569-4FAB87F0B60E}"
 EndProject
@@ -40,7 +40,6 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{1BA03BE5-F893-46A3-B569-4FAB87F0B60E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1BA03BE5-F893-46A3-B569-4FAB87F0B60E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1BA03BE5-F893-46A3-B569-4FAB87F0B60E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1BA03BE5-F893-46A3-B569-4FAB87F0B60E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B17705B9-0D8F-41C8-A868-D46EF3E45E40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

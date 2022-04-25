@@ -303,7 +303,7 @@ namespace ConnectorGSA
           Commands.LoadDataFromFile(null, Instance.GsaModel.ResultGroups, Instance.GsaModel.ResultTypes, Instance.GsaModel.ResultCases); //Ensure all nodes
 
           Console.WriteLine($"Converting...");
-          var objs = Commands.ConvertToSpeckle(converter);
+          var objs = Commands.ConvertToSpeckle(converter, new List<string>());
 
           objs.Reverse();
 
