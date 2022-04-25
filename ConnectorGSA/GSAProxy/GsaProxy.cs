@@ -433,6 +433,27 @@ namespace Speckle.ConnectorGSA.Proxy
         ? entities.ToList()
         : new List<int>();
     }
+
+    public void ParseListDefinitionParameter(string parameter, out string prefix, out int index)
+    {
+      var indexString = "";
+      prefix = "";
+
+      foreach (var ch in parameter.ToCharArray())
+      {
+        if (Char.IsDigit(ch))
+        {
+          indexString += ch;
+        }
+
+        else
+        {
+          prefix += ch;
+        }
+      }
+
+      index = Convert.ToInt32(indexString);
+    }
     #endregion
 
     #region type_dependency_tree
@@ -593,6 +614,56 @@ namespace Speckle.ConnectorGSA.Proxy
       return "";
     }
 
+
+    public bool GetGwaListData(GSALayer layer, out List<GsaList> records)
+    {
+      if (!InitialiseIfNecessary())
+      {
+        records = null;
+        return false;
+      }
+
+      var retRecords = new List<GsaList>();
+
+      var kw = GwaKeyword.LIST;
+
+      var newCommand = $"GET_ALL\t{kw}";
+
+      string[] gwaLines;
+
+      try
+      {
+        lock (syncLock)
+        {
+          gwaLines = ((string)GSAObject.GwaCommand(newCommand)).Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        }
+      }
+      catch
+      {
+        gwaLines = new string[0];
+      }
+
+      foreach(var gwa in gwaLines)
+      {
+
+      var ktd = typeInfo[layer][typeInfoIndicesByKeyword[layer][kw]];
+
+        if (ktd != null)
+        {
+          var schemaType = ktd.GetSchemaType(kw);
+          var parser = (IGwaParser)Activator.CreateInstance(ktd.GetParserType(schemaType));
+          if (parser.FromGwa(gwa))
+          {
+            retRecords.Add((GsaList)parser.Record);
+          }
+        }
+      }
+
+      records = retRecords;
+
+      return true;
+    } 
+    
     //Tuple: keyword | index | Application ID | GWA command | Set or Set At
     public bool GetGwaData(GSALayer layer, IProgress<string> loggingProgress, out List<GsaRecord> records, IProgress<int> incrementProgress = null)
     {

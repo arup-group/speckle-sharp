@@ -117,5 +117,6 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
       index = Convert.ToInt32(indexString);
     }
     #endregion
+
   }
 }
