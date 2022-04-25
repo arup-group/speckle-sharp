@@ -47,7 +47,7 @@ namespace ConnectorGSA.UI
         //new ListSelectionFilter { Slug ="type", Name = "Type", Icon = "Category", Values = types, Description ="Selects all objects belonging to the specified categories."},
         new ListSelectionFilter { Slug ="list", Name = "List", Icon = "LayersTriple", Values = listNames, Description ="Selects all objects belonging to the specified list."},
         //new ListSelectionFilterStandalone { Slug ="list", Name = "List", Icon = "LayersTriple", Values = listNames, Description ="Selects all objects belonging to the specified list."},
-        new ManualSelectionFilter()
+        //new ManualSelectionFilter()
       };
     }
 
