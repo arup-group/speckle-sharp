@@ -10,6 +10,6 @@ namespace Speckle.GSA.API.GwaSchema
   {
     public string Name { get => name; set { name = value; } }
     public string Type;
-    public List<string> Definition;
+    public List<int> Definition;
   }
 }
