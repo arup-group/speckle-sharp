@@ -270,7 +270,7 @@ namespace ConnectorGSA
       // Send elements by list selection
       else
       {
-        if (!Instance.GsaModel.Cache.GetFilteredNativesByList(out gsaRecords, selectionFilterObjects))
+        if (!Instance.GsaModel.Cache.GetNativesFilteredByList(out gsaRecords, selectionFilterObjects))
         {
           return null;
         }

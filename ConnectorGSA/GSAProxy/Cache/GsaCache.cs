@@ -1,4 +1,5 @@
-﻿using Speckle.GSA.API;
+﻿using ConverterGSA;
+using Speckle.GSA.API;
 using Speckle.GSA.API.GwaSchema;
 using System;
 using System.Collections.Generic;
@@ -329,24 +330,293 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
       return true;
     }
 
-    public bool GetFilteredNativesByList(out List<GsaRecord> gsaRecords, List<string> filterSelections)
+    public bool GetNativesFilteredByList(out List<GsaRecord> gsaRecords, List<string> filterSelections)
     {
-      var listRecords = new List<GsaRecord>();
+      var records = new List<GsaRecord>();
+      var listRecords = new List<GsaList>();
 
       lock (cacheLock)
       {
-        var filteredRecords = records.Where(rec => rec.GsaRecord.GetType() == typeof(GsaList)).Select(rec => (GsaList)rec.GsaRecord);
+        GetNatives<GsaList>(out records);
 
-        foreach (var filterSelection in filterSelections)
+        listRecords = records.Cast<GsaList>().ToList();
+
+        foreach (var listRecord in listRecords)
         {
-          listRecords.AddRange(filteredRecords.Where(fr => fr.Name == filterSelection));
+          var precendentRecords = new List<GsaRecord>();
+
+          switch (listRecord.Type.ToUpper())
+          {
+            case "MEMBER":
+              GetPrecedentNatives<GsaMemb>(listRecord.Definition, out precendentRecords);
+              break;
+            case "ELEMENT":
+              GetPrecedentNatives<GsaEl>(listRecord.Definition, out precendentRecords);
+              break;
+            case "NODE":
+              GetPrecedentNatives<GsaNode>(listRecord.Definition, out precendentRecords);
+              break;
+            case "CASE":
+              GetPrecedentNatives<GsaLoadCase>(listRecord.Definition, out precendentRecords);
+              break;
+            default:
+              break;
+          }
+          records.AddRange(precendentRecords);
         }
       }
-      gsaRecords = listRecords;
+      gsaRecords = records;
       return true;
 
     }
     
+    public bool GetPrecedentNatives<T>(List<int> recordIndices, out List<GsaRecord> precendentRecords)
+    {
+      var t = typeof(T);
+
+      var records = new List<GsaRecord>();
+
+      foreach (var index in recordIndices)
+      {
+        if (t == typeof(GsaMemb))
+        {
+          GetNative<GsaMemb>(index, out var memberRecord);
+          if (!records.Contains(memberRecord))
+            records.Add(memberRecord);
+
+          
+          var gsaMemb = (GsaMemb)memberRecord;
+
+
+          // Get members precedents:
+
+          if (gsaMemb.Is1dMember())
+          {
+            // Nodes
+            if (gsaMemb.NodeIndices.Count >= 2)
+            {
+              foreach (var node in gsaMemb.NodeIndices)
+              {
+                GetNative<GsaNode>(node, out var nodeRecord);
+
+                if (!records.Contains(nodeRecord))
+                  records.Add(nodeRecord);
+              }
+            }
+
+            // Orientation node
+            if (gsaMemb.OrientationNodeIndex.IsIndex())
+            {
+              GetNative<GsaNode>(gsaMemb.OrientationNodeIndex.Value, out var nodeRecord);
+              if (!records.Contains(nodeRecord)) 
+                records.Add(nodeRecord);
+            }
+
+            // Section
+            if (gsaMemb.PropertyIndex.IsIndex())
+            {
+              GetNative<GsaSection>(gsaMemb.PropertyIndex.Value, out var propertyRecord);
+              if (!records.Contains(propertyRecord))
+                records.Add(propertyRecord);
+            }
+          }
+
+          else if (gsaMemb.Is2dMember())
+          {
+            // Nodes
+            if (gsaMemb.NodeIndices.Count >= 3)
+            {
+              foreach (var node in gsaMemb.NodeIndices)
+              {
+                GetNative<GsaNode>(node, out var nodeRecord);
+                if (!records.Contains(nodeRecord))
+                  records.Add(nodeRecord);
+              }
+            }
+            
+            // Void nodes
+            if (gsaMemb.Voids.HasValues())
+            {
+              foreach (var vd in gsaMemb.Voids)
+              {
+                foreach(var node in vd)
+                {
+                  GetNative<GsaNode>(node, out var nodeRecord);
+                  if (!records.Contains(nodeRecord))
+                    records.Add(nodeRecord);
+                }
+              }
+            }
+
+            // Polyline nodes
+            if (gsaMemb.Polylines.HasValues())
+            {
+              foreach (var polyline in gsaMemb.Polylines)
+              {
+                foreach (var node in polyline)
+                {
+                  GetNative<GsaNode>(node, out var nodeRecord);
+                  if (!records.Contains(nodeRecord))
+                    records.Add(nodeRecord);
+                }
+              }
+            }
+
+            // Property
+            if (gsaMemb.PropertyIndex.IsIndex())
+            {
+              GetNative<GsaProp2d>(gsaMemb.PropertyIndex.Value, out var propertyRecord);
+              if (!records.Contains(propertyRecord))
+                records.Add(propertyRecord);
+            }
+          }
+
+        }
+
+        else if (t == typeof(GsaEl))
+        {
+          GetNative<GsaEl>(index, out var elementRecord);
+
+          if (!records.Contains(elementRecord))
+            records.Add(elementRecord);
+
+
+          var gsaEl = (GsaEl)elementRecord;
+
+          // Get element precedents:
+          if (gsaEl.Is1dElement())
+          {
+            if (gsaEl.NodeIndices.Count >= 2)
+            {
+              foreach (var node in gsaEl.NodeIndices)
+              {
+                GetNative<GsaNode>(node, out var nodeRecord);
+
+                if (!records.Contains(nodeRecord))
+                  records.Add(nodeRecord);
+              }
+            }
+
+            // Orientation node
+            if (gsaEl.OrientationNodeIndex.IsIndex())
+            {
+              GetNative<GsaNode>(gsaEl.OrientationNodeIndex.Value, out var nodeRecord);
+              if (!records.Contains(nodeRecord))
+                records.Add(nodeRecord);
+            }
+
+            // Section
+            if (gsaEl.PropertyIndex.IsIndex())
+            {
+              GetNative<GsaSection>(gsaEl.PropertyIndex.Value, out var propertyRecord);
+              if (!records.Contains(propertyRecord))
+                records.Add(propertyRecord);
+            }
+
+            // Parent member
+            if (gsaEl.ParentIndex.IsIndex())
+            {
+              GetNative<GsaMemb>(gsaEl.ParentIndex.Value, out var memberRecord);
+              if (!records.Contains(memberRecord))
+                records.Add(memberRecord);
+
+              memberRecord = (GsaMemb)memberRecord;
+
+              // Drills down recursively to hit typeof(GsaMemb) base case
+              GetPrecedentNatives<GsaMemb>(new List<int>() { memberRecord.Index.Value }, out var embeddedMemberRecords);
+
+              var uniqueRecords = embeddedMemberRecords.Where(rec => !records.Contains(rec)).ToList();
+
+              records.AddRange(uniqueRecords);
+            }
+          }
+
+          else if (gsaEl.Is2dElement())
+          {
+            // Nodes
+            if (gsaEl.NodeIndices.Count >= 3)
+            {
+              foreach (var node in gsaEl.NodeIndices)
+              {
+                GetNative<GsaNode>(node, out var nodeRecord);
+                if (!records.Contains(nodeRecord))
+                  records.Add(nodeRecord);
+              }
+            }
+
+            // Property
+            if (gsaEl.PropertyIndex.IsIndex())
+            {
+              GetNative<GsaProp2d>(gsaEl.PropertyIndex.Value, out var propertyRecord);
+              if (!records.Contains(propertyRecord))
+                records.Add(propertyRecord);
+            }
+
+            // Parent member
+            if (gsaEl.ParentIndex.IsIndex())
+            {
+              GetNative<GsaMemb>(gsaEl.ParentIndex.Value, out var memberRecord);
+              if (!records.Contains(memberRecord))
+                records.Add(memberRecord);
+
+              memberRecord = (GsaMemb)memberRecord;
+
+              // Drills down recursively to hit typeof(GsaMemb) base case
+              GetPrecedentNatives<GsaMemb>(new List<int>() { memberRecord.Index.Value }, out var embeddedMemberRecords);
+
+              var uniqueRecords = embeddedMemberRecords.Where(rec => !records.Contains(rec)).ToList();
+
+              records.AddRange(uniqueRecords);
+            }
+          }
+
+        }
+
+        else if (t == typeof(GsaNode))
+        {
+          GetNative<GsaNode>(index, out var nodeRecord);
+
+          if (!records.Contains(nodeRecord))
+            records.Add(nodeRecord);
+
+
+          var gsaNode = (GsaNode)nodeRecord;
+
+          // Get node precedents:
+
+          // Mass property
+          if (gsaNode.MassPropertyIndex.IsIndex())
+          {
+            GetNative<GsaPropMass>(gsaNode.MassPropertyIndex.Value, out var propMassRecord);
+
+            if (!records.Contains(propMassRecord))
+              records.Add(propMassRecord);
+          }
+
+          // Spring property
+          if (gsaNode.SpringPropertyIndex.IsIndex())
+          {
+            GetNative<GsaPropSpr>(gsaNode.SpringPropertyIndex.Value, out var springPropRecord);
+
+            if (!records.Contains(springPropRecord))
+              records.Add(springPropRecord);
+          }
+        }
+
+        else if (t == typeof(GsaLoadCase))
+        {
+          GetNative<GsaLoadCase>(index, out var loadCaseRecord);
+          if (!records.Contains(loadCaseRecord))
+            records.Add(loadCaseRecord);
+        }
+      }
+      
+
+
+      precendentRecords = records;
+
+      return true;
+    }
 
     public bool GetNatives(Type t, out List<GsaRecord> gsaRecords)
     {
@@ -595,7 +865,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
           //The appIds have already been checked and they are all present as keys in the recordIndicesByApplicationId dictionary
           foreach (var appId in appIds)
           {
-            var index = records[colIndex].GsaRecord.Index;
+            var index = this.records[colIndex].GsaRecord.Index;
             if (index != null && recordIndicesByApplicationId.ContainsKey(appId) && recordIndicesByApplicationId[appId].Contains(colIndex) 
               && !indicesHash.Contains(index.Value))
             {
@@ -655,7 +925,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
         foundRecords = null;
         return false;
       }
-      foundRecords = recordIndicesBySchemaTypeGsaId[t][gsaIndex].ToDictionary(i => i, i => records[i]);
+      foundRecords = recordIndicesBySchemaTypeGsaId[t][gsaIndex].ToDictionary(i => i, i => this.records[i]);
       return true;
     }
 
@@ -859,7 +1129,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
 
     public void Clear()
     {
-      records.Clear();
+      this.records.Clear();
       recordIndicesByApplicationId.Clear();
       recordIndicesBySchemaType.Clear();
       recordIndicesBySchemaTypeGsaId.Clear();
