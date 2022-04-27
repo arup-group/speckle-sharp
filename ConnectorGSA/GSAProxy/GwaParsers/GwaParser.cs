@@ -353,7 +353,8 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
 
           //Only recognise the groups, as these represent the members
           //TO DO: for all elements, find if they have parents and include them
-          var members = string.Join(" ", entityItems.Where(ei => ei.StartsWith("G") || ei.StartsWith("P") || ei.StartsWith("M")));
+          //var members = string.Join(" ", entityItems.Where(ei => ei.StartsWith("G") || ei.StartsWith("P") || ei.StartsWith("M")));
+          var members = v;
           indices = Instance.GsaModel.Proxy.ConvertGSAList(members, GSAEntity.MEMBER).ToList();
         }
       }

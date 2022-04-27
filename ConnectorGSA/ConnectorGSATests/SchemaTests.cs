@@ -365,8 +365,6 @@ namespace ConnectorGSATests
       var gsaListGwas = new List<string>();
 
       gsaListGwas.Add("LIST.1\t1\tsampleOne\tMEMBER\t1 2 4 to 9");
-      gsaListGwas.Add("LIST.1\t2\tsampleTwo\tMEMBER\tP1 to P4");
-
 
       var listParser = new GsaListParser();
       var gsaLists = new List<GsaList>();
@@ -380,12 +378,7 @@ namespace ConnectorGSATests
       // Equal checks on first list only
       Assert.Equal("sampleOne", gsaLists[0].Name);
       Assert.Equal("MEMBER", gsaLists[0].Type);
-      //Assert.True(new List<string>() { "1", "2", "4", "5", "6", "7", "8" }.SequenceEqual(gsaLists[0].Definition));
-
-      Assert.Equal("sampleTwo", gsaLists[1].Name);
-      Assert.Equal("MEMBER", gsaLists[1].Type);
-      //Assert.True(new List<string>() { "P1", "P2", "P3" }.SequenceEqual(gsaLists[1].Definition));
-
+      Assert.True(new List<int>() { 1, 2, 4, 5, 6, 7, 8 }.SequenceEqual(gsaLists[0].Definition));
     }
 
     [Fact]

@@ -343,7 +343,7 @@ namespace Speckle.ConnectorGSA.Proxy
         }
         else if (pieces[i] == "to" && int.TryParse(pieces[i - 1], out int lowerRange) && int.TryParse(pieces[i + 1], out int upperRange))
         {
-          for (int j = lowerRange + 1; j <= upperRange; j++)
+          for (int j = lowerRange + 1; j < upperRange; j++)
           {
             items.Add(j);
           }
