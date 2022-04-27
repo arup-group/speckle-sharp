@@ -295,7 +295,7 @@
               Text="Send" />
           </StackPanel>
         </TabItem.Header>
-        <uc:Send />
+        <uc:SendGSA />
       </TabItem>
 
       <TabItem>

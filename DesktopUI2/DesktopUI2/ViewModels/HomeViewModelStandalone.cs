@@ -33,7 +33,16 @@ namespace DesktopUI2.ViewModels
     #region bindings
     public bool HasGSAFile { get; set; }
 
-    public string FilePath { get; set; }
+    private string _FilePath = "No file loaded";
+
+    public string FilePath
+    {
+      get => _FilePath;
+      set
+      {
+        this.RaiseAndSetIfChanged(ref _FilePath, value);
+      }
+    }
 
     public string FileStatus { get; set; }
 
@@ -134,6 +143,34 @@ namespace DesktopUI2.ViewModels
       this.RaisePropertyChanged("HasSavedStreams");
     }
 
+    public override async void NewStreamCommand()
+    {
+      var dialog = new NewStreamDialog(Accounts);
+      dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+      await dialog.ShowDialog(MainWindowStandalone.Instance);
+
+      if (dialog.Create)
+      {
+        try
+        {
+          var client = new Client(dialog.Account);
+          var streamId = await client.StreamCreate(new StreamCreateInput { description = dialog.Description, name = dialog.StreamName, isPublic = dialog.IsPublic });
+          var stream = await client.StreamGet(streamId);
+          var streamState = new StreamState(dialog.Account, stream);
+
+          OpenStream(streamState);
+
+          Analytics.TrackEvent(dialog.Account, Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Create" } });
+
+          GetStreams().ConfigureAwait(false); //update streams
+        }
+        catch (Exception e)
+        {
+          Dialogs.ShowDialog("Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
+        }
+      }
+    }
+
     public async void NewFileCommand()
     {
       try
@@ -141,11 +178,8 @@ namespace DesktopUI2.ViewModels
         var bindings = (ConnectorBindingsStandalone)Bindings;
         bindings.NewFile();
         HasGSAFile = true;
-        //((GsaProxy)Speckle.GSA.API.Instance.GsaModel.Proxy).NewFile(true);
-
-        //ConnectorGSA.Commands.OpenFile(path, true);
-        //FilePath = path;
-        FileStatus = "new"; // GsaLoadedFileType.ExistingFile;
+        FilePath = "New file";
+        FileStatus = "new";
       }
       catch (Exception e)
       {

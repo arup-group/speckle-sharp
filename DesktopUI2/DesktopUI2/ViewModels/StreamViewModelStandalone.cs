@@ -362,8 +362,21 @@ namespace DesktopUI2.ViewModels
 
 
 
+    public override async void OpenReportCommand()
+    {
+      //ensure click transition has finished
+      await Task.Delay(1000);
+      ShowReport = true;
+      var report = new Report();
+      report.Title = $"Report of the last operation, {LastUsed.ToLower()}";
+      report.DataContext = Progress;
+      report.WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterOwner;
+      report.ShowDialog(MainWindowStandalone.Instance);
+      Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Open Report" } });
+    }
 
-    private async void OpenSettingsCommand()
+
+    public override async void OpenSettingsCommand()
     {
       try
       {
@@ -377,7 +390,7 @@ namespace DesktopUI2.ViewModels
         settingsWindow.DataContext = settingsPageViewModel;
         settingsWindow.Title = $"Settings for {Stream.name}";
         Analytics.TrackEvent(null, Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Settings Open" } });
-        var saveResult = await settingsWindow.ShowDialog<bool?>(MainWindow.Instance); // TODO: debug throws "control already has a visual parent exception" when calling a second time
+        var saveResult = await settingsWindow.ShowDialog<bool?>(MainWindowStandalone.Instance); // TODO: debug throws "control already has a visual parent exception" when calling a second time
 
         if (saveResult != null && (bool)saveResult)
         {

@@ -439,7 +439,7 @@ namespace DesktopUI2.ViewModels
       OpenStream(streamState);
     }
 
-    public async void NewStreamCommand()
+    public virtual async void NewStreamCommand()
     {
       var dialog = new NewStreamDialog(Accounts);
       dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;

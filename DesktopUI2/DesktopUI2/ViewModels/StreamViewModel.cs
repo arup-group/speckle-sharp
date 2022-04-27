@@ -657,7 +657,7 @@ namespace DesktopUI2.ViewModels
       Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Cancel Send or Receive" } });
     }
 
-    public async void OpenReportCommand()
+    public virtual async void OpenReportCommand()
     {
       //ensure click transition has finished
       await Task.Delay(1000);
@@ -757,7 +757,7 @@ namespace DesktopUI2.ViewModels
 
 
 
-    private async void OpenSettingsCommand()
+    public virtual async void OpenSettingsCommand()
     {
       try
       {
