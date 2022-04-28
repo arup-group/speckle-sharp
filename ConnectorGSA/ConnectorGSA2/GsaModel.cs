@@ -23,39 +23,39 @@ namespace ConnectorGSA
     public override IGSAProxy Proxy { get => proxy; set => proxy = value; }
     //public override IGSAMessenger Messenger { get => messenger; set => messenger = value; }
 
-		//Using an integer scale at the moment from 0 to 5, which can be mapped to individual loggers
-		private int loggingthreshold = 3;
-		public override int LoggingMinimumLevel
-		{
-			get
-			{
-				return loggingthreshold;
-			}
-			set
-			{
-				this.loggingthreshold = value;
-				var loggerConfigMinimum = new LoggerConfiguration();
-				LoggerConfiguration loggerConfig = loggerConfigMinimum.MinimumLevel.Debug();
-				//switch (this.loggingthreshold)
-				//{
-				//	case 1:
-				//		loggerConfig = loggerConfigMinimum.Debug();
-				//		break;
+    //Using an integer scale at the moment from 0 to 5, which can be mapped to individual loggers
+    private int loggingthreshold = 3;
+    public override int LoggingMinimumLevel
+    {
+      get
+      {
+        return loggingthreshold;
+      }
+      set
+      {
+        this.loggingthreshold = value;
+        var loggerConfigMinimum = new LoggerConfiguration();
+        LoggerConfiguration loggerConfig = loggerConfigMinimum.MinimumLevel.Debug();
+        //switch (this.loggingthreshold)
+        //{
+        //	case 1:
+        //		loggerConfig = loggerConfigMinimum.Debug();
+        //		break;
 
-				//	case 4:
-				//		loggerConfig = loggerConfigMinimum.Error();
-				//		break;
+        //	case 4:
+        //		loggerConfig = loggerConfigMinimum.Error();
+        //		break;
 
-				//	default:
-				//		loggerConfig = loggerConfigMinimum.Information();
-				//		break;
-				//}
-				Log.Logger = loggerConfig.CreateLogger();
-			}
-		}
+        //	default:
+        //		loggerConfig = loggerConfigMinimum.Information();
+        //		break;
+        //}
+        Log.Logger = loggerConfig.CreateLogger();
+      }
+    }
 
-		public Account Account;
-		public string LastCommitId;
+    public Account Account;
+    public string LastCommitId;
 
     public GsaModel()
     {
@@ -93,7 +93,7 @@ namespace ConnectorGSA
         var fullName = t.FullName;
         var referencedStructuralTypes = new List<Type>();
         var propertyInfos = t.GetProperties();
-    
+
         foreach (var pi in propertyInfos)
         {
           Type typeToAdd = null;
@@ -128,7 +128,7 @@ namespace ConnectorGSA
         }
 
         var k = referencedStructuralTypes.ToList().Any(x => x.FullName == "Objects.Structural.GSA.Analysis.GSAAnalysisTask" || x.FullName == "Objects.Structural.GSA.Analysis.GSAAnalysisCase");
-        
+
         tree.Integrate(t, referencedStructuralTypes.ToArray());
       }
       return tree.Generations();

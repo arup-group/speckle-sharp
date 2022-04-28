@@ -22,6 +22,9 @@ namespace Speckle.Core.Logging
     private const string MixpanelToken = "acd87c5a50b56df91a795e999812a3a4";
     private const string MixpanelServer = "https://analytics.speckle.systems";
 
+    private static string PosthogToken { get; set; }
+    private const string PosthogServer = "https://posthog.insights.arup.com";
+
     /// <summary>
     /// Default Mixpanel events
     /// </summary>
@@ -42,7 +45,8 @@ namespace Speckle.Core.Logging
       /// <summary>
       /// Event triggered when an action is executed in Desktop UI, it should contain the name of the action and the host application
       /// </summary>
-      DUIAction
+      DUIAction,
+      GSA
     };
 
 
@@ -109,6 +113,8 @@ namespace Speckle.Core.Logging
     /// <param name="customProperties">Additional parameters to pass to the event</param>
     private static void TrackEvent(string email, string server, Events eventName, Dictionary<string, object> customProperties = null)
     {
+      PosthogToken = Environment.GetEnvironmentVariable("POSTHOG_API_KEY");
+
       LastEmail = email;
       LastServer = server;
 
@@ -164,6 +170,48 @@ namespace Speckle.Core.Logging
           }
 
           var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+          using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+          {
+            var result = streamReader.ReadToEnd();
+          }
+
+          httpWebRequest = (HttpWebRequest)WebRequest.Create(PosthogServer + "/capture");
+          httpWebRequest.ContentType = "application/x-www-form-urlencoded";
+          httpWebRequest.Accept = "text/plain";
+          httpWebRequest.Method = "POST";
+          ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+          server = CleanURL(server);
+
+          properties = new Dictionary<string, object>()
+          {
+            { "distinct_id", email },
+            { "server_id", server },
+            { "hostApp", Setup.HostApplication },
+            { "hostAppVersion", Setup.VersionedHostApplication },
+            { "core_version", Assembly.GetExecutingAssembly().GetName().Version.ToString()},
+            { "$os",  GetOs() },
+            { "type", "action" }
+          };
+
+          if (customProperties != null)
+            properties = properties.Concat(customProperties).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+          using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+          {
+            string json = JsonConvert.SerializeObject(new
+            {
+              api_key = PosthogToken,
+              @event = eventName.ToString(),
+              properties
+            });
+
+            streamWriter.Write("data=" + HttpUtility.UrlEncode(json));
+            streamWriter.Flush();
+            streamWriter.Close();
+          }
+
+          httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
           using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
           {
             var result = streamReader.ReadToEnd();

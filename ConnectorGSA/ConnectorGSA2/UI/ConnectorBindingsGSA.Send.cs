@@ -39,7 +39,7 @@ namespace ConnectorGSA.UI
       if (converter == null)
         throw new Exception("Could not find any Kit!");
 
-      var account = state.Client.Account; //((GsaModel)Instance.GsaModel).Account;
+      var account = state.Client.Account;
 
       // set converter settings as tuples (setting slug, setting selection)
       var settings = new Dictionary<string, string>();
@@ -54,6 +54,10 @@ namespace ConnectorGSA.UI
 
       var percentage = 0;
       var perecentageProgressLock = new object();
+
+      var currentFile = ((GsaProxy)Instance.GsaModel.Proxy).FilePath;
+      if (currentFile != null) progress.Report.Log($"Using GSA file: {currentFile}");
+      else progress.Report.Log($"Using new GSA file");
 
       var startTime = DateTime.Now;
 
@@ -105,6 +109,7 @@ namespace ConnectorGSA.UI
       if (duration.Seconds > 0)
       {
         progress.Report.Log("Duration of reading GSA model into cache: " + duration.ToString(@"hh\:mm\:ss"));
+        Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "timeToHydrateCache", duration.ToString(@"hh\:mm\:ss") } });
       }
       startTime = DateTime.Now;
 
@@ -162,6 +167,8 @@ namespace ConnectorGSA.UI
 
       }
 
+      Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "numConverted", numConverted } });
+
       progress.Report.Merge(converter.Report);
 
       if (progress.Report.ConversionErrors != null && converter.Report.ConversionErrors.Count > 0)
@@ -178,6 +185,7 @@ namespace ConnectorGSA.UI
       if (duration.Seconds > 0)
       {
         progress.Report.Log("Duration of conversion to Speckle: " + duration.ToString(@"hh\:mm\:ss"));
+        Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "timeToConvertToSpeckle", duration.ToString(@"hh\:mm\:ss") } });
       }
       startTime = DateTime.Now;
 
@@ -186,7 +194,7 @@ namespace ConnectorGSA.UI
 
       //The converter itself can't give anything back other than Base objects, so this is the first time it can be adorned with any
       //info useful to the sending in streams
-      progress.Report.Log("Sending to Server");
+      progress.Report.Log($"Sending to server: {state.ServerUrl}");      
 
       var commitObj = new Base();
       foreach (var obj in objs)
@@ -212,27 +220,28 @@ namespace ConnectorGSA.UI
         commitObj['@' + name] = obj;
       }
 
+      //var fileTransport = new DiskTransport.DiskTransport(System.IO.Path.Combine(@"C:\Speckle_Reference\DiskTransport", state.StreamId));
       var serverTransport = new ServerTransport(account, state.StreamId);
       var sent = await Commands.SendCommit(commitObj, state, progress, ((GsaModel)Instance.GsaModel).LastCommitId, serverTransport);
+      Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "totalChildrenCountSentObject", commitObj.GetTotalChildrenCount() } });
 
-      if (sent != null)
+      if (!String.IsNullOrEmpty(sent))
       {
         progress.Report.Log("Successfully sent data to stream");
         //Commands.UpsertSavedReceptionStreamInfo(true, null, state);
+
+        duration = DateTime.Now - startTime;
+        if (duration.Seconds > 0)
+        {
+          progress.Report.Log("Duration of sending to Speckle: " + duration.ToString(@"hh\:mm\:ss"));
+          Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "timeToSend", duration.ToString(@"hh\:mm\:ss") } });
+        }
+        startTime = DateTime.Now;
       }
       else
       {
         progress.Report.LogOperationError(new Exception("Unable to send data to stream"));
-      }
-
-      duration = DateTime.Now - startTime;
-      if (duration.Seconds > 0)
-      {
-        progress.Report.Log("Duration of sending to Speckle: " + duration.ToString(@"hh\:mm\:ss"));
-      }
-      startTime = DateTime.Now;
-
-      Console.WriteLine("Sending complete");
+      }      
 
       return null;
     }

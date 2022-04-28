@@ -17,10 +17,12 @@
     <PackageReference Include="Avalonia" Version="0.10.13" />
     <PackageReference Include="Avalonia.Desktop" Version="0.10.13" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.13" />
-    <PackageReference Include="Serilog" Version="2.10.0" />
+    <PackageReference Include="Serilog" Version="2.11.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Core\Transports\DiskTransport\DiskTransport.csproj" />
     <ProjectReference Include="..\..\DesktopUI2\DesktopUI2\DesktopUI2.csproj" />
     <ProjectReference Include="..\GSAProxy\GSAProxy.csproj" />
     <ProjectReference Include="..\Speckle.GSA.API\Speckle.GSA.API.csproj" />

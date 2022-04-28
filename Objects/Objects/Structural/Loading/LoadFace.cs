@@ -4,18 +4,18 @@ using Speckle.Core.Models;
 using System.Collections.Generic;
 using Objects.Geometry;
 using Objects.Structural.Geometry;
+using System.Linq;
 
 namespace Objects.Structural.Loading
 {
   public class LoadFace : Load
   {
-    [DetachProperty]
-    [Chunkable(1000)]
+    //[DetachProperty]
+    [Chunkable(250)]
     public List<Base> elements { get; set; }
+    public List<string> elementRefs { get; set; }
     public FaceLoadType loadType { get; set; }
     public LoadDirection2D direction { get; set; }
-
-    [DetachProperty]
     public Axis loadAxis { get; set; }
     public LoadAxisType loadAxisType { get; set; }
     public bool isProjected { get; set; }
@@ -50,6 +50,8 @@ namespace Objects.Structural.Loading
       this.positions = positions;
       this.isProjected = isProjected;
       this.name = name;
+
+      this.elementRefs = elements.Select(e => e.applicationId).ToList();
     }
 
     /// <summary>
@@ -79,6 +81,8 @@ namespace Objects.Structural.Loading
       this.positions = positions;
       this.isProjected = isProjected;
       this.name = name;
+
+      this.elementRefs = elements.Select(e => e.applicationId).ToList();
     }
   }
 }

@@ -30,7 +30,8 @@ namespace Objects.Converter.Revit
       {
         case MemberType.Generic1D:
         case MemberType.Beam:
-          if(speckleStick.type == ElementType1D.Brace) {
+          if (speckleStick.type == ElementType1D.Brace)
+          {
             RevitBrace revitBrace = new RevitBrace();
             revitBrace.type = speckleStick.property.name.Replace('X', 'x');
             revitBrace.baseLine = speckleStick.baseLine;
@@ -52,13 +53,14 @@ namespace Objects.Converter.Revit
               revitBeam.type = mappings["familyType"];
               revitBeam.family = mappings["familyFraming"];
               Report.Log($"Found corresponding family {mappings["familyFraming"]} and family type {mappings["familyType"]} for section {profileName} in mapping data");
-            } else
+            }
+            else
             {
               //This only works for CISC sections now for sure. Need to test on other sections
               revitBeam.type = ParseFamilyTypeFromProperty(speckleStick.property.name);
               revitBeam.family = ParseFamilyNameFromProperty(speckleStick.property.name);
-            }             
-            revitBeam.baseLine = speckleStick.baseLine;           
+            }
+            revitBeam.baseLine = speckleStick.baseLine;
             placeholders = BeamToNative(revitBeam);
             DB.FamilyInstance nativeRevitBeam = (DB.FamilyInstance)placeholders[0].NativeObject;
             AnalyticalModelStick analyticalModel = (AnalyticalModelStick)nativeRevitBeam.GetAnalyticalModel();
@@ -67,7 +69,7 @@ namespace Objects.Converter.Revit
             analyticalModel.SetOffset(AnalyticalElementSelector.StartOrBase, offset1);
             analyticalModel.SetOffset(AnalyticalElementSelector.EndOrTop, offset2);
             return placeholders;
-          }          
+          }
         case MemberType.Column:
           RevitColumn revitColumn = new RevitColumn();
           revitColumn.applicationId = speckleStick.applicationId;
@@ -122,7 +124,8 @@ namespace Objects.Converter.Revit
           break;
       }
 
-      speckleElement1D.baseLine = AnalyticalCurvesToBaseline(revitStick);
+      var baseLine = AnalyticalCurvesToBaseline(revitStick);
+      speckleElement1D.baseLine = baseLine;
 
       //var curves = revitStick.GetCurves(AnalyticalCurveType.RigidLinkHead).ToList();
       //curves.AddRange(revitStick.GetCurves(AnalyticalCurveType.ActiveCurves));
@@ -186,7 +189,7 @@ namespace Objects.Converter.Revit
       var stickFamily = (Autodesk.Revit.DB.FamilyInstance)revitStick.Document.GetElement(revitStick.GetElementId());
       var stickFamilyName = stickFamily.Symbol.FamilyName;
       var stickFamilyType = stickFamily.Symbol.Name;
-      var familyAndTypeName = $"{stickFamilyName}:{stickFamilyType}"; 
+      var familyAndTypeName = $"{stickFamilyName}:{stickFamilyType}";
 
       var section = stickFamily.Symbol.GetStructuralSection();
       if (section != null)
@@ -399,10 +402,13 @@ namespace Objects.Converter.Revit
 
       speckleElement1D.property = prop;
 
-    GetAllRevitParamsAndIds(speckleElement1D, revitStick);
-      speckleElement1D.displayValue = GetElementDisplayMesh(revitStick.Document.GetElement(revitStick.GetElementId()));
-    return speckleElement1D;
-  }
+      GetAllRevitParamsAndIds(speckleElement1D, revitStick);
+      
+      var points = baseLine.start.ToList();
+      points.AddRange(baseLine.end.ToList());
+      speckleElement1D.displayValue = new Objects.Geometry.Polyline(points, speckleElement1D.units); //GetElementDisplayMesh(revitStick.Document.GetElement(revitStick.GetElementId()));
+      return speckleElement1D;
+    }
 
     private ISection ISectionToSpeckle(DB.Structure.StructuralSections.StructuralSection section, string name = null)
     {
@@ -555,7 +561,7 @@ namespace Objects.Converter.Revit
         var firstSegment = (Geometry.Line)curveList.segments[0];
         var lastSegment = (Geometry.Line)curveList.segments[-1];
         return new Geometry.Line(firstSegment.start, lastSegment.end);
-        
+
       }
       return LineToSpeckle((Line)curves[0]);
     }
