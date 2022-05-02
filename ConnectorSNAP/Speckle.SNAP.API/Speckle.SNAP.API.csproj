@@ -49,11 +49,17 @@
     <Compile Include="ISNAPProxy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="s8iSchema\Beam.cs" />
+    <Compile Include="s8iSchema\EndReleases.cs" />
     <Compile Include="s8iSchema\Enums.cs" />
+    <Compile Include="s8iSchema\Girder.cs" />
     <Compile Include="s8iSchema\ISnapRecord.cs" />
+    <Compile Include="s8iSchema\LinearBase.cs" />
+    <Compile Include="s8iSchema\MaterialSteel.cs" />
+    <Compile Include="s8iSchema\NodalSupport.cs" />
     <Compile Include="s8iSchema\Node.cs" />
     <Compile Include="s8iSchema\SecondaryNode.cs" />
-    <Compile Include="s8iSchema\SnapRecord.cs" />
+    <Compile Include="s8iSchema\Section.cs" />
+    <Compile Include="s8iSchema\VectorSixBase.cs" />
     <Compile Include="StringValue.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

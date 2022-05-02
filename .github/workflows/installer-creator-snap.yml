@@ -70,11 +70,13 @@ jobs:
       run: |
         $tag = "${{ github.event.inputs.version }}.$($env:GITHUB_RUN_ID%65536)"
         echo "::set-output name=tag::$tag"
+
     - name: Update Version
       shell: powershell
       working-directory: ConnectorSNAP/ConnectorSNAP/Properties
       run: |
         (Get-content .\AssemblyInfo.cs) -replace '1\.0\.0\.0', '${{ steps.calculate-tag-version.outputs.tag }}' | Out-File -encoding ASCII .\AssemblyInfo.cs
+
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore all the applications
       shell: cmd

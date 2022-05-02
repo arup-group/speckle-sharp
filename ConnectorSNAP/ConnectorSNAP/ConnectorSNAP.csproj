@@ -59,9 +59,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Proxy\s81CsvMaps\BeamMap.cs" />
     <Compile Include="Proxy\s81CsvMaps\Enums.cs" />
+    <Compile Include="Proxy\s81CsvMaps\GirderMap.cs" />
     <Compile Include="Proxy\s81CsvMaps\MapConverters.cs" />
+    <Compile Include="Proxy\s81CsvMaps\MaterialSteelMap.cs" />
+    <Compile Include="Proxy\s81CsvMaps\NodalSupportMap.cs" />
     <Compile Include="Proxy\s81CsvMaps\NodeMap.cs" />
+    <Compile Include="Proxy\s81CsvMaps\EndReleasesMap.cs" />
     <Compile Include="Proxy\s81CsvMaps\SecondaryNodeMap.cs" />
+    <Compile Include="Proxy\s81CsvMaps\SectionMap.cs" />
     <Compile Include="Proxy\SnapProxy.cs" />
     <Compile Include="SNAPBindings.cs" />
     <Compile Include="SnapModel.cs" />
@@ -71,16 +76,16 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia">
-      <Version>0.10.10</Version>
+      <Version>0.10.13</Version>
     </PackageReference>
     <PackageReference Include="Avalonia.Desktop">
-      <Version>0.10.10</Version>
+      <Version>0.10.13</Version>
     </PackageReference>
     <PackageReference Include="Avalonia.ReactiveUI">
-      <Version>0.10.10</Version>
+      <Version>0.10.13</Version>
     </PackageReference>
     <PackageReference Include="CsvHelper">
-      <Version>27.2.0</Version>
+      <Version>27.2.1</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

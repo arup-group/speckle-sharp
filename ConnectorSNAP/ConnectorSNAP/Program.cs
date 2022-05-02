@@ -103,5 +103,10 @@ namespace ConnectorSNAP
     {
       this.Hide();
     }
+
+    private void SaveCommand()
+    {
+
+    }
   }
 }

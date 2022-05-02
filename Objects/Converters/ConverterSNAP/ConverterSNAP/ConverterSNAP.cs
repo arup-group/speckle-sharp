@@ -14,7 +14,7 @@ namespace ConverterSNAP
 {
   public partial class ConverterSNAP : ISpeckleConverter
   {
-    public static string AppName = Applications.SNAP;
+    public static string AppName = HostApplications.SNAP.Name;
 
     public string Description => "Default Speckle Kit for SNAP";
 
@@ -26,7 +26,7 @@ namespace ConverterSNAP
 
     public HashSet<Exception> ConversionErrors { get; } = new HashSet<Exception>();
 
-    public ProgressReport Report => new ProgressReport();
+    public ProgressReport Report { get; } = new ProgressReport();
 
     public void SetConverterSettings(object settings)
     {
@@ -73,10 +73,10 @@ namespace ConverterSNAP
       else if (models.Count > 1)
       {
         //Prefer analysis if present
-        var designModels = models.Where(m => m.layerDescription.ToLower().Contains("design"));
-        if (designModels.Any())
+        var analysisModels = models.Where(m => m.layerDescription.ToLower().Contains("analysis"));
+        if (analysisModels.Any())
         {
-          retList.AddRange(ModelToNative(designModels.First()));
+          retList.AddRange(ModelToNative(analysisModels.First()));
         }
       }
       var remaining = objects.Except(models).ToList();

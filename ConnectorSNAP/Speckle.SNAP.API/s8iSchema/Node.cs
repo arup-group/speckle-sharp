@@ -1,6 +1,6 @@
 ﻿namespace Speckle.SNAP.API.s8iSchema
 {
-  public class Node
+  public class Node : ISnapRecordNamed
   {
     public string Name { get; set; }
     public double X { get; set; } = 0;

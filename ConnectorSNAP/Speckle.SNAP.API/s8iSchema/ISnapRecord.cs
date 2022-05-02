@@ -9,4 +9,9 @@ namespace Speckle.SNAP.API.s8iSchema
   public interface ISnapRecord
   {
   }
+
+  public interface ISnapRecordNamed : ISnapRecord
+  { 
+    string Name { get; }
+  }
 }

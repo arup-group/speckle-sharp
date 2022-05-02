@@ -93,7 +93,7 @@ namespace Speckle.Core.Models
     public object NativeObject;
   }
 
-  public class ProgressReport
+  public class ProgressReport : IDisposable
   {
     /// <summary>
     /// Keeps track of the conversion process
@@ -175,6 +175,11 @@ namespace Speckle.Core.Models
       this.ConversionErrors.AddRange(report.ConversionErrors);
       this.OperationErrors.AddRange(report.OperationErrors);
       this.ConversionLog.AddRange(report.ConversionLog);
+    }
+
+    public void Dispose()
+    {
+      
     }
   }
 }

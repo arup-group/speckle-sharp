@@ -7,6 +7,11 @@ namespace ConverterSNAP
 {
   public static class Extensions
   {
+    public const double DefaultTolerance = 0.01;
+
+    public static bool EqualsWithinTolerance(this double a, double b) => Math.Abs(a - b) < DefaultTolerance;
+    public static bool EqualsWithinTolerance(this double a, double b, double tol) => Math.Abs(a - b) < tol;
+
     public static void AddRange<T>(this ICollection<T> target, IEnumerable<T> source)
     {
       if (target == null)
@@ -127,6 +132,11 @@ namespace ConverterSNAP
       if (parent.IsGenericType && shouldUseGenericType)
         parent = parent.GetGenericTypeDefinition();
       return parent;
+    }
+
+    public static bool ToBoolean(this double dv)
+    {
+      return (dv == 0) ? false : true;
     }
   }
 }

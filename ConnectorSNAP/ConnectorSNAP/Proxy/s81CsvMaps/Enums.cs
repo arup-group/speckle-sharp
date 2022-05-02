@@ -16,6 +16,16 @@ namespace ConnectorSNAP.Proxy.s81CsvMaps
     [StringValue("SN")] //Secondary node
     SN,
     [StringValue("ND")] //Secondary node
-    ND
+    ND,
+    [StringValue("GR")] //Girder
+    GR,
+    [StringValue("BD")] // Restraints
+    BD,
+    [StringValue("DGRS")] //Sections
+    DGRS,
+    [StringValue("MS")] //Material Steel
+    MS,
+    [StringValue("SP")] //Node support
+    SP
   }
 }

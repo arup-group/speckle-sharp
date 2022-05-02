@@ -2511,7 +2511,7 @@ namespace ConverterGSA
           break;
         case NodeRestraint.Custom:
           string code = GetCustomRestraintCode(gsaNode);
-          restraint = new Restraint(code.ToString());
+          restraint = new Restraint(code);
           break;
         default:
           restraint = new Restraint();
@@ -2560,7 +2560,7 @@ namespace ConverterGSA
         }
       }
 
-      var speckleRelease = new Restraint(string.Join("", code));
+      var speckleRelease = new Restraint(string.Join("", code)) {  applicationId = Guid.NewGuid().ToString() };
 
       //Add stiffnesses
       if (code[0] == "K") speckleRelease.stiffnessX = gsaStiffness[index++];
@@ -2582,7 +2582,7 @@ namespace ConverterGSA
       if (gsaGenRest.XX == RestraintCondition.Constrained) code[3] = "F";
       if (gsaGenRest.YY == RestraintCondition.Constrained) code[4] = "F";
       if (gsaGenRest.ZZ == RestraintCondition.Constrained) code[5] = "F";
-      return new Restraint(string.Join("", code));
+      return new Restraint(string.Join("", code)) { applicationId = Guid.NewGuid().ToString() };
     }
 
     /// <summary>
@@ -2651,7 +2651,7 @@ namespace ConverterGSA
             break;
         }
       }
-      return code.ToString();
+      return new string(code);
     }
 
     /// <summary>
@@ -2678,42 +2678,42 @@ namespace ConverterGSA
         {
           var code = restraint.code.ToCharArray();
           code[0] = 'K';
-          restraint.code = code.ToString();
+          restraint.code = new string(code);
           restraint.stiffnessX = gsaSpring.Stiffnesses[GwaAxisDirection6.X];
         }
         if (gsaSpring.Stiffnesses[GwaAxisDirection6.Y] > 0)
         {
           var code = restraint.code.ToCharArray();
           code[1] = 'K';
-          restraint.code = code.ToString();
+          restraint.code = new string(code);
           restraint.stiffnessY = gsaSpring.Stiffnesses[GwaAxisDirection6.Y];
         }
         if (gsaSpring.Stiffnesses[GwaAxisDirection6.Z] > 0)
         {
           var code = restraint.code.ToCharArray();
           code[2] = 'K';
-          restraint.code = code.ToString();
+          restraint.code = new string(code);
           restraint.stiffnessZ = gsaSpring.Stiffnesses[GwaAxisDirection6.Z];
         }
         if (gsaSpring.Stiffnesses[GwaAxisDirection6.XX] > 0)
         {
           var code = restraint.code.ToCharArray();
           code[3] = 'K';
-          restraint.code = code.ToString();
+          restraint.code = new string(code);
           restraint.stiffnessXX = gsaSpring.Stiffnesses[GwaAxisDirection6.XX];
         }
         if (gsaSpring.Stiffnesses[GwaAxisDirection6.YY] > 0)
         {
           var code = restraint.code.ToCharArray();
           code[4] = 'K';
-          restraint.code = code.ToString();
+          restraint.code = new string(code);
           restraint.stiffnessYY = gsaSpring.Stiffnesses[GwaAxisDirection6.YY];
         }
         if (gsaSpring.Stiffnesses[GwaAxisDirection6.ZZ] > 0)
         {
           var code = restraint.code.ToCharArray();
           code[5] = 'K';
-          restraint.code = code.ToString();
+          restraint.code = new string(code);
           restraint.stiffnessZZ = gsaSpring.Stiffnesses[GwaAxisDirection6.ZZ];
         }
       }

@@ -48,5 +48,7 @@ namespace Speckle.SNAP.API
     }
 
     public static double ToDouble(this string v) => double.TryParse(v, out double result) ? result : 0;
+
+    public static double ToInt(this string v) => int.TryParse(v, out int result) ? result : 0;
   }
 }

@@ -23,4 +23,20 @@ namespace Speckle.SNAP.API.s8iSchema
     [StringValue("Other")]
     Other = 3
   }
+
+  public enum SectionType
+  {
+    HSection = 0,
+    Channel = 1,
+    Box = 4,
+    UserDefined = 9
+  }
+
+  public enum SectionRelevance
+  {
+    I = 0,
+    Centre = 2,
+    J = 3,
+    EntireLength = 6
+  }
 }

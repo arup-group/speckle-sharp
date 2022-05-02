@@ -75,16 +75,17 @@ namespace ConnectorSNAP
       return false;
     }
 
-    public static bool ConvertToNative(List<Base> objects, ISpeckleConverter converter, IProgress<string> loggingProgress) //Includes writing to Cache
+    public static bool ConvertToNative(List<Base> objects, ISpeckleConverter converter) //Includes writing to Cache
     {
+      Instance.SnapModel.Cache.Clear();
       try
       {
         var nativeObjects = converter.ConvertToNative(objects).ToList();
-        ((SnapCache)Instance.SnapModel.Cache).Upsert(nativeObjects);
+        //((SnapCache)Instance.SnapModel.Cache).Upsert(nativeObjects);
       }
       catch (Exception ex)
       {
-        loggingProgress.Report("Unable to convert one or more received objects: " + ex.Message);
+        converter.Report.LogOperationError(new Exception("Unable to convert one or more received objects: " + ex.Message));
       }
 
       return true;

@@ -11,10 +11,10 @@ namespace ConnectorSNAP.Proxy.s81CsvMaps
     public BeamMap()
     {
       //Reading
-      Map(m => m.NodeIEdgeType).Index(0).Convert(r => (r.Row.GetField(0).Split('/').Last().Trim() == "0") ? NodeType.SecondaryNode : NodeType.Node);
-      Map(m => m.NodeIEdgeName).Index(1);
-      Map(m => m.NodeJEdgeType).Index(2).Convert(r => (r.Row.GetField(2) == "0") ? NodeType.SecondaryNode : NodeType.Node);
-      Map(m => m.NodeJEdgeName).Index(3);
+      Map(m => m.NodeIType).Index(0).Convert(r => (r.Row.GetField(0).Split('/').Last().Trim() == "0") ? NodeType.SecondaryNode : NodeType.Node);
+      Map(m => m.NodeI).Index(1);
+      Map(m => m.NodeJType).Index(2).Convert(r => (r.Row.GetField(2) == "0") ? NodeType.SecondaryNode : NodeType.Node);
+      Map(m => m.NodeJ).Index(3);
       Map(m => m.StructureType).Index(4).TypeConverter<EnumIntConverter<StructureType>>();
       Map(m => m.CrossSection).Index(5);
       Map(m => m.FinishingCoating).Index(6);
@@ -25,8 +25,8 @@ namespace ConnectorSNAP.Proxy.s81CsvMaps
       Map(m => m.SectionProperties).Index(11);
 
       //Writing
-      Map(m => m.NodeIEdgeType).Convert(o => Keyword.BM.GetStringValue() + " / " + (int)o.Value.NodeIEdgeType);
-      Map(m => m.NodeJEdgeType).Convert(o => ((int)o.Value.NodeJEdgeType).ToString());
+      Map(m => m.NodeIType).Convert(o => Keyword.BM.GetStringValue() + " / " + (int)o.Value.NodeIType);
+      Map(m => m.NodeJType).Convert(o => ((int)o.Value.NodeJType).ToString());
     }
   }
 }

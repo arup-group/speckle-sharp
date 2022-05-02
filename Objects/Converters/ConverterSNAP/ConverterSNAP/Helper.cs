@@ -14,7 +14,7 @@ namespace ConverterSNAP
     {
       var assembly = Assembly.GetAssembly(typeof(Model));
 
-      var structuralTypes = new HashSet<Type>(assembly.GetTypes().Where(t => t.Namespace.ToLower().Contains("structural")));
+      var structuralTypes = new HashSet<Type>(assembly.GetTypes().Where(t => t != null && !string.IsNullOrEmpty(t.Namespace) && t.Namespace.ToLower().Contains("structural")));
       var tree = new TypeTreeCollection<Type>(structuralTypes);
 
       var typeChildren = new Dictionary<Type, List<Type>>();

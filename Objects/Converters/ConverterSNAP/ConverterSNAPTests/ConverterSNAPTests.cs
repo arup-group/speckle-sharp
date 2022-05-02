@@ -16,7 +16,7 @@ namespace ConverterSNAPTests
 
     public ConverterSNAPTests()
     {
-      converter = KitManager.GetDefaultKit().LoadConverter(Applications.SNAP);
+      converter = KitManager.GetDefaultKit().LoadConverter(HostApplications.SNAP.Name);
     }
 
     [Fact]

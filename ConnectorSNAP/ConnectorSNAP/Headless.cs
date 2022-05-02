@@ -246,16 +246,7 @@ namespace ConnectorSNAP
 
           Console.WriteLine("Converting objects into SNAP records in .s8i format");
 
-          Commands.ConvertToNative(topLevelObjects, converter, loggingProgress);
-
-          if (converter.Report.ConversionErrors != null && converter.Report.ConversionErrors.Count > 0)
-          {
-            foreach (var ce in converter.Report.ConversionErrors)
-            {
-              loggingProgress.Report(ce.Message);
-              loggingProgress.Report(ce.Message);
-            }
-          }
+          Commands.ConvertToNative(topLevelObjects, converter);
 
           //The cache is filled with natives
           if (Instance.SnapModel.Cache.GetNatives(out var snapRecords) && snapRecords != null && snapRecords.Count > 0)

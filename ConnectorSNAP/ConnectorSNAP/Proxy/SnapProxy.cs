@@ -51,7 +51,8 @@ namespace ConnectorSNAP
 
     public void WriteModel(List<object> snapRecords)
     {
-      recordsToSave = snapRecords;
+      var recordsByType = snapRecords.GroupBy(r => r.GetType()).ToDictionary(r => r.Key, r => r.ToList());
+      recordsToSave = recordsByType.Keys.SelectMany(k => recordsByType[k]).ToList();
     }
 
     public void PrepareResults(object resultTypes)
@@ -83,9 +84,14 @@ namespace ConnectorSNAP
 
         using (var csvWriter = new CsvWriter(writer, config))
         {
+          csvWriter.Context.RegisterClassMap<MaterialSteelMap>();
           csvWriter.Context.RegisterClassMap<BeamMap>();
           csvWriter.Context.RegisterClassMap<NodeMap>();
           csvWriter.Context.RegisterClassMap<SecondaryNodeMap>();
+          csvWriter.Context.RegisterClassMap<GirderMap>();
+          csvWriter.Context.RegisterClassMap<EndReleasesMap>();
+          csvWriter.Context.RegisterClassMap<NodalSupportMap>();
+          csvWriter.Context.RegisterClassMap<SectionMap>();
 
           foreach (var record in records)
           {
