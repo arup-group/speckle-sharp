@@ -447,6 +447,27 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
       return true;
     }
 
+    public bool GetSpeckleObjectsByType<T, U>(out List<U> foundObjects, GSALayer layer = GSALayer.Both)
+    {
+      if (!objectIndicesByLayer.ContainsKey(layer))
+      {
+        foundObjects = null;
+        return false;
+      }
+
+      var t = typeof(T);
+      var typeIndices = objectIndicesBySchemaTypesGsaId[t];
+      var indices = new List<int>();
+
+      foreach (var v in typeIndices)
+      {
+        indices.Add(v.Value.FirstOrDefault());
+      }
+      foundObjects = indices.Select(i => objects[i]).Cast<U>().ToList();
+
+      return true;
+    }
+
     public int? LookupIndex<T>(string applicationId)
     {
       var t = typeof(T);

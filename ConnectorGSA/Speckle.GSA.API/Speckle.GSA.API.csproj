@@ -60,6 +60,7 @@
     <Compile Include="GwaSchema\Constraints\GsaGenRest.cs" />
     <Compile Include="GwaSchema\Constraints\GsaRigid.cs" />
     <Compile Include="GwaSchema\Enums.cs" />
+    <Compile Include="GwaSchema\GeneralData\GsaList.cs" />
     <Compile Include="GwaSchema\Geometry\GsaAxis.cs" />
     <Compile Include="GwaSchema\Geometry\GsaGridLine.cs" />
     <Compile Include="GwaSchema\Geometry\GsaGridPlane.cs" />
