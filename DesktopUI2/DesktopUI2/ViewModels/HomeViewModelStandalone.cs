@@ -71,7 +71,7 @@ namespace DesktopUI2.ViewModels
       WriteStreamsToFile();
     }
 
-    private async Task GetStreams()
+    public override async Task GetStreams()
     {
       if (!HasAccounts)
         return;
@@ -89,7 +89,7 @@ namespace DesktopUI2.ViewModels
         }
         catch (Exception e)
         {
-          Dialogs.ShowDialog($"Could not get streams for {account.Account.userInfo.email} on {account.Account.serverInfo.url}.", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
+          Dialogs.ShowDialog(MainWindowStandalone.Instance, $"Could not get streams for {account.Account.userInfo.email} on {account.Account.serverInfo.url}.", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
         }
       }
       Streams = Streams.OrderByDescending(x => DateTime.Parse(x.Stream.updatedAt)).ToList();
@@ -166,7 +166,7 @@ namespace DesktopUI2.ViewModels
         }
         catch (Exception e)
         {
-          Dialogs.ShowDialog("Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
+          Dialogs.ShowDialog(MainWindowStandalone.Instance, "Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
         }
       }
     }
@@ -183,7 +183,7 @@ namespace DesktopUI2.ViewModels
       }
       catch (Exception e)
       {
-        Dialogs.ShowDialog("Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
+        Dialogs.ShowDialog(MainWindowStandalone.Instance, "Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
       }
     }
 
@@ -209,7 +209,7 @@ namespace DesktopUI2.ViewModels
           }
           catch (Exception e)
           {
-            Dialogs.ShowDialog("Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
+            Dialogs.ShowDialog(MainWindowStandalone.Instance, "Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
           }
         }
       }

@@ -276,14 +276,16 @@ namespace ConnectorGSA
         {
           foreach (var kvp in dict)
           {
-            if(kvp.Key == "RemoteTransport") statusProgress.Report($"{kvp.Key}: {(double)kvp.Value}");
+            if (kvp.Key == "RemoteTransport") statusProgress.Report($"{kvp.Key}: {(double)kvp.Value}");
           }
         },
         onErrorAction: (s, e) =>
         {
           state.Errors.Add(e);
+          loggingProgress.Report(new MessageEventArgs(MessageIntent.TechnicalLog, MessageLevel.Error, e));
+          Func<string> temp = () => { return null; };
         }
-        ); ;
+        );
 
       statusProgress.Report($"{commitObj.GetTotalChildrenCount()} objects sent to server");
 
@@ -983,8 +985,18 @@ namespace ConnectorGSA
       }
       catch (Exception ex)
       {
-
+        loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, ex.Message));
+        loggingProgress.Report(new MessageEventArgs(MessageIntent.TechnicalLog, MessageLevel.Error, ex, ex.Message));
+        return false;
       }
+
+      if (objs == null)
+      {
+        loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Information, "Failed to convert GSA data to Speckle"));
+        loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Information, "Failed to convert GSA data to Speckle"));
+        return false;
+      }
+
       if (converter.Report.ConversionErrors != null && converter.Report.ConversionErrors.Count > 0)
       {
         foreach (var ce in converter.Report.ConversionErrors)
@@ -1031,7 +1043,7 @@ namespace ConnectorGSA
 
         commitObj['@' + name] = obj;
       }
-      
+
       //var fileTransport = new DiskTransport.DiskTransport(System.IO.Path.Combine(@"C:\Speckle_Reference\DiskTransport", ss.Stream.id));
       var serverTransport = new ServerTransport(account, ss.Stream.id);
       var sent = await Commands.SendCommit(commitObj, ss, ((GsaModel)Instance.GsaModel).LastCommitId, loggingProgress, statusProgress, percentageProgress, serverTransport);
@@ -1040,32 +1052,30 @@ namespace ConnectorGSA
       {
         loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Information, "Successfully sent data to stream"));
         Commands.UpsertSavedReceptionStreamInfo(true, null, ss);
+
+        if (ss.Errors != null && ss.Errors.Count > 0)
+        {
+          foreach (var se in ss.Errors)
+          {
+            loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, se.Message));
+            loggingProgress.Report(new MessageEventArgs(MessageIntent.TechnicalLog, MessageLevel.Error, se, se.Message));
+          }
+        }
+
+        duration = DateTime.Now - startTime;
+        if (duration.Seconds > 0)
+        {
+          loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Information, "Duration of sending to Speckle: " + duration.ToString(@"hh\:mm\:ss")));
+          loggingProgress.Report(new MessageEventArgs(MessageIntent.Telemetry, MessageLevel.Information, "send", "sending", "duration", duration.ToString(@"hh\:mm\:ss")));
+        }
+        startTime = DateTime.Now;
+
+        percentageProgress.Report(100);
       }
       else
       {
         loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, "Unable to send data to stream"));
       }
-
-      if (ss.Errors != null && ss.Errors.Count > 0)
-      {
-        foreach (var se in ss.Errors)
-        {
-          loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, se.Message));
-          loggingProgress.Report(new MessageEventArgs(MessageIntent.TechnicalLog, MessageLevel.Error, se, se.Message));
-        }
-      }
-
-      percentageProgress.Report(100);
-
-      duration = DateTime.Now - startTime;
-      if (duration.Seconds > 0)
-      {
-        loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Information, "Duration of sending to Speckle: " + duration.ToString(@"hh\:mm\:ss")));
-        loggingProgress.Report(new MessageEventArgs(MessageIntent.Telemetry, MessageLevel.Information, "send", "sending", "duration", duration.ToString(@"hh\:mm\:ss")));
-      }
-      startTime = DateTime.Now;
-
-      Console.WriteLine("Sending complete");
 
       percentageProgress.Report(0);
 
@@ -1107,10 +1117,9 @@ namespace ConnectorGSA
 
       streamCreationProgress.Report(streamState); //This will add it to the sender tab's streamState list
 
-      await Send(coordinator, streamState, loggingProgress, statusProgress, percentageProgress);
+      var sent = await Send(coordinator, streamState, loggingProgress, statusProgress, percentageProgress);      
 
       coordinator.SenderTab.SetDocumentName(((GsaProxy)Instance.GsaModel.Proxy).GetTitle());
-
 
       coordinator.WriteStreamInfo();
 

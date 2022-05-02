@@ -222,13 +222,13 @@ namespace ConnectorGSA.UI
 
       //var fileTransport = new DiskTransport.DiskTransport(System.IO.Path.Combine(@"C:\Speckle_Reference\DiskTransport", state.StreamId));
       var serverTransport = new ServerTransport(account, state.StreamId);
-      var sent = await Commands.SendCommit(commitObj, state, progress, ((GsaModel)Instance.GsaModel).LastCommitId, serverTransport);
-      Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "totalChildrenCountSentObject", commitObj.GetTotalChildrenCount() } });
+      var sent = await Commands.SendCommit(commitObj, state, progress, ((GsaModel)Instance.GsaModel).LastCommitId, serverTransport);      
 
       if (!String.IsNullOrEmpty(sent))
       {
         progress.Report.Log("Successfully sent data to stream");
         //Commands.UpsertSavedReceptionStreamInfo(true, null, state);
+        Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "totalChildrenCountSentObject", commitObj.GetTotalChildrenCount() } });
 
         duration = DateTime.Now - startTime;
         if (duration.Seconds > 0)
