@@ -329,6 +329,63 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
       return true;
     }
 
+    public bool GetFilteredNativesByList(out List<GsaRecord> gsaRecords, List<string> filterSelections)
+    {
+      var listRecords = new List<GsaList>();
+      var associatedRecords = new List<GsaRecord>();
+
+      var proxy = new GsaProxy();
+
+      lock (cacheLock)
+      {
+        var filteredRecords = records.Where(rec => rec.GsaRecord.GetType() == typeof(GsaList)).Select(rec => (GsaList)rec.GsaRecord);
+
+        foreach (var filterSelection in filterSelections)
+        {
+          listRecords.AddRange(filteredRecords.Where(fr => fr.Name == filterSelection));
+        }
+
+        // Get records associated with each list
+        foreach (var record in listRecords)
+        {
+          foreach (var def in record.Definition)
+          {
+            proxy.ParseListDefinitionParameter(def, out var prefix, out var index);
+
+            switch (prefix.FirstOrDefault())
+            {
+              // Does not filter by 1d/2d
+              case 'P':
+                if (record.Type == "MEMBER")
+                  associatedRecords.AddRange(records.Where(rec => rec.GsaRecord.GetType() == typeof(GsaMemb)).Select(rec => rec.GsaRecord).Cast<GsaMemb>().Where(mem => mem.PropertyIndex == index));
+                else if (record.Type == "ELEMENT")
+                  associatedRecords.AddRange(records.Where(rec => rec.GsaRecord.GetType() == typeof(GsaEl)).Select(rec => rec.GsaRecord).Cast<GsaEl>().Where(el => el.PropertyIndex == index));
+                break;
+
+              // Else by index
+              default:
+                if (record.Type == "MEMBER")
+                  associatedRecords.AddRange(records.Where(rec => rec.GsaRecord.GetType() == typeof(GsaMemb)).Select(rec => rec.GsaRecord).Cast<GsaMemb>().Where(mem => mem.Index == index));
+                else if (record.Type == "ELEMENT")
+                  associatedRecords.AddRange(records.Where(rec => rec.GsaRecord.GetType() == typeof(GsaEl)).Select(rec => rec.GsaRecord).Cast<GsaEl>().Where(el => el.Index == index));
+                else if (record.Type == "CASE")
+                  associatedRecords.AddRange(records.Where(rec => rec.GsaRecord.GetType() == typeof(GsaLoadCase)).Select(rec => rec.GsaRecord).Cast<GsaLoadCase>().Where(lc => lc.Index == index));
+                else if (record.Type == "NODE")
+                  associatedRecords.AddRange(records.Where(rec => rec.GsaRecord.GetType() == typeof(GsaNode)).Select(rec => rec.GsaRecord).Cast<GsaNode>().Where(nd => nd.Index == index));
+                break;
+            }
+          }
+        }
+      }
+
+      associatedRecords.AddRange(listRecords);
+      gsaRecords = associatedRecords;
+
+      return true;
+
+    }
+    
+
     public bool GetNatives(Type t, out List<GsaRecord> gsaRecords)
     {
       lock (cacheLock)
