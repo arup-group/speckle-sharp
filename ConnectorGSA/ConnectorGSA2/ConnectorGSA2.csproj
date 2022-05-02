@@ -27,7 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\Transports\DiskTransport\DiskTransport.csproj" />
     <ProjectReference Include="..\..\DesktopUI2\DesktopUI2\DesktopUI2.csproj" />
     <ProjectReference Include="..\GSAProxy\GSAProxy.csproj" />
     <ProjectReference Include="..\Speckle.GSA.API\Speckle.GSA.API.csproj" />

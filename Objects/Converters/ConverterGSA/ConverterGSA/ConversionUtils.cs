@@ -21,7 +21,7 @@ using Objects.Structural.Loading;
 using System.Threading.Tasks;
 using Speckle.Core.Transports;
 using Speckle.Core.Serialisation;
-using Speckle.Newtonsoft.Json;
+using Newtonsoft.Json;
 
 namespace ConverterGSA
 {
