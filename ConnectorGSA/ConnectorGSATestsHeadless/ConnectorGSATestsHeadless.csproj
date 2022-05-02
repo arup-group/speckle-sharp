@@ -10,7 +10,7 @@
     <RootNamespace>ConnectorGSATestsHeadless</RootNamespace>
     <AssemblyName>ConnectorGSATestsHeadless</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+	<RuntimeIdentifier>win;win-x64</RuntimeIdentifier>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
