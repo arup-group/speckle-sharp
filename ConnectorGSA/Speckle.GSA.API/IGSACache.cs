@@ -11,7 +11,7 @@ namespace Speckle.GSA.API
     bool GetNative(Type t, out List<GsaRecord> gsaRecords);
     bool GetNatives(out List<GsaRecord> gsaRecords);
     bool GetNatives(Type t, out List<GsaRecord> gsaRecords);
-    bool GetFilteredNativesByList(out List<GsaRecord> gsaRecords, List<string> filterSelections);
+    bool GetNativesFilteredByList(out List<GsaRecord> gsaRecords, List<string> filterSelections);
     bool GetSpeckleObjects<T>(int index, out List<object> objects, GSALayer layer = GSALayer.Both);
     bool GetSpeckleObjects<T,U>(int index, out List<U> objects, GSALayer layer = GSALayer.Both);
     bool GetSpeckleObjects(out List<object> objects, GSALayer layer = GSALayer.Both);
