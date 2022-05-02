@@ -22,9 +22,17 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
 
       var items = remainingItems;
 
-      FromGwaByFuncs(items, out remainingItems, AddName, AddType, AddDefinition);
+      if (items[1] == "MEMBER")
+        FromGwaByFuncs(items, out remainingItems, AddName, AddType, (v) => AddEntities(v, GSA.API.GSALayer.Design, out record.Definition));
+      
+      else if (items[1] == "NODE") // Add nodes currently gets all nodes only.
+        FromGwaByFuncs(items, out remainingItems, AddName, AddType, (v) => AddNodes(v, out record.Definition));
 
-      return true;
+      // Element, Case
+      else
+        FromGwaByFuncs(items, out remainingItems, AddName, AddType, (v) => AddEntities(v, GSA.API.GSALayer.Analysis, out record.Definition));
+
+        return true;
     }
 
     public override bool Gwa(out List<string> gwa, bool includeSet = false)
@@ -45,50 +53,50 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
       return true;
     }
 
-    protected bool AddDefinition(string v)
-    {
-      var allDefinitions = new List<string>();
+    //protected bool AddDefinition(string v)
+    //{
+    //  var allDefinitions = new List<string>();
 
-      var definitionsArray = v.Split(' ');
+    //  var definitionsArray = v.Split(' ');
 
-      // Find indices of keyword "to" if existing
-      var indicesOfKeyword = Enumerable.Range(0, definitionsArray.Count()).Where(i => definitionsArray[i].ToLower() == "to").ToList();
+    //  // Find indices of keyword "to" if existing
+    //  var indicesOfKeyword = Enumerable.Range(0, definitionsArray.Count()).Where(i => definitionsArray[i].ToLower() == "to").ToList();
 
-      // User error in gsa list definition, "to" cannot be first in definition
-      if (indicesOfKeyword.Any(x => x < 1))
-      {
-        return false;
-      }
+    //  // User error in gsa list definition, "to" cannot be first in definition
+    //  if (indicesOfKeyword.Any(x => x < 1))
+    //  {
+    //    return false;
+    //  }
 
-      var beginningIndicesOfRanges = indicesOfKeyword.Select(i => i - 1);
+    //  var beginningIndicesOfRanges = indicesOfKeyword.Select(i => i - 1);
 
-      for(var i = 0; i < definitionsArray.Count(); i++)
-      {
-        // index is part of "to" range
-        if (beginningIndicesOfRanges.Contains(i))
-        {
+    //  for(var i = 0; i < definitionsArray.Count(); i++)
+    //  {
+    //    // index is part of "to" range
+    //    if (beginningIndicesOfRanges.Contains(i))
+    //    {
 
-          ParseListDefinitionParameter(definitionsArray[i], out var prefix, out var startIndex);
-          ParseListDefinitionParameter(definitionsArray[i + 2], out var _, out var endIndex);
+    //      ParseListDefinitionParameter(definitionsArray[i], out var prefix, out var startIndex);
+    //      ParseListDefinitionParameter(definitionsArray[i + 2], out var _, out var endIndex);
 
-          for (var j = startIndex; j < endIndex; j++)
-          {
-            allDefinitions.Add(prefix + Convert.ToString(j));
-          }
+    //      for (var j = startIndex; j < endIndex; j++)
+    //      {
+    //        allDefinitions.Add(prefix + Convert.ToString(j));
+    //      }
 
-          i += 2;
-        }
+    //      i += 2;
+    //    }
 
-        else
-        {
-          allDefinitions.Add(definitionsArray[i]);
-        }
-      }
+    //    else
+    //    {
+    //      allDefinitions.Add(definitionsArray[i]);
+    //    }
+    //  }
 
-      record.Definition = allDefinitions;
+    //  record.Definition = allDefinitions;
 
-      return true;
-    }
+    //  return true;
+    //}
 
     /// <summary>
     /// Transform list definition value to prefix and index

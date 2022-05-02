@@ -338,7 +338,8 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
       return (AddEntities(v, GSALayer.Design, out memberIndices) && AddEntities(v, GSALayer.Analysis, out elementIndices));
     }
 
-    private bool AddEntities(string v, GSALayer layer, out List<int> indices)
+
+    protected bool AddEntities(string v, GSALayer layer, out List<int> indices)
     {
       var entityItems = v.Split(' ');
       if (layer == GSALayer.Design)
@@ -352,7 +353,7 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
 
           //Only recognise the groups, as these represent the members
           //TO DO: for all elements, find if they have parents and include them
-          var members = string.Join(" ", entityItems.Where(ei => ei.StartsWith("G")));
+          var members = string.Join(" ", entityItems.Where(ei => ei.StartsWith("G") || ei.StartsWith("P") || ei.StartsWith("M")));
           indices = Instance.GsaModel.Proxy.ConvertGSAList(members, GSAEntity.MEMBER).ToList();
         }
       }

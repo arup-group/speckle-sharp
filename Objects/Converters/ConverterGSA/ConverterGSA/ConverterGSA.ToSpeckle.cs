@@ -4288,264 +4288,40 @@ namespace ConverterGSA
       }
     }
 
-    private List<string> GetListDefinition(List<string> definition, GSAListType listType)
+    private List<string> GetListDefinition(List<int> definition, GSAListType listType)
     {
       var speckleDefinitions = new List<string>();
 
-      foreach (var item in definition)
+      foreach (var index in definition)
       {
-        ParseListDefinitionParameter(item, out var prefix, out var index);
+        var speckleObjects = new List<Base>();
 
         if (listType == GSAListType.Member)
         {
-          switch (prefix.ToUpper())
-          {
-            // members by property
-            case "P":
-              speckleDefinitions.AddRange(GetGsaMember1DByProperty(index, GSALayer.Design).Select(x => x.applicationId));
-              speckleDefinitions.AddRange(GetGsaMember2DByProperty(index, GSALayer.Design).Select(x => x.applicationId));
-              break;
-            // 1d members by property
-            case "PB":
-              speckleDefinitions.AddRange(GetGsaMember1DByTypeAndProperty(index, GSALayer.Design).Select(x => x.applicationId));
-              break;
-            // 2d members by property
-            case "PA":
-              speckleDefinitions.AddRange(GetGsaMember2DByProperty(index, GSALayer.Design).Select(x => x.applicationId));
-              break;
-            // No prefix, index of gsa object only
-            default:
-              speckleDefinitions.AddRange(GetGsaMember1DByIndex(index, GSALayer.Design).Select(x => x.applicationId));
-              break;
-              // TODO: by material, group
-          }
+          Instance.GsaModel.Cache.GetSpeckleObjects<GsaMemb, Base>(index, out speckleObjects, GSALayer.Design);
         }
 
         else if (listType == GSAListType.Element)
         {
-          switch (prefix.ToUpper())
-          {
-            // elements by property
-            case "P":
-              speckleDefinitions.AddRange(GetGsaElement1DByProperty(index, GSALayer.Analysis).Select(x => x.applicationId));
-              speckleDefinitions.AddRange(GetGsaElement2DByProperty(index, GSALayer.Analysis).Select(x => x.applicationId));
-              break;
-            // 1d elements by property
-            case "PB":
-              speckleDefinitions.AddRange(GetGsaElement1DByTypeAndProperty(index, GSALayer.Analysis).Select(x => x.applicationId));
-              break;
-            // 2d elements by property
-            case "PA":
-              speckleDefinitions.AddRange(GetGsaElement2DByProperty(index, GSALayer.Analysis).Select(x => x.applicationId));
-              break;
-
-            // TODO: by material, group, properties: springs, links, cables, spacers, dampers
-
-            // No prefix, index of gsa element only
-            default:
-              speckleDefinitions.AddRange(GetGsaElement1DByIndex(index, GSALayer.Analysis).Select(x => x.applicationId));
-              break;
-          }
+          Instance.GsaModel.Cache.GetSpeckleObjects<GsaEl, Base>(index, out speckleObjects, GSALayer.Analysis);
         }
 
         else if (listType == GSAListType.Node)
         {
-          speckleDefinitions.AddRange(GetGsaNodeByIndex(index, GSALayer.Analysis).Select(x => x.applicationId));
+          Instance.GsaModel.Cache.GetSpeckleObjects<GsaNode, Base>(index, out speckleObjects, GSALayer.Analysis);
         }
 
+        else if (listType == GSAListType.Case)
+        {
+          Instance.GsaModel.Cache.GetSpeckleObjects<GsaLoadCase, Base>(index, out speckleObjects, GSALayer.Analysis);
+        }
+        
+        if (speckleObjects != null)
+          speckleDefinitions.AddRange(speckleObjects.Select(o => o.applicationId).ToList());
       }
 
       return speckleDefinitions;
-    }
-
-    //private List<Base> GetListDefinition(List<string> definition, GSAListType listType)
-    //{
-    //  var speckleDefinitions = new List<Base>();
-
-    //  foreach (var item in definition)
-    //  {
-    //    ParseListDefinitionParameter(item, out var prefix, out var index);
-
-    //    if (listType == GSAListType.Member)
-    //    {
-    //      switch (prefix.ToUpper())
-    //      {
-    //        // members by property
-    //        case "P":
-    //          speckleDefinitions.AddRange(GetGsaMember1DByProperty(index, GSALayer.Design));
-    //          speckleDefinitions.AddRange(GetGsaMember2DByProperty(index, GSALayer.Design));
-    //          break;
-    //        // 1d members by property
-    //        case "PB":
-    //          speckleDefinitions.AddRange(GetGsaMember1DByTypeAndProperty(index, GSALayer.Design));
-    //          break;
-    //        // 2d members by property
-    //        case "PA":
-    //          speckleDefinitions.AddRange(GetGsaMember2DByProperty(index, GSALayer.Design));
-    //          break;
-    //        // No prefix, index of gsa object only
-    //        default:
-    //          speckleDefinitions.AddRange(GetGsaMember1DByIndex(index, GSALayer.Design));
-    //          break;
-    //          // TODO: by material, group
-    //      }
-    //    }
-
-    //    else if (listType == GSAListType.Element)
-    //    {
-    //      switch (prefix.ToUpper())
-    //      {
-    //        // elements by property
-    //        case "P":
-    //          speckleDefinitions.AddRange(GetGsaElement1DByProperty(index, GSALayer.Analysis));
-    //          speckleDefinitions.AddRange(GetGsaElement2DByProperty(index, GSALayer.Analysis));
-    //          break;
-    //        // 1d elements by property
-    //        case "PB":
-    //          speckleDefinitions.AddRange(GetGsaElement1DByTypeAndProperty(index, GSALayer.Analysis));
-    //          break;
-    //        // 2d elements by property
-    //        case "PA":
-    //          speckleDefinitions.AddRange(GetGsaElement2DByProperty(index, GSALayer.Analysis));
-    //          break;
-
-    //        // TODO: by material, group, properties: springs, links, cables, spacers, dampers
-
-    //        // No prefix, index of gsa element only
-    //        default:
-    //          speckleDefinitions.AddRange(GetGsaElement1DByIndex(index, GSALayer.Analysis));
-    //          break;
-    //      }
-    //    }
-
-    //    else if (listType == GSAListType.Node)
-    //    {
-    //      speckleDefinitions.AddRange(GetGsaNodeByIndex(index, GSALayer.Analysis));
-    //    }
-
-    //  }
-
-    //  return speckleDefinitions;
-    //}
-
-    private List<Base> GetGsaMember1DByProperty(int index, GSALayer layer)
-    {
-      GetSpeckleObjectsByObjectReference<GsaSection, GsaMemb>(index, out var referenceObjects, out var unfilteredObjects, layer);
-      var speckleProperties = referenceObjects.Cast<Property>();
-
-      // Filter out GSAMember2D
-      var speckleMembers1D = unfilteredObjects.Where(uo => uo.GetType() == typeof(GSAMember1D)).Cast<GSAMember1D>();
-
-      return speckleMembers1D.Where(mb => mb.property.applicationId == speckleProperties.FirstOrDefault().applicationId).Cast<Base>().ToList() ?? new List<Base>();
-    }
-
-    private List<Base> GetGsaMember1DByTypeAndProperty(int index, GSALayer layer)
-    {
-      GetSpeckleObjectsByObjectReference<GsaSection, GsaMemb>(index, out var referenceObjects, out var unfilteredObjects, layer);
-      var speckleProperties = referenceObjects.Cast<Property>();
-
-      // Filter out GSAMember2D
-      var speckleMembers1D = unfilteredObjects.Where(uo => uo.GetType() == typeof(GSAMember1D)).Cast<GSAMember1D>();
-
-      return speckleMembers1D.Where(mb => mb.property.applicationId == speckleProperties.FirstOrDefault().applicationId)
-        .Where(mb => mb.memberType == MemberType.Beam || mb.memberType == MemberType.Column || mb.memberType == MemberType.Generic1D || mb.memberType == MemberType.VoidCutter1D)
-        .Cast<Base>().ToList() ?? new List<Base>();
-    }
-
-    private List<Base> GetGsaMember1DByIndex(int index, GSALayer layer)
-    {
-      Instance.GsaModel.Cache.GetSpeckleObjects<GsaMemb, Base>(index, out var referenceObjects, layer);
-
-      return referenceObjects ?? new List<Base>();
-    }
-
-    private List<Base> GetGsaMember2DByProperty(int index, GSALayer layer)
-    {
-      GetSpeckleObjectsByObjectReference<GsaProp2d, GsaMemb>(index, out var referenceObjects, out var unfilteredObjects, layer);
-      var speckleProperties = referenceObjects.Cast<Property>();
-
-      // Filter out GSAMember1D
-      var speckleMembers2D = unfilteredObjects.Where(uo => uo.GetType() == typeof(GSAMember2D)).Cast<GSAMember2D>();
-
-      return speckleMembers2D.Where(mb => mb.property.applicationId == speckleProperties.FirstOrDefault().applicationId).Cast<Base>().ToList() ?? new List<Base>();
-    }
-
-    private List<Base> GetGsaElement1DByProperty(int index, GSALayer layer)
-    {
-      GetSpeckleObjectsByObjectReference<GsaSection, GsaEl>(index, out var referenceObjects, out var unfilteredObjects, layer);
-      var speckleProperties = referenceObjects.Cast<Property>();
-
-      // Filter out GSAElement2D
-      var speckleElements1D = unfilteredObjects.Where(uo => uo.GetType() == typeof(GSAElement1D)).Cast<GSAElement1D>();
-
-      return speckleElements1D.Where(el => el.property.applicationId == speckleProperties.FirstOrDefault().applicationId).Cast<Base>().ToList() ?? new List<Base>();
-    }
-
-    private List<Base> GetGsaElement1DByTypeAndProperty(int index, GSALayer layer)
-    {
-      GetSpeckleObjectsByObjectReference<GsaSection, GsaEl>(index, out var referenceObjects, out var unfilteredObjects, layer);
-      var speckleProperties = referenceObjects.Cast<Property>();
-
-      // Filter out GSAElement2D
-      var speckleElements1D = unfilteredObjects.Where(uo => uo.GetType() == typeof(GSAElement1D)).Cast<GSAElement1D>();
-
-      return speckleElements1D.Where(el => el.property.applicationId == speckleProperties.FirstOrDefault().applicationId)
-        .Where(el => el.type == ElementType1D.Beam || el.type == ElementType1D.Column || el.type == ElementType1D.Bar || el.type == ElementType1D.Rod || el.type == ElementType1D.Strut || el.type == ElementType1D.Tie)
-        .Cast<Base>().ToList() ?? new List<Base>();
-    }
-
-    private List<Base> GetGsaElement1DByIndex(int index, GSALayer layer)
-    {
-      Instance.GsaModel.Cache.GetSpeckleObjects<GsaEl, Base>(index, out var referenceObjects, layer);
-
-      return referenceObjects ?? new List<Base>();
-    }
-
-    private List<Base> GetGsaElement2DByProperty(int index, GSALayer layer)
-    {
-      GetSpeckleObjectsByObjectReference<GsaProp2d, GsaEl>(index, out var referenceObjects, out var unfilteredObjects, layer);
-      var speckleProperties = referenceObjects.Cast<Property>();
-
-      // Filter out GSAElement1D
-      var speckleElements2D = unfilteredObjects.Where(uo => uo.GetType() == typeof(GSAElement2D)).Cast<GSAElement2D>();
-
-      return speckleElements2D.Where(el => el.property.applicationId == speckleProperties.FirstOrDefault().applicationId).Cast<Base>().ToList() ?? new List<Base>();
-    }
-
-    private List<Base> GetGsaNodeByIndex(int index, GSALayer layer)
-    {
-      Instance.GsaModel.Cache.GetSpeckleObjects<GsaNode, Base>(index, out var referenceObjects, layer);
-
-      return referenceObjects ?? new List<Base>();
-    }
-
-    private void GetSpeckleObjectsByObjectReference<T, U>(int referenceObjectIndex, out List<Base> referenceObjects, out List<Base> speckleObjects, GSALayer layer = GSALayer.Both)
-    {
-      Instance.GsaModel.Cache.GetSpeckleObjects<T, Base>(referenceObjectIndex, out referenceObjects, layer);
-      Instance.GsaModel.Cache.GetSpeckleObjectsByType<U, Base>(out speckleObjects, layer);
-    }
-
-    private void ParseListDefinitionParameter(string parameter, out string prefix, out int index)
-    {
-      var indexString = "";
-      prefix = "";
-
-      foreach (var ch in parameter.ToCharArray())
-      {
-        if (Char.IsDigit(ch))
-        {
-          indexString += ch;
-        }
-
-        else
-        {
-          prefix += ch;
-        }
-      }
-
-      index = Convert.ToInt32(indexString);
-    }
-
+    }    
 
     #endregion
 
