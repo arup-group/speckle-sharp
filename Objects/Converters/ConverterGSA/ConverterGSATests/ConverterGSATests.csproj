@@ -10,7 +10,7 @@
     <RootNamespace>ConverterGSATests</RootNamespace>
     <AssemblyName>ConverterGSATests</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+	<RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
