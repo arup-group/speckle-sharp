@@ -3,7 +3,6 @@
 #define AppPublisher "Speckle@Arup"
 #define AppURL       "https://speckle.arup.com"
 #define SpeckleFolder "{localappdata}\Speckle"
-#define AppVersion "1"
 
 [Setup]
 AppId="f9556ce4-23c7-45e7-9af6-32aeec5073ad"
