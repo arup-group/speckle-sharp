@@ -86,6 +86,7 @@ Name: civil22; Description: Speckle for Civil 3D 2022 - v{#Civil2022Version};  T
 Name: etabs; Description: Speckle for ETABS - v{#ETABSVersion};  Types: full
 Name: sap2000; Description: Speckle for SAP2000 - v{#SAP2000Version};  Types: full
 Name: gsa; Description: Speckle for Oasys GSA - v{#GSAVersion};  Types: full
+Name: gsa2; Description: Speckle for Oasys GSA (New UI) - v{#GSAVersion};  Types: full
 Name: microstation; Description: Speckle for MicroStation CONNECT Edition Update 14 - v{#MicroStationVersion};  Types: full
 Name: openroads; Description: Speckle for OpenRoads Designer CONNECT Edition 2020 R3 - v{#OpenRoadsVersion};  Types: full
 Name: openrail; Description: Speckle for OpenRail Designer CONNECT Edition 2020 R3 - v{#OpenRailVersion};  Types: full
@@ -208,6 +209,10 @@ Source: "..\Objects\Converters\ConverterCSI\ConverterSAP2000\bin\Release\netstan
 Source: "..\ConnectorGSA\ConnectorGSA\bin\Release\*"; DestDir: "{userappdata}\Oasys\SpeckleGSA\"; Flags: ignoreversion recursesubdirs; Components: gsa
 Source: "..\Objects\Converters\ConverterGSA\ConverterGSA\bin\Release\Objects.Converter.GSA.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects"; Flags: ignoreversion recursesubdirs; Components: gsa
 
+;gsa2
+Source: "..\ConnectorGSA\ConnectorGSA2\bin\Release\net48\*"; DestDir: "{userappdata}\Oasys\SpeckleGSA2\"; Flags: ignoreversion recursesubdirs; Components: gsa2
+Source: "..\Objects\Converters\ConverterGSA\ConverterGSA\bin\Release\Objects.Converter.GSA.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects"; Flags: ignoreversion recursesubdirs; Components: gsa2
+
 ;microstation
 Source: "..\ConnectorBentley\ConnectorMicroStation\bin\Release\*"; DestDir: "{userappdata}\Bentley\MicroStation\Addins\Speckle2MicroStation\"; Flags: ignoreversion recursesubdirs; Components: microstation
 Source: "..\Objects\Converters\ConverterBentley\ConverterMicroStation\bin\Release\netstandard2.0\Objects.Converter.MicroStation.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects"; Flags: ignoreversion recursesubdirs; Components: microstation
@@ -270,6 +275,7 @@ Type: filesandordirs; Name: "{userappdata}\Dynamo\*"; Components: dynamo
 Type: filesandordirs; Name: "{localappdata}\Computers and Structures\ETABS 19\Speckle2ETABS\*"; Components: etabs
 Type: filesandordirs; Name: "{localappdata}\Computers and Structures\SAP2000 23\Speckle2SAP2000\*"; Components: sap2000
 Type: filesandordirs; Name: "{userappdata}\Oasys\SpeckleGSA\*"; Components: gsa
+Type: filesandordirs; Name: "{userappdata}\Oasys\SpeckleGSA2\*"; Components: gsa2
 Type: filesandordirs; Name: "{userappdata}\Bentley\MicroStation\Addins\Speckle2MicroStation\*";  Components: microstation
 Type: filesandordirs; Name: "{userappdata}\Bentley\OpenRoadsDesigner\Addins\Speckle2OpenRoads\*";  Components: openroads
 Type: filesandordirs; Name: "{userappdata}\Bentley\OpenRailDesigner\Addins\Speckle2OpenRail\*";  Components: openrail
@@ -304,6 +310,7 @@ Type: filesandordirs; Name: "{userappdata}\Dynamo";
 Type: filesandordirs; Name: "{localappdata}\Computers and Structures\ETABS 19\Speckle2ETABS";
 Type: filesandordirs; Name: "{localappdata}\Computers and Structures\SAP2000 23\Speckle2SAP2000";
 Type: filesandordirs; Name: "{userappdata}\Oasys\SpeckleGSA";
+Type: filesandordirs; Name: "{userappdata}\Oasys\SpeckleGSA2";
 Type: filesandordirs; Name: "{userappdata}\Bentley\MicroStation\Addins\Speckle2MicroStation"; 
 Type: filesandordirs; Name: "{userappdata}\Bentley\OpenRoadsDesigner\Addins\Speckle2OpenRoads";
 Type: filesandordirs; Name: "{userappdata}\Bentley\OpenRailDesigner\Addins\Speckle2OpenRail"; 
@@ -352,7 +359,8 @@ Name: "{group}\{cm:UninstallProgram,{#AppName}}"; Filename: "{uninstallexe}"
 Name: "{group}\Speckle@Arup AccountManager"; Filename: "{userappdata}\speckle-connection-manager-ui\SpeckleConnectionManagerUI.exe";
 Name: "{group}\Check for Speckle Updates"; Filename: "{#SpeckleFolder}\{#UpdaterFilename}"; Parameters: "-showprogress"
 Name: "{userappdata}\Microsoft\Windows\Start Menu\Programs\Startup\Speckle@Arup"; Filename: "{#SpeckleFolder}\{#UpdaterFilename}"; Tasks: updates
-Name: "{userappdata}\Microsoft\Windows\Start Menu\Programs\Oasys\SpeckleGSAV2"; Filename: "{userappdata}\Oasys\SpeckleGSA\ConnectorGSA.exe";
+Name: "{userappdata}\Microsoft\Windows\Start Menu\Programs\Oasys\SpeckleGSAV2"; Filename: "{userappdata}\Oasys\SpeckleGSA\ConnectorGSA.exe"; Components: gsa
+Name: "{userappdata}\Microsoft\Windows\Start Menu\Programs\Oasys\SpeckleGSAV2 (New UI)"; Filename: "{userappdata}\Oasys\SpeckleGSA2\SpeckleConnectorGSA.exe"; Components: gsa2
 
 [Run]
 Filename: "{userappdata}\speckle-connection-manager-ui\SpeckleConnectionManagerUI.exe"; Description: "Authenticate with the Speckle Server"; Flags: nowait postinstall skipifsilent
