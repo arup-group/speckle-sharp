@@ -1,11 +1,11 @@
 ;defining variables
-#define AppName      "Speckle@Arup v2 GSA Connector"
+#define AppName      "Speckle@Arup v2 GSA Connector (New UI)"
 #define AppPublisher "Speckle@Arup"
 #define AppURL       "https://docs.speckle.arup.com"
 #define SpeckleFolder "{localappdata}\Speckle"
 
 [Setup]
-AppId="f9556ce4-23c7-45e7-9af6-32aeec5073ad"
+AppId="f9556ce4-23c7-45e7-9af6-32aeec5073ae"
 AppName={#AppName}
 AppVersion={#AppVersion}
 AppVerName={#AppName} {#AppVersion}
@@ -43,16 +43,16 @@ Name: "{app}"; Permissions: everyone-full
 
 [Files]
 ;gsa
-Source: "..\ConnectorGSA\ConnectorGSA2\bin\Release\net5.0\*"; DestDir: "{userappdata}\Oasys\SpeckleGSA\"; Flags: ignoreversion recursesubdirs; Components: gsa
+Source: "..\ConnectorGSA\ConnectorGSA2\bin\Release\net48\*"; DestDir: "{userappdata}\Oasys\SpeckleGSA2\"; Flags: ignoreversion recursesubdirs; Components: gsa
 Source: "..\Objects\Converters\ConverterGSA\ConverterGSA\bin\Release\Objects.Converter.GSA.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects"; Flags: ignoreversion recursesubdirs; Components: gsa
 
 ;kits
 Source: "..\Objects\Objects\bin\Release\netstandard2.0\Objects.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects"; Flags: ignoreversion recursesubdirs; Components: kits
 
 [InstallDelete]
-Type: filesandordirs; Name: "{userappdata}\Oasys\SpeckleGSA\*"
+Type: filesandordirs; Name: "{userappdata}\Oasys\SpeckleGSA2\*"
 Type: files; Name: "{userappdata}\Speckle\Kits\Objects\Objects.Converter.GSA.dll"
 
 [Icons]
 Name: "{group}\{cm:UninstallProgram,{#AppName}}"; Filename: "{uninstallexe}"
-Name: "{userappdata}\Microsoft\Windows\Start Menu\Programs\Oasys\SpeckleGSAV2"; Filename: "{userappdata}\Oasys\SpeckleGSA\ConnectorGSA.exe";
+Name: "{userappdata}\Microsoft\Windows\Start Menu\Programs\Oasys\SpeckleGSAV2"; Filename: "{userappdata}\Oasys\SpeckleGSA2\SpeckleConnectorGSA.exe";
