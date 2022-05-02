@@ -24,14 +24,14 @@ namespace Objects.Structural.Geometry
     public double offset { get; set; } //z direction (normal)
     public double orientationAngle { get; set; } //
 
-    [DetachProperty]
+    //[DetachProperty]
     public Base parent { get; set; } //parent element
 
-    [DetachProperty]
+    //[DetachProperty]
     public List<Node> topology { get; set; }
     public List<string> topologyRefs { get; set; }
 
-    [DetachProperty]
+    //[DetachProperty]
     public List<List<Node>> voids { get; set; }
     public List<List<string>> voidRefs { get; set; }
 
