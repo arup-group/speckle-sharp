@@ -362,7 +362,13 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
             default:
               break;
           }
-          records.AddRange(precendentRecords);
+
+          foreach (var rec in precendentRecords)
+          {
+            // Ensure objects appearing in multiple lists are not duplicated in records
+            if (!records.Contains(rec))
+              records.Add(rec);
+          }
         }
       }
       gsaRecords = records;
@@ -390,6 +396,61 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
 
           // Get members precedents:
 
+          // Common to 1d and 2d members
+
+          // Void nodes
+          if (gsaMemb.Voids.HasValues())
+          {
+            foreach (var vd in gsaMemb.Voids)
+            {
+              foreach (var node in vd)
+              {
+                GetNative<GsaNode>(node, out var nodeRecord);
+                if (!records.Contains(nodeRecord))
+                  records.Add(nodeRecord);
+              }
+            }
+          }
+
+          // Polyline nodes
+          if (gsaMemb.Polylines.HasValues())
+          {
+            foreach (var polyline in gsaMemb.Polylines)
+            {
+              foreach (var node in polyline)
+              {
+                GetNative<GsaNode>(node, out var nodeRecord);
+                if (!records.Contains(nodeRecord))
+                  records.Add(nodeRecord);
+              }
+            }
+          }
+
+          // Pointnode nodes
+          if (gsaMemb.PointNodeIndices.HasValues())
+          {
+            foreach (var pt in gsaMemb.PointNodeIndices)
+            {
+              GetNative<GsaNode>(pt, out var nodeRecord);
+              if (!records.Contains(nodeRecord))
+                records.Add(nodeRecord);
+            }
+          }
+
+          if (gsaMemb.AdditionalAreas.HasValues())
+          {
+            foreach (var area in gsaMemb.AdditionalAreas)
+            {
+              foreach (var node in area)
+              {
+                GetNative<GsaNode>(node, out var nodeRecord);
+                if (!records.Contains(nodeRecord))
+                  records.Add(nodeRecord);
+              }
+            }
+          }
+
+          // 1d members
           if (gsaMemb.Is1dMember())
           {
             // Nodes
@@ -421,6 +482,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
             }
           }
 
+          // 2d members
           else if (gsaMemb.Is2dMember())
           {
             // Nodes
@@ -431,34 +493,6 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
                 GetNative<GsaNode>(node, out var nodeRecord);
                 if (!records.Contains(nodeRecord))
                   records.Add(nodeRecord);
-              }
-            }
-            
-            // Void nodes
-            if (gsaMemb.Voids.HasValues())
-            {
-              foreach (var vd in gsaMemb.Voids)
-              {
-                foreach(var node in vd)
-                {
-                  GetNative<GsaNode>(node, out var nodeRecord);
-                  if (!records.Contains(nodeRecord))
-                    records.Add(nodeRecord);
-                }
-              }
-            }
-
-            // Polyline nodes
-            if (gsaMemb.Polylines.HasValues())
-            {
-              foreach (var polyline in gsaMemb.Polylines)
-              {
-                foreach (var node in polyline)
-                {
-                  GetNative<GsaNode>(node, out var nodeRecord);
-                  if (!records.Contains(nodeRecord))
-                    records.Add(nodeRecord);
-                }
               }
             }
 
