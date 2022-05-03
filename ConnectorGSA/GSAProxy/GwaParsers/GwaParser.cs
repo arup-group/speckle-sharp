@@ -338,39 +338,24 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
       return (AddEntities(v, GSALayer.Design, out memberIndices) && AddEntities(v, GSALayer.Analysis, out elementIndices));
     }
 
-    private bool AddEntities(string v, GSALayer layer, out List<int> indices)
+    protected bool AddEntities(string v, GSALayer layer, out List<int> indices)
     {
-      var entityItems = v.Split(' ');
       if (layer == GSALayer.Design)
       {
-        if (entityItems.Count() == 1 && entityItems.First().Equals("all", StringComparison.InvariantCultureIgnoreCase))
-        {
-          indices = Instance.GsaModel.Cache.LookupIndices<GsaMemb>().ToList();
-        }
-        else
-        {
-
-          //Only recognise the groups, as these represent the members
-          //TO DO: for all elements, find if they have parents and include them
-          var members = string.Join(" ", entityItems.Where(ei => ei.StartsWith("G")));
-          indices = Instance.GsaModel.Proxy.ConvertGSAList(members, GSAEntity.MEMBER).ToList();
-        }
+        indices = Instance.GsaModel.Proxy.ConvertGSAList(v, GSAEntity.MEMBER).ToList();
       }
       else
       {
-        indices = (entityItems.Count() == 1 && entityItems.First().Equals("all", StringComparison.InvariantCultureIgnoreCase))
-          ? Instance.GsaModel.Cache.LookupIndices<GsaEl>().ToList()
-          : Instance.GsaModel.Proxy.ConvertGSAList(v, GSAEntity.ELEMENT).ToList();
+        indices = Instance.GsaModel.Proxy.ConvertGSAList(v, GSAEntity.ELEMENT).ToList();
       }
       return true;
     }
 
     protected bool AddNodes(string v, out List<int> indices)
     {
-      var entityItems = v.Split(' ');
-      indices = (entityItems.Count() == 1 && entityItems.First().Equals("all", StringComparison.InvariantCultureIgnoreCase))
-          ? Instance.GsaModel.Cache.LookupIndices<GsaNode>()
-          : Instance.GsaModel.Proxy.ConvertGSAList(v, GSAEntity.NODE);
+
+      indices = Instance.GsaModel.Proxy.ConvertGSAList(v, GSAEntity.NODE);
+
       return true;
     }
 

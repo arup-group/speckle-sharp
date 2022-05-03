@@ -10,7 +10,7 @@
     <RootNamespace>Speckle.ConnectorGSA.Proxy</RootNamespace>
     <AssemblyName>ConnectorGSAProxy</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-	<RuntimeIdentifier>win</RuntimeIdentifier>
+    <RuntimeIdentifier>win</RuntimeIdentifier>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
@@ -50,6 +50,7 @@
     <Compile Include="Cache\GsaCache.cs" />
     <Compile Include="Cache\GsaCacheRecord.cs" />
     <Compile Include="GwaParsers\AnalysisStages\GsaAnalStagePropParser.cs" />
+    <Compile Include="GwaParsers\GeneralData\GsaListParser.cs" />
     <Compile Include="GwaParsers\Geometry\GsaPolylineParser.cs" />
     <Compile Include="GwaParsers\Loading\Beam\GsaLoad1dThermalParser.cs" />
     <Compile Include="GwaParsers\Specification\GsaTolParser.cs" />

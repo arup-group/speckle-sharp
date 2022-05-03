@@ -160,7 +160,7 @@ namespace ConnectorGSA.UI
       List<Base> objs = null;
       try
       {
-        objs = Commands.ConvertToSpeckle(converter);
+        objs = Commands.ConvertToSpeckle(converter, selectedObjects);
       }
       catch (Exception ex)
       {
@@ -177,6 +177,12 @@ namespace ConnectorGSA.UI
         {
           progress.Report.LogConversionError(ce);
         }
+      }
+
+      if(objs == null)
+      {
+        progress.Report.LogConversionError(new Exception("Failed to convert cache data to Speckle"));
+        return null;
       }
 
       progress.Report.Log("Converted cache data to Speckle");

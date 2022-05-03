@@ -20,6 +20,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using DesktopUI2.ViewModels;
 using DesktopUI2.Models;
+using DesktopUI2.Models.Filters;
 
 namespace ConnectorGSA
 {
@@ -252,11 +253,27 @@ namespace ConnectorGSA
       return true;
     }
 
-    public static List<Base> ConvertToSpeckle(ISpeckleConverter converter)
+    public static List<Base> ConvertToSpeckle(ISpeckleConverter converter, List<string> selectionFilterObjects)
     {
-      if (!Instance.GsaModel.Cache.GetNatives(out List<GsaRecord> gsaRecords))
+      var gsaRecords = new List<GsaRecord>();
+
+      // Send all elements
+      if (String.Equals(selectionFilterObjects.FirstOrDefault(), "all", StringComparison.InvariantCultureIgnoreCase) || String.Equals(selectionFilterObjects.FirstOrDefault(), "everything", StringComparison.InvariantCultureIgnoreCase))
       {
-        return null;
+        if (!Instance.GsaModel.Cache.GetNatives(out gsaRecords))
+        {
+          return null;
+        }
+
+      }
+
+      // Send elements by list selection
+      else
+      {
+        if (!Instance.GsaModel.Cache.GetNativesFilteredByList(out gsaRecords, selectionFilterObjects))
+        {
+          return null;
+        }
       }
 
       //This converts all the natives ONCE and THEN assigns them into the correct layer-specific Model object(s)

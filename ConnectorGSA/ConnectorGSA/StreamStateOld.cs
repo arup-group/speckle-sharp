@@ -12,7 +12,9 @@ namespace ConnectorGSA
   [JsonObject(MemberSerialization.OptIn)]
   public class StreamStateOld
   {
+#pragma warning disable CS0414 // The field 'StreamStateOld.branchName' is assigned but its value is never used
     private string branchName = "main";
+#pragma warning restore CS0414 // The field 'StreamStateOld.branchName' is assigned but its value is never used
     private Client _client;
 
     [JsonProperty]

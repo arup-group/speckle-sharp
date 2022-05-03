@@ -184,7 +184,9 @@ namespace ConnectorGSA.ViewModels
     #region continuous_streaming_members
     private Timer TriggerTimer { get; set; } = new Timer();
     //private ReceiverCoordinator continuousReceiverCoordinator;
+#pragma warning disable CS0169 // The field 'MainWindowViewModel.continuousReceiverCoordinator' is never used
     private object continuousReceiverCoordinator;
+#pragma warning restore CS0169 // The field 'MainWindowViewModel.continuousReceiverCoordinator' is never used
     #endregion
 
     public MainWindowViewModel()
@@ -232,7 +234,9 @@ namespace ConnectorGSA.ViewModels
        });
 
       ConnectToServerCommand = new DelegateCommand<object>(
+#pragma warning disable CS1998 // This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread.
         async (o) =>
+#pragma warning restore CS1998 // This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread.
         {
 
           MainWindowEnabled = false;

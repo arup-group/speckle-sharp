@@ -22,7 +22,7 @@ namespace ConnectorGSATests
 
     protected string v2ServerUrl = "https://v2.speckle.arup.com";
 
-    protected GsaModelMock GsaModelMock = new GsaModelMock();
+    protected GsaModel GsaModelMock = new GsaModel();
     protected IGSACache cache => GsaModelMock.Cache;
     protected IGSAProxy proxy { get => GsaModelMock.Proxy; set => GsaModelMock.Proxy = value; }
 
