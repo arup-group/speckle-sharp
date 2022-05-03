@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Objects.Geometry;
 using Objects.Structural.Geometry;
 using Objects.Structural.Properties;
+using System.Linq;
 
 namespace Objects.Structural.GSA.Geometry //GSA.Geometry?
 {
@@ -69,6 +70,8 @@ namespace Objects.Structural.GSA.Geometry //GSA.Geometry?
       this.end2Offset = end2Offset == null ? new Vector(0, 0, 0) : end2Offset;
       this.localAxis = localAxis;
       this.isDummy = isDummy;
+
+      this.topologyRefs = topology.Select(n => n.applicationId).ToList();
     }
   }
 }

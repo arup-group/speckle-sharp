@@ -9,7 +9,7 @@ using Objects.Structural.Properties;
 
 namespace Objects.Structural.Geometry
 {
-  public class Element1D : Base, IDisplayValue<List<Mesh>>
+  public class Element1D : Base, IDisplayValue<Polyline>
   {
     public string name { get; set; } //add unique id as base identifier, name can change too easily
     public ICurve baseLine { get; set; }
@@ -37,9 +37,10 @@ namespace Objects.Structural.Geometry
 
     [DetachProperty]
     public List<Node> topology { get; set; }
+    public List<string> topologyRefs { get; set; }
 
     [DetachProperty]
-    public List<Mesh> displayValue { get; set; }
+    public Polyline displayValue { get; set; }
 
     public string units { get; set; }
     public Element1D() { }
@@ -128,13 +129,13 @@ namespace Objects.Structural.Geometry
       this.end2Offset = end2Offset == null ? new Vector(0, 0, 0) : end2Offset;
       this.localAxis = localAxis;
     }
-    
+
     #region Obsolete
-    [JsonIgnore, Obsolete("Use " + nameof(displayValue) + " instead")]
-    public Mesh displayMesh {
-      get => displayValue?.FirstOrDefault();
-      set => displayValue = new List<Mesh> {value};
-    }
+    //[JsonIgnore, Obsolete("Use " + nameof(displayValue) + " instead")]
+    //public Mesh displayMesh {
+    //  get => displayValue?.FirstOrDefault();
+    //  set => displayValue = new List<Mesh> {value};
+    //}
     #endregion
   }
 }

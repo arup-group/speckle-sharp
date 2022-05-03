@@ -5,6 +5,7 @@ using Speckle.Core.Models;
 using Speckle.Core.Kits;
 using Objects.Structural.Geometry;
 using Objects.Structural.GSA.Analysis;
+using System.Linq;
 
 namespace Objects.Structural.GSA.Geometry
 {
@@ -12,21 +13,16 @@ namespace Objects.Structural.GSA.Geometry
   {
     public string name { get; set; }
     public int? nativeId { get; set; }
-
-    [DetachProperty]
     public Node primaryNode { get; set; }
+    public string primaryNodeRef { get; set; }
 
-    [DetachProperty]
-    [Chunkable(5000)]
+    [Chunkable(250)]
     public List<Node> constrainedNodes { get; set; }
-
-    [DetachProperty]
+    public List<string> constrainedNodeRefs { get; set; }
     public Base parentMember { get; set; }
-
-    [DetachProperty]
     public List<GSAStage> stages { get; set; }
     public LinkageType type { get; set; }
-    //public Dictionary<AxisDirection6, List<AxisDirection6>> coupledDirections { get; set; }
+
     public GSAConstraintCondition constraintCondition { get; set; }
     public GSARigidConstraint() { }
 
@@ -41,6 +37,8 @@ namespace Objects.Structural.GSA.Geometry
       this.stages = stageList;
       this.type = LinkageType.Custom;
       this.constraintCondition = coupledDirections;
+
+      this.constrainedNodeRefs = constrainedNodes.Select(n => n.applicationId).ToList();
     }
 
     [SchemaInfo("GSARigidConstraint", "Creates a Speckle structural rigid restraint (a set of nodes constrained to move as a rigid body) for GSA", "GSA", "Geometry")]
@@ -52,6 +50,8 @@ namespace Objects.Structural.GSA.Geometry
       this.constrainedNodes = constrainedNodes;
       this.stages = stageList;
       this.type = type;
+
+      this.constrainedNodeRefs = constrainedNodes.Select(n => n.applicationId).ToList();
     }
   }
 

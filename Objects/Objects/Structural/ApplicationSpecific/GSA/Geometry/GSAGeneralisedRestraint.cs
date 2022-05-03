@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Objects.Geometry;
 using Objects.Structural.Geometry;
 using Objects.Structural.GSA.Analysis;
+using System.Linq;
 
 namespace Objects.Structural.GSA.Geometry
 {
@@ -12,13 +13,11 @@ namespace Objects.Structural.GSA.Geometry
   {
     public int? nativeId { get; set; }
     public string name { get; set; }
-
-    [DetachProperty]
     public Restraint restraint { get; set; }
 
-    [DetachProperty]
-    [Chunkable(5000)]
+    [Chunkable(250)]
     public List<Node> nodes { get; set; }
+    public List<string> nodeRefs { get; set; }
 
     [DetachProperty]
     public List<GSAStage> stages { get; set; }
@@ -32,6 +31,8 @@ namespace Objects.Structural.GSA.Geometry
       this.restraint = restraint;
       this.nodes = nodes;
       this.stages = stages;
+
+      this.nodeRefs = nodes.Select(n => n.applicationId).ToList();
     }
   }
 }

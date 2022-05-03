@@ -21,7 +21,7 @@ using Objects.Structural.Loading;
 using System.Threading.Tasks;
 using Speckle.Core.Transports;
 using Speckle.Core.Serialisation;
-using Speckle.Newtonsoft.Json;
+using Objects.Structural.ApplicationSpecific.GSA.GeneralData;
 
 namespace ConverterGSA
 {
@@ -29,7 +29,7 @@ namespace ConverterGSA
   public partial class ConverterGSA : ISpeckleConverter
   {
     #region ISpeckleConverter props
-    public static string AppName = Applications.GSA;
+    public static string AppName = VersionedHostApplications.GSA;
     public string Description => "Default Speckle Kit for GSA";
 
     public string Name => nameof(ConverterGSA);
@@ -39,28 +39,6 @@ namespace ConverterGSA
     public string WebsiteOrEmail => "https://www.oasys-software.com/";
 
     public Dictionary<string, string> Settings { get; private set; } = new Dictionary<string, string>();
-
-    private static SQLiteTransport MappingStorage = new SQLiteTransport(scope: "Mappings");
-
-    private bool _useMappings;
-    private bool UseMappings
-    {
-      get { return Settings.ContainsKey("section-mapping") && Settings["section-mapping"] != null; }
-    }
-
-    private Base _mappingData;
-    private Base MappingData
-    {
-      get 
-      {
-        if (_mappingData == null)
-        {
-          // get from settings
-          _mappingData = UseMappings ? GetMappingData() : null;
-        }
-        return _mappingData;
-      }
-    }
 
     public ProgressReport Report { get; private set; } = new ProgressReport();
 
@@ -73,7 +51,7 @@ namespace ConverterGSA
 
     private UnitConversion conversionFactors = new UnitConversion();  //Default
 
-    public List<ApplicationPlaceholderObject> ContextObjects { get; set; } = new List<ApplicationPlaceholderObject>();
+    public List<Base> ContextObjects { get; set; } = new List<Base>();
 
     //public List<string> ConvertedObjectsList { get; set; } = new List<string>();
     //The presence of a key (application ID) and non-null speckle object means it's an embedded object yet to be converted to native
@@ -116,7 +94,8 @@ namespace ConverterGSA
       Loads,
       Restraints,
       Properties,
-      Materials
+      Materials,
+      GeneralData
     }
 
     private static List<ModelAspect> modelAspectValues = Enum.GetValues(typeof(ModelAspect)).Cast<ModelAspect>().ToList();
@@ -138,7 +117,8 @@ namespace ConverterGSA
       { ModelAspect.Restraints, new List<Type>() { typeof(Objects.Structural.Geometry.Restraint) } },
       { ModelAspect.Properties, new List<Type>()
         { typeof(GSAProperty1D), typeof(GSAProperty2D), typeof(SectionProfile), typeof(PropertyMass), typeof(PropertySpring), typeof(PropertyDamper), typeof(Property3D) } },
-      { ModelAspect.Materials, new List<Type>() { typeof(GSAMaterial), typeof(GSAConcrete), typeof(GSASteel) } }
+      { ModelAspect.Materials, new List<Type>() { typeof(GSAMaterial), typeof(GSAConcrete), typeof(GSASteel) } },
+      { ModelAspect.GeneralData, new List<Type>() { typeof(GSAList)} }
     };
     #endregion
 
@@ -218,6 +198,8 @@ namespace ConverterGSA
       var retListLock = new object();
 #endif
       embeddedToBeConverted.Clear();
+
+      ContextObjects.AddRange(objects);
 
       //Handle Model objects as a special case, essentially flatten them first
       var models = objects.Where(o => o is Model).ToList();
@@ -483,16 +465,28 @@ namespace ConverterGSA
       //nodeDependentSchemaTypesByLayer.Add(GSALayer.Design, Instance.GsaModel.Proxy.GetNodeDependentTypes(GSALayer.Design));
 
       var gsaRecordsByType = gsaRecords.GroupBy(r => r.GetType()).ToDictionary(r => r.Key, r => r.ToList());
+      var modelsByLayer = new Dictionary<GSALayer, Model>() { };
+      var modelHasData = new Dictionary<GSALayer, bool>() { };
 
-      var modelsByLayer = new Dictionary<GSALayer, Model>() { { GSALayer.Design, new Model() { specs = modelInfo, layerDescription = "Design" } } };
-      var modelHasData = new Dictionary<GSALayer, bool>() { { GSALayer.Design, false } };
+      if (sendLayer == GSALayer.Design)
+      {
+        modelsByLayer = new Dictionary<GSALayer, Model>() { { GSALayer.Design, new Model() { specs = modelInfo, layerDescription = "Design" } } };
+        modelHasData = new Dictionary<GSALayer, bool>() { { GSALayer.Design, false } };
+      }
+      if (sendLayer == GSALayer.Analysis)
+      {
+        modelsByLayer = new Dictionary<GSALayer, Model>() { { GSALayer.Analysis, new Model() { specs = modelInfo, layerDescription = "Analysis" } } };
+        modelHasData = new Dictionary<GSALayer, bool>() { { GSALayer.Analysis, false } };
+      }
       if (sendLayer == GSALayer.Both)
       {
+        modelsByLayer = new Dictionary<GSALayer, Model>() { { GSALayer.Design, new Model() { specs = modelInfo, layerDescription = "Design" } } };
+        modelHasData = new Dictionary<GSALayer, bool>() { { GSALayer.Design, false } };
+
         modelsByLayer.Add(GSALayer.Analysis, new Model() { specs = modelInfo, layerDescription = "Analysis" });
         modelHasData.Add(GSALayer.Analysis, false);
 
         //nodeDependentSchemaTypesByLayer.Add(GSALayer.Analysis, Instance.GsaModel.Proxy.GetNodeDependentTypes(GSALayer.Analysis));
-
         //nodeDependentSchemaTypesByLayer.Add(GSALayer.Both, Instance.GsaModel.Proxy.GetNodeDependentTypes(GSALayer.Both));
       }
 
@@ -564,7 +558,7 @@ namespace ConverterGSA
                     Instance.GsaModel.Cache.SetSpeckleObjects(nativeObj, layerObjectsToCache.ToDictionary(o => o.applicationId, o => (object)o), l);
                   }
                 }
-                
+
                 if (AssignIntoResultSet(rsa, toSpeckleResult))
                 {
                   resultSetHasData = true;
@@ -578,7 +572,7 @@ namespace ConverterGSA
           }
         }
       }
-     
+
       var resultObjects = new List<Base> { };
       var globalResults = GsaGlobalResultToSpeckle(out var speckleResult);
       if (globalResults) resultObjects.AddRange(speckleResult.Select(i => (Base)i));
@@ -769,6 +763,11 @@ namespace ConverterGSA
           }
           model.materials.AddRange(objsByType[sType]);
         }
+        if (modelGroups[ModelAspect.GeneralData].Contains(sType))
+        {
+          model["generalData"] = objsByType[sType];
+        }
+
         numObjs += objsByType[sType].Count();
       }
       return (numObjs > 0);
@@ -781,83 +780,17 @@ namespace ConverterGSA
       throw new NotImplementedException();
     }
 
-    public void SetContextObjects(List<ApplicationPlaceholderObject> objects) => ContextObjects = objects;
+    public void SetContextObjects(List<ApplicationPlaceholderObject> objects)
+    {
+      throw new NotImplementedException();
+    }
 
     public void SetPreviousContextObjects(List<ApplicationPlaceholderObject> objects)
     {
       throw new NotImplementedException();
     }
 
-    #region Section Mapping
 
-    private Dictionary<string, string> GetMappingFromProfileName(string name, string target = "gsa", bool isFraming = true)
-    {
-      Dictionary<string, string> mappingData = new Dictionary<string, string>();
-
-      var key = Settings["section-mapping"];
-      var hash = $"{key}-mappings";
-      var objString = MappingStorage.GetObject(hash);
-
-      var objBase = JsonConvert.DeserializeObject<Base>(objString);
-      var serializerV2 = new BaseObjectDeserializerV2();
-      var data = serializerV2.Deserialize(objString);
-
-      var mappingsList = ((List<object>)data["data"]).Select(m => m as Dictionary<string, object>).ToList();
-      var mappingDict = mappingsList.Select(m => m as Dictionary<string, object>).ToList();
-      var mapping = mappingDict.Where(x => (string)x["section"] == name).FirstOrDefault();
-      if (mapping != null && mapping.ContainsKey(target))
-      {
-        var targetSection = MappingData[target] as Base;
-        var sectionList = ((List<object>)targetSection["data"]).Select(m => m as Dictionary<string, object>).ToList();
-        var sectionDict = sectionList.Select(m => m as Dictionary<string, object>).ToList();
-        var section = sectionDict.Where(x => (long)x["key"] == (long)mapping[target]).FirstOrDefault();
-
-        foreach (var sectionParameter in section)
-        {
-          mappingData.Add(sectionParameter.Key, sectionParameter.Value.ToString());
-        }
-      }
-      else
-      {
-        return null;
-      }
-
-      return mappingData;
-    }
-
-    private Base GetMappingData()
-    {
-      var key = Settings["section-mapping"];
-      const string mappingsBranch = "mappings";
-      const string sectionBranchPrefix = "sections";
-
-      var mappingData = new Base();
-
-      var hashes = MappingStorage.GetAllHashes();
-      var matches = hashes.Where(h => h.Contains(key)).ToList();
-      foreach (var match in matches)
-      {
-        var objString = MappingStorage.GetObject(match);
-        var serializerV2 = new BaseObjectDeserializerV2();
-        var data = serializerV2.Deserialize(objString);
-
-        if (match.Contains($"{key}-{mappingsBranch}"))
-        {
-          mappingData[$"{mappingsBranch}"] = data;
-        }
-        else if (match.Contains(sectionBranchPrefix))
-        {
-          var name = match.Replace($"{key}-{sectionBranchPrefix}/", "");
-          mappingData[$"{name}"] = data;
-        }
-      }
-
-      Report.Log($"Using section mapping data from stream: {key}");
-
-      return mappingData;
-
-    }
-    #endregion
 
     #region private_classes
     internal class ToSpeckleResult

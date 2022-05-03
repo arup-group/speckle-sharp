@@ -10,8 +10,6 @@ namespace Objects.Structural.GSA.Geometry
   public class GSAGridPlane : Storey
   {
     public int? nativeId { get; set; }
-
-    [DetachProperty]
     public Axis axis { get; set; }
     public double? toleranceBelow { get; set; }
     public double? toleranceAbove { get; set; }

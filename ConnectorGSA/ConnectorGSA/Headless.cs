@@ -226,7 +226,7 @@ namespace ConnectorGSA
         return false;
       }
 
-      var streamStates = new List<StreamState>();
+      var streamStates = new List<StreamStateOld>();
       bool cliResult = false;
       if (sendReceive == SendReceive.Receive)
       {
@@ -244,7 +244,7 @@ namespace ConnectorGSA
 
           foreach (var streamId in streamIds)
           {
-            var streamState = new StreamState(userInfo.id, RestApi)
+            var streamState = new StreamStateOld(userInfo.id, RestApi)
             {
               Stream = new Speckle.Core.Api.Stream() { id = streamId },
               IsReceiving = true
@@ -287,7 +287,7 @@ namespace ConnectorGSA
           //The cache is filled with natives
           if (Instance.GsaModel.Cache.GetNatives(out var gsaRecords))
           {
-            ((GsaProxy)Instance.GsaModel.Proxy).WriteModel(gsaRecords, null, Instance.GsaModel.StreamLayer);
+            ((GsaProxy)Instance.GsaModel.Proxy).WriteModel(gsaRecords, new Progress<string>(), Instance.GsaModel.StreamLayer);
           }
 
           Console.WriteLine("Receiving complete!");
@@ -338,18 +338,18 @@ namespace ConnectorGSA
 
 
           var stream = NewStream(client, "GSA data", "GSA data").Result;
-          var streamState = new StreamState(userInfo.id, RestApi) { Stream = stream, IsSending = true };
+          var streamState = new StreamStateOld(userInfo.id, RestApi) { Stream = stream, IsSending = true };
           streamStates.Add(streamState);
 
           var serverTransport = new ServerTransport(account, streamState.Stream.id);
 
           Console.WriteLine($"Sending to Speckle server...");
-          var sent = Commands.SendCommit(commitObj, streamState, "", serverTransport).Result;
-          if (sent.status)
+          var sent = Commands.SendCommit(commitObj, streamState, "", null, null, null, serverTransport).Result;
+          if (String.IsNullOrEmpty(sent))
           {
             Console.WriteLine("Sending complete!");
             Console.WriteLine($"New stream created: {streamState.Stream.id}");
-            Console.WriteLine($"New commit created: {sent.commitId}");
+            Console.WriteLine($"New commit created: {sent}");
           } else
           {
             Console.WriteLine("Sending failed!");

@@ -14,7 +14,7 @@ namespace Speckle.GSA.API
     //public abstract IGSAMessenger Messenger { get; set; }
 
     public string Units { get; set; } = "mm";
-    public double CoincidentNodeAllowance { get; set; }
+    public double CoincidentNodeAllowance { get; set; } = 10;
     public List<ResultType> ResultTypes { get; set; }
     public List<ResultGroup> ResultGroups
     {
@@ -58,7 +58,7 @@ namespace Speckle.GSA.API
 
     public char GwaDelimiter { get; set; } = '\t';
     public virtual int LoggingMinimumLevel { get; set; }
-    public bool SendOnlyMeaningfulNodes { get; set; }
+    public bool SendOnlyMeaningfulNodes { get; set; } = true;
     public IProgress<bool> ConversionProgress { get; set; }
     public IProgress<int> NumberToConvertProgress { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 

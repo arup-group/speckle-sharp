@@ -96,19 +96,19 @@
               </Grid>
             </DataTemplate>
           </ComboBox.ItemTemplate>
-        </ComboBox>
+        </ComboBox>        
         <!--  FILTER INFO  -->
         <Grid
           Grid.Row="1"
           Grid.ColumnSpan="4"
           Margin="0,15">
           <ContentControl Content="{Binding #FilterCombo.SelectedItem.FilterView}" />
-        </Grid>
+        </Grid>       
         <!--  ADVANCED SETTINGS  -->
         <Button
-          Grid.Row="2"
+          Grid.Row="3"
           Grid.ColumnSpan="4"
-          Margin="5"
+          Margin="0,90,0,15"
           HorizontalAlignment="Center"
           HorizontalContentAlignment="Center"
           assists:ShadowAssist.ShadowDepth="Depth0"

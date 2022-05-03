@@ -11,11 +11,9 @@ namespace Objects.Structural.Properties
   {
     public PropertyType2D type { get; set; }
     public double thickness { get; set; } //also thickness type? ex. waffle vs constant
-
+    
     [DetachProperty]
     public Material material { get; set; }
-
-    [DetachProperty]
     public Axis orientationAxis { get; set; }
     public ReferenceSurface refSurface { get; set; } = ReferenceSurface.Middle; //system plane
     public double zOffset { get; set; } //relative to reference surface

@@ -10,9 +10,11 @@ using System.Threading.Tasks;
 namespace ConnectorGSA
 {
   [JsonObject(MemberSerialization.OptIn)]
-  public class StreamState
+  public class StreamStateOld
   {
+#pragma warning disable CS0414 // The field 'StreamStateOld.branchName' is assigned but its value is never used
     private string branchName = "main";
+#pragma warning restore CS0414 // The field 'StreamStateOld.branchName' is assigned but its value is never used
     private Client _client;
 
     [JsonProperty]
@@ -54,12 +56,12 @@ namespace ConnectorGSA
 
     public string Name { get; internal set; }
 
-    public StreamState()
+    public StreamStateOld()
     {
 
     }
 
-    public bool Equals(StreamState other)
+    public bool Equals(StreamStateOld other)
     {
       if (Stream != null && other.Stream != null && Client != null && other.Client != null)
       {
@@ -72,7 +74,7 @@ namespace ConnectorGSA
     }
 
     [JsonConstructor]
-    public StreamState(string userId, string serverUrl)
+    public StreamStateOld(string userId, string serverUrl)
     {
       var account = AccountManager.GetAccounts().FirstOrDefault(a => a.userInfo.id == userId || a.id == userId);
 

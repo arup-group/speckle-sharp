@@ -212,7 +212,7 @@ namespace Speckle.Core.Serialisation
               {
                 deserialized = ((Task<object>)deserialized).Result;
               }
-              catch (AggregateException aggregateEx)
+              catch(AggregateException aggregateEx)
               {
                 throw aggregateEx.InnerException;
               }

@@ -5,6 +5,7 @@ using Speckle.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace Objects.Structural.GSA.Loading
 {
@@ -12,9 +13,10 @@ namespace Objects.Structural.GSA.Loading
   {
     public int? nativeId { get; set; }
 
-    [DetachProperty]
-    [Chunkable(1000)]
+    //[DetachProperty]
+    [Chunkable(500)]
     public List<Element1D> elements { get; set; }
+    public List<string> elementRefs { get; set; }
     public Thermal1dLoadType type { get; set; }
     public List<double> values { get; set; }
 
@@ -35,6 +37,8 @@ namespace Objects.Structural.GSA.Loading
       this.elements = elements;
       this.type = type;
       this.values = values;
+
+      this.elementRefs = elements.Select(e => e.applicationId).ToList();
     }
   }
 
