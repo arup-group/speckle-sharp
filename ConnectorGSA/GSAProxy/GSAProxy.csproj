@@ -10,7 +10,7 @@
     <RootNamespace>Speckle.ConnectorGSA.Proxy</RootNamespace>
     <AssemblyName>ConnectorGSAProxy</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-	<RuntimeIdentifier>win</RuntimeIdentifier>
+    <RuntimeIdentifier>win</RuntimeIdentifier>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
@@ -140,10 +140,6 @@
     <ProjectReference Include="..\..\DesktopUI2\DesktopUI2\DesktopUI2.csproj">
       <Project>{00b71764-00b1-4b24-abaf-a22864540d76}</Project>
       <Name>DesktopUI2</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Objects\Converters\ConverterGSA\ConverterGSA\ConverterGSA.csproj">
-      <Project>{6E561E4F-A3B4-4277-A2F7-B934A4141394}</Project>
-      <Name>ConverterGSA</Name>
     </ProjectReference>
     <ProjectReference Include="..\Speckle.GSA.API\Speckle.GSA.API.csproj">
       <Project>{b17705b9-0d8f-41c8-a868-d46ef3e45e40}</Project>

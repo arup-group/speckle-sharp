@@ -1,5 +1,4 @@
-﻿using ConverterGSA;
-using Speckle.GSA.API;
+﻿using Speckle.GSA.API;
 using Speckle.GSA.API.GwaSchema;
 using System;
 using System.Collections.Generic;
@@ -367,9 +366,8 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
       }
       gsaRecords = records;
       return true;
-
     }
-    
+
     public bool GetPrecedentNatives<T>(List<int> recordIndices, out List<GsaRecord> precendentRecords)
     {
       var t = typeof(T);
@@ -384,12 +382,10 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
           if (!records.Contains(memberRecord))
             records.Add(memberRecord);
 
-          
+
           var gsaMemb = (GsaMemb)memberRecord;
 
-
           // Get members precedents:
-
           if (gsaMemb.Is1dMember())
           {
             // Nodes
@@ -408,7 +404,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
             if (gsaMemb.OrientationNodeIndex.IsIndex())
             {
               GetNative<GsaNode>(gsaMemb.OrientationNodeIndex.Value, out var nodeRecord);
-              if (!records.Contains(nodeRecord)) 
+              if (!records.Contains(nodeRecord))
                 records.Add(nodeRecord);
             }
 
@@ -433,13 +429,13 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
                   records.Add(nodeRecord);
               }
             }
-            
+
             // Void nodes
             if (gsaMemb.Voids.HasValues())
             {
               foreach (var vd in gsaMemb.Voids)
               {
-                foreach(var node in vd)
+                foreach (var node in vd)
                 {
                   GetNative<GsaNode>(node, out var nodeRecord);
                   if (!records.Contains(nodeRecord))
@@ -610,7 +606,6 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
             records.Add(loadCaseRecord);
         }
       }
-      
 
 
       precendentRecords = records;
@@ -865,7 +860,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
           //The appIds have already been checked and they are all present as keys in the recordIndicesByApplicationId dictionary
           foreach (var appId in appIds)
           {
-            var index = this.records[colIndex].GsaRecord.Index;
+            var index = records[colIndex].GsaRecord.Index;
             if (index != null && recordIndicesByApplicationId.ContainsKey(appId) && recordIndicesByApplicationId[appId].Contains(colIndex) 
               && !indicesHash.Contains(index.Value))
             {
@@ -925,7 +920,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
         foundRecords = null;
         return false;
       }
-      foundRecords = recordIndicesBySchemaTypeGsaId[t][gsaIndex].ToDictionary(i => i, i => this.records[i]);
+      foundRecords = recordIndicesBySchemaTypeGsaId[t][gsaIndex].ToDictionary(i => i, i => records[i]);
       return true;
     }
 
@@ -1129,7 +1124,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
 
     public void Clear()
     {
-      this.records.Clear();
+      records.Clear();
       recordIndicesByApplicationId.Clear();
       recordIndicesBySchemaType.Clear();
       recordIndicesBySchemaTypeGsaId.Clear();

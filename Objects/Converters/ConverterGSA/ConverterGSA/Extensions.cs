@@ -39,17 +39,17 @@ namespace ConverterGSA
     /// <returns></returns>
     public static bool IsIndex(this int? v)
     {
-      return (v.HasValue && v.Value > 0);
+      return Speckle.GSA.API.Extensions.IsIndex(v);
     }
 
     public static bool HasValues(this List<int> v)
     {
-      return (v != null && v.Count > 0);
+      return Speckle.GSA.API.Extensions.HasValues(v);
     }
 
     public static bool HasValues(this List<List<int>> v)
     {
-      return (v != null && v.Count > 0);
+      return Speckle.GSA.API.Extensions.HasValues(v);
     }
 
     /// <summary>
@@ -59,7 +59,7 @@ namespace ConverterGSA
     /// <returns></returns>
     public static bool IsPositive(this double? value)
     {
-      return (value.HasValue && value.Value > 0);
+      return Speckle.GSA.API.Extensions.IsPositive(value);
     }
 
     /// <summary>
@@ -69,7 +69,7 @@ namespace ConverterGSA
     /// <returns></returns>
     public static bool Is2dElement(this GsaEl gsaEl)
     {
-      return (gsaEl.Type == ElementType.Triangle3 || gsaEl.Type == ElementType.Triangle6 || gsaEl.Type == ElementType.Quad4 || gsaEl.Type == ElementType.Quad8);
+      return Speckle.GSA.API.Extensions.Is2dElement(gsaEl);
     }
 
     /// <summary>
@@ -79,7 +79,7 @@ namespace ConverterGSA
     /// <returns></returns>
     public static bool Is3dElement(this GsaEl gsaEl)
     {
-      return (gsaEl.Type == ElementType.Brick8 || gsaEl.Type == ElementType.Pyramid5 || gsaEl.Type == ElementType.Tetra4 || gsaEl.Type == ElementType.Wedge6);
+      return Speckle.GSA.API.Extensions.Is3dElement(gsaEl);
     }
 
     /// <summary>
@@ -89,24 +89,22 @@ namespace ConverterGSA
     /// <returns></returns>
     public static bool Is1dElement(this GsaEl gsaEl)
     {
-      return (gsaEl.Type == ElementType.Bar || gsaEl.Type == ElementType.Beam || gsaEl.Type == ElementType.Cable || gsaEl.Type == ElementType.Damper ||
-        gsaEl.Type == ElementType.Link || gsaEl.Type == ElementType.Rod || gsaEl.Type == ElementType.Spacer || gsaEl.Type == ElementType.Spring ||
-        gsaEl.Type == ElementType.Strut || gsaEl.Type == ElementType.Tie);
+      return Speckle.GSA.API.Extensions.Is1dElement(gsaEl);
     }
 
     public static bool Is1dMember(this GsaMemb gsaMemb)
     {
-      return (gsaMemb.Type == GwaMemberType.Beam || gsaMemb.Type == GwaMemberType.Column || gsaMemb.Type == GwaMemberType.Generic1d || gsaMemb.Type == GwaMemberType.Void1d);
+      return Speckle.GSA.API.Extensions.Is1dMember(gsaMemb);
     }
 
     public static bool Is2dMember(this GsaMemb gsaMemb)
     {
-      return (gsaMemb.Type == GwaMemberType.Generic2d || gsaMemb.Type == GwaMemberType.Slab || gsaMemb.Type == GwaMemberType.Void2d || gsaMemb.Type == GwaMemberType.Wall);
+      return Speckle.GSA.API.Extensions.Is2dMember(gsaMemb);
     }
 
     public static bool Is3dMember(this GsaMemb gsaMemb)
     {
-      return (gsaMemb.Type == GwaMemberType.Generic3d);
+      return Speckle.GSA.API.Extensions.Is3dMember(gsaMemb);
     }
 
     public static bool IsGlobal(this Plane p)
