@@ -237,6 +237,8 @@ namespace ConnectorGSA.UI
           Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "timeToSend", duration.ToString(@"hh\:mm\:ss") } });
         }
         startTime = DateTime.Now;
+
+        return sent;
       }
       else
       {

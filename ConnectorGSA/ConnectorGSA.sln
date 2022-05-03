@@ -31,8 +31,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DesktopUI2", "..\DesktopUI2
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConnectorGSA2", "ConnectorGSA2\ConnectorGSA2.csproj", "{8C36DDC3-B8B8-4FC5-A566-3220D3167A51}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiskTransport", "..\Core\Transports\DiskTransport\DiskTransport.csproj", "{57859781-9B7A-4136-8868-351BC7315CCA}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,10 +85,6 @@ Global
 		{8C36DDC3-B8B8-4FC5-A566-3220D3167A51}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8C36DDC3-B8B8-4FC5-A566-3220D3167A51}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8C36DDC3-B8B8-4FC5-A566-3220D3167A51}.Release|Any CPU.Build.0 = Release|Any CPU
-		{57859781-9B7A-4136-8868-351BC7315CCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{57859781-9B7A-4136-8868-351BC7315CCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{57859781-9B7A-4136-8868-351BC7315CCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{57859781-9B7A-4136-8868-351BC7315CCA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -106,7 +100,6 @@ Global
 		{F8521EEA-6C45-4B01-A002-542824B97062} = {358F50C2-24C4-45B5-B104-18D1FDAB77AC}
 		{69087486-2CC6-4DDF-BFA2-F8B20C12BF02} = {30B052EA-5D48-4F52-824E-ED5E96CBA358}
 		{00B71764-00B1-4B24-ABAF-A22864540D76} = {30B052EA-5D48-4F52-824E-ED5E96CBA358}
-		{57859781-9B7A-4136-8868-351BC7315CCA} = {30B052EA-5D48-4F52-824E-ED5E96CBA358}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {057A6E70-0C2D-4782-930F-CAA8AA8151D5}
