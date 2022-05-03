@@ -82,12 +82,12 @@ namespace ConnectorGSA.UI
         var lengthUnitData = (GsaUnitData)gsaUnitDataRecords.FirstOrDefault(r => ((GsaUnitData)r).Option == UnitDimension.Length);
         if (lengthUnitData != null)
         {
-          var fromStr = "mm"; // coordinator.ReceiverTab.CoincidentNodeUnits.GetStringValue();
+          var fromStr = Instance.GsaModel.Units; // coordinator.ReceiverTab.CoincidentNodeUnits.GetStringValue(); 
           var toStr = lengthUnitData.Name;
           factor = (lengthUnitData == null) ? 1 : Speckle.Core.Kits.Units.GetConversionFactor(fromStr, toStr);
         }
       }
-      Instance.GsaModel.CoincidentNodeAllowance = 0.05 * factor; // coordinator.ReceiverTab.CoincidentNodeAllowance * factor;
+      Instance.GsaModel.CoincidentNodeAllowance = Instance.GsaModel.CoincidentNodeAllowance * factor; // coordinator.ReceiverTab.CoincidentNodeAllowance * factor;
 
       percentage = 10;
       //percentageProgress.Report(percentage);
