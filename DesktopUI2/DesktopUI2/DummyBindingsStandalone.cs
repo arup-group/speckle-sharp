@@ -361,5 +361,7 @@ namespace DesktopUI2
 
     public override string Units { get; set; }
 
+    public override double CoincidentNodeAllowance { get; set; }
+
   }
 }
