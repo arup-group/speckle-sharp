@@ -327,6 +327,7 @@ namespace ConverterGSA
         return null;
       }
       speckleElement1d.baseLine = new Line(speckleElement1d.end1Node.basePoint, speckleElement1d.end2Node.basePoint);
+      speckleElement1d.displayValue = GetBasePolyline( new List<Point> { speckleElement1d.end1Node.basePoint, speckleElement1d.end2Node.basePoint });
       if (gsaEl.PropertyIndex.IsIndex()) speckleElement1d.property = GetProperty1dFromIndex(gsaEl.PropertyIndex.Value);
       if (gsaEl.OrientationNodeIndex.IsIndex())
       {
@@ -479,7 +480,9 @@ namespace ConverterGSA
         return null;
       }
       //speckleMember1d.baseLine = GetBaseLine(speckleMember1d.topology.Select(n => n.basePoint).ToList());
-      speckleMember1d.baseLine = GetBaseLine(gsaMemb.NodeIndices.Select(i => GetNodeFromIndex(i)).Select(n => n.basePoint).ToList());
+      var points = gsaMemb.NodeIndices.Select(i => GetNodeFromIndex(i)).Select(n => n.basePoint).ToList();
+      speckleMember1d.baseLine = GetBaseLine(points);
+      speckleMember1d.displayValue = GetBasePolyline(points);
       if (gsaMemb.Index.IsIndex()) speckleMember1d.applicationId = Instance.GsaModel.Cache.GetApplicationId<GsaMemb>(gsaMemb.Index.Value);
       if (gsaMemb.PropertyIndex.IsIndex()) speckleMember1d.property = GetProperty1dFromIndex(gsaMemb.PropertyIndex.Value);
       if (gsaMemb.OrientationNodeIndex.IsIndex()) speckleMember1d.orientationNode = GetNodeFromIndex(gsaMemb.OrientationNodeIndex.Value);
