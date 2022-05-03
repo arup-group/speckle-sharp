@@ -243,15 +243,15 @@ namespace ConnectorGSATests
 
       var account = AccountManager.GetDefaultAccount();
       var client = new Client(account);
-      returnInfo.ConvertedObjectsByStream = new Dictionary<StreamState, object>();
+      returnInfo.ConvertedObjectsByStream = new Dictionary<StreamStateOld, object>();
 
       foreach (var co in commitObjs)
       {
         var streamState = await PrepareStream(client);
 
-        var sent = await Commands.SendCommit(co, streamState, "",
+        var sent = await Commands.SendCommit(co, streamState, "", null, null, null,
           (new ITransport[] { new ServerTransport(account, streamState.Stream.id) }).Concat(nonServerTransports).ToArray());
-        returnInfo.Sent = sent.status;
+        returnInfo.Sent = !String.IsNullOrEmpty(sent);
         returnInfo.ConvertedObjectsByStream.Add(streamState, co);
       }
       return returnInfo;
@@ -263,10 +263,10 @@ namespace ConnectorGSATests
       public bool Loaded;
       public bool Converted;
       public bool Sent;
-      public Dictionary<StreamState, object> ConvertedObjectsByStream;
+      public Dictionary<StreamStateOld, object> ConvertedObjectsByStream;
     }
 
-    private async Task<StreamState> PrepareStream(Client client)
+    private async Task<StreamStateOld> PrepareStream(Client client)
     {
       var usersStreamsOnServer = await client.StreamsGet();
       var matchingStreams = usersStreamsOnServer.Where(s => s.name.StartsWith(testStreamMarker));
@@ -281,7 +281,7 @@ namespace ConnectorGSATests
         stream = await NewStream(client);
       }
 
-      return new StreamState() { Client = client, Stream = stream };
+      return new StreamStateOld() { Client = client, Stream = stream };
     }
 
     private bool SendResults()

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Objects.Geometry;
 using Objects.Structural.Properties;
+using System.Linq;
 
 namespace Objects.Structural.Geometry
 {
@@ -13,7 +14,6 @@ namespace Objects.Structural.Geometry
   {
     public string name { get; set; }
 
-    [DetachProperty]
     public List<ICurve> outline { get; set; }
 
     [DetachProperty]
@@ -24,14 +24,16 @@ namespace Objects.Structural.Geometry
     public double offset { get; set; } //z direction (normal)
     public double orientationAngle { get; set; } //
 
-    [DetachProperty]
+    //[DetachProperty]
     public Base parent { get; set; } //parent element
 
-    [DetachProperty]
+    //[DetachProperty]
     public List<Node> topology { get; set; }
+    public List<string> topologyRefs { get; set; }
 
-    [DetachProperty]
+    //[DetachProperty]
     public List<List<Node>> voids { get; set; }
+    public List<List<string>> voidRefs { get; set; }
 
     [DetachProperty]
     public List<Mesh> displayValue { get; set; }
@@ -43,6 +45,8 @@ namespace Objects.Structural.Geometry
     public Element2D(List<Node> nodes)
     {
       this.topology = nodes;
+      this.outline = new List<ICurve>() { GetPolylineFromNodes(nodes) };
+      this.topologyRefs = nodes.Select(n => n.applicationId).ToList();
     }
 
     [SchemaInfo("Element2D", "Creates a Speckle structural 2D element (based on a list of edge ie. external, geometry defining nodes)", "Structural", "Geometry")]
@@ -54,13 +58,18 @@ namespace Objects.Structural.Geometry
       this.voids = voids;
       this.offset = offset;
       this.orientationAngle = orientationAngle;
+
+      this.outline = new List<ICurve>() { GetPolylineFromNodes(nodes) };
+      this.topologyRefs = nodes.Select(n => n.applicationId).ToList();
+      if (voids != null) this.voidRefs = voids.Select(v => v.Select(n => n.applicationId).ToList()).ToList();
     }
 
 
     [SchemaInfo("Element2D (from polyline)", "Creates a Speckle structural 2D element (based on a list of edge ie. external, geometry defining nodes)", "Structural", "Geometry")]
     public Element2D(Polyline perimeter, Property2D property, MemberType memberType = MemberType.NotSet, List<Polyline> voids = null, double offset = 0, double orientationAngle = 0)
     {
-      this.topology = GetNodesFromPolyline(perimeter);
+      var nodes = GetNodesFromPolyline(perimeter);
+      this.topology = nodes;
       this.property = property;
       this.memberType = memberType;
       this.offset = offset;
@@ -79,6 +88,8 @@ namespace Objects.Structural.Geometry
       }
 
       this.outline = outlineLoops;
+      this.topologyRefs = nodes.Select(n => n.applicationId).ToList();
+      if (voids != null) this.voidRefs = this.voids.Select(v => v.Select(n => n.applicationId).ToList()).ToList();
     }
 
     public static List<Node> GetNodesFromPolyline(Polyline outline)
@@ -92,6 +103,17 @@ namespace Objects.Structural.Geometry
       nodes.ForEach(n => n.units = outline.units);
       return nodes;
     }
+
+    public static Polyline GetPolylineFromNodes(List<Node> nodes)
+    {
+      if (nodes == null && nodes.Count() == 0)
+        return null;
+
+      var points = nodes.Select(n => n.basePoint.ToList()).ToList().SelectMany(p => p).ToList();
+      var outline = new Polyline(points, nodes[0].units) { closed = true };
+      return outline;
+    }
+
 
     #region Obsolete
     [JsonIgnore, Obsolete("Use " + nameof(displayValue) + " instead")]

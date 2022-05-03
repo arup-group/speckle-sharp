@@ -10,8 +10,6 @@ namespace Objects.Structural.Loading
   public class LoadCombination : Base 
   {
     public string name { get; set; }
-
-    [DetachProperty]
     public List<Base> loadCases { get; set; }
     public List<double> loadFactors { get; set; }
     public CombinationType combinationType { get; set; }

@@ -29,10 +29,14 @@ namespace DesktopUI2.ViewModels
     //Instance of this HomeViewModel, so that the SavedStreams are kept in memory and not disposed on navigation
     public static HomeViewModel Instance { get; private set; }
     public IScreen HostScreen { get; }
-
     public string UrlPathSegment { get; } = "home";
 
-    private ConnectorBindings Bindings;
+    private ConnectorBindings _Bindings;
+    public virtual ConnectorBindings Bindings
+    {
+      get { return _Bindings; }
+      set { _Bindings = value; }
+    }
 
     #region bindings
     public string Title => "for " + Bindings.GetHostAppNameVersion();
@@ -43,14 +47,14 @@ namespace DesktopUI2.ViewModels
     public bool InProgress
     {
       get => _showProgress;
-      private set => this.RaiseAndSetIfChanged(ref _showProgress, value);
+      set => this.RaiseAndSetIfChanged(ref _showProgress, value);
     }
 
     private bool _isLoggingIn;
     public bool IsLoggingIn
     {
       get => _isLoggingIn;
-      private set => this.RaiseAndSetIfChanged(ref _isLoggingIn, value);
+      set => this.RaiseAndSetIfChanged(ref _isLoggingIn, value);
     }
 
 
@@ -65,7 +69,7 @@ namespace DesktopUI2.ViewModels
     public List<StreamAccountWrapper> Streams
     {
       get => _streams;
-      private set
+      set
       {
         this.RaiseAndSetIfChanged(ref _streams, value);
         this.RaisePropertyChanged("HasStreams");
@@ -245,7 +249,7 @@ namespace DesktopUI2.ViewModels
       this.RaisePropertyChanged("HasSavedStreams");
     }
 
-    private async Task GetStreams()
+    public virtual async Task GetStreams()
     {
       if (!HasAccounts)
         return;
@@ -375,6 +379,7 @@ namespace DesktopUI2.ViewModels
       }
 
     }
+
     public async void AddAccountCommand()
     {
       IsLoggingIn = true;
@@ -435,7 +440,7 @@ namespace DesktopUI2.ViewModels
       OpenStream(streamState);
     }
 
-    public async void NewStreamCommand()
+    public virtual async void NewStreamCommand()
     {
       var dialog = new NewStreamDialog(Accounts);
       dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -550,7 +555,7 @@ namespace DesktopUI2.ViewModels
       return !InProgress;
     }
 
-    private void OpenStream(StreamState streamState)
+    public virtual void OpenStream(StreamState streamState)
     {
       MainWindowViewModel.RouterInstance.Navigate.Execute(new StreamViewModel(streamState, HostScreen, RemoveSavedStreamCommand));
     }

@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Metadata;
+using Avalonia.Controls.Selection;
 using DesktopUI2.Models;
 using DesktopUI2.Models.Settings;
 using DesktopUI2.Views;
@@ -23,6 +24,7 @@ using System.Reactive;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Stream = Speckle.Core.Api.Stream;
+using DesktopUI2.Views.Windows.Dialogs;
 
 namespace DesktopUI2.ViewModels
 {
@@ -36,7 +38,7 @@ namespace DesktopUI2.ViewModels
 
     private List<MenuItemViewModel> _menuItems = new List<MenuItemViewModel>();
 
-    public ICommand RemoveSavedStreamCommand { get; }
+    public ICommand RemoveSavedStreamCommand { get; set; }
 
     #region bindings
     private Stream _stream;
@@ -108,7 +110,7 @@ namespace DesktopUI2.ViewModels
     public bool ShowReport
     {
       get => _showReport;
-      private set
+      set
       {
         this.RaiseAndSetIfChanged(ref _showReport, value);
       }
@@ -127,7 +129,7 @@ namespace DesktopUI2.ViewModels
 
     public string UrlPathSegment { get; } = "stream";
 
-    private Client Client { get; }
+    public Client Client { get; set; }
 
     public ReactiveCommand<Unit, Unit> GoBack => MainWindowViewModel.RouterInstance.NavigateBack;
 
@@ -160,7 +162,7 @@ namespace DesktopUI2.ViewModels
     public List<Branch> Branches
     {
       get => _branches;
-      private set => this.RaiseAndSetIfChanged(ref _branches, value);
+      set => this.RaiseAndSetIfChanged(ref _branches, value);
     }
 
 
@@ -185,7 +187,7 @@ namespace DesktopUI2.ViewModels
     public List<Commit> Commits
     {
       get => _commits;
-      private set
+      set
       {
         this.RaiseAndSetIfChanged(ref _commits, value);
         this.RaisePropertyChanged("HasCommits");
@@ -196,7 +198,7 @@ namespace DesktopUI2.ViewModels
     public List<ActivityViewModel> Activity
     {
       get => _activity;
-      private set => this.RaiseAndSetIfChanged(ref _activity, value);
+      set => this.RaiseAndSetIfChanged(ref _activity, value);
     }
 
     private FilterViewModel _selectedFilter;
@@ -220,14 +222,14 @@ namespace DesktopUI2.ViewModels
     public List<FilterViewModel> AvailableFilters
     {
       get => _availableFilters;
-      private set => this.RaiseAndSetIfChanged(ref _availableFilters, value);
+      set => this.RaiseAndSetIfChanged(ref _availableFilters, value);
     }
 
     private List<ISetting> _settings;
     public List<ISetting> Settings
     {
       get => _settings;
-      private set
+      set
       {
         this.RaiseAndSetIfChanged(ref _settings, value);
         this.RaisePropertyChanged("HasSettings");
@@ -287,6 +289,8 @@ namespace DesktopUI2.ViewModels
       //refresh stream, branches, filters etc
       Init();
     }
+
+    public StreamViewModel() { }
     public StreamViewModel(StreamState streamState, IScreen hostScreen, ICommand removeSavedStreamCommand)
     {
       StreamState = streamState;
@@ -374,7 +378,7 @@ namespace DesktopUI2.ViewModels
       }
     }
 
-    internal async void GetBranchesAndRestoreState()
+    internal virtual async void GetBranchesAndRestoreState()
     {
       //get available settings from our bindings
       Settings = Bindings.GetSettings();
@@ -569,14 +573,16 @@ namespace DesktopUI2.ViewModels
       Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Copy Link" } });
     }
 
-    public async void SendCommand()
+    public virtual async void SendCommand()
     {
       UpdateStreamState();
       //save the stream as well
       HomeViewModel.Instance.AddSavedStream(this);
 
       Reset();
+      Progress.ProgressTitle = "Sending to Speckle 🚀";
       Progress.IsProgressing = true;
+
       var commitId = await Task.Run(() => Bindings.SendStream(StreamState, Progress));
       Progress.IsProgressing = false;
 
@@ -595,14 +601,17 @@ namespace DesktopUI2.ViewModels
       GetActivity();
     }
 
-    public async void ReceiveCommand()
+    public virtual async void ReceiveCommand()
     {
       UpdateStreamState();
       //save the stream as well
       HomeViewModel.Instance.AddSavedStream(this);
 
       Reset();
+
+      Progress.ProgressTitle = "Receiving from Speckle 🚀";
       Progress.IsProgressing = true;
+
       await Task.Run(() => Bindings.ReceiveStream(StreamState, Progress));
       Progress.IsProgressing = false;
 
@@ -634,7 +643,7 @@ namespace DesktopUI2.ViewModels
       Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Cancel Send or Receive" } });
     }
 
-    public async void OpenReportCommand()
+    public virtual async void OpenReportCommand()
     {
       //ensure click transition has finished
       await Task.Delay(1000);
@@ -734,7 +743,7 @@ namespace DesktopUI2.ViewModels
 
 
 
-    private async void OpenSettingsCommand()
+    public virtual async void OpenSettingsCommand()
     {
       try
       {
@@ -769,7 +778,6 @@ namespace DesktopUI2.ViewModels
     {
       return true;
     }
-
 
 
     [DependsOn(nameof(SelectedBranch))]

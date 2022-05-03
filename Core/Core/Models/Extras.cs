@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Serilog;
 
 namespace Speckle.Core.Models
 {
@@ -126,7 +127,12 @@ namespace Speckle.Core.Models
     public void Log(string text)
     {
       var time = DateTime.Now.ToLocalTime().ToString("dd/MM/yy HH:mm:ss");
-      ConversionLog.Add(time + " " + text);
+      var message = $"{time} {text}";
+      if (!String.IsNullOrEmpty(message))
+      {
+        ConversionLog.Add(message);
+        Serilog.Log.Information(message);
+      }
     }
     /// <summary>
     /// Keeps track of errors in the conversions.
@@ -146,6 +152,8 @@ namespace Speckle.Core.Models
     {
       ConversionErrors.Add(exception);
       Log(exception.Message);
+
+      Serilog.Log.Error(exception.Message);
     }
 
 
@@ -168,6 +176,8 @@ namespace Speckle.Core.Models
     {
       OperationErrors.Add(exception);
       Log(exception.Message);
+
+      Serilog.Log.Error(exception.Message);
     }
 
     public void Merge(ProgressReport report)

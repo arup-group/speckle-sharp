@@ -10,6 +10,7 @@
     <RootNamespace>ConnectorGSATests</RootNamespace>
     <AssemblyName>ConnectorGSATests</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+	<RuntimeIdentifiers>win;win-x64</RuntimeIdentifiers>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
@@ -57,9 +58,6 @@
     <PackageReference Include="Moq">
       <Version>4.16.1</Version>
     </PackageReference>
-    <PackageReference Include="Newtonsoft.Json">
-      <Version>13.0.1</Version>
-    </PackageReference>
     <PackageReference Include="xunit">
       <Version>2.4.1</Version>
     </PackageReference>
@@ -79,6 +77,10 @@
     <ProjectReference Include="..\..\Core\Core\Core.csproj">
       <Project>{a2c8730a-b605-483e-914e-61f3ed7954d9}</Project>
       <Name>Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DesktopUI2\DesktopUI2\DesktopUI2.csproj">
+      <Project>{00b71764-00b1-4b24-abaf-a22864540d76}</Project>
+      <Name>DesktopUI2</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Objects\Converters\ConverterGSA\ConverterGSA\ConverterGSA.csproj">
       <Project>{6e561e4f-a3b4-4277-a2f7-b934a4141394}</Project>
