@@ -59,6 +59,17 @@ namespace ConnectorGSA.UI
       }
     }
 
+    private double _coincidentNodeAllowance = 10;
+    public override double CoincidentNodeAllowance
+    {
+      get => _coincidentNodeAllowance;
+      set
+      {
+        _coincidentNodeAllowance = value;
+        Instance.GsaModel.CoincidentNodeAllowance = value;
+      }
+    }
+
     public override string GetHostAppNameVersion() => VersionedHostApplications.GSA;
     public override string GetHostAppName() => HostApplications.GSA.Slug;
     public override string GetDocumentId() => "id"; //GetDocHash(CurrentDoc?.Document);
