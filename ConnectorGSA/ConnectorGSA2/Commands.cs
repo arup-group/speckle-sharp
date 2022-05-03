@@ -256,9 +256,8 @@ namespace ConnectorGSA
     public static List<Base> ConvertToSpeckle(ISpeckleConverter converter, List<string> selectionFilterObjects)
     {
       var gsaRecords = new List<GsaRecord>();
-
       // Send all elements
-      if (String.Equals(selectionFilterObjects.FirstOrDefault(), "all", StringComparison.InvariantCultureIgnoreCase))
+      if (String.Equals(selectionFilterObjects.FirstOrDefault(), "all", StringComparison.InvariantCultureIgnoreCase) || String.Equals(selectionFilterObjects.FirstOrDefault(), "everything", StringComparison.InvariantCultureIgnoreCase))
       {
         if (!Instance.GsaModel.Cache.GetNatives(out gsaRecords))
         {
@@ -284,20 +283,33 @@ namespace ConnectorGSA
 
     public static async Task<string> SendCommit(Base commitObj, DesktopUI2.Models.StreamState state, ProgressViewModel progress, string parent, params ITransport[] transports)
     {
+      var startTime = DateTime.Now;
+
       var commitObjId = await Operations.Send(
         @object: commitObj,
         cancellationToken: progress.CancellationTokenSource.Token,
         transports: transports.ToList(),
-        useDefaultCache: false,
-        onProgressAction: dict => progress.Update(dict),
+        useDefaultCache: true,
+        onProgressAction: dict => 
+        {
+          progress.Update(dict);
+          if (dict.ContainsKey("RemoteTransport"))
+          {
+            TimeSpan duration = DateTime.Now - startTime;
+            if (duration.Minutes >= 1)
+            {
+              progress.Report.Log($"Sending - {dict["RemoteTransport"]} objects sent so far...");
+              startTime = DateTime.Now;
+            }
+          }             
+        },
         onErrorAction: (s, e) =>
         {
           progress.Report.LogOperationError(e);
           progress.CancellationTokenSource.Cancel();
         },
-        disposeTransports: true
+        disposeTransports: false
         );
-
 
       if (progress.CancellationTokenSource.Token.IsCancellationRequested)
         return null;
@@ -650,6 +662,7 @@ namespace ConnectorGSA
       {
         if (((GsaProxy)Instance.GsaModel.Proxy).GetGwaData(Instance.GsaModel.StreamLayer, progress, out var records, null))
         {
+          progress.Max = records.Count;
           for (int i = 0; i < records.Count(); i++)
           {
             if (!Instance.GsaModel.Cache.Upsert(records[i]))
@@ -658,7 +671,7 @@ namespace ConnectorGSA
             }
           }
         }
-        return true;
+       return true;
       }
       catch
       {

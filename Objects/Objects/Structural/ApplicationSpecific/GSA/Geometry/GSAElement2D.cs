@@ -6,6 +6,7 @@ using Objects.Geometry;
 using Objects.Structural.Geometry;
 using Objects.Structural.Properties;
 using System;
+using System.Linq;
 
 namespace Objects.Structural.GSA.Geometry
 {
@@ -52,6 +53,8 @@ namespace Objects.Structural.GSA.Geometry
       this.colour = colour;
       this.isDummy = isDummy;
       this.memberType = MemberType.NotSet;
+
+      this.topologyRefs = nodes.Select(n => n.applicationId).ToList();
     }
   }
 }

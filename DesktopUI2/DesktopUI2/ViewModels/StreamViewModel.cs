@@ -583,11 +583,6 @@ namespace DesktopUI2.ViewModels
       Progress.ProgressTitle = "Sending to Speckle 🚀";
       Progress.IsProgressing = true;
 
-      var dialog = new QuickOpsDialog();
-      dialog.DataContext = Progress;
-      dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-      dialog.ShowDialog(MainWindow.Instance);
-
       var commitId = await Task.Run(() => Bindings.SendStream(StreamState, Progress));
       Progress.IsProgressing = false;
 
@@ -599,8 +594,6 @@ namespace DesktopUI2.ViewModels
         Notification = $"Sent successfully, view online";
         NotificationUrl = $"{StreamState.ServerUrl}/streams/{StreamState.StreamId}/commits/{commitId}";
       }
-      else
-        dialog.Close();
 
       if (Progress.Report.ConversionErrorsCount > 0 || Progress.Report.OperationErrorsCount > 0)
         ShowReport = true;
@@ -619,11 +612,6 @@ namespace DesktopUI2.ViewModels
       Progress.ProgressTitle = "Receiving from Speckle 🚀";
       Progress.IsProgressing = true;
 
-      var dialog = new QuickOpsDialog();
-      dialog.DataContext = Progress;
-      dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-      dialog.ShowDialog(MainWindow.Instance);
-
       await Task.Run(() => Bindings.ReceiveStream(StreamState, Progress));
       Progress.IsProgressing = false;
 
@@ -632,8 +620,6 @@ namespace DesktopUI2.ViewModels
         LastUsed = DateTime.Now.ToString();
         Analytics.TrackEvent(StreamState.Client.Account, Analytics.Events.Receive);
       }
-      else
-        dialog.Close(); // if user cancelled close automatically
 
       if (Progress.Report.ConversionErrorsCount > 0 || Progress.Report.OperationErrorsCount > 0)
         ShowReport = true;

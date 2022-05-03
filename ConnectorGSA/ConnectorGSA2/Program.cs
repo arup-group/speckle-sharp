@@ -14,6 +14,7 @@ using System.Diagnostics;
 using Avalonia.Controls;
 using ConnectorGSA.UI;
 using System.Reflection;
+using Serilog;
 
 namespace ConnectorGSA.Launcher
 {
@@ -30,29 +31,15 @@ namespace ConnectorGSA.Launcher
     {
       AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(OnAssemblyResolve);
       AppDomain domain = null;
-      try
-      {
-        //cHelper helper = new Helper();
-        //var etabsObject = helper.GetObject("CSI.ETABS.API.ETABSObject");
-        //model = etabsObject.SapModel;
-      }
-      catch (Exception E)
-      {
-        return;
-      }
 
       try
       {
-        //SelectionTimer = new Timer(2000) { AutoReset = true, Enabled = true };
-        //SelectionTimer.Elapsed += SelectionTimer_Elapsed;
-        //SelectionTimer.Start();
         OpenOrFocusSpeckle();
       }
 
       catch (Exception e)
       {
         throw e;
-        //return;
       }
 
       return;
@@ -63,12 +50,23 @@ namespace ConnectorGSA.Launcher
 
     public static ConnectorBindingsGSA Bindings { get; set; }
 
-    public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<DesktopUI2.App>()
+    public static AppBuilder BuildAvaloniaApp()
+    {
+      Log.Logger = new LoggerConfiguration()
+      .MinimumLevel.Verbose()
+      .WriteTo.File($"SpeckleGSA - .txt",
+          retainedFileCountLimit: 10,
+          rollingInterval: RollingInterval.Day,
+          rollOnFileSizeLimit: true)
+      .CreateLogger();
+
+      return AppBuilder.Configure<DesktopUI2.App>()
       .UsePlatformDetect()
       .With(new SkiaOptions { MaxGpuResourceSizeBytes = 8096000 })
       .With(new Win32PlatformOptions { AllowEglInitialization = true, EnableMultitouch = false })
       .LogToTrace()
       .UseReactiveUI();
+    }
 
     public static void CreateOrFocusSpeckle()
     {
@@ -88,7 +86,6 @@ namespace ConnectorGSA.Launcher
       MainWindow.Closed += SpeckleWindowClosed;
       MainWindow.Closing += SpeckleWindowClosed;
       app.Run(MainWindow);
-      //Task.Run(() => app.Run(MainWindow));
     }
 
     public static void OpenOrFocusSpeckle()

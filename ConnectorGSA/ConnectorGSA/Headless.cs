@@ -344,12 +344,12 @@ namespace ConnectorGSA
           var serverTransport = new ServerTransport(account, streamState.Stream.id);
 
           Console.WriteLine($"Sending to Speckle server...");
-          var sent = Commands.SendCommit(commitObj, streamState, "", serverTransport).Result;
-          if (sent.status)
+          var sent = Commands.SendCommit(commitObj, streamState, "", null, null, null, serverTransport).Result;
+          if (String.IsNullOrEmpty(sent))
           {
             Console.WriteLine("Sending complete!");
             Console.WriteLine($"New stream created: {streamState.Stream.id}");
-            Console.WriteLine($"New commit created: {sent.commitId}");
+            Console.WriteLine($"New commit created: {sent}");
           } else
           {
             Console.WriteLine("Sending failed!");
@@ -384,9 +384,7 @@ namespace ConnectorGSA
         return await client.StreamGet(streamId);
 
       }
-#pragma warning disable CS0168 // The variable 'e' is declared but never used
       catch (Exception e)
-#pragma warning restore CS0168 // The variable 'e' is declared but never used
       {
         try
         {

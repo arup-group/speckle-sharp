@@ -71,11 +71,17 @@ jobs:
         $tag = "${{ github.event.inputs.version }}.$($env:GITHUB_RUN_ID%65536)"
         echo "::set-output name=tag::$tag"
 
+    - name: Update Version
+      shell: powershell
+      working-directory: ConnectorGSA/ConnectorGSA/Properties
+      run: |
+        (Get-content .\AssemblyInfo.cs) -replace '1\.0\.0\.0', '${{ steps.calculate-tag-version.outputs.tag }}' | Out-File -encoding ASCII .\AssemblyInfo.cs
+
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore all the applications
       shell: cmd
       run: |
-        for %%x in (Objects) do (
+        for %%x in (Objects, ConnectorGSA) do (
           cd %%x && msbuild %%x.sln /t:Restore /p:Configuration=Release /p:WarningLevel=0 /p:IsDesktopBuild=false && cd ../ 
         )
       env:
@@ -87,28 +93,14 @@ jobs:
       shell: cmd
       run: |
         SET _version=${{ github.event.inputs.version }}
-        for %%x in (Objects) do (
+        for %%x in (Objects, ConnectorGSA) do (
           cd %%x && msbuild %%x.sln /p:Configuration=Release /p:WarningLevel=0 /p:IsDesktopBuild=false /p:AssemblyVersionNumber=%_version% /p:AssemblyInformationalVersion=%_version% /p:Version=%_version% && cd ../ 
         )               
-        
-    - name: ConnectorGSA2 - Restore NuGets
-      run: dotnet restore        
-      working-directory: ConnectorGSA/ConnectorGSA2  
-      env:
-        GH_PKG_USER: ${{ secrets.GH_PKG_USER }} 
-        GH_PKG_TOKEN: ${{ secrets.GH_PKG_TOKEN }}     
-        
-    - name: ConnectorGSA2 - Compile
-      run: dotnet build ConnectorGSA2.csproj --configuration Release
-      working-directory: ConnectorGSA/ConnectorGSA2      
-      env:
-        GH_PKG_USER: ${{ secrets.GH_PKG_USER }} 
-        GH_PKG_TOKEN: ${{ secrets.GH_PKG_TOKEN }}     
         
     - name: create Installer
       id: installer
       run: | 
-        iscc /dAppVersion="${{ steps.calculate-tag-version.outputs.tag }}" speckle-v2-installer-gsa2.iss
+        iscc /dAppVersion="${{ steps.calculate-tag-version.outputs.tag }}" speckle-v2-installer-gsa.iss
         $filename = (ls *.exe).Name
         echo "::set-output name=filename::$filename"          
       working-directory: Installer          
@@ -155,8 +147,8 @@ jobs:
         tag_name: ${{ steps.calculate-tag-version.outputs.tag }}
         release_name: gsa/${{ steps.calculate-tag-version.outputs.tag }}
         body: |
-          Automated release of Speckle v2 Connector for Oasys GSA 10.1 (DUI2)
-        draft: true
+          Automated release of Speckle v2 Connector for Oasys GSA 10.1
+        draft: false
         prerelease: true
 
     - name: Upload Release Asset

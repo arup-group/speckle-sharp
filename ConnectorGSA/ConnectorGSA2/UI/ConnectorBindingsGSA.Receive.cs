@@ -165,6 +165,7 @@ namespace ConnectorGSA.UI
       duration = DateTime.Now - startTime;
 
       progress.Report.Log("Duration of reception from Speckle and scaling: " + duration.ToString(@"hh\:mm\:ss"));
+      Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "timeToReceive", duration.ToString(@"hh\:mm\:ss") } });
 
       startTime = DateTime.Now;
 
@@ -209,6 +210,7 @@ namespace ConnectorGSA.UI
       if (duration.Seconds > 0)
       {
         progress.Report.Log("Duration of conversion from Speckle: " + duration.ToString(@"hh\:mm\:ss"));
+        Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "timeToConvert", duration.ToString(@"hh\:mm\:ss") } });
       }
       startTime = DateTime.Now;
 
@@ -225,6 +227,7 @@ namespace ConnectorGSA.UI
       if (duration.Seconds > 0)
       {
         progress.Report.Log("Duration of writing converted objects to GSA: " + duration.ToString(@"hh\:mm\:ss"));
+        Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "timeToWrite", duration.ToString(@"hh\:mm\:ss") } });
       }
 
       Console.WriteLine("Receiving complete");

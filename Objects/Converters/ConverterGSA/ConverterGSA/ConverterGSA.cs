@@ -21,7 +21,6 @@ using Objects.Structural.Loading;
 using System.Threading.Tasks;
 using Speckle.Core.Transports;
 using Speckle.Core.Serialisation;
-using Speckle.Newtonsoft.Json;
 using Objects.Structural.ApplicationSpecific.GSA.GeneralData;
 
 namespace ConverterGSA
@@ -41,28 +40,6 @@ namespace ConverterGSA
 
     public Dictionary<string, string> Settings { get; private set; } = new Dictionary<string, string>();
 
-    //private static SQLiteTransport MappingStorage = new SQLiteTransport(scope: "Mappings");
-
-    //private bool _useMappings;
-    //private bool UseMappings
-    //{
-    //  get { return Settings.ContainsKey("section-mapping") && Settings["section-mapping"] != null; }
-    //}
-
-    //private Base _mappingData;
-    //private Base MappingData
-    //{
-    //  get 
-    //  {
-    //    if (_mappingData == null)
-    //    {
-    //      // get from settings
-    //      _mappingData = UseMappings ? GetMappingData() : null;
-    //    }
-    //    return _mappingData;
-    //  }
-    //}
-
     public ProgressReport Report { get; private set; } = new ProgressReport();
 
     public void SetConverterSettings(object settings)
@@ -74,7 +51,7 @@ namespace ConverterGSA
 
     private UnitConversion conversionFactors = new UnitConversion();  //Default
 
-    public List<ApplicationPlaceholderObject> ContextObjects { get; set; } = new List<ApplicationPlaceholderObject>();
+    public List<Base> ContextObjects { get; set; } = new List<Base>();
 
     //public List<string> ConvertedObjectsList { get; set; } = new List<string>();
     //The presence of a key (application ID) and non-null speckle object means it's an embedded object yet to be converted to native
@@ -221,6 +198,8 @@ namespace ConverterGSA
       var retListLock = new object();
 #endif
       embeddedToBeConverted.Clear();
+
+      ContextObjects.AddRange(objects);
 
       //Handle Model objects as a special case, essentially flatten them first
       var models = objects.Where(o => o is Model).ToList();
@@ -493,12 +472,13 @@ namespace ConverterGSA
       {
         modelsByLayer = new Dictionary<GSALayer, Model>() { { GSALayer.Design, new Model() { specs = modelInfo, layerDescription = "Design" } } };
         modelHasData = new Dictionary<GSALayer, bool>() { { GSALayer.Design, false } };
-      } else if (sendLayer == GSALayer.Analysis)
+      }
+      if (sendLayer == GSALayer.Analysis)
       {
         modelsByLayer = new Dictionary<GSALayer, Model>() { { GSALayer.Analysis, new Model() { specs = modelInfo, layerDescription = "Analysis" } } };
         modelHasData = new Dictionary<GSALayer, bool>() { { GSALayer.Analysis, false } };
       }
-      else if (sendLayer == GSALayer.Both)
+      if (sendLayer == GSALayer.Both)
       {
         modelsByLayer = new Dictionary<GSALayer, Model>() { { GSALayer.Design, new Model() { specs = modelInfo, layerDescription = "Design" } } };
         modelHasData = new Dictionary<GSALayer, bool>() { { GSALayer.Design, false } };
@@ -735,14 +715,14 @@ namespace ConverterGSA
       int numObjs = 0;
       foreach (var sType in objsByType.Keys)
       {
-        //if (modelGroups[ModelAspect.Nodes].Contains(sType))
-        //{
-        //  if (model.nodes == null)
-        //  {
-        //    model.nodes = new List<Base>();
-        //  }
-        //  model.nodes.AddRange(objsByType[sType]);
-        //}
+        if (modelGroups[ModelAspect.Nodes].Contains(sType))
+        {
+          if (model.nodes == null)
+          {
+            model.nodes = new List<Base>();
+          }
+          model.nodes.AddRange(objsByType[sType]);
+        }
         if (modelGroups[ModelAspect.Elements].Contains(sType))
         {
           if (model.elements == null)
@@ -785,12 +765,7 @@ namespace ConverterGSA
         }
         if (modelGroups[ModelAspect.GeneralData].Contains(sType))
         {
-          if (model.generalData == null)
-          {
-            model.generalData = new List<Base>();
-          }
-
-          model.generalData.AddRange(objsByType[sType]);
+          model["generalData"] = objsByType[sType];
         }
 
         numObjs += objsByType[sType].Count();
@@ -805,7 +780,10 @@ namespace ConverterGSA
       throw new NotImplementedException();
     }
 
-    public void SetContextObjects(List<ApplicationPlaceholderObject> objects) => ContextObjects = objects;
+    public void SetContextObjects(List<ApplicationPlaceholderObject> objects)
+    {
+      throw new NotImplementedException();
+    }
 
     public void SetPreviousContextObjects(List<ApplicationPlaceholderObject> objects)
     {

@@ -1012,6 +1012,7 @@ namespace Speckle.ConnectorGSA.Proxy
         return false;
       }
 
+      //progress.Max = 0;
       var parseProgressDict = new ConcurrentDictionary<string, int>();
       parseProgressDict["Parsing"] = 0;
 
@@ -1025,7 +1026,7 @@ namespace Speckle.ConnectorGSA.Proxy
           var ti = typeInfo[layer][typeInfoIndicesBySchemaType[layer][t]];
           keywords.Add(ti.TableKeyword);
         }
-      
+
         var dataLock = new object();
         var setKeywords = new List<GwaKeyword>();
         var setAtKeywords = new List<GwaKeyword>();
@@ -1070,39 +1071,41 @@ namespace Speckle.ConnectorGSA.Proxy
             gwaLines = new string[0];
           }
 
-            foreach (var gwa in gwaLines)
+          foreach (var gwa in gwaLines)
+          {
+            var pieces = gwa.ListSplit(_GwaDelimiter).ToList();
+            if (pieces[0].StartsWith("set", StringComparison.InvariantCultureIgnoreCase))
             {
-              var pieces = gwa.ListSplit(_GwaDelimiter).ToList();
-              if (pieces[0].StartsWith("set", StringComparison.InvariantCultureIgnoreCase))
+              pieces = pieces.Skip(1).ToList();
+            }
+            var keywordAndVersion = pieces.First();
+            var keywordPieces = keywordAndVersion.Split('.');
+            if (keywordPieces.Count() == 2 && keywordPieces.Last().All(c => char.IsDigit(c))
+              && int.TryParse(keywordPieces.Last(), out int ver)
+              && keywordPieces.First().TryParseStringValue(out GwaKeyword kw))
+            {
+              var ktd = typeInfo[layer][typeInfoIndicesByKeyword[layer][kw]];
+              if (ktd != null)
               {
-                pieces = pieces.Skip(1).ToList();
-              }
-              var keywordAndVersion = pieces.First();
-              var keywordPieces = keywordAndVersion.Split('.');
-              if (keywordPieces.Count() == 2 && keywordPieces.Last().All(c => char.IsDigit(c))
-                && int.TryParse(keywordPieces.Last(), out int ver)
-                && keywordPieces.First().TryParseStringValue(out GwaKeyword kw))
-              {
-                var ktd = typeInfo[layer][typeInfoIndicesByKeyword[layer][kw]];
-                if (ktd != null)
-                {
-                  var schemaType = ktd.GetSchemaType(kw);
-                  var parser = (IGwaParser)Activator.CreateInstance(ktd.GetParserType(schemaType));
+                var schemaType = ktd.GetSchemaType(kw);
+                var parser = (IGwaParser)Activator.CreateInstance(ktd.GetParserType(schemaType));
                 if (parser.FromGwa(gwa))
                 {
                   retRecords.Add(parser.Record);
-                  if(parser.Record.Index.HasValue) 
+                  if (parser.Record.Index.HasValue)
                     progress.Report.Log($"Parsed GWA data for {schemaType.Name} at index: {parser.Record.Index.Value}");
                   else
                     progress.Report.Log($"Parsed GWA data for {schemaType.Name}");
+                  parseProgressDict["Parsing"]++;
+                  progress.Update(parseProgressDict);
                 }
                 else if (progress != null)
                 {
                   progress.Report.LogOperationError(new Exception(FormulateParsingErrorContext(parser.Record, schemaType.Name)));
                 }
-                }
               }
             }
+          }
         }
 
 
@@ -1117,7 +1120,7 @@ namespace Speckle.ConnectorGSA.Proxy
 
           try
           {
-            lock(syncLock)
+            lock (syncLock)
             {
               gwaLines = ((string)GSAObject.GwaCommand(newCommand)).Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
             }
@@ -1150,7 +1153,7 @@ namespace Speckle.ConnectorGSA.Proxy
                     {
                       try
                       {
-                        lock (syncLock) {streamId = GSAObject.GetSidTagValue(kwStr, index.Value, SID_STRID_TAG); }
+                        lock (syncLock) { streamId = GSAObject.GetSidTagValue(kwStr, index.Value, SID_STRID_TAG); }
                       }
                       catch { }
                     }
@@ -1222,6 +1225,8 @@ namespace Speckle.ConnectorGSA.Proxy
                         progress.Report.Log($"Parsed GWA data for {schemaType.Name} at index: {parser.Record.Index.Value}");
                       else
                         progress.Report.Log($"Parsed GWA data for {schemaType.Name}");
+                      parseProgressDict["Parsing"]++;
+                      progress.Update(parseProgressDict);
                     }
                     else if (progress != null)
                     {
@@ -1235,11 +1240,8 @@ namespace Speckle.ConnectorGSA.Proxy
 
           if (incrementProgress != null)
           {
-            incrementProgress.Report(1);            
+            incrementProgress.Report(1);
           }
-
-          parseProgressDict["Parsing"]++;
-          progress.Update(parseProgressDict);
         }
         #endregion
 
@@ -1247,7 +1249,7 @@ namespace Speckle.ConnectorGSA.Proxy
         for (int i = 0; i < setAtKeywords.Count(); i++)
         {
           int highestIndex = 0;
-          lock(syncLock)
+          lock (syncLock)
           {
             highestIndex = GSAObject.GwaCommand("HIGHEST" + GwaDelimiter + setAtKeywords[i]);
           }
@@ -1266,7 +1268,7 @@ namespace Speckle.ConnectorGSA.Proxy
             }
             catch { }
 
-            if ((gwaLine != "") 
+            if ((gwaLine != "")
               && ParseGeneralGwa(gwaLine, out GwaKeyword? keyword, out int? version, out int? index, out string streamId, out string appId, out string gwaWithoutSet,
                 out string keywordAndVersion) && keyword.HasValue)
             {
@@ -1307,7 +1309,7 @@ namespace Speckle.ConnectorGSA.Proxy
                 {
                   gwaWithoutSet.Replace(originalSid, newSid);
                 }
-              
+
                 var kw = ktd.HasDifferentatedKeywords ? (GwaKeyword)Enum.Parse(typeof(GwaKeyword), keywordAndVersion.Split('.')[0]) : keyword.Value;
 
                 var schemaType = ktd.GetSchemaType(kw);
@@ -1339,6 +1341,8 @@ namespace Speckle.ConnectorGSA.Proxy
                     progress.Report.Log($"Parsed GWA data for {schemaType.Name} at index: {parser.Record.Index.Value}");
                   else
                     progress.Report.Log($"Parsed GWA data for {schemaType.Name}");
+                  parseProgressDict["Parsing"]++;
+                  progress.Update(parseProgressDict);
                 }
                 else if (progress != null)
                 {
@@ -1351,14 +1355,12 @@ namespace Speckle.ConnectorGSA.Proxy
           {
             incrementProgress.Report(1);
           }
-          parseProgressDict["Parsing"]++;
-          progress.Update(parseProgressDict);
         }
         #endregion
       }
 
       records = retRecords;
-      return true; 
+      return true;
     }
 
     private string FormulateParsingErrorContext(GsaRecord gsaRecord, string typeName)
@@ -1393,7 +1395,7 @@ namespace Speckle.ConnectorGSA.Proxy
 
         initialised = true;
       }
-     
+
       return !initialisedError;
     }
 
@@ -1403,7 +1405,7 @@ namespace Speckle.ConnectorGSA.Proxy
       //of these instances, the SID is available through an explicit call for the SID, so try that next
       if (string.IsNullOrEmpty(applicationId))
       {
-        lock(syncLock)
+        lock (syncLock)
         {
           return GSAObject.GetSidTagValue(keyword, index, SID_APPID_TAG);
         }
@@ -1425,7 +1427,7 @@ namespace Speckle.ConnectorGSA.Proxy
 
       try
       {
-        lock(syncLock)
+        lock (syncLock)
         {
           gwaLines = ((string)GSAObject.GwaCommand(newCommand)).Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
         }
@@ -1493,7 +1495,7 @@ namespace Speckle.ConnectorGSA.Proxy
 
       try
       {
-        Sync();
+        Sync(progress);
       }
       catch (Exception ex)
       {
@@ -1506,6 +1508,8 @@ namespace Speckle.ConnectorGSA.Proxy
 
     public void WriteModel(List<GsaRecord> gsaRecords, ProgressViewModel progress, GSALayer layer = GSALayer.Both)
     {
+      progress.Report.Log("Writing to GSA");
+
       var parsersToUseBySchemaType = new Dictionary<Type, List<IGwaParser>>();
       foreach (var r in gsaRecords)
       {
@@ -1546,7 +1550,7 @@ namespace Speckle.ConnectorGSA.Proxy
               }
               catch (Exception ex)
               {
-                progress.Report.LogOperationError(new Exception("Unable to generate GWA for " + t.Name 
+                progress.Report.LogOperationError(new Exception("Unable to generate GWA for " + t.Name
                   + (string.IsNullOrEmpty(op.Record.ApplicationId) ? "" : " with applicationID = " + op.Record.ApplicationId)));
               }
             }
@@ -1556,7 +1560,7 @@ namespace Speckle.ConnectorGSA.Proxy
 
       try
       {
-        Sync();
+        Sync(progress);
       }
       catch (Exception ex)
       {
@@ -1580,7 +1584,7 @@ namespace Speckle.ConnectorGSA.Proxy
     {
       if (batchBlankGwa.Count() > 0)
       {
-        lock(syncLock)
+        lock (syncLock)
         {
           var batchBlankCommand = string.Join("\r\n", batchBlankGwa);
           var blankCommandResult = GSAObject.GwaCommand(batchBlankCommand);
@@ -1590,10 +1594,110 @@ namespace Speckle.ConnectorGSA.Proxy
 
       if (batchSetGwa.Count() > 0)
       {
-        lock(syncLock)
+        lock (syncLock)
         {
-          var batchSetCommand = string.Join("\r\n", batchSetGwa);
-          var setCommandResult = GSAObject.GwaCommand(batchSetCommand);
+          try
+          {
+            var batchSetCommand = string.Join("\r\n", batchSetGwa);
+            var setCommandResult = GSAObject.GwaCommand(batchSetCommand);
+          }
+          catch
+          {
+            foreach (var command in batchSetGwa)
+            {
+              try
+              {
+                var commandResult = GSAObject.GwaCommand(command);
+              }
+              catch { }
+            }
+          }
+          batchSetGwa.Clear();
+
+        }
+      }
+    }
+
+    private void Sync(IProgress<string> progress)
+    {
+      if (batchBlankGwa.Count() > 0)
+      {
+        lock (syncLock)
+        {
+          var batchBlankCommand = string.Join("\r\n", batchBlankGwa);
+          var blankCommandResult = GSAObject.GwaCommand(batchBlankCommand);
+          batchBlankGwa.Clear();
+        }
+      }
+
+      if (batchSetGwa.Count() > 0)
+      {
+        lock (syncLock)
+        {
+          try
+          {
+            var batchSetCommand = string.Join("\r\n", batchSetGwa);
+            var setCommandResult = GSAObject.GwaCommand(batchSetCommand);
+          }
+          catch
+          {
+            progress.Report("Unable to batch write Gwa records");
+            foreach (var command in batchSetGwa)
+            {
+              try
+              {
+                var commandResult = GSAObject.GwaCommand(command);
+              }
+              catch
+              {
+                progress.Report($"Unable to write Gwa record: {command}");
+              }
+            }
+          }
+          batchSetGwa.Clear();
+        }
+      }
+    }
+
+    private void Sync(ProgressViewModel progress)
+    {
+      if (batchBlankGwa.Count() > 0)
+      {
+        lock (syncLock)
+        {
+          var batchBlankCommand = string.Join("\r\n", batchBlankGwa);
+          var blankCommandResult = GSAObject.GwaCommand(batchBlankCommand);
+          batchBlankGwa.Clear();
+        }
+      }
+
+      if (batchSetGwa.Count() > 0)
+      {
+        lock (syncLock)
+        {
+          try
+          {
+            var batchSetCommand = string.Join("\r\n", batchSetGwa);
+            var setCommandResult = GSAObject.GwaCommand(batchSetCommand);
+          }
+          catch
+          {
+            progress.Report.LogOperationError(new Exception($"Unable to batch write Gwa records"));
+            foreach (var command in batchSetGwa)
+            {
+              try
+              {
+                var commandResult = GSAObject.GwaCommand(command);
+              }
+              catch
+              {
+                if (progress != null)
+                {
+                  progress.Report.LogOperationError(new Exception($"Unable to write Gwa record: {command}"));
+                }
+              }
+            }
+          }
           batchSetGwa.Clear();
         }
       }
@@ -1602,7 +1706,7 @@ namespace Speckle.ConnectorGSA.Proxy
     public string GetGwaForNode(int index)
     {
       var gwaCommand = string.Join(GwaDelimiter.ToString(), new[] { "GET", "NODE.3", index.ToString() });
-      lock(syncLock)
+      lock (syncLock)
       {
         return (string)GSAObject.GwaCommand(gwaCommand);
       }
@@ -1615,7 +1719,7 @@ namespace Speckle.ConnectorGSA.Proxy
     {
       try
       {
-        lock(syncLock)
+        lock (syncLock)
         {
           GSAObject.ReindexCasesAndTasks();
         }
@@ -1630,7 +1734,7 @@ namespace Speckle.ConnectorGSA.Proxy
     public void DeleteGWA(string keyword, int index, GwaSetCommandType gwaSetCommandType)
     {
       var command = string.Join(GwaDelimiter.ToString(), new[] { (gwaSetCommandType == GwaSetCommandType.Set) ? "BLANK" : "DELETE", keyword, index.ToString() });
-      lock(syncLock)
+      lock (syncLock)
       {
         if (gwaSetCommandType == GwaSetCommandType.Set)
         {
@@ -1653,7 +1757,7 @@ namespace Speckle.ConnectorGSA.Proxy
       string sid = "";
       try
       {
-        lock(syncLock)
+        lock (syncLock)
         {
           var gwa = (string)GSAObject.GwaCommand("GET" + GwaDelimiter + "SID");
           sid = gwa.Substring(gwa.IndexOf(GwaDelimiter) + 1).Replace("\"\"", "\"");
@@ -1678,7 +1782,7 @@ namespace Speckle.ConnectorGSA.Proxy
     {
       try
       {
-        lock(syncLock)
+        lock (syncLock)
         {
           GSAObject.GwaCommand(string.Join(GwaDelimiter.ToString(), new[] { "SET", "SID", StreamState }));
         }
@@ -1697,7 +1801,7 @@ namespace Speckle.ConnectorGSA.Proxy
     public string GetTitle()
     {
       string res;
-      lock(syncLock)
+      lock (syncLock)
       {
         res = (string)GSAObject.GwaCommand("GET" + GwaDelimiter + "TITLE");
       }
@@ -1709,7 +1813,7 @@ namespace Speckle.ConnectorGSA.Proxy
 
     public string[] GetTolerances()
     {
-      lock(syncLock)
+      lock (syncLock)
       {
         return ((string)GSAObject.GwaCommand("GET" + GwaDelimiter + "TOL")).ListSplit(GwaDelimiter);
       }
@@ -2001,7 +2105,7 @@ namespace Speckle.ConnectorGSA.Proxy
     private bool IsMarkerPattern(string item) => (item.Length >= 2 && char.IsLetter(item[0]) && item.Substring(1).All(c => char.IsDigit(c)));
 
     private string RemoveMarker(string item) => (IsMarkerPattern(item) ? item.Substring(1) : item);
-    
+
 
     //Since EntitiesInList doesn't offer load cases/combinations as a GsaEntity type, a dummy GSA instance is 
     //created where a node is created for every load case/combination in the specification.  This is done separately for load cases and combinations.
@@ -2040,7 +2144,7 @@ namespace Speckle.ConnectorGSA.Proxy
     public string GetUnits()
     {
       string retrievedUnits;
-      lock(syncLock)
+      lock (syncLock)
       {
         retrievedUnits = (GSAObject.GwaCommand(string.Join(GwaDelimiter.ToString(), new[] { "GET", "UNIT_DATA.1", "LENGTH" }))).ListSplit(GwaDelimiter)[2];
       }
@@ -2052,7 +2156,7 @@ namespace Speckle.ConnectorGSA.Proxy
     {
       this.units = units;
       int retCode;
-      lock(syncLock)
+      lock (syncLock)
       {
         var retCode1 = GSAObject.GwaCommand(string.Join(GwaDelimiter.ToString(), new[] { "SET", "UNIT_DATA", "LENGTH", units }));
         var retCode2 = GSAObject.GwaCommand(string.Join(GwaDelimiter.ToString(), new[] { "SET", "UNIT_DATA", "DISP", units }));
@@ -2072,7 +2176,7 @@ namespace Speckle.ConnectorGSA.Proxy
     {
       try
       {
-        lock(syncLock)
+        lock (syncLock)
         {
           GSAObject.UpdateViews();
         }
@@ -2134,7 +2238,7 @@ namespace Speckle.ConnectorGSA.Proxy
       {
         return false;
       }
-      
+
       return resultProcessors[group].LoadFromFile(out numErrorRows);
     }
 

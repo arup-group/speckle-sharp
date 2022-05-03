@@ -615,6 +615,16 @@ namespace Objects.Converter.RhinoGh
           Report.Log($"Created Element1D with line {o.id}");
           break;
 
+        case Objects.Structural.Geometry.Element2D o:
+          rhinoObj = Element2DToNative(o);
+          Report.Log($"Created Element2D with outline {o.id}");
+          break;
+
+        case Objects.Structural.Geometry.Node o:
+          rhinoObj = NodeToNative(o);
+          Report.Log($"Created Node with point {o.id}");
+          break;
+
         case DisplayStyle o:
           rhinoObj = DisplayStyleToNative(o);
           break;

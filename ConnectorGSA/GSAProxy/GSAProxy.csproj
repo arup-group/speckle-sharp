@@ -10,6 +10,7 @@
     <RootNamespace>Speckle.ConnectorGSA.Proxy</RootNamespace>
     <AssemblyName>ConnectorGSAProxy</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+	<RuntimeIdentifier>win</RuntimeIdentifier>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
@@ -155,7 +156,7 @@
       <Version>10.1.1</Version>
     </PackageReference>
     <PackageReference Include="CsvHelper">
-      <Version>27.1.1</Version>
+      <Version>27.2.1</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

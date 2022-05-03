@@ -3,6 +3,7 @@ using Speckle.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace Objects.Structural.ApplicationSpecific.GSA.GeneralData
 {
@@ -12,7 +13,7 @@ namespace Objects.Structural.ApplicationSpecific.GSA.GeneralData
     public string name { get; set; }
     public GSAListType listType { get; set; }
     public List<Base> definition { get; set; }
-
+    public List<string> definitionRefs { get; set; }
     public GSAList()
     {
 
@@ -25,6 +26,7 @@ namespace Objects.Structural.ApplicationSpecific.GSA.GeneralData
       this.name = name;
       this.listType = listType;
       this.definition = definition;
+      this.definitionRefs = definition.Select(d => d.applicationId).ToList();
     }
   }
 

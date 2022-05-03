@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Objects.Structural.Geometry;
 using Objects.Structural.Loading;
 using Speckle.Core.Kits;
+using System.Linq;
 
 namespace Objects.Structural.GSA.Loading
 {
@@ -10,9 +11,11 @@ namespace Objects.Structural.GSA.Loading
   {
     public int? nativeId { get; set; }
 
-    [DetachProperty]
-    [Chunkable(1000)]
+    //[DetachProperty]
+    [Chunkable(500)]
     public List<Element2D> elements { get; set; }
+    public List<string> elementRefs { get; set; }
+
     public Thermal2dLoadType type { get; set; }
     public List<double> values { get; set; }
     public GSALoadThermal2d() { }
@@ -26,6 +29,8 @@ namespace Objects.Structural.GSA.Loading
       this.elements = elements;
       this.type = type;
       this.values = values;
+
+      this.elementRefs = elements.Select(e => e.applicationId).ToList();
     }
   }
 

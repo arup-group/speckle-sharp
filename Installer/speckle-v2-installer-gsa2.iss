@@ -20,7 +20,7 @@ DisableProgramGroupPage=yes
 DisableWelcomePage=no
 OutputDir="."
 OutputBaseFilename=Speckle@ArupGSAConnector-v{#AppVersion}
-SetupIconFile=..\ConnectorGSA\ConnectorGSA2\icon.ico
+SetupIconFile=..\ConnectorGSA\ConnectorGSA\icon.ico
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
@@ -43,7 +43,7 @@ Name: "{app}"; Permissions: everyone-full
 
 [Files]
 ;gsa
-Source: "..\ConnectorGSA\ConnectorGSA2\bin\Release\net5.0\*"; DestDir: "{userappdata}\Oasys\SpeckleGSA\"; Flags: ignoreversion recursesubdirs; Components: gsa
+Source: "..\ConnectorGSA\ConnectorGSA\bin\Release\*"; DestDir: "{userappdata}\Oasys\SpeckleGSA\"; Flags: ignoreversion recursesubdirs; Components: gsa
 Source: "..\Objects\Converters\ConverterGSA\ConverterGSA\bin\Release\Objects.Converter.GSA.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects"; Flags: ignoreversion recursesubdirs; Components: gsa
 
 ;kits

@@ -36,7 +36,7 @@
 # For a complete CI/CD sample to get started with GitHub Action workflows for Desktop Applications,
 # refer to https://github.com/microsoft/github-actions-for-desktop-apps
 
-name: Create Installer for GSA Connector
+name: Create Installer for SNAP Connector
 
 on:
   push:
@@ -70,42 +70,35 @@ jobs:
       run: |
         $tag = "${{ github.event.inputs.version }}.$($env:GITHUB_RUN_ID%65536)"
         echo "::set-output name=tag::$tag"
-
     - name: Update Version
       shell: powershell
-      working-directory: ConnectorGSA/ConnectorGSA/Properties
+      working-directory: ConnectorSNAP/ConnectorSNAP/Properties
       run: |
         (Get-content .\AssemblyInfo.cs) -replace '1\.0\.0\.0', '${{ steps.calculate-tag-version.outputs.tag }}' | Out-File -encoding ASCII .\AssemblyInfo.cs
-
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore all the applications
       shell: cmd
       run: |
-        for %%x in (Objects, ConnectorGSA) do (
+        for %%x in (Objects, ConnectorSNAP) do (
           cd %%x && msbuild %%x.sln /t:Restore /p:Configuration=Release /p:WarningLevel=0 /p:IsDesktopBuild=false && cd ../ 
         )
       env:
         GH_PKG_USER: ${{ secrets.GH_PKG_USER }} 
-        GH_PKG_TOKEN: ${{ secrets.GH_PKG_TOKEN }}    
-        POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}            
+        GH_PKG_TOKEN: ${{ secrets.GH_PKG_TOKEN }}          
         
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Build all Solutions
       shell: cmd
       run: |
         SET _version=${{ github.event.inputs.version }}
-        for %%x in (Objects, ConnectorGSA) do (
+        for %%x in (Objects, ConnectorSNAP) do (
           cd %%x && msbuild %%x.sln /p:Configuration=Release /p:WarningLevel=0 /p:IsDesktopBuild=false /p:AssemblyVersionNumber=%_version% /p:AssemblyInformationalVersion=%_version% /p:Version=%_version% && cd ../ 
-        )   
-      env:
-        GH_PKG_USER: ${{ secrets.GH_PKG_USER }} 
-        GH_PKG_TOKEN: ${{ secrets.GH_PKG_TOKEN }}    
-        POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}            
+        )               
         
     - name: create Installer
       id: installer
       run: | 
-        iscc /dAppVersion="${{ steps.calculate-tag-version.outputs.tag }}" speckle-v2-installer-gsa.iss
+        iscc /dAppVersion="${{ steps.calculate-tag-version.outputs.tag }}" speckle-v2-installer-SNAP.iss
         $filename = (ls *.exe).Name
         echo "::set-output name=filename::$filename"          
       working-directory: Installer          
@@ -150,9 +143,9 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
       with:
         tag_name: ${{ steps.calculate-tag-version.outputs.tag }}
-        release_name: gsa/${{ steps.calculate-tag-version.outputs.tag }}
+        release_name: SNAP/${{ steps.calculate-tag-version.outputs.tag }}
         body: |
-          Automated release of Speckle v2 Connector for Oasys GSA 10.1
+          Automated release of Speckle v2 Connector for SNAP (INP files)
         draft: false
         prerelease: true
 

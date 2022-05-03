@@ -249,7 +249,7 @@ namespace DesktopUI2.ViewModels
       this.RaisePropertyChanged("HasSavedStreams");
     }
 
-    private async Task GetStreams()
+    public virtual async Task GetStreams()
     {
       if (!HasAccounts)
         return;
@@ -379,6 +379,7 @@ namespace DesktopUI2.ViewModels
       }
 
     }
+
     public async void AddAccountCommand()
     {
       IsLoggingIn = true;

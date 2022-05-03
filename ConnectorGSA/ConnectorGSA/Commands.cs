@@ -58,13 +58,11 @@ namespace ConnectorGSA
         {
           streamsForAccount = await client.StreamsGet(50);  //Undocumented limitation servers cannot seem to return more than 50 items
         }
-#pragma warning disable CS0168 // The variable 'ex' is declared but never used
         catch (Exception ex)
-#pragma warning restore CS0168 // The variable 'ex' is declared but never used
         {
           loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, "Unable to get stream list"));
         }
-        
+
 
         coordinator.Account = accountCandidate;
         coordinator.ServerStreamList.StreamListItems.Clear();
@@ -124,21 +122,22 @@ namespace ConnectorGSA
     }
 
     public static bool ExtractSavedReceptionStreamInfo(bool? receive, bool? send, out List<StreamStateOld> streamStates)
-    { 
+    {
       List<StreamStateOld> allSaved;
       try
       {
         var sid = ((GsaProxy)Instance.GsaModel.Proxy).GetTopLevelSid();
         allSaved = JsonConvert.DeserializeObject<List<StreamStateOld>>(sid);
-        if (allSaved == null) {
+        if (allSaved == null)
+        {
           allSaved = new List<StreamStateOld>();
         }
       }
       catch
       {
         allSaved = new List<StreamStateOld>();
-      }      
-      
+      }
+
       var userId = ((GsaModel)Instance.GsaModel).Account.userInfo.id;
       var restApi = ((GsaModel)Instance.GsaModel).Account.serverInfo.url;
 
@@ -158,17 +157,15 @@ namespace ConnectorGSA
 
     public static bool UpsertSavedReceptionStreamInfo(bool? receive, bool? send, params StreamStateOld[] streamStates)
     {
-      
-      
+
+
       var sid = ((GsaProxy)Instance.GsaModel.Proxy).GetTopLevelSid();
       List<StreamStateOld> allSs = null;
       try
       {
         allSs = JsonConvert.DeserializeObject<List<StreamStateOld>>(sid);
       }
-#pragma warning disable CS0168 // The variable 'ex' is declared but never used
       catch (JsonException ex)
-#pragma warning restore CS0168 // The variable 'ex' is declared but never used
       {
         //Could not deserialise, probably because it has a v1-format of stream information.  In this case, ignore the info
 
@@ -247,7 +244,7 @@ namespace ConnectorGSA
       }
       catch (Exception ex)
       {
-        loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, 
+        loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error,
           "Unable to convert one or more received objects.  Refer to logs for more information"));
 
         loggingProgress.Report(new MessageEventArgs(MessageIntent.TechnicalLog, MessageLevel.Error, ex, "Converion error"));
@@ -269,16 +266,28 @@ namespace ConnectorGSA
       return convertedObjs;
     }
 
-    public static async Task<(bool status, string commitId)> SendCommit(Base commitObj, StreamStateOld state, string parent, params ITransport[] transports)
+    public static async Task<string> SendCommit(Base commitObj, StreamStateOld state, string parent, IProgress<MessageEventArgs> loggingProgress, IProgress<string> statusProgress, IProgress<double> percentageProgress, params ITransport[] transports)
     {
       var commitObjId = await Operations.Send(
         @object: commitObj,
         transports: transports.ToList(),
+        useDefaultCache: true,
+        onProgressAction: (dict) =>
+        {
+          foreach (var kvp in dict)
+          {
+            if (kvp.Key == "RemoteTransport") statusProgress.Report($"{kvp.Key}: {(double)kvp.Value}");
+          }
+        },
         onErrorAction: (s, e) =>
         {
           state.Errors.Add(e);
+          loggingProgress.Report(new MessageEventArgs(MessageIntent.TechnicalLog, MessageLevel.Error, e));
+          Func<string> temp = () => { return null; };
         }
         );
+
+      statusProgress.Report($"{commitObj.GetTotalChildrenCount()} objects sent to server");
 
       var commitId = "";
       if (transports.Any(t => t is ServerTransport))
@@ -310,7 +319,7 @@ namespace ConnectorGSA
         }
       }
 
-      return (status: (state.Errors.Count == 0), commitId: commitId);
+      return commitId;
     }
 
     internal static async Task<bool> Receive(TabCoordinator coordinator, IProgress<MessageEventArgs> loggingProgress, IProgress<string> statusProgress, IProgress<double> percentageProgress)
@@ -452,12 +461,13 @@ namespace ConnectorGSA
               if (received)
               {
                 loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Information, "Received data from " + streamId + " stream"));
-                } else
-                {
-                  loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, "Failed to receive data from " + streamId + " stream"));
-                  loggingProgress.Report(new MessageEventArgs(MessageIntent.TechnicalLog, MessageLevel.Error, "Failed to receive data from " + streamId + " stream"));
-                  percentageProgress.Report(0);
-                  return;
+              }
+              else
+              {
+                loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, "Failed to receive data from " + streamId + " stream"));
+                loggingProgress.Report(new MessageEventArgs(MessageIntent.TechnicalLog, MessageLevel.Error, "Failed to receive data from " + streamId + " stream"));
+                percentageProgress.Report(0);
+                return;
               }
 
               if (streamState.Errors != null && streamState.Errors.Count > 0)
@@ -531,12 +541,12 @@ namespace ConnectorGSA
       }
       startTime = DateTime.Now;
 
+      statusProgress.Report("Writing converting objects to GSA");
+
       //The cache is filled with natives
       if (Instance.GsaModel.Cache.GetNatives(out var gsaRecords))
       {
-#pragma warning disable CS0012 // The type 'ProgressViewModel' is defined in an assembly that is not referenced. You must add a reference to assembly 'DesktopUI2, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
-        //((GsaProxy)Instance.GsaModel.Proxy).WriteModel(gsaRecords, proxyLoggingProgress);
-#pragma warning restore CS0012 // The type 'ProgressViewModel' is defined in an assembly that is not referenced. You must add a reference to assembly 'DesktopUI2, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+        ((GsaProxy)Instance.GsaModel.Proxy).WriteModel(gsaRecords, proxyLoggingProgress);
       }
 
       percentageProgress.Report(100);
@@ -627,18 +637,16 @@ namespace ConnectorGSA
 
       try
       {
-#pragma warning disable CS0012 // The type 'ProgressViewModel' is defined in an assembly that is not referenced. You must add a reference to assembly 'DesktopUI2, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
-//        if (((GsaProxy)Instance.GsaModel.Proxy).GetGwaData(Instance.GsaModel.StreamLayer, gwaLoggingProgress, out var records))
-//#pragma warning restore CS0012 // The type 'ProgressViewModel' is defined in an assembly that is not referenced. You must add a reference to assembly 'DesktopUI2, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
-//        {
-//          for (int i = 0; i < records.Count(); i++)
-//          {
-//            if (!Instance.GsaModel.Cache.Upsert(records[i]))
-//            {
-//              errored.Add(i, records[i]);
-//            }
-//          }
-//        }
+        if (((GsaProxy)Instance.GsaModel.Proxy).GetGwaData(Instance.GsaModel.StreamLayer, gwaLoggingProgress, out var records))
+        {
+          for (int i = 0; i < records.Count(); i++)
+          {
+            if (!Instance.GsaModel.Cache.Upsert(records[i]))
+            {
+              errored.Add(i, records[i]);
+            }
+          }
+        }
         return true;
       }
       catch
@@ -722,9 +730,7 @@ namespace ConnectorGSA
       return objects;
     }
 
-#pragma warning disable CS1998 // This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread.
     internal static async Task<List<StreamStateOld>> GetStreamList(TabCoordinator coordinator, SpeckleAccountForUI account, Progress<MessageEventArgs> loggingProgress)
-#pragma warning restore CS1998 // This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread.
     {
       return new List<StreamStateOld>();
     }
@@ -842,9 +848,7 @@ namespace ConnectorGSA
       return changed;
     }
 
-#pragma warning disable CS1998 // This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread.
     internal static async Task<bool> CloneStream(TabCoordinator coordinator, string streamId, Progress<MessageEventArgs> loggingProgress)
-#pragma warning restore CS1998 // This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread.
     {
       var messenger = new ProgressMessenger(loggingProgress);
 
@@ -854,7 +858,7 @@ namespace ConnectorGSA
       return true;
     }
 
-    internal static async Task<bool> SendTriggered(TabCoordinator coordinator, IProgress<MessageEventArgs> loggingProgress, 
+    internal static async Task<bool> SendTriggered(TabCoordinator coordinator, IProgress<MessageEventArgs> loggingProgress,
       IProgress<string> statusProgress, IProgress<double> percentageProgress)
     {
       var result = await Send(coordinator, coordinator.SenderTab.SenderStreamStates.First(), loggingProgress, statusProgress, percentageProgress);
@@ -864,9 +868,9 @@ namespace ConnectorGSA
     private static async Task<bool> Send(TabCoordinator coordinator, StreamStateOld ss, IProgress<MessageEventArgs> loggingProgress, IProgress<string> statusProgress, IProgress<double> percentageProgress)
     {
       var kit = KitManager.GetDefaultKit();
-#pragma warning disable CS0618 // 'Applications' is obsolete: 'Use VersionedHostApplications or HostApplications instead.'
-      var converter = kit.LoadConverter(Applications.GSA);
-#pragma warning restore CS0618 // 'Applications' is obsolete: 'Use VersionedHostApplications or HostApplications instead.'
+      var converter = kit.LoadConverter(VersionedHostApplications.GSA);
+      if (converter == null)
+        throw new Exception("Could not find any Kit!");
       var account = ((GsaModel)Instance.GsaModel).Account;
       var percentage = 0;
       var perecentageProgressLock = new object();
@@ -953,7 +957,8 @@ namespace ConnectorGSA
             loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Information, "Duration of preparing results: " + duration.ToString(@"hh\:mm\:ss")));
             loggingProgress.Report(new MessageEventArgs(MessageIntent.Telemetry, MessageLevel.Information, "send", "prepare-results", "duration", duration.ToString(@"hh\:mm\:ss")));
           }
-        } catch
+        }
+        catch
         {
 
         }
@@ -978,12 +983,20 @@ namespace ConnectorGSA
       {
         objs = Commands.ConvertToSpeckle(converter);
       }
-#pragma warning disable CS0168 // The variable 'ex' is declared but never used
       catch (Exception ex)
-#pragma warning restore CS0168 // The variable 'ex' is declared but never used
       {
-
+        loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, ex.Message));
+        loggingProgress.Report(new MessageEventArgs(MessageIntent.TechnicalLog, MessageLevel.Error, ex, ex.Message));
+        return false;
       }
+
+      if (objs == null)
+      {
+        loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Information, "Failed to convert GSA data to Speckle"));
+        loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Information, "Failed to convert GSA data to Speckle"));
+        return false;
+      }
+
       if (converter.Report.ConversionErrors != null && converter.Report.ConversionErrors.Count > 0)
       {
         foreach (var ce in converter.Report.ConversionErrors)
@@ -1005,7 +1018,7 @@ namespace ConnectorGSA
 
       //The converter itself can't give anything back other than Base objects, so this is the first time it can be adorned with any
       //info useful to the sending in streams
-      statusProgress.Report("Sending to Server");
+      statusProgress.Report("Sending to server");
 
       var commitObj = new Base();
       foreach (var obj in objs)
@@ -1031,46 +1044,45 @@ namespace ConnectorGSA
         commitObj['@' + name] = obj;
       }
 
+      //var fileTransport = new DiskTransport.DiskTransport(System.IO.Path.Combine(@"C:\Speckle_Reference\DiskTransport", ss.Stream.id));
       var serverTransport = new ServerTransport(account, ss.Stream.id);
-      var sent = await Commands.SendCommit(commitObj, ss, ((GsaModel)Instance.GsaModel).LastCommitId, serverTransport);
+      var sent = await Commands.SendCommit(commitObj, ss, ((GsaModel)Instance.GsaModel).LastCommitId, loggingProgress, statusProgress, percentageProgress, serverTransport);
 
-      if (sent.status)
+      if (!String.IsNullOrEmpty(sent))
       {
         loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Information, "Successfully sent data to stream"));
         Commands.UpsertSavedReceptionStreamInfo(true, null, ss);
+
+        if (ss.Errors != null && ss.Errors.Count > 0)
+        {
+          foreach (var se in ss.Errors)
+          {
+            loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, se.Message));
+            loggingProgress.Report(new MessageEventArgs(MessageIntent.TechnicalLog, MessageLevel.Error, se, se.Message));
+          }
+        }
+
+        duration = DateTime.Now - startTime;
+        if (duration.Seconds > 0)
+        {
+          loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Information, "Duration of sending to Speckle: " + duration.ToString(@"hh\:mm\:ss")));
+          loggingProgress.Report(new MessageEventArgs(MessageIntent.Telemetry, MessageLevel.Information, "send", "sending", "duration", duration.ToString(@"hh\:mm\:ss")));
+        }
+        startTime = DateTime.Now;
+
+        percentageProgress.Report(100);
       }
       else
       {
         loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, "Unable to send data to stream"));
       }
 
-      if (ss.Errors != null && ss.Errors.Count > 0)
-      {
-        foreach (var se in ss.Errors)
-        {
-          loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, se.Message));
-          loggingProgress.Report(new MessageEventArgs(MessageIntent.TechnicalLog, MessageLevel.Error, se, se.Message));
-        }
-      }
-
-      percentageProgress.Report(100);
-
-      duration = DateTime.Now - startTime;
-      if (duration.Seconds > 0)
-      {
-        loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Information, "Duration of sending to Speckle: " + duration.ToString(@"hh\:mm\:ss")));
-        loggingProgress.Report(new MessageEventArgs(MessageIntent.Telemetry, MessageLevel.Information, "send", "sending", "duration", duration.ToString(@"hh\:mm\:ss")));
-      }
-      startTime = DateTime.Now;
-
-      Console.WriteLine("Sending complete");
-
       percentageProgress.Report(0);
 
       return true;
     }
 
-    internal static async Task<bool> SendInitial(TabCoordinator coordinator, IProgress<StreamStateOld> streamCreationProgress, IProgress<StreamStateOld> streamDeletionProgress, 
+    internal static async Task<bool> SendInitial(TabCoordinator coordinator, IProgress<StreamStateOld> streamCreationProgress, IProgress<StreamStateOld> streamDeletionProgress,
       IProgress<MessageEventArgs> loggingProgress, IProgress<string> statusProgress, IProgress<double> percentageProgress)
     {
       Instance.GsaModel.StreamLayer = coordinator.SenderTab.TargetLayer;
@@ -1102,13 +1114,12 @@ namespace ConnectorGSA
           ((GsaModel)Instance.GsaModel).LastCommitId = mainBranch.commits.items[0].id;
         }
       }
-      
+
       streamCreationProgress.Report(streamState); //This will add it to the sender tab's streamState list
 
-      await Send(coordinator, streamState, loggingProgress, statusProgress, percentageProgress);
+      var sent = await Send(coordinator, streamState, loggingProgress, statusProgress, percentageProgress);      
 
       coordinator.SenderTab.SetDocumentName(((GsaProxy)Instance.GsaModel.Proxy).GetTitle());
-
 
       coordinator.WriteStreamInfo();
 

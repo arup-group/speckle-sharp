@@ -56,6 +56,8 @@ namespace Objects.Structural.GSA.Geometry
       }
 
       this.outline = outline;
+
+      this.topologyRefs = topology.Select(n => n.applicationId).ToList();
     }
 
     [SchemaInfo("GSAMember2D (from polyline)", "Creates a Speckle structural 2D member for GSA", "GSA", "Geometry")]
@@ -87,6 +89,8 @@ namespace Objects.Structural.GSA.Geometry
       this.orientationAngle = orientationAngle;
       this.isDummy = isDummy;
       this.outline = outlineLoops;
+
+      this.topologyRefs = topology.Select(n => n.applicationId).ToList();
     }
   }
 }
