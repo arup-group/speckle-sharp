@@ -721,7 +721,7 @@ namespace ConverterGSA
       };
       if (gsaGridSurface.MemberIndices.HasValues()) designGridSurface.elements = gsaGridSurface.MemberIndices.Select(i => GetMemberFromIndex(i)).ToList();
 
-      if (layer == GSALayer.Both)
+      if (layer == GSALayer.Analysis || layer == GSALayer.Both)
       {
         //analysis layer
         analysisGridSurface = new GSAGridSurface()
@@ -838,7 +838,7 @@ namespace ConverterGSA
       if (gsaAnalysisCase.TaskIndex.IsIndex())
       {
         var task = GetTaskFromIndex(gsaAnalysisCase.TaskIndex.Value);
-        task.analysisCases.Add(speckleAnalysisCase);
+        if (task != null) task.analysisCases.Add(speckleAnalysisCase);
       }
       return new ToSpeckleResult(speckleAnalysisCase);
     }
@@ -906,7 +906,7 @@ namespace ConverterGSA
       };
       if (gsaLoad.MemberIndices.HasValues()) designLoad.elements = gsaLoad.MemberIndices.Select(i => GetMemberFromIndex(i)).ToList();
 
-      if (layer == GSALayer.Both)
+      if (layer == GSALayer.Analysis || layer == GSALayer.Both)
       {
         //analysis layer
         analysisLoad = new GSALoadFace()
@@ -975,7 +975,7 @@ namespace ConverterGSA
       };
       if (gsaLoad.MemberIndices.HasValues()) designLoad.elements = gsaLoad.MemberIndices.Select(i => GetMemberFromIndex(i)).ToList();
 
-      if (layer == GSALayer.Both)
+      if (layer == GSALayer.Analysis || layer == GSALayer.Both)
       {
         //analysis layer
         analysisLoad = new GSALoadBeam()
@@ -1065,7 +1065,7 @@ namespace ConverterGSA
 
       AddToMeaningfulNodeIndices(nodes.Select(n => n.applicationId));
 
-      if (layer == GSALayer.Both)
+      if (layer == GSALayer.Analysis || layer == GSALayer.Both)
       {
         //analysis layer
         analysisLoad = new GSALoadGravity()
@@ -1117,7 +1117,7 @@ namespace ConverterGSA
       };
       if (gsaLoad.MemberIndices.HasValues()) designLoad.elements = gsaLoad.MemberIndices.Select(i => (Element1D)GetMemberFromIndex(i)).ToList();
 
-      if (layer == GSALayer.Both)
+      if (layer == GSALayer.Analysis || layer == GSALayer.Both)
       {
         //analysis layer
         analysisLoad = new GSALoadThermal1d()
@@ -1165,7 +1165,7 @@ namespace ConverterGSA
       };
       if (gsaLoad.MemberIndices.HasValues()) designLoad.elements = gsaLoad.MemberIndices.Select(i => (Element2D)GetMemberFromIndex(i)).ToList();
 
-      if (layer == GSALayer.Both)
+      if (layer == GSALayer.Analysis || layer == GSALayer.Both)
       {
         //analysis layer
         analysisLoad = new GSALoadThermal2d()
@@ -1229,7 +1229,7 @@ namespace ConverterGSA
         value = gsaLoad.Value ?? 0,
       };
 
-      if (layer == GSALayer.Both)
+      if (layer == GSALayer.Analysis || layer == GSALayer.Both)
       {
         //analysis layer
         analysisLoad = new GSALoadGridArea()
@@ -1300,7 +1300,7 @@ namespace ConverterGSA
         values = values,
       };
 
-      if (layer == GSALayer.Both)
+      if (layer == GSALayer.Analysis || layer == GSALayer.Both)
       {
         //analysis layer
         analysisLoad = new GSALoadGridLine()
@@ -1369,7 +1369,7 @@ namespace ConverterGSA
         position = position,
       };
 
-      if (layer == GSALayer.Both)
+      if (layer == GSALayer.Analysis || layer == GSALayer.Both)
       {
         //analysis layer
         analysisLoad = new GSALoadGridPoint()
@@ -2157,7 +2157,7 @@ namespace ConverterGSA
         parentMember = parentMember,
       };
 
-      if (layer == GSALayer.Both)
+      if (layer == GSALayer.Analysis || layer == GSALayer.Both)
       {
         //analysis layer
         analysisRigid = new GSARigidConstraint()
@@ -2218,7 +2218,7 @@ namespace ConverterGSA
         stages = designStages,
       };
 
-      if (layer == GSALayer.Both)
+      if (layer == GSALayer.Analysis || layer == GSALayer.Both)
       {
         //analysis layer
         analysisGenRest = new GSAGeneralisedRestraint()
@@ -2268,7 +2268,7 @@ namespace ConverterGSA
       if (gsaStage.MemberIndices.HasValues()) designStage.elements = gsaStage.MemberIndices.Select(i => GetMemberFromIndex(i)).ToList();
       if (gsaStage.LockMemberIndices.HasValues()) designStage.lockedElements = gsaStage.LockMemberIndices.Select(i => GetMemberFromIndex(i)).ToList();
 
-      if (layer == GSALayer.Both)
+      if (layer == GSALayer.Analysis || layer == GSALayer.Both)
       {
         //analysis layer
         analysisStage = new GSAStage()
@@ -2404,7 +2404,7 @@ namespace ConverterGSA
         gridSurface = designGridSurface,
       };
 
-      if (layer == GSALayer.Both)
+      if (layer == GSALayer.Analysis || layer == GSALayer.Both)
       {
         analysisAlignment = new GSAAlignment()
         {
@@ -2459,7 +2459,7 @@ namespace ConverterGSA
         alignment = designAlignment,
       };
 
-      if (layer == GSALayer.Both)
+      if (layer == GSALayer.Analysis || layer == GSALayer.Both)
       {
         //analysis layer
         analysisPath = new GSAPath()

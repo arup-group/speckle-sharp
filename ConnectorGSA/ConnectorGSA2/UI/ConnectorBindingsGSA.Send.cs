@@ -30,7 +30,7 @@ using System.Collections.Concurrent;
 
 namespace ConnectorGSA.UI
 {
-  public partial class ConnectorBindingsGSA : ConnectorBindings
+  public partial class ConnectorBindingsGSA : ConnectorBindingsStandalone
   {
     public override async Task<string> SendStream(StreamState state, ProgressViewModel progress)
     {
@@ -218,7 +218,7 @@ namespace ConnectorGSA.UI
       if (sent != null)
       {
         progress.Report.Log("Successfully sent data to stream");
-        Commands.UpsertSavedReceptionStreamInfo(true, null, state);
+        //Commands.UpsertSavedReceptionStreamInfo(true, null, state);
       }
       else
       {

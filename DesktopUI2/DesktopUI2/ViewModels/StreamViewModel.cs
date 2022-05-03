@@ -38,7 +38,7 @@ namespace DesktopUI2.ViewModels
 
     private List<MenuItemViewModel> _menuItems = new List<MenuItemViewModel>();
 
-    public ICommand RemoveSavedStreamCommand { get; }
+    public ICommand RemoveSavedStreamCommand { get; set; }
 
     #region bindings
     private Stream _stream;
@@ -110,7 +110,7 @@ namespace DesktopUI2.ViewModels
     public bool ShowReport
     {
       get => _showReport;
-      private set
+      set
       {
         this.RaiseAndSetIfChanged(ref _showReport, value);
       }
@@ -129,7 +129,7 @@ namespace DesktopUI2.ViewModels
 
     public string UrlPathSegment { get; } = "stream";
 
-    private Client Client { get; }
+    public Client Client { get; set; }
 
     public ReactiveCommand<Unit, Unit> GoBack => MainWindowViewModel.RouterInstance.NavigateBack;
 
@@ -162,7 +162,7 @@ namespace DesktopUI2.ViewModels
     public List<Branch> Branches
     {
       get => _branches;
-      private set => this.RaiseAndSetIfChanged(ref _branches, value);
+      set => this.RaiseAndSetIfChanged(ref _branches, value);
     }
 
 
@@ -187,7 +187,7 @@ namespace DesktopUI2.ViewModels
     public List<Commit> Commits
     {
       get => _commits;
-      private set
+      set
       {
         this.RaiseAndSetIfChanged(ref _commits, value);
         this.RaisePropertyChanged("HasCommits");
@@ -198,7 +198,7 @@ namespace DesktopUI2.ViewModels
     public List<ActivityViewModel> Activity
     {
       get => _activity;
-      private set => this.RaiseAndSetIfChanged(ref _activity, value);
+      set => this.RaiseAndSetIfChanged(ref _activity, value);
     }
 
     private FilterViewModel _selectedFilter;
@@ -222,14 +222,14 @@ namespace DesktopUI2.ViewModels
     public List<FilterViewModel> AvailableFilters
     {
       get => _availableFilters;
-      private set => this.RaiseAndSetIfChanged(ref _availableFilters, value);
+      set => this.RaiseAndSetIfChanged(ref _availableFilters, value);
     }
 
     private List<ISetting> _settings;
     public List<ISetting> Settings
     {
       get => _settings;
-      private set
+      set
       {
         this.RaiseAndSetIfChanged(ref _settings, value);
         this.RaisePropertyChanged("HasSettings");
@@ -254,28 +254,6 @@ namespace DesktopUI2.ViewModels
     {
       get => _previewImage;
       set => this.RaiseAndSetIfChanged(ref _previewImage, value);
-    }
-
-    public List<string> GSALayers { get; set; } = new List<string> { "Design", "Analysis", "Both" };
-
-    public SelectionModel<string> SelectedLayer { get; }
-
-    public double CoincidentNodeAllowance { get; set; } = 10;
-
-    public List<string> Units { get; set; } = new List<string> { "Millimetres", "Metres", "Inches" };
-
-    //public SelectionModel<string> SelectedUnits { get; }
-
-
-    private string _selectedUnits = "Millimetres";
-    public string SelectedUnits
-    {
-      get => _selectedUnits;
-      set
-      {
-        this.RaiseAndSetIfChanged(ref _selectedUnits, value);
-        Bindings.Units = value;
-      }
     }
 
     #endregion
@@ -312,16 +290,7 @@ namespace DesktopUI2.ViewModels
       Init();
     }
 
-    void SelectedLayerSelectionChanged(object sender, SelectionModelSelectionChangedEventArgs e)
-    {
-      Bindings.Layer = (string)e.SelectedItems.FirstOrDefault();
-    }
-
-    void SelectedUnitsSelectionChanged(object sender, SelectionModelSelectionChangedEventArgs e)
-    {
-      Bindings.Units = (string)e.SelectedItems.FirstOrDefault();
-    }
-
+    public StreamViewModel() { }
     public StreamViewModel(StreamState streamState, IScreen hostScreen, ICommand removeSavedStreamCommand)
     {
       StreamState = streamState;
@@ -358,12 +327,6 @@ namespace DesktopUI2.ViewModels
       updateTextTimer.Elapsed += UpdateTextTimer_Elapsed;
       updateTextTimer.Interval = TimeSpan.FromMinutes(1).TotalMilliseconds;
       updateTextTimer.Enabled = true;
-
-      SelectedLayer = new SelectionModel<string>();
-      SelectedLayer.SingleSelect = true;
-      SelectedLayer.Select(0);
-
-      SelectedLayer.SelectionChanged += SelectedLayerSelectionChanged;
     }
 
     private void Init()
@@ -415,7 +378,7 @@ namespace DesktopUI2.ViewModels
       }
     }
 
-    internal async void GetBranchesAndRestoreState()
+    internal virtual async void GetBranchesAndRestoreState()
     {
       //get available settings from our bindings
       Settings = Bindings.GetSettings();
@@ -610,7 +573,7 @@ namespace DesktopUI2.ViewModels
       Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Copy Link" } });
     }
 
-    public async void SendCommand()
+    public virtual async void SendCommand()
     {
       UpdateStreamState();
       //save the stream as well
@@ -635,7 +598,8 @@ namespace DesktopUI2.ViewModels
 
         Notification = $"Sent successfully, view online";
         NotificationUrl = $"{StreamState.ServerUrl}/streams/{StreamState.StreamId}/commits/{commitId}";
-      } else
+      }
+      else
         dialog.Close();
 
       if (Progress.Report.ConversionErrorsCount > 0 || Progress.Report.OperationErrorsCount > 0)
@@ -644,7 +608,7 @@ namespace DesktopUI2.ViewModels
       GetActivity();
     }
 
-    public async void ReceiveCommand()
+    public virtual async void ReceiveCommand()
     {
       UpdateStreamState();
       //save the stream as well
@@ -693,7 +657,7 @@ namespace DesktopUI2.ViewModels
       Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Cancel Send or Receive" } });
     }
 
-    public async void OpenReportCommand()
+    public virtual async void OpenReportCommand()
     {
       //ensure click transition has finished
       await Task.Delay(1000);
@@ -793,7 +757,7 @@ namespace DesktopUI2.ViewModels
 
 
 
-    private async void OpenSettingsCommand()
+    public virtual async void OpenSettingsCommand()
     {
       try
       {
@@ -830,7 +794,6 @@ namespace DesktopUI2.ViewModels
     }
 
 
-    [DependsOn(nameof(DesktopUI2.ViewModels.HomeViewModel.HasGSAFile))]
     [DependsOn(nameof(SelectedBranch))]
     [DependsOn(nameof(SelectedFilter))]
     [DependsOn(nameof(IsReceiver))]
@@ -839,7 +802,6 @@ namespace DesktopUI2.ViewModels
       return IsReady();
     }
 
-    [DependsOn(nameof(DesktopUI2.ViewModels.HomeViewModel.HasGSAFile))]
     [DependsOn(nameof(SelectedBranch))]
     [DependsOn(nameof(SelectedCommit))]
     [DependsOn(nameof(IsReceiver))]
@@ -853,8 +815,6 @@ namespace DesktopUI2.ViewModels
       if (NoAccess)
         return false;
       if (SelectedBranch == null)
-        return false;
-      if (!HomeViewModel.Instance.HasGSAFile)
         return false;
 
       if (!IsReceiver)

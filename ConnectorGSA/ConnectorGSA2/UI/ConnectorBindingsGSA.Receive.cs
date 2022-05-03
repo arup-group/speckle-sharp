@@ -29,7 +29,7 @@ using System.Collections.Concurrent;
 
 namespace ConnectorGSA.UI
 {
-  public partial class ConnectorBindingsGSA : ConnectorBindings
+  public partial class ConnectorBindingsGSA : ConnectorBindingsStandalone
   {
     public override async Task<StreamState> ReceiveStream(StreamState state, ProgressViewModel progress)
     {

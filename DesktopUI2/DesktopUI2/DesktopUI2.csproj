@@ -41,6 +41,7 @@
     <None Remove="Views\Pages\HomeView.xaml" />
     <None Remove="Views\Pages\StreamEditControls\Receive.xaml" />
     <None Remove="Views\Pages\StreamEditControls\Send.xaml" />
+    <None Remove="Views\Pages\StreamEditControls\SendGSA.xaml" />
     <None Remove="Views\Pages\StreamEditView.xaml" />
     <None Remove="Views\Scheduler.xaml" />
     <None Remove="Views\Settings\ListBoxSettingView.xaml" />
@@ -192,9 +193,6 @@
     <Compile Update="Views\Filters\PropertyFilterView.xaml.cs">
       <DependentUpon>PropertyFilterView.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Pages\NewOrOpenFileView.axaml.cs">
-      <DependentUpon>NewOrOpenFileView.axaml</DependentUpon>
-    </Compile>
     <Compile Update="Views\Pages\StreamEditView - Copy.xaml.cs">
       <DependentUpon>StreamEditView.xaml</DependentUpon>
     </Compile>
@@ -218,6 +216,9 @@
     </Compile>
     <Compile Update="Views\Pages\StreamEditControls\Send.xaml.cs">
       <DependentUpon>Send.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Pages\StreamEditControls\SendGSA.xaml.cs">
+      <DependentUpon>SendGSA.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Settings\ListBoxSettingView.xaml.cs">
       <DependentUpon>ListBoxSettingView.xaml</DependentUpon>

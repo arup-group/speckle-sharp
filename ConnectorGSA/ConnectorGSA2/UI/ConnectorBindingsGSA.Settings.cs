@@ -17,7 +17,7 @@ using Speckle.Newtonsoft.Json;
 
 namespace ConnectorGSA.UI
 {
-  public partial class ConnectorBindingsGSA : ConnectorBindings
+  public partial class ConnectorBindingsGSA : ConnectorBindingsStandalone
   {
     const string MappingStream = "Default Section Mapping Stream";
 

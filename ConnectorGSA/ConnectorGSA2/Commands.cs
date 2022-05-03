@@ -288,6 +288,7 @@ namespace ConnectorGSA
         @object: commitObj,
         cancellationToken: progress.CancellationTokenSource.Token,
         transports: transports.ToList(),
+        useDefaultCache: false,
         onProgressAction: dict => progress.Update(dict),
         onErrorAction: (s, e) =>
         {

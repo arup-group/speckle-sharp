@@ -1,5 +1,5 @@
 <UserControl
-  x:Class="DesktopUI2.Views.Pages.StreamEditControls.Send"
+  x:Class="DesktopUI2.Views.Pages.StreamEditControls.SendGSA"
   xmlns="https://github.com/avaloniaui"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
@@ -13,6 +13,9 @@
   d:DesignWidth="400"
   mc:Ignorable="d">
 
+  <UserControl.Styles>
+    <StyleInclude Source="/Styles/ChipListBox.xaml" />
+  </UserControl.Styles>
   <Grid RowDefinitions="auto, auto">
 
     <Expander
@@ -96,14 +99,35 @@
               </Grid>
             </DataTemplate>
           </ComboBox.ItemTemplate>
-        </ComboBox>        
+        </ComboBox>
+        
         <!--  FILTER INFO  -->
         <Grid
           Grid.Row="1"
           Grid.ColumnSpan="4"
           Margin="0,15">
           <ContentControl Content="{Binding #FilterCombo.SelectedItem.FilterView}" />
-        </Grid>       
+        </Grid>
+
+        <Grid
+          Grid.Row="2"
+          Grid.ColumnSpan="4"
+          Margin="0,15,0,15">
+          <TextBlock
+                  Grid.Column="1"
+                  Margin="0,0,0,30"
+                  Text="Layer to send:"
+                  TextTrimming="CharacterEllipsis" />
+          <StackPanel Grid.Column="2" VerticalAlignment="Center">
+            <ListBox
+              x:Name="ItemsListBox"
+              Margin="0,0,0,15"
+              Items="{Binding GSALayers}"
+              Selection="{Binding SelectedLayer}"
+              SelectionMode="Single, Toggle" />
+          </StackPanel>
+        </Grid>
+        
         <!--  ADVANCED SETTINGS  -->
         <Button
           Grid.Row="3"

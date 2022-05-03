@@ -287,9 +287,7 @@ namespace ConnectorGSA
           //The cache is filled with natives
           if (Instance.GsaModel.Cache.GetNatives(out var gsaRecords))
           {
-#pragma warning disable CS0012 // The type 'ProgressViewModel' is defined in an assembly that is not referenced. You must add a reference to assembly 'DesktopUI2, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
-            //((GsaProxy)Instance.GsaModel.Proxy).WriteModel(gsaRecords, null, Instance.GsaModel.StreamLayer);
-#pragma warning restore CS0012 // The type 'ProgressViewModel' is defined in an assembly that is not referenced. You must add a reference to assembly 'DesktopUI2, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+            ((GsaProxy)Instance.GsaModel.Proxy).WriteModel(gsaRecords, new Progress<string>(), Instance.GsaModel.StreamLayer);
           }
 
           Console.WriteLine("Receiving complete!");

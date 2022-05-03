@@ -29,10 +29,14 @@ namespace DesktopUI2.ViewModels
     //Instance of this HomeViewModel, so that the SavedStreams are kept in memory and not disposed on navigation
     public static HomeViewModel Instance { get; private set; }
     public IScreen HostScreen { get; }
-
     public string UrlPathSegment { get; } = "home";
 
-    private ConnectorBindings Bindings;
+    private ConnectorBindings _Bindings;
+    public virtual ConnectorBindings Bindings
+    {
+      get { return _Bindings; }
+      set { _Bindings = value; }
+    }
 
     #region bindings
     public string Title => "for " + Bindings.GetHostAppNameVersion();
@@ -43,14 +47,14 @@ namespace DesktopUI2.ViewModels
     public bool InProgress
     {
       get => _showProgress;
-      private set => this.RaiseAndSetIfChanged(ref _showProgress, value);
+      set => this.RaiseAndSetIfChanged(ref _showProgress, value);
     }
 
     private bool _isLoggingIn;
     public bool IsLoggingIn
     {
       get => _isLoggingIn;
-      private set => this.RaiseAndSetIfChanged(ref _isLoggingIn, value);
+      set => this.RaiseAndSetIfChanged(ref _isLoggingIn, value);
     }
 
 
@@ -65,7 +69,7 @@ namespace DesktopUI2.ViewModels
     public List<StreamAccountWrapper> Streams
     {
       get => _streams;
-      private set
+      set
       {
         this.RaiseAndSetIfChanged(ref _streams, value);
         this.RaisePropertyChanged("HasStreams");
@@ -174,13 +178,6 @@ namespace DesktopUI2.ViewModels
     {
       get => Accounts != null && Accounts.Any();
     }
-
-
-    public bool HasGSAFile { get; set; }
-
-    public string FilePath { get; set; }
-
-    public string FileStatus { get; set; }
 
     #endregion
 
@@ -442,7 +439,7 @@ namespace DesktopUI2.ViewModels
       OpenStream(streamState);
     }
 
-    public async void NewStreamCommand()
+    public virtual async void NewStreamCommand()
     {
       var dialog = new NewStreamDialog(Accounts);
       dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -524,52 +521,6 @@ namespace DesktopUI2.ViewModels
       }
     }
 
-
-    public async void NewFileCommand()
-    {
-      try
-      {
-        Bindings.NewFile();
-        HasGSAFile = true;
-        //((GsaProxy)Speckle.GSA.API.Instance.GsaModel.Proxy).NewFile(true);
-
-        //ConnectorGSA.Commands.OpenFile(path, true);
-        //FilePath = path;
-        FileStatus = "new"; // GsaLoadedFileType.ExistingFile;
-      }
-      catch (Exception e)
-      {
-        Dialogs.ShowDialog("Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
-      }
-    }
-
-
-    public async void OpenFileCommand()
-    {
-      var dialog = new OpenFileDialog();
-      dialog.Filters.Add(new FileDialogFilter() { Name = "GSA Files", Extensions = { "gwb", "gwa" } });
-      var result = await dialog.ShowAsync(MainWindow.Instance);
-
-      if (result != null)
-      {
-        var path = result.FirstOrDefault();
-        if (!string.IsNullOrEmpty(path))
-        {
-          try
-          {
-            Bindings.OpenFile(path);
-            HasGSAFile = true;
-            FilePath = path;
-            FileStatus = "existing"; // GsaLoadedFileType.ExistingFile;
-          }
-          catch (Exception e)
-          {
-            Dialogs.ShowDialog("Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
-          }
-        }
-      }
-    }
-
     private Tuple<bool, string> ValidateUrl(string url)
     {
       Uri uri;
@@ -603,7 +554,7 @@ namespace DesktopUI2.ViewModels
       return !InProgress;
     }
 
-    private void OpenStream(StreamState streamState)
+    public virtual void OpenStream(StreamState streamState)
     {
       MainWindowViewModel.RouterInstance.Navigate.Execute(new StreamViewModel(streamState, HostScreen, RemoveSavedStreamCommand));
     }

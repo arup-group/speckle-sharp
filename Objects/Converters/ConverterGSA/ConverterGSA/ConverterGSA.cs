@@ -486,16 +486,27 @@ namespace ConverterGSA
       //nodeDependentSchemaTypesByLayer.Add(GSALayer.Design, Instance.GsaModel.Proxy.GetNodeDependentTypes(GSALayer.Design));
 
       var gsaRecordsByType = gsaRecords.GroupBy(r => r.GetType()).ToDictionary(r => r.Key, r => r.ToList());
+      var modelsByLayer = new Dictionary<GSALayer, Model>() { };
+      var modelHasData = new Dictionary<GSALayer, bool>() { };
 
-      var modelsByLayer = new Dictionary<GSALayer, Model>() { { GSALayer.Design, new Model() { specs = modelInfo, layerDescription = "Design" } } };
-      var modelHasData = new Dictionary<GSALayer, bool>() { { GSALayer.Design, false } };
-      if (sendLayer == GSALayer.Both)
+      if (sendLayer == GSALayer.Design)
       {
+        modelsByLayer = new Dictionary<GSALayer, Model>() { { GSALayer.Design, new Model() { specs = modelInfo, layerDescription = "Design" } } };
+        modelHasData = new Dictionary<GSALayer, bool>() { { GSALayer.Design, false } };
+      } else if (sendLayer == GSALayer.Analysis)
+      {
+        modelsByLayer = new Dictionary<GSALayer, Model>() { { GSALayer.Analysis, new Model() { specs = modelInfo, layerDescription = "Analysis" } } };
+        modelHasData = new Dictionary<GSALayer, bool>() { { GSALayer.Analysis, false } };
+      }
+      else if (sendLayer == GSALayer.Both)
+      {
+        modelsByLayer = new Dictionary<GSALayer, Model>() { { GSALayer.Design, new Model() { specs = modelInfo, layerDescription = "Design" } } };
+        modelHasData = new Dictionary<GSALayer, bool>() { { GSALayer.Design, false } };
+
         modelsByLayer.Add(GSALayer.Analysis, new Model() { specs = modelInfo, layerDescription = "Analysis" });
         modelHasData.Add(GSALayer.Analysis, false);
 
         //nodeDependentSchemaTypesByLayer.Add(GSALayer.Analysis, Instance.GsaModel.Proxy.GetNodeDependentTypes(GSALayer.Analysis));
-
         //nodeDependentSchemaTypesByLayer.Add(GSALayer.Both, Instance.GsaModel.Proxy.GetNodeDependentTypes(GSALayer.Both));
       }
 
@@ -567,7 +578,7 @@ namespace ConverterGSA
                     Instance.GsaModel.Cache.SetSpeckleObjects(nativeObj, layerObjectsToCache.ToDictionary(o => o.applicationId, o => (object)o), l);
                   }
                 }
-                
+
                 if (AssignIntoResultSet(rsa, toSpeckleResult))
                 {
                   resultSetHasData = true;
@@ -581,7 +592,7 @@ namespace ConverterGSA
           }
         }
       }
-     
+
       var resultObjects = new List<Base> { };
       var globalResults = GsaGlobalResultToSpeckle(out var speckleResult);
       if (globalResults) resultObjects.AddRange(speckleResult.Select(i => (Base)i));
@@ -724,14 +735,14 @@ namespace ConverterGSA
       int numObjs = 0;
       foreach (var sType in objsByType.Keys)
       {
-        if (modelGroups[ModelAspect.Nodes].Contains(sType))
-        {
-          if (model.nodes == null)
-          {
-            model.nodes = new List<Base>();
-          }
-          model.nodes.AddRange(objsByType[sType]);
-        }
+        //if (modelGroups[ModelAspect.Nodes].Contains(sType))
+        //{
+        //  if (model.nodes == null)
+        //  {
+        //    model.nodes = new List<Base>();
+        //  }
+        //  model.nodes.AddRange(objsByType[sType]);
+        //}
         if (modelGroups[ModelAspect.Elements].Contains(sType))
         {
           if (model.elements == null)
