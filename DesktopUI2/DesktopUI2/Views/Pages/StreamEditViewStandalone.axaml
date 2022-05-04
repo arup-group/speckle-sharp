@@ -319,7 +319,7 @@
               Text="Receive" />
           </StackPanel>
         </TabItem.Header>
-        <uc:Receive />
+        <uc:ReceiveGSA />
       </TabItem>
     </TabControl>
 

@@ -1,5 +1,5 @@
 <UserControl
-  x:Class="DesktopUI2.Views.Pages.StreamEditControls.Receive"
+  x:Class="DesktopUI2.Views.Pages.StreamEditControls.ReceiveGSA"
   xmlns="https://github.com/avaloniaui"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
@@ -113,17 +113,56 @@
               IsVisible="{Binding HasCommits, Converter={x:Static BoolConverters.Not}}"
               Text="This branch has no commits. Commits are generated what data is sent to a Stream.&#x0a;&#x0a;Please select a different branch or stream."
               TextWrapping="Wrap" />
-
             <Image Source="{Binding PreviewImage}" />
-
-
           </StackPanel>
         </m:Card>
+
+        <!--  SELECT BRANCH  -->
+        <Grid
+         Grid.Row="1"
+         Grid.ColumnSpan="4"
+         Margin="0,15">
+          <ContentControl Content="{Binding #FilterCombo.SelectedItem.FilterView}" />
+        </Grid>
+
+        <TextBlock
+          Grid.Row="2"
+          Grid.Column="0"
+          Grid.ColumnSpan="2"
+          Margin="0,10,0,30"
+          Text="Coincident node allowance:"
+          TextTrimming="CharacterEllipsis" />
+        <StackPanel Grid.Row="2" Grid.Column="0"  Grid.ColumnSpan="2" VerticalAlignment="Center">
+          <TextBox
+            Margin="0,0,10,20"
+            Padding="0"
+            HorizontalAlignment="Stretch"
+            HorizontalContentAlignment="Stretch"
+            Classes="Filled Dense"
+            Text="{Binding CoincidentNodeAllowance}" />
+        </StackPanel>
+        <TextBlock
+          Grid.Row="2"
+          Grid.Column="3"
+          Margin="0,10,0,30"
+          Text="Distance units:"
+          TextTrimming="CharacterEllipsis" />
+        <StackPanel Grid.Row="2" Grid.Column="4" VerticalAlignment="Center">
+          <ComboBox
+            Name="UnitsComboBox"
+            Margin="0,10,0,20"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Center"
+            Items="{Binding Units}"
+            SelectedItem="{Binding SelectedUnits}">
+          </ComboBox>
+        </StackPanel>
+
         <!--  ADVANCED SETTINGS  -->
         <Button
-          Grid.Row="2"
+          Grid.Row="3"
           Grid.ColumnSpan="4"
-          Margin="5"
+          Margin="0,105,0,15"
           HorizontalAlignment="Center"
           HorizontalContentAlignment="Center"
           assists:ShadowAssist.ShadowDepth="Depth0"
