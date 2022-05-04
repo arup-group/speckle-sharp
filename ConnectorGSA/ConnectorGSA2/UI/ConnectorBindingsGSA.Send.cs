@@ -179,6 +179,12 @@ namespace ConnectorGSA.UI
         }
       }
 
+      if(objs == null)
+      {
+        progress.Report.LogConversionError(new Exception("Failed to convert cache data to Speckle"));
+        return null;
+      }
+
       progress.Report.Log("Converted cache data to Speckle");
 
       duration = DateTime.Now - startTime;

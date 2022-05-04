@@ -14,6 +14,7 @@ namespace Objects.Structural.ApplicationSpecific.GSA.GeneralData
     public GSAListType listType { get; set; }
     public List<Base> definition { get; set; }
     public List<string> definitionRefs { get; set; }
+
     public GSAList()
     {
 
@@ -26,7 +27,7 @@ namespace Objects.Structural.ApplicationSpecific.GSA.GeneralData
       this.name = name;
       this.listType = listType;
       this.definition = definition;
-      this.definitionRefs = definition.Select(d => d.applicationId).ToList();
+      this.definitionRefs = definition.Select(i => i.applicationId).ToList();
     }
   }
 

@@ -127,8 +127,12 @@ namespace Speckle.Core.Models
     public void Log(string text)
     {
       var time = DateTime.Now.ToLocalTime().ToString("dd/MM/yy HH:mm:ss");
-      ConversionLog.Add(time + " " + text);
-      Serilog.Log.Information(time + " " + text);
+      var message = $"{time} {text}";
+      if (!String.IsNullOrEmpty(message))
+      {
+        ConversionLog.Add(message);
+        Serilog.Log.Information(message);
+      }
     }
     /// <summary>
     /// Keeps track of errors in the conversions.

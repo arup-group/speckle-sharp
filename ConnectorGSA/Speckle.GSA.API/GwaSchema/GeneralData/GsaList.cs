@@ -11,5 +11,11 @@ namespace Speckle.GSA.API.GwaSchema
     public string Name { get => name; set { name = value; } }
     public string Type;
     public List<int> Definition;
+
+    public GsaList() : base()
+    {
+      //Defaults
+      Version = 1;
+    }
   }
 }

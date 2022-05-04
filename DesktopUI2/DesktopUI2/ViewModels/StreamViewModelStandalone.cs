@@ -40,10 +40,20 @@ namespace DesktopUI2.ViewModels
 
     public SelectionModel<string> SelectedLayer { get; set; }
 
-    public double CoincidentNodeAllowance { get; set; } = 10;
+    //public double CoincidentNodeAllowance { get; set; } = 10;
+
+    private double _coincidentNodeAllowance = 10;
+    public double CoincidentNodeAllowance
+    {
+      get => _coincidentNodeAllowance;
+      set
+      {
+        this.RaiseAndSetIfChanged(ref _coincidentNodeAllowance, value);
+        Bindings.CoincidentNodeAllowance = value;
+      }
+    }
 
     public List<string> Units { get; set; } = new List<string> { "Millimetres", "Metres", "Inches" };
-
 
     private string _selectedUnits = "Millimetres";
     public string SelectedUnits
@@ -55,6 +65,7 @@ namespace DesktopUI2.ViewModels
         Bindings.Units = value;
       }
     }
+
     void SelectedLayerSelectionChanged(object sender, SelectionModelSelectionChangedEventArgs e)
     {
       Bindings.Layer = (string)e.SelectedItems.FirstOrDefault();
@@ -64,6 +75,9 @@ namespace DesktopUI2.ViewModels
     {
       Bindings.Units = (string)e.SelectedItems.FirstOrDefault();
     }
+
+
+
     public StreamViewModelStandalone(StreamState streamState, IScreen hostScreen, ICommand removeSavedStreamCommand) : base()
     {
       StreamState = streamState;

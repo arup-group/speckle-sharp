@@ -338,7 +338,6 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
       return (AddEntities(v, GSALayer.Design, out memberIndices) && AddEntities(v, GSALayer.Analysis, out elementIndices));
     }
 
-
     protected bool AddEntities(string v, GSALayer layer, out List<int> indices)
     {
       if (layer == GSALayer.Design)
@@ -354,7 +353,7 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
 
     protected bool AddNodes(string v, out List<int> indices)
     {
-      
+
       indices = Instance.GsaModel.Proxy.ConvertGSAList(v, GSAEntity.NODE);
 
       return true;

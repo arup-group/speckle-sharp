@@ -21,6 +21,7 @@ using Objects.Structural.Loading;
 using System.Threading.Tasks;
 using Speckle.Core.Transports;
 using Speckle.Core.Serialisation;
+using Speckle.Newtonsoft.Json;
 using Objects.Structural.ApplicationSpecific.GSA.GeneralData;
 
 namespace ConverterGSA
@@ -765,7 +766,12 @@ namespace ConverterGSA
         }
         if (modelGroups[ModelAspect.GeneralData].Contains(sType))
         {
-          model["generalData"] = objsByType[sType];
+          if (model.generalData == null)
+          {
+            model.generalData = new List<Base>();
+          }
+
+          model.generalData.AddRange(objsByType[sType]);
         }
 
         numObjs += objsByType[sType].Count();

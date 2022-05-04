@@ -256,6 +256,7 @@ namespace ConnectorGSA
     public static List<Base> ConvertToSpeckle(ISpeckleConverter converter, List<string> selectionFilterObjects)
     {
       var gsaRecords = new List<GsaRecord>();
+
       // Send all elements
       if (String.Equals(selectionFilterObjects.FirstOrDefault(), "all", StringComparison.InvariantCultureIgnoreCase) || String.Equals(selectionFilterObjects.FirstOrDefault(), "everything", StringComparison.InvariantCultureIgnoreCase))
       {
