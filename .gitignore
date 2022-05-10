@@ -370,3 +370,5 @@ GSAExport/
 *.lok
 
 *.orig
+/speckle-sharp
+/ConnectorRevit/speckle-sharp

@@ -388,9 +388,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
           GetNative<GsaMemb>(index, out var memberRecord);
           if (memberRecord != null)
           {
-            if (!records.Contains(memberRecord))
-              records.Add(memberRecord);
-
+            records.Add(memberRecord);
 
             var gsaMemb = (GsaMemb)memberRecord;
 
@@ -404,8 +402,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
                 {
                   GetNative<GsaNode>(node, out var nodeRecord);
 
-                  if (!records.Contains(nodeRecord))
-                    records.Add(nodeRecord);
+                  records.Add(nodeRecord);
                 }
               }
 
@@ -413,16 +410,16 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
               if (gsaMemb.OrientationNodeIndex.IsIndex())
               {
                 GetNative<GsaNode>(gsaMemb.OrientationNodeIndex.Value, out var nodeRecord);
-                if (!records.Contains(nodeRecord))
-                  records.Add(nodeRecord);
+                  
+                records.Add(nodeRecord);
               }
 
               // Section
               if (gsaMemb.PropertyIndex.IsIndex())
               {
                 GetNative<GsaSection>(gsaMemb.PropertyIndex.Value, out var propertyRecord);
-                if (!records.Contains(propertyRecord))
-                  records.Add(propertyRecord);
+                  
+                records.Add(propertyRecord);
               }
             }
 
@@ -434,8 +431,8 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
                 foreach (var node in gsaMemb.NodeIndices)
                 {
                   GetNative<GsaNode>(node, out var nodeRecord);
-                  if (!records.Contains(nodeRecord))
-                    records.Add(nodeRecord);
+                    
+                  records.Add(nodeRecord);
                 }
               }
 
@@ -447,8 +444,8 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
                   foreach (var node in vd)
                   {
                     GetNative<GsaNode>(node, out var nodeRecord);
-                    if (!records.Contains(nodeRecord))
-                      records.Add(nodeRecord);
+                      
+                    records.Add(nodeRecord);
                   }
                 }
               }
@@ -461,8 +458,8 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
                   foreach (var node in polyline)
                   {
                     GetNative<GsaNode>(node, out var nodeRecord);
-                    if (!records.Contains(nodeRecord))
-                      records.Add(nodeRecord);
+                      
+                    records.Add(nodeRecord);
                   }
                 }
               }
@@ -474,8 +471,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
                 {
                   GetNative<GsaNode>(node, out var nodeRecord);
 
-                  if (!records.Contains(nodeRecord))
-                    records.Add(nodeRecord);
+                  records.Add(nodeRecord);
                 }
               }
 
@@ -488,8 +484,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
                   {
                     GetNative<GsaNode>(node, out var nodeRecord);
 
-                    if (!records.Contains(nodeRecord))
-                      records.Add(nodeRecord);
+                    records.Add(nodeRecord);
                   }
                 }
               }
@@ -498,8 +493,8 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
               if (gsaMemb.PropertyIndex.IsIndex())
               {
                 GetNative<GsaProp2d>(gsaMemb.PropertyIndex.Value, out var propertyRecord);
-                if (!records.Contains(propertyRecord))
-                  records.Add(propertyRecord);
+                  
+                records.Add(propertyRecord);
               }
             }
           }
@@ -510,9 +505,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
           GetNative<GsaEl>(index, out var elementRecord);
           if (elementRecord != null)
           {
-            if (!records.Contains(elementRecord))
-              records.Add(elementRecord);
-
+            records.Add(elementRecord);
 
             var gsaEl = (GsaEl)elementRecord;
 
@@ -525,8 +518,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
                 {
                   GetNative<GsaNode>(node, out var nodeRecord);
 
-                  if (!records.Contains(nodeRecord))
-                    records.Add(nodeRecord);
+                  records.Add(nodeRecord);
                 }
               }
 
@@ -534,24 +526,24 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
               if (gsaEl.OrientationNodeIndex.IsIndex())
               {
                 GetNative<GsaNode>(gsaEl.OrientationNodeIndex.Value, out var nodeRecord);
-                if (!records.Contains(nodeRecord))
-                  records.Add(nodeRecord);
+                  
+                records.Add(nodeRecord);
               }
 
               // Section
               if (gsaEl.PropertyIndex.IsIndex())
               {
                 GetNative<GsaSection>(gsaEl.PropertyIndex.Value, out var propertyRecord);
-                if (!records.Contains(propertyRecord))
-                  records.Add(propertyRecord);
+                  
+                records.Add(propertyRecord);
               }
 
               // Parent member
               if (gsaEl.ParentIndex.IsIndex())
               {
                 GetNative<GsaMemb>(gsaEl.ParentIndex.Value, out var memberRecord);
-                if (!records.Contains(memberRecord))
-                  records.Add(memberRecord);
+                  
+                records.Add(memberRecord);
 
                 memberRecord = (GsaMemb)memberRecord;
                 if(memberRecord != null) {
@@ -573,8 +565,8 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
                 foreach (var node in gsaEl.NodeIndices)
                 {
                   GetNative<GsaNode>(node, out var nodeRecord);
-                  if (!records.Contains(nodeRecord))
-                    records.Add(nodeRecord);
+                    
+                  records.Add(nodeRecord);
                 }
               }
 
@@ -582,16 +574,16 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
               if (gsaEl.PropertyIndex.IsIndex())
               {
                 GetNative<GsaProp2d>(gsaEl.PropertyIndex.Value, out var propertyRecord);
-                if (!records.Contains(propertyRecord))
-                  records.Add(propertyRecord);
+                  
+                records.Add(propertyRecord);
               }
 
               // Parent member
               if (gsaEl.ParentIndex.IsIndex())
               {
                 GetNative<GsaMemb>(gsaEl.ParentIndex.Value, out var memberRecord);
-                if (!records.Contains(memberRecord))
-                  records.Add(memberRecord);
+                  
+                records.Add(memberRecord);
 
                 memberRecord = (GsaMemb)memberRecord;
 
@@ -611,9 +603,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
           GetNative<GsaNode>(index, out var nodeRecord);
           if (nodeRecord != null)
           {
-            if (!records.Contains(nodeRecord))
-              records.Add(nodeRecord);
-
+            records.Add(nodeRecord);
 
             var gsaNode = (GsaNode)nodeRecord;
 
@@ -624,8 +614,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
             {
               GetNative<GsaPropMass>(gsaNode.MassPropertyIndex.Value, out var propMassRecord);
 
-              if (!records.Contains(propMassRecord))
-                records.Add(propMassRecord);
+              records.Add(propMassRecord);
             }
 
             // Spring property
@@ -633,8 +622,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
             {
               GetNative<GsaPropSpr>(gsaNode.SpringPropertyIndex.Value, out var springPropRecord);
 
-              if (!records.Contains(springPropRecord))
-                records.Add(springPropRecord);
+              records.Add(springPropRecord);
             }
           }
         }
@@ -644,14 +632,12 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
           GetNative<GsaLoadCase>(index, out var loadCaseRecord);
           if (loadCaseRecord != null)
           {
-            if (!records.Contains(loadCaseRecord))
-              records.Add(loadCaseRecord);
+            records.Add(loadCaseRecord);
           }
         }
       }
 
-
-      precendentRecords = records;
+      precendentRecords = records.Distinct().ToList();
 
       return true;
     }
