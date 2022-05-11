@@ -611,7 +611,15 @@ namespace Objects.Converter.Bentley
           throw new SpeckleException("Inclined slabs not supported!");
         }
 
-        int elevation = (int)Math.Round(start.z / Epsilon);
+        int precision = (int)(1 / Epsilon);
+        int elevation = (int)Math.Round(start.z * precision);
+        // this is unfortunately not a determinstic operation
+        // currently no better idea than checking if neighbouring values are present already
+        if (elevationMap.ContainsKey(elevation - 1))
+          elevation--;
+        else if (elevationMap.ContainsKey(elevation + 1))
+          elevation++;
+
         if (elevation > maxElevation)
         {
           maxElevation = elevation;
@@ -725,7 +733,15 @@ namespace Objects.Converter.Bentley
           throw new SpeckleException("Wall geometry not supported!");
         }
 
-        int y = (int)Math.Round(start.y / Epsilon);
+        int precision = (int)(1 / Epsilon);
+        int y = (int)Math.Round(start.y * precision);
+        // this is unfortunately not a determinstic operation
+        // currently no better idea than checking if neighbouring values are present already
+        if (yMap.ContainsKey(y - 1))
+          y--;
+        else if (yMap.ContainsKey(y + 1))
+          y++;
+
         if (y > maxY)
         {
           maxY = y;
