@@ -2,18 +2,21 @@
 using Speckle.Core.Kits;
 using Speckle.Core.Models;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Objects.Structural.Loading
 {
   public class LoadGravity : Load
   {
-    [DetachProperty]
-    [Chunkable(1000)]
+    //[DetachProperty]
+    [Chunkable(250)]
     public List<Base> elements { get; set; }
+    public List<string> elementRefs { get; set; }
 
-    [DetachProperty]
-    [Chunkable(1000)]
+    //[DetachProperty]
+    [Chunkable(250)]
     public List<Base> nodes { get; set; }
+    public List<string> nodeRefs { get; set; }
     public Vector gravityFactors { get; set; } // a normal vertical gravity load is Z = -1
     public LoadGravity() { }
 
@@ -45,6 +48,8 @@ namespace Objects.Structural.Loading
       this.loadCase = loadCase;
       this.gravityFactors = gravityFactors == null ? new Vector(0, 0, -1) : gravityFactors;
       this.name = name;
+
+      this.elementRefs = elements.Select(e => e.applicationId).ToList();
     }
 
     /// <summary>
@@ -63,6 +68,9 @@ namespace Objects.Structural.Loading
       this.loadCase = loadCase;
       this.gravityFactors = gravityFactors == null ? new Vector(0, 0, -1) : gravityFactors;
       this.name = name;
+
+      this.elementRefs = elements.Select(e => e.applicationId).ToList();
+      this.nodeRefs = nodes.Select(n => n.applicationId).ToList();
     }
   }
 }

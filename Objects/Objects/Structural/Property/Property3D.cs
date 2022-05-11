@@ -10,11 +10,7 @@ namespace Objects.Structural.Properties
     public class Property3D : Property
     {
         public PropertyType3D type { get; set; }
-
-        [DetachProperty]
         public Material material { get; set; }
-
-        [DetachProperty]
         public Axis orientationAxis { get; set; }
 
         public Property3D() { }

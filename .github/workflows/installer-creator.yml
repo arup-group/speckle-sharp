@@ -50,7 +50,8 @@ jobs:
     runs-on: windows-2019 # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
     env:
         GH_PKG_USER: ${{ secrets.GH_PKG_USER }} 
-        GH_PKG_TOKEN: ${{ secrets.GH_PKG_TOKEN }}                     
+        GH_PKG_TOKEN: ${{ secrets.GH_PKG_TOKEN }}     
+        POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}         
     steps:
     - name: Checkout
       uses: actions/checkout@v2

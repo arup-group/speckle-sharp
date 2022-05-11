@@ -4,16 +4,16 @@ using Speckle.Core.Models;
 using System.Collections.Generic;
 using Objects.Geometry;
 using Objects.Structural.Geometry;
+using System.Linq;
 
 namespace Objects.Structural.Loading
 {
   public class LoadNode : Load
   {
-    [DetachProperty]
-    [Chunkable(5000)]
+    //[DetachProperty]
+    [Chunkable(250)]
     public List<Node> nodes { get; set; }
-
-    [DetachProperty]
+    public List<string> nodeRefs { get; set; }
     public Axis loadAxis { get; set; }
     public LoadDirection direction { get; set; }
     public double value { get; set; } //a force or a moment, displacement (translation or rotation) and settlement to be covered in other classes
@@ -36,6 +36,8 @@ namespace Objects.Structural.Loading
       this.nodes = nodes;
       this.direction = direction;
       this.value = value;
+
+      this.nodeRefs = nodes.Select(n => n.applicationId).ToList();
     }
 
     /// <summary>
@@ -56,6 +58,8 @@ namespace Objects.Structural.Loading
       this.loadAxis = loadAxis;
       this.direction = direction;
       this.value = value;
+
+      this.nodeRefs = nodes.Select(n => n.applicationId).ToList();
     }
   }
 }

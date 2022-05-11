@@ -62,7 +62,7 @@ namespace ConnectorGSA
         {
           loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, "Unable to get stream list"));
         }
-        
+
 
         coordinator.Account = accountCandidate;
         coordinator.ServerStreamList.StreamListItems.Clear();
@@ -121,28 +121,29 @@ namespace ConnectorGSA
       return true;
     }
 
-    public static bool ExtractSavedReceptionStreamInfo(bool? receive, bool? send, out List<StreamState> streamStates)
-    { 
-      List<StreamState> allSaved;
+    public static bool ExtractSavedReceptionStreamInfo(bool? receive, bool? send, out List<StreamStateOld> streamStates)
+    {
+      List<StreamStateOld> allSaved;
       try
       {
         var sid = ((GsaProxy)Instance.GsaModel.Proxy).GetTopLevelSid();
-        allSaved = JsonConvert.DeserializeObject<List<StreamState>>(sid);
-        if (allSaved == null) {
-          allSaved = new List<StreamState>();
+        allSaved = JsonConvert.DeserializeObject<List<StreamStateOld>>(sid);
+        if (allSaved == null)
+        {
+          allSaved = new List<StreamStateOld>();
         }
       }
       catch
       {
-        allSaved = new List<StreamState>();
-      }      
-      
+        allSaved = new List<StreamStateOld>();
+      }
+
       var userId = ((GsaModel)Instance.GsaModel).Account.userInfo.id;
       var restApi = ((GsaModel)Instance.GsaModel).Account.serverInfo.url;
 
       //So currently it assumes that a new user for this file will have a new stream created for them, even if other users saved this file with their stream info
       var accountStreamStates = allSaved.Where(ss => ((ss.UserId == userId) && ss.ServerUrl.Equals(restApi, StringComparison.InvariantCultureIgnoreCase))).ToList();
-      streamStates = new List<StreamState>();
+      streamStates = new List<StreamStateOld>();
       if (receive.HasValue)
       {
         streamStates.AddRange(accountStreamStates.Where(ss => ss.IsReceiving == receive.Value));
@@ -154,15 +155,15 @@ namespace ConnectorGSA
       return (streamStates != null && streamStates.Count > 0);
     }
 
-    public static bool UpsertSavedReceptionStreamInfo(bool? receive, bool? send, params StreamState[] streamStates)
+    public static bool UpsertSavedReceptionStreamInfo(bool? receive, bool? send, params StreamStateOld[] streamStates)
     {
-      
-      
+
+
       var sid = ((GsaProxy)Instance.GsaModel.Proxy).GetTopLevelSid();
-      List<StreamState> allSs = null;
+      List<StreamStateOld> allSs = null;
       try
       {
-        allSs = JsonConvert.DeserializeObject<List<StreamState>>(sid);
+        allSs = JsonConvert.DeserializeObject<List<StreamStateOld>>(sid);
       }
       catch (JsonException ex)
       {
@@ -177,7 +178,7 @@ namespace ConnectorGSA
       }
       else
       {
-        var merged = new List<StreamState>();
+        var merged = new List<StreamStateOld>();
         foreach (var ss in streamStates)
         {
           var matching = allSs.FirstOrDefault(s => s.Equals(ss));
@@ -243,7 +244,7 @@ namespace ConnectorGSA
       }
       catch (Exception ex)
       {
-        loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, 
+        loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error,
           "Unable to convert one or more received objects.  Refer to logs for more information"));
 
         loggingProgress.Report(new MessageEventArgs(MessageIntent.TechnicalLog, MessageLevel.Error, ex, "Converion error"));
@@ -265,16 +266,28 @@ namespace ConnectorGSA
       return convertedObjs;
     }
 
-    public static async Task<(bool status, string commitId)> SendCommit(Base commitObj, StreamState state, string parent, params ITransport[] transports)
+    public static async Task<string> SendCommit(Base commitObj, StreamStateOld state, string parent, IProgress<MessageEventArgs> loggingProgress, IProgress<string> statusProgress, IProgress<double> percentageProgress, params ITransport[] transports)
     {
       var commitObjId = await Operations.Send(
         @object: commitObj,
         transports: transports.ToList(),
+        useDefaultCache: true,
+        onProgressAction: (dict) =>
+        {
+          foreach (var kvp in dict)
+          {
+            if (kvp.Key == "RemoteTransport") statusProgress.Report($"{kvp.Key}: {(double)kvp.Value}");
+          }
+        },
         onErrorAction: (s, e) =>
         {
           state.Errors.Add(e);
+          loggingProgress.Report(new MessageEventArgs(MessageIntent.TechnicalLog, MessageLevel.Error, e));
+          Func<string> temp = () => { return null; };
         }
         );
+
+      statusProgress.Report($"{commitObj.GetTotalChildrenCount()} objects sent to server");
 
       var commitId = "";
       if (transports.Any(t => t is ServerTransport))
@@ -306,7 +319,7 @@ namespace ConnectorGSA
         }
       }
 
-      return (status: (state.Errors.Count == 0), commitId: commitId);
+      return commitId;
     }
 
     internal static async Task<bool> Receive(TabCoordinator coordinator, IProgress<MessageEventArgs> loggingProgress, IProgress<string> statusProgress, IProgress<double> percentageProgress)
@@ -421,7 +434,7 @@ namespace ConnectorGSA
 
       foreach (var streamId in streamIds)
       {
-        var streamState = new StreamState(account.userInfo.id, account.serverInfo.url)
+        var streamState = new StreamStateOld(account.userInfo.id, account.serverInfo.url)
         {
           Stream = new Stream() { id = streamId },
           IsReceiving = true
@@ -448,12 +461,13 @@ namespace ConnectorGSA
               if (received)
               {
                 loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Information, "Received data from " + streamId + " stream"));
-                } else
-                {
-                  loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, "Failed to receive data from " + streamId + " stream"));
-                  loggingProgress.Report(new MessageEventArgs(MessageIntent.TechnicalLog, MessageLevel.Error, "Failed to receive data from " + streamId + " stream"));
-                  percentageProgress.Report(0);
-                  return;
+              }
+              else
+              {
+                loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, "Failed to receive data from " + streamId + " stream"));
+                loggingProgress.Report(new MessageEventArgs(MessageIntent.TechnicalLog, MessageLevel.Error, "Failed to receive data from " + streamId + " stream"));
+                percentageProgress.Report(0);
+                return;
               }
 
               if (streamState.Errors != null && streamState.Errors.Count > 0)
@@ -527,6 +541,8 @@ namespace ConnectorGSA
       }
       startTime = DateTime.Now;
 
+      statusProgress.Report("Writing converting objects to GSA");
+
       //The cache is filled with natives
       if (Instance.GsaModel.Cache.GetNatives(out var gsaRecords))
       {
@@ -551,7 +567,7 @@ namespace ConnectorGSA
       return true;
     }
 
-    public static async Task<bool> Receive(string commitId, StreamState state, ITransport transport, List<Base> topLevelObjects)
+    public static async Task<bool> Receive(string commitId, StreamStateOld state, ITransport transport, List<Base> topLevelObjects)
     {
       var commitObject = await Operations.Receive(
           commitId,
@@ -714,9 +730,9 @@ namespace ConnectorGSA
       return objects;
     }
 
-    internal static async Task<List<StreamState>> GetStreamList(TabCoordinator coordinator, SpeckleAccountForUI account, Progress<MessageEventArgs> loggingProgress)
+    internal static async Task<List<StreamStateOld>> GetStreamList(TabCoordinator coordinator, SpeckleAccountForUI account, Progress<MessageEventArgs> loggingProgress)
     {
-      return new List<StreamState>();
+      return new List<StreamStateOld>();
     }
 
     internal static bool NewFile(TabCoordinator coordinator, IProgress<MessageEventArgs> loggingProgress)
@@ -735,7 +751,7 @@ namespace ConnectorGSA
     {
       if (coordinator.FileStatus == GsaLoadedFileType.ExistingFile && coordinator.Account != null && coordinator.Account.IsValid)
       {
-        var retrieved = ExtractSavedReceptionStreamInfo(true, true, out List<StreamState> steamStates);
+        var retrieved = ExtractSavedReceptionStreamInfo(true, true, out List<StreamStateOld> steamStates);
         if (!retrieved)
         {
           return false;
@@ -748,7 +764,7 @@ namespace ConnectorGSA
           coordinator.ReceiverTab.ReceiverStreamStates.AddRange(receivingStreamStates);
           if (coordinator.ReceiverTab.ReceiverStreamStates.Count() > 0)
           {
-            var invalidStreamStates = new List<StreamState>();
+            var invalidStreamStates = new List<StreamStateOld>();
             //Since the buckets are stored in the SID tags, but not the stream names, get the stream names
             foreach (var r in coordinator.ReceiverTab.ReceiverStreamStates)
             {
@@ -770,7 +786,7 @@ namespace ConnectorGSA
           coordinator.SenderTab.SenderStreamStates.AddRange(sendingStreamStates);
           if (coordinator.SenderTab.SenderStreamStates.Count() > 0)
           {
-            var invalidStreamStates = new List<StreamState>();
+            var invalidStreamStates = new List<StreamStateOld>();
             //Since the buckets are stored in the SID tags, but not the stream names, get the stream names
             foreach (var r in coordinator.SenderTab.SenderStreamStates)
             {
@@ -842,17 +858,19 @@ namespace ConnectorGSA
       return true;
     }
 
-    internal static async Task<bool> SendTriggered(TabCoordinator coordinator, IProgress<MessageEventArgs> loggingProgress, 
+    internal static async Task<bool> SendTriggered(TabCoordinator coordinator, IProgress<MessageEventArgs> loggingProgress,
       IProgress<string> statusProgress, IProgress<double> percentageProgress)
     {
       var result = await Send(coordinator, coordinator.SenderTab.SenderStreamStates.First(), loggingProgress, statusProgress, percentageProgress);
       return result;
     }
 
-    private static async Task<bool> Send(TabCoordinator coordinator, StreamState ss, IProgress<MessageEventArgs> loggingProgress, IProgress<string> statusProgress, IProgress<double> percentageProgress)
+    private static async Task<bool> Send(TabCoordinator coordinator, StreamStateOld ss, IProgress<MessageEventArgs> loggingProgress, IProgress<string> statusProgress, IProgress<double> percentageProgress)
     {
       var kit = KitManager.GetDefaultKit();
-      var converter = kit.LoadConverter(Applications.GSA);
+      var converter = kit.LoadConverter(VersionedHostApplications.GSA);
+      if (converter == null)
+        throw new Exception("Could not find any Kit!");
       var account = ((GsaModel)Instance.GsaModel).Account;
       var percentage = 0;
       var perecentageProgressLock = new object();
@@ -939,7 +957,8 @@ namespace ConnectorGSA
             loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Information, "Duration of preparing results: " + duration.ToString(@"hh\:mm\:ss")));
             loggingProgress.Report(new MessageEventArgs(MessageIntent.Telemetry, MessageLevel.Information, "send", "prepare-results", "duration", duration.ToString(@"hh\:mm\:ss")));
           }
-        } catch
+        }
+        catch
         {
 
         }
@@ -966,8 +985,18 @@ namespace ConnectorGSA
       }
       catch (Exception ex)
       {
-
+        loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, ex.Message));
+        loggingProgress.Report(new MessageEventArgs(MessageIntent.TechnicalLog, MessageLevel.Error, ex, ex.Message));
+        return false;
       }
+
+      if (objs == null)
+      {
+        loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Information, "Failed to convert GSA data to Speckle"));
+        loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Information, "Failed to convert GSA data to Speckle"));
+        return false;
+      }
+
       if (converter.Report.ConversionErrors != null && converter.Report.ConversionErrors.Count > 0)
       {
         foreach (var ce in converter.Report.ConversionErrors)
@@ -989,7 +1018,7 @@ namespace ConnectorGSA
 
       //The converter itself can't give anything back other than Base objects, so this is the first time it can be adorned with any
       //info useful to the sending in streams
-      statusProgress.Report("Sending to Server");
+      statusProgress.Report("Sending to server");
 
       var commitObj = new Base();
       foreach (var obj in objs)
@@ -1015,46 +1044,45 @@ namespace ConnectorGSA
         commitObj['@' + name] = obj;
       }
 
+      //var fileTransport = new DiskTransport.DiskTransport(System.IO.Path.Combine(@"C:\Speckle_Reference\DiskTransport", ss.Stream.id));
       var serverTransport = new ServerTransport(account, ss.Stream.id);
-      var sent = await Commands.SendCommit(commitObj, ss, ((GsaModel)Instance.GsaModel).LastCommitId, serverTransport);
+      var sent = await Commands.SendCommit(commitObj, ss, ((GsaModel)Instance.GsaModel).LastCommitId, loggingProgress, statusProgress, percentageProgress, serverTransport);
 
-      if (sent.status)
+      if (!String.IsNullOrEmpty(sent))
       {
         loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Information, "Successfully sent data to stream"));
         Commands.UpsertSavedReceptionStreamInfo(true, null, ss);
+
+        if (ss.Errors != null && ss.Errors.Count > 0)
+        {
+          foreach (var se in ss.Errors)
+          {
+            loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, se.Message));
+            loggingProgress.Report(new MessageEventArgs(MessageIntent.TechnicalLog, MessageLevel.Error, se, se.Message));
+          }
+        }
+
+        duration = DateTime.Now - startTime;
+        if (duration.Seconds > 0)
+        {
+          loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Information, "Duration of sending to Speckle: " + duration.ToString(@"hh\:mm\:ss")));
+          loggingProgress.Report(new MessageEventArgs(MessageIntent.Telemetry, MessageLevel.Information, "send", "sending", "duration", duration.ToString(@"hh\:mm\:ss")));
+        }
+        startTime = DateTime.Now;
+
+        percentageProgress.Report(100);
       }
       else
       {
         loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, "Unable to send data to stream"));
       }
 
-      if (ss.Errors != null && ss.Errors.Count > 0)
-      {
-        foreach (var se in ss.Errors)
-        {
-          loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, se.Message));
-          loggingProgress.Report(new MessageEventArgs(MessageIntent.TechnicalLog, MessageLevel.Error, se, se.Message));
-        }
-      }
-
-      percentageProgress.Report(100);
-
-      duration = DateTime.Now - startTime;
-      if (duration.Seconds > 0)
-      {
-        loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Information, "Duration of sending to Speckle: " + duration.ToString(@"hh\:mm\:ss")));
-        loggingProgress.Report(new MessageEventArgs(MessageIntent.Telemetry, MessageLevel.Information, "send", "sending", "duration", duration.ToString(@"hh\:mm\:ss")));
-      }
-      startTime = DateTime.Now;
-
-      Console.WriteLine("Sending complete");
-
       percentageProgress.Report(0);
 
       return true;
     }
 
-    internal static async Task<bool> SendInitial(TabCoordinator coordinator, IProgress<StreamState> streamCreationProgress, IProgress<StreamState> streamDeletionProgress, 
+    internal static async Task<bool> SendInitial(TabCoordinator coordinator, IProgress<StreamStateOld> streamCreationProgress, IProgress<StreamStateOld> streamDeletionProgress,
       IProgress<MessageEventArgs> loggingProgress, IProgress<string> statusProgress, IProgress<double> percentageProgress)
     {
       Instance.GsaModel.StreamLayer = coordinator.SenderTab.TargetLayer;
@@ -1068,10 +1096,10 @@ namespace ConnectorGSA
 
       var account = ((GsaModel)Instance.GsaModel).Account;
       //var client = new Client(account);
-      StreamState streamState;
+      StreamStateOld streamState;
       if (coordinator.SenderTab.SenderStreamStates == null || coordinator.SenderTab.SenderStreamStates.Count == 0)
       {
-        streamState = new StreamState(account.userInfo.id, account.serverInfo.url);
+        streamState = new StreamStateOld(account.userInfo.id, account.serverInfo.url);
         streamState.Stream = await NewStream(streamState.Client, "GSA data", "GSA data");
         streamState.IsSending = true;
         ((GsaModel)Instance.GsaModel).LastCommitId = "";
@@ -1086,13 +1114,12 @@ namespace ConnectorGSA
           ((GsaModel)Instance.GsaModel).LastCommitId = mainBranch.commits.items[0].id;
         }
       }
-      
+
       streamCreationProgress.Report(streamState); //This will add it to the sender tab's streamState list
 
-      await Send(coordinator, streamState, loggingProgress, statusProgress, percentageProgress);
+      var sent = await Send(coordinator, streamState, loggingProgress, statusProgress, percentageProgress);      
 
       coordinator.SenderTab.SetDocumentName(((GsaProxy)Instance.GsaModel.Proxy).GetTitle());
-
 
       coordinator.WriteStreamInfo();
 

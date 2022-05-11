@@ -96,6 +96,8 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
     INF_BEAM,
     [StringValue("INF_NODE")]
     INF_NODE,
+    [StringValue("LIST")]
+    LIST,
     [StringValue("LOAD_1D_THERMAL")]
     LOAD_1D_THERMAL,
     [StringValue("LOAD_2D_FACE")]

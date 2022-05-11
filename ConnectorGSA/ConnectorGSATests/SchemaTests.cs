@@ -360,6 +360,28 @@ namespace ConnectorGSATests
     }
 
     [Fact]
+    public void GsaListSimple()
+    {
+      var gsaListGwas = new List<string>();
+
+      gsaListGwas.Add("LIST.1\t1\tsampleOne\tMEMBER\t1 2 4 to 9");
+
+      var listParser = new GsaListParser();
+      var gsaLists = new List<GsaList>();
+
+      foreach(var gsaListGwa in gsaListGwas)
+      {
+        Assert.True(listParser.FromGwa(gsaListGwa));
+        gsaLists.Add((GsaList)listParser.Record);
+      }
+
+      // Equal checks on first list only
+      Assert.Equal("sampleOne", gsaLists[0].Name);
+      Assert.Equal("MEMBER", gsaLists[0].Type);
+      Assert.True(new List<int>() { 1, 2, 4, 5, 6, 7, 8 }.SequenceEqual(gsaLists[0].Definition));
+    }
+
+    [Fact]
     public void GsaLoad2dFaceSimple()
     {
       var load2dFaceGwas = new List<string>()

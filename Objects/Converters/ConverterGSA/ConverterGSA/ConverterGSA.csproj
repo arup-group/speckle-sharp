@@ -10,6 +10,7 @@
     <RootNamespace>ConverterGSA</RootNamespace>
     <AssemblyName>Objects.Converter.GSA</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <RuntimeIdentifier>win</RuntimeIdentifier>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
@@ -32,9 +33,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\ConnectorGSA\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -46,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConversionUtils.cs" />
     <Compile Include="ConverterGSA.cs" />
     <Compile Include="ConverterGSA.ToNative.cs" />
     <Compile Include="ConverterGSA.ToSpeckle.cs" />
@@ -86,8 +85,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Speckle.Newtonsoft.Json">
-      <Version>12.0.3.1</Version>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>13.0.1</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

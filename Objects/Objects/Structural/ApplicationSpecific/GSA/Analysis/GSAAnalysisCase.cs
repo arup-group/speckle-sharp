@@ -22,7 +22,7 @@ namespace Objects.Structural.GSA.Analysis
 
     [SchemaInfo("GSAAnalysisCase", "Creates a GSA analysis case", "GSA", "Analysis")]
     public GSAAnalysisCase([SchemaParamInfo("A list of load cases")] List<LoadCase> loadCases,
-      [SchemaParamInfo("A list of load factors (to be mapped to provided load cases)")] List<double> loadFactors, string name = null, int ? nativeId = null)
+      [SchemaParamInfo("A list of load factors (to be mapped to provided load cases)")] List<double> loadFactors, string name = null, int? nativeId = null)
     {
       if (loadCases.Count != loadFactors.Count)
         throw new ArgumentException("Number of load cases provided does not match number of load factors provided");

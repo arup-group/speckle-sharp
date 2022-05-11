@@ -7,32 +7,32 @@ using Objects.Structural.Properties.Profiles;
 
 namespace Objects.Structural.Properties
 {
-    public class Property1D : Property
+  public class Property1D : Property
+  {
+    [DetachProperty]
+    public Material material { get; set; }
+
+    [DetachProperty]
+    public SectionProfile profile { get; set; } //section description
+
+    public BaseReferencePoint referencePoint { get; set; }
+    public double offsetY { get; set; } = 0; //offset from reference point
+    public double offsetZ { get; set; } = 0; //offset from reference point
+
+    public Property1D() { }
+
+    [SchemaInfo("Property1D (by name)", "Creates a Speckle structural 1D element property", "Structural", "Properties")]
+    public Property1D(string name)
     {
-        [DetachProperty]
-        public Material material { get; set; }
-
-        [DetachProperty]
-        public SectionProfile profile { get; set; } //section description
-
-        public BaseReferencePoint referencePoint { get; set; }
-        public double offsetY { get; set; } = 0; //offset from reference point
-        public double offsetZ { get; set; } = 0; //offset from reference point
-
-        public Property1D() { }
-
-        [SchemaInfo("Property1D (by name)", "Creates a Speckle structural 1D element property", "Structural", "Properties")]
-        public Property1D(string name)
-        {
-            this.name = name;
-        }
+      this.name = name;
+    }
 
     [SchemaInfo("Property1D", "Creates a Speckle structural 1D element property", "Structural", "Properties")]
-        public Property1D(string name, Material material, SectionProfile profile)
-        {
-            this.name = name;
-            this.material = material;
-            this.profile = profile;
-        }
+    public Property1D(string name, Material material, SectionProfile profile)
+    {
+      this.name = name;
+      this.material = material;
+      this.profile = profile;
     }
+  }
 }

@@ -10,6 +10,7 @@
     <RootNamespace>Speckle.ConnectorGSA.Proxy</RootNamespace>
     <AssemblyName>ConnectorGSAProxy</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <RuntimeIdentifier>win</RuntimeIdentifier>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
@@ -49,6 +50,7 @@
     <Compile Include="Cache\GsaCache.cs" />
     <Compile Include="Cache\GsaCacheRecord.cs" />
     <Compile Include="GwaParsers\AnalysisStages\GsaAnalStagePropParser.cs" />
+    <Compile Include="GwaParsers\GeneralData\GsaListParser.cs" />
     <Compile Include="GwaParsers\Geometry\GsaPolylineParser.cs" />
     <Compile Include="GwaParsers\Loading\Beam\GsaLoad1dThermalParser.cs" />
     <Compile Include="GwaParsers\Specification\GsaTolParser.cs" />
@@ -131,6 +133,14 @@
     <Compile Include="Results\ResultsProcessorBase.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Core\Core\Core.csproj">
+      <Project>{9cf2e568-cae4-4224-9458-720f83909fb0}</Project>
+      <Name>Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DesktopUI2\DesktopUI2\DesktopUI2.csproj">
+      <Project>{00b71764-00b1-4b24-abaf-a22864540d76}</Project>
+      <Name>DesktopUI2</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Speckle.GSA.API\Speckle.GSA.API.csproj">
       <Project>{b17705b9-0d8f-41c8-a868-d46ef3e45e40}</Project>
       <Name>Speckle.GSA.API</Name>
@@ -142,7 +152,7 @@
       <Version>10.1.1</Version>
     </PackageReference>
     <PackageReference Include="CsvHelper">
-      <Version>27.1.1</Version>
+      <Version>27.2.1</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

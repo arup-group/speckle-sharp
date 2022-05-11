@@ -21,6 +21,7 @@ namespace DesktopUI2
     public string ConnectorName =>
       System.Reflection.Assembly.GetAssembly(GetType()).GetNameAndVersion().Name;
 
+
     //public List<StreamState> SavedStreamStates = new List<StreamState>();
 
     #region delegates
@@ -153,6 +154,7 @@ namespace DesktopUI2
     public abstract List<MenuItem> GetCustomStreamMenuItems();
 
     public abstract List<ISetting> GetSettings();
+
 
     #endregion
   }

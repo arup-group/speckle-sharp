@@ -86,7 +86,8 @@ jobs:
         )
       env:
         GH_PKG_USER: ${{ secrets.GH_PKG_USER }} 
-        GH_PKG_TOKEN: ${{ secrets.GH_PKG_TOKEN }}          
+        GH_PKG_TOKEN: ${{ secrets.GH_PKG_TOKEN }}    
+        POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}            
         
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Build all Solutions
@@ -95,7 +96,11 @@ jobs:
         SET _version=${{ github.event.inputs.version }}
         for %%x in (Objects, ConnectorGSA) do (
           cd %%x && msbuild %%x.sln /p:Configuration=Release /p:WarningLevel=0 /p:IsDesktopBuild=false /p:AssemblyVersionNumber=%_version% /p:AssemblyInformationalVersion=%_version% /p:Version=%_version% && cd ../ 
-        )               
+        )   
+      env:
+        GH_PKG_USER: ${{ secrets.GH_PKG_USER }} 
+        GH_PKG_TOKEN: ${{ secrets.GH_PKG_TOKEN }}    
+        POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}            
         
     - name: create Installer
       id: installer

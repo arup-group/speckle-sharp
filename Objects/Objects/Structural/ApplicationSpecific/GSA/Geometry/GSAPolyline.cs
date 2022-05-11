@@ -12,8 +12,6 @@ namespace Objects.Structural.GSA.Geometry
     public int? nativeId { get; set; }    
     public Polyline description { get; set; }
     public string colour { get; set; }
-
-    [DetachProperty]
     public GSAGridPlane gridPlane { get; set; }
     public GSAPolyline() { }
 

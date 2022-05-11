@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
-VisualStudioVersion = 16.0.31424.327
+VisualStudioVersion = 16.0.32407.337
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectorGSA", "ConnectorGSA\ConnectorGSA.csproj", "{1BA03BE5-F893-46A3-B569-4FAB87F0B60E}"
 EndProject
@@ -19,13 +19,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Local Dependencies", "Local
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "..\Core\Core\Core.csproj", "{9CF2E568-CAE4-4224-9458-720F83909FB0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolygonMesher", "..\Objects\Converters\StructuralUtilities\PolygonMesher\PolygonMesher.csproj", "{6185B1A1-0A12-44B1-8AC5-0ED48147FB21}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PolygonMesher", "..\Objects\Converters\StructuralUtilities\PolygonMesher\PolygonMesher.csproj", "{6185B1A1-0A12-44B1-8AC5-0ED48147FB21}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConverterGSA", "..\Objects\Converters\ConverterGSA\ConverterGSA\ConverterGSA.csproj", "{6E561E4F-A3B4-4277-A2F7-B934A4141394}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConverterGSATests", "..\Objects\Converters\ConverterGSA\ConverterGSATests\ConverterGSATests.csproj", "{F8521EEA-6C45-4B01-A002-542824B97062}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Objects", "..\Objects\Objects\Objects.csproj", "{69087486-2CC6-4DDF-BFA2-F8B20C12BF02}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DesktopUI2", "..\DesktopUI2\DesktopUI2\DesktopUI2.csproj", "{00B71764-00B1-4B24-ABAF-A22864540D76}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConnectorGSA2", "ConnectorGSA2\ConnectorGSA2.csproj", "{8C36DDC3-B8B8-4FC5-A566-3220D3167A51}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,7 +38,6 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{1BA03BE5-F893-46A3-B569-4FAB87F0B60E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1BA03BE5-F893-46A3-B569-4FAB87F0B60E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1BA03BE5-F893-46A3-B569-4FAB87F0B60E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1BA03BE5-F893-46A3-B569-4FAB87F0B60E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B17705B9-0D8F-41C8-A868-D46EF3E45E40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -73,6 +76,14 @@ Global
 		{69087486-2CC6-4DDF-BFA2-F8B20C12BF02}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69087486-2CC6-4DDF-BFA2-F8B20C12BF02}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69087486-2CC6-4DDF-BFA2-F8B20C12BF02}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00B71764-00B1-4B24-ABAF-A22864540D76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00B71764-00B1-4B24-ABAF-A22864540D76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00B71764-00B1-4B24-ABAF-A22864540D76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00B71764-00B1-4B24-ABAF-A22864540D76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C36DDC3-B8B8-4FC5-A566-3220D3167A51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C36DDC3-B8B8-4FC5-A566-3220D3167A51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C36DDC3-B8B8-4FC5-A566-3220D3167A51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C36DDC3-B8B8-4FC5-A566-3220D3167A51}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -87,6 +98,7 @@ Global
 		{6E561E4F-A3B4-4277-A2F7-B934A4141394} = {30B052EA-5D48-4F52-824E-ED5E96CBA358}
 		{F8521EEA-6C45-4B01-A002-542824B97062} = {358F50C2-24C4-45B5-B104-18D1FDAB77AC}
 		{69087486-2CC6-4DDF-BFA2-F8B20C12BF02} = {30B052EA-5D48-4F52-824E-ED5E96CBA358}
+		{00B71764-00B1-4B24-ABAF-A22864540D76} = {30B052EA-5D48-4F52-824E-ED5E96CBA358}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {057A6E70-0C2D-4782-930F-CAA8AA8151D5}

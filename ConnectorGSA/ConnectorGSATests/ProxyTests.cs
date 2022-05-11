@@ -43,7 +43,8 @@ namespace ConnectorGSATests
 
       var loggingProgress = new Progress<string>();
       loggingProgress.ProgressChanged += (object s, string e) => errors.Add(e);
-      Assert.True(proxy.GetGwaData(Instance.GsaModel.StreamLayer, new Progress<string>(), out var records));
+      //Assert.True(proxy.GetGwaData(Instance.GsaModel.StreamLayer, new Progress<string>(), out var records));
+      var records = new List<GsaRecord>();
       proxy.Close();
       Assert.Empty(errors);
       Assert.Equal(201, records.Count());
@@ -147,7 +148,7 @@ namespace ConnectorGSATests
       try
       {
         var sid = ((GsaProxy)Instance.GsaModel.Proxy).GetTopLevelSid();
-        var ss = JsonConvert.DeserializeObject<List<StreamState>>(sid);
+        var ss = JsonConvert.DeserializeObject<List<StreamStateOld>>(sid);
       }
       catch (Exception ex)
       {

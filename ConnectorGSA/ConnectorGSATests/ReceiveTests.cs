@@ -161,9 +161,9 @@ namespace ConnectorGSATests
       return result;
     }
 
-    private async Task<StreamState> GetTestStream(Client client)
+    private async Task<StreamStateOld> GetTestStream(Client client)
     {
-      StreamState streamState = null;
+      StreamStateOld streamState = null;
       Speckle.Core.Api.Stream testStream = null;
 
       try
@@ -181,7 +181,7 @@ namespace ConnectorGSATests
 
       }
 
-      streamState = new StreamState() { Client = client, Stream = testStream };
+      streamState = new StreamStateOld() { Client = client, Stream = testStream };
       return streamState;
     }
 

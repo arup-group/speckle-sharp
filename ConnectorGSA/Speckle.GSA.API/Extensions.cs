@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using GwaMemberType = Speckle.GSA.API.GwaSchema.MemberType;
 
 namespace Speckle.GSA.API
 {
@@ -259,5 +260,84 @@ namespace Speckle.GSA.API
     {
       return Assembly.GetAssembly(typeof(T)).GetTypes().Where(myType => myType.IsClass && !myType.IsAbstract && myType.IsSubclassOf(typeof(T)));
     }
+
+    #region Test Fns
+    /// <summary>
+    /// Test if a nullable integer has a value and is positive
+    /// </summary>
+    /// <param name="index"></param>
+    /// <returns></returns>
+    public static bool IsIndex(this int? v)
+    {
+      return (v.HasValue && v.Value > 0);
+    }
+
+    public static bool HasValues(this List<int> v)
+    {
+      return (v != null && v.Count > 0);
+    }
+
+    public static bool HasValues(this List<List<int>> v)
+    {
+      return (v != null && v.Count > 0);
+    }
+
+    /// <summary>
+    /// Test if a nullable double has a value and is positive
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    public static bool IsPositive(this double? value)
+    {
+      return (value.HasValue && value.Value > 0);
+    }
+
+    /// <summary>
+    /// Determine if object represents a 2D element
+    /// </summary>
+    /// <param name="gsaEl">GsaEl object containing the element definition</param>
+    /// <returns></returns>
+    public static bool Is2dElement(this GsaEl gsaEl)
+    {
+      return (gsaEl.Type == ElementType.Triangle3 || gsaEl.Type == ElementType.Triangle6 || gsaEl.Type == ElementType.Quad4 || gsaEl.Type == ElementType.Quad8);
+    }
+
+    /// <summary>
+    /// Determine if object represents a 3D element
+    /// </summary>
+    /// <param name="gsaEl">GsaEl object containing the element definition</param>
+    /// <returns></returns>
+    public static bool Is3dElement(this GsaEl gsaEl)
+    {
+      return (gsaEl.Type == ElementType.Brick8 || gsaEl.Type == ElementType.Pyramid5 || gsaEl.Type == ElementType.Tetra4 || gsaEl.Type == ElementType.Wedge6);
+    }
+
+    /// <summary>
+    /// Determine if object represents a 1D element
+    /// </summary>
+    /// <param name="gsaEl">GsaEl object containing the element definition</param>
+    /// <returns></returns>
+    public static bool Is1dElement(this GsaEl gsaEl)
+    {
+      return (gsaEl.Type == ElementType.Bar || gsaEl.Type == ElementType.Beam || gsaEl.Type == ElementType.Cable || gsaEl.Type == ElementType.Damper ||
+        gsaEl.Type == ElementType.Link || gsaEl.Type == ElementType.Rod || gsaEl.Type == ElementType.Spacer || gsaEl.Type == ElementType.Spring ||
+        gsaEl.Type == ElementType.Strut || gsaEl.Type == ElementType.Tie);
+    }
+
+    public static bool Is1dMember(this GsaMemb gsaMemb)
+    {
+      return (gsaMemb.Type == GwaMemberType.Beam || gsaMemb.Type == GwaMemberType.Column || gsaMemb.Type == GwaMemberType.Generic1d || gsaMemb.Type == GwaMemberType.Void1d);
+    }
+
+    public static bool Is2dMember(this GsaMemb gsaMemb)
+    {
+      return (gsaMemb.Type == GwaMemberType.Generic2d || gsaMemb.Type == GwaMemberType.Slab || gsaMemb.Type == GwaMemberType.Void2d || gsaMemb.Type == GwaMemberType.Wall);
+    }
+
+    public static bool Is3dMember(this GsaMemb gsaMemb)
+    {
+      return (gsaMemb.Type == GwaMemberType.Generic3d);
+    }
+    #endregion
   }
 }
