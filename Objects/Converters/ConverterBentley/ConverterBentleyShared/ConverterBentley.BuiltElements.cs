@@ -331,17 +331,23 @@ namespace Objects.Converter.Bentley
       double dy2 = edge2.end.y - edge2.start.y;
       double dz2 = edge2.end.z - edge2.start.z;
 
-      // z-coordinates need to be rounded to avoid problems in Revit regarding floating point errors or small deviations
       double x1 = edge1.start.x + dx1 / 2;
       double y1 = edge1.start.y + dy1 / 2;
-      double z1 = Math.Round(edge1.start.z + dz1 / 2, Decimals);
+      double z1 = edge1.start.z + dz1 / 2;
 
       double x2 = edge2.start.x + dx2 / 2;
       double y2 = edge2.start.y + dy2 / 2;
-      double z2 = Math.Round(edge2.start.z + dz2 / 2, Decimals);
+      double z2 = edge2.start.z + dz2 / 2;
 
-      Point start = new Point(x1, y1, z1, u);
-      Point end = new Point(x2, y2, z2, u);
+      // Check allowable deviation 
+      if (Math.Abs(z2 - z1) > 3 * Epsilon)
+        throw new Exception("Inclined wall base lines are not supported!");
+
+      // z-coordinates need to be rounded to avoid problems in Revit regarding floating point errors or small deviations
+      double z = Math.Round((z1 + z2) / 2, Decimals);
+
+      Point start = new Point(x1, y1, z, u);
+      Point end = new Point(x2, y2, z, u);
 
       Line baseLine = new Line(start, end, u);
 
@@ -611,8 +617,7 @@ namespace Objects.Converter.Bentley
           throw new SpeckleException("Inclined slabs not supported!");
         }
 
-        int precision = (int)(1 / Epsilon);
-        int elevation = (int)Math.Round(start.z * precision);
+        int elevation = (int)Math.Round(start.z * Math.Pow(10, Decimals));
         // this is unfortunately not a determinstic operation
         // currently no better idea than checking if neighbouring values are present already
         if (elevationMap.ContainsKey(elevation - 1))
@@ -733,8 +738,7 @@ namespace Objects.Converter.Bentley
           throw new SpeckleException("Wall geometry not supported!");
         }
 
-        int precision = (int)(1 / Epsilon);
-        int y = (int)Math.Round(start.y * precision);
+        int y = (int)Math.Round(start.y * Math.Pow(10, Decimals));
         // this is unfortunately not a determinstic operation
         // currently no better idea than checking if neighbouring values are present already
         if (yMap.ContainsKey(y - 1))
