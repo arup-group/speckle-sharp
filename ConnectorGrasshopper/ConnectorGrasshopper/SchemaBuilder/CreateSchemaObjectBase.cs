@@ -267,11 +267,12 @@ namespace ConnectorGrasshopper
       }
 
       // Create new param based on property name
-      Param_GenericObject newInputParam = new Param_GenericObject();
+      SpeckleStatefulParam newInputParam = new SpeckleStatefulParam();
       newInputParam.Name = propName;
       newInputParam.NickName = propName;
       newInputParam.MutableNickName = false;
-
+      newInputParam.Detachable = false;
+      
       newInputParam.Description = $"({propType.Name}) {d}";
       newInputParam.Optional = param.IsOptional;
       if (param.IsOptional)
