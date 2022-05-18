@@ -221,21 +221,30 @@ namespace ConnectorGrasshopper.Objects
           {
             // If value is not list, it is a single item.
 
-            try
-            {
-              if (Converter != null)
-                @base[key] = value == null ? null : Utilities.TryConvertItemToSpeckle(value, Converter);
-              else
-                @base[key] = value;
-            }
-            catch (Exception e)
-            {
-              Logging.Log.CaptureException(e);
-              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Message}");
-              hasErrors = true;
-            }
-          }
-        });
+      foreach (var ghGoo in speckleObjects.AllData(true))
+      {
+        object converted;
+        if (ghGoo is GH_SpeckleBase ghBase)
+        {
+          converted = ghBase.Value;
+        }
+        else
+        {
+          converted = Utilities.TryConvertItemToSpeckle(ghGoo,Converter);
+        }
+        if (converted is Base b)
+        {
+          b.GetMemberNames().ToList().ForEach(prop =>
+          {
+            if (!fullProps.Contains(prop))
+              fullProps.Add(prop);
+          });
+        }
+      }
+
+      fullProps.Sort();
+      return fullProps;
+    }
 
         if (hasErrors)
         {
