@@ -221,17 +221,27 @@ namespace ConnectorGrasshopper.Objects
           {
             // If value is not list, it is a single item.
 
+    protected override void BeforeSolveInstance()
+    {
+      if (RunCount == -1)
+      {
+        Console.WriteLine("No iter has run");
+        var x = Params.Input[0].VolatileData;
+        var tree = x as GH_Structure<IGH_Goo>;
+        outputList = GetOutputList(tree);
+        AutoCreateOutputs();
+      }
+      base.BeforeSolveInstance();
+    }
+
+    private List<string> GetOutputList(GH_Structure<IGH_Goo> speckleObjects)
+    {
+      // Get the full list of output parameters
+      var fullProps = new List<string>();
+
       foreach (var ghGoo in speckleObjects.AllData(true))
       {
-        object converted;
-        if (ghGoo is GH_SpeckleBase ghBase)
-        {
-          converted = ghBase.Value;
-        }
-        else
-        {
-          converted = Utilities.TryConvertItemToSpeckle(ghGoo,Converter);
-        }
+        var converted = Utilities.TryConvertItemToSpeckle(ghGoo,Converter);
         if (converted is Base b)
         {
           b.GetMemberNames().ToList().ForEach(prop =>
