@@ -184,7 +184,10 @@ namespace ConverterGSA
       if (gsaNode.MassPropertyIndex.IsIndex()) speckleNode.massProperty = GetPropertyMassFromIndex(gsaNode.MassPropertyIndex.Value);
       if (gsaNode.SpringPropertyIndex.IsIndex()) speckleNode.springProperty = GetPropertySpringFromIndex(gsaNode.SpringPropertyIndex.Value);
 
-      AddToMeaningfulNodeIndices(speckleNode.applicationId, layer);
+      if (Instance.GsaModel.Cache.LayerContainsNode(gsaNode.Index.Value, layer))
+      {
+        AddToMeaningfulNodeIndices(speckleNode.applicationId, layer);
+      }
 
       Report.Log($"Converted Node {speckleNode.nativeId}");
 

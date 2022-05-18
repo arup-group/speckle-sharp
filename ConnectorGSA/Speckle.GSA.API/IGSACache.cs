@@ -18,6 +18,7 @@ namespace Speckle.GSA.API
     bool GetSpeckleObjectsByType<T, U>(out List<U> foundObjects, GSALayer layer = GSALayer.Both);
     string GetApplicationId<T>(int index);
     string GetApplicationId(Type t, int gsaIndex);
+    bool LayerContainsNode(int nodeIndex, GSALayer layer);
     List<int> LookupIndices<T>();
     List<int> LookupIndices<T>(IEnumerable<string> applicationIds);
     bool SetSpeckleObjects(GsaRecord gsaRecord, Dictionary<string, object> objectsByApplicationId, GSALayer layer = GSALayer.Both);
