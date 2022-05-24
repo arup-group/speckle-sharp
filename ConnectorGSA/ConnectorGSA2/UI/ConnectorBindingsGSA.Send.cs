@@ -73,37 +73,51 @@ namespace ConnectorGSA.UI
 
       percentage += 20;
 
-      //var resultsToSend = coordinator.SenderTab.ResultSettings.ResultSettingItems.Where(rsi => rsi.Selected).ToList();
-      //if (resultsToSend != null && resultsToSend.Count() > 0 && !string.IsNullOrEmpty(coordinator.SenderTab.LoadCaseList)
-      //  && (Instance.GsaModel.ResultCases == null || Instance.GsaModel.ResultCases.Count() == 0))
-      //{
-      //  try
-      //  {
-      //    statusProgress.Report("Preparing results");
-      //    var analIndices = new List<int>();
-      //    var comboIndices = new List<int>();
-      //    if (((GsaCache)Instance.GsaModel.Cache).GetNatives<GsaAnal>(out var analRecords) && analRecords != null && analRecords.Count() > 0)
-      //    {
-      //      analIndices.AddRange(analRecords.Select(r => r.Index.Value));
-      //    }
-      //    if (((GsaCache)Instance.GsaModel.Cache).GetNatives<GsaCombination>(out var comboRecords) && comboRecords != null && comboRecords.Count() > 0)
-      //    {
-      //      comboIndices.AddRange(comboRecords.Select(r => r.Index.Value));
-      //    }
-      //    var expanded = ((GsaProxy)Instance.GsaModel.Proxy).ExpandLoadCasesAndCombinations(coordinator.SenderTab.LoadCaseList, analIndices, comboIndices);
-      //    if (expanded != null && expanded.Count() > 0)
-      //    {
-      //      loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Information, "Resolved load cases"));
+      if (ResultSettings != null)
+      {
+        var resultsToSend = ResultSettings.ResultSettingItems.Where(rsi => rsi.Selected).ToList();
 
-      //      Instance.GsaModel.ResultCases = expanded;
-      //      Instance.GsaModel.ResultTypes = resultsToSend.Select(rts => rts.ResultType).ToList();
-      //    }
-      //  }
-      //  catch
-      //  {
+        if (resultsToSend != null && resultsToSend.Count() > 0 && !string.IsNullOrEmpty(ResultSettings.CasesDescription)
+          && (Instance.GsaModel.ResultCases == null || Instance.GsaModel.ResultCases.Count() == 0))
+        {
+          try
+          {
+            progress.Report.Log("Preparing results");
+            var analIndices = new List<int>();
+            var comboIndices = new List<int>();
+            if (((GsaCache)Instance.GsaModel.Cache).GetNatives<GsaAnal>(out var analRecords) && analRecords != null && analRecords.Count() > 0)
+            {
+              analIndices.AddRange(analRecords.Select(r => r.Index.Value));
+            }
+            if (((GsaCache)Instance.GsaModel.Cache).GetNatives<GsaCombination>(out var comboRecords) && comboRecords != null && comboRecords.Count() > 0)
+            {
+              comboIndices.AddRange(comboRecords.Select(r => r.Index.Value));
+            }
+            var expanded = ((GsaProxy)Instance.GsaModel.Proxy).ExpandLoadCasesAndCombinations(ResultSettings.CasesDescription, analIndices, comboIndices);
+            if (expanded != null && expanded.Count() > 0)
+            {
+              //loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Information, "Resolved load cases"));
 
-      //  }
-      //}
+              Instance.GsaModel.ResultCases = expanded;
+
+              var resultTypes = new List<ResultType>();
+
+              foreach (var result in resultsToSend)
+              {
+                if (Enum.TryParse(result.ResultType, out ResultType resultType))
+                {
+                  resultTypes.Add(resultType);
+                }
+              }
+              Instance.GsaModel.ResultTypes = resultTypes;
+            }
+          }
+          catch
+          {
+
+          }
+        }
+      }
 
       TimeSpan duration = DateTime.Now - startTime;
       if (duration.Seconds > 0)
@@ -179,7 +193,7 @@ namespace ConnectorGSA.UI
         }
       }
 
-      if(objs == null)
+      if (objs == null)
       {
         progress.Report.LogConversionError(new Exception("Failed to convert cache data to Speckle"));
         return null;
@@ -200,7 +214,7 @@ namespace ConnectorGSA.UI
 
       //The converter itself can't give anything back other than Base objects, so this is the first time it can be adorned with any
       //info useful to the sending in streams
-      progress.Report.Log($"Sending to server: {state.ServerUrl}");      
+      progress.Report.Log($"Sending to server: {state.ServerUrl}");
 
       var commitObj = new Base();
       foreach (var obj in objs)
@@ -228,7 +242,7 @@ namespace ConnectorGSA.UI
 
       //var fileTransport = new DiskTransport.DiskTransport(System.IO.Path.Combine(@"C:\Speckle_Reference\DiskTransport", state.StreamId));
       var serverTransport = new ServerTransport(account, state.StreamId);
-      var sent = await Commands.SendCommit(commitObj, state, progress, ((GsaModel)Instance.GsaModel).LastCommitId, serverTransport);      
+      var sent = await Commands.SendCommit(commitObj, state, progress, ((GsaModel)Instance.GsaModel).LastCommitId, serverTransport);
 
       if (!String.IsNullOrEmpty(sent))
       {
@@ -249,7 +263,7 @@ namespace ConnectorGSA.UI
       else
       {
         progress.Report.LogOperationError(new Exception("Unable to send data to stream"));
-      }      
+      }
 
       return null;
     }

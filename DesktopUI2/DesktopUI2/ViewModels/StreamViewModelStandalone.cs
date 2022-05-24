@@ -416,6 +416,29 @@ namespace DesktopUI2.ViewModels
       }
     }
 
+    public async void OpenResultsCommand()
+    {
+      try
+      {
+        var resultsWindow = new ResultsStandalone();
+        resultsWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+
+        var resultsViewModel = new ResultsViewModelStandalone();
+        resultsWindow.DataContext = resultsViewModel;
+        resultsWindow.Title = $"Results for {Stream.name}";
+        var saveResult = await resultsWindow.ShowDialog<bool?>(MainWindowStandalone.Instance);
+
+        if (saveResult != null && (bool)saveResult)
+        {
+          Bindings.ResultSettings = resultsViewModel.ResultSettings;
+        }
+      }
+      catch (Exception e)
+      {
+      }
+
+    }
+
 
     [DependsOn(nameof(SelectedBranch))]
     [DependsOn(nameof(SelectedFilter))]

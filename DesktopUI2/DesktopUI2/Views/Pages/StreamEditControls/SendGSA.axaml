@@ -13,196 +13,220 @@
   d:DesignWidth="400"
   mc:Ignorable="d">
 
-  <UserControl.Styles>
-    <StyleInclude Source="/Styles/ChipListBox.xaml" />
-  </UserControl.Styles>
-  <Grid RowDefinitions="auto, auto">
+	<UserControl.Styles>
+		<StyleInclude Source="/Styles/ChipListBox.xaml" />
+	</UserControl.Styles>
+	<Grid RowDefinitions="auto, auto">
 
-    <Expander
-      Padding="15,0"
-      HorizontalAlignment="Stretch"
-      HorizontalContentAlignment="Stretch"
-      Background="Transparent"
-      Classes="Flat"
-      IsExpanded="{Binding IsExpanded}">
-      <Expander.Header>
-        <StackPanel Orientation="Horizontal">
-          <TextBlock Text="Sending " />
-          <TextBlock FontWeight="Bold" Text="{Binding SelectedFilter.Summary, FallbackValue=?}" />
-          <TextBlock Text=" to " />
-          <TextBlock FontWeight="Bold" Text="{Binding SelectedBranch.name, FallbackValue=?}" />
-        </StackPanel>
-      </Expander.Header>
+		<Expander
+		  Padding="15,0"
+		  HorizontalAlignment="Stretch"
+		  HorizontalContentAlignment="Stretch"
+		  Background="Transparent"
+		  Classes="Flat"
+		  IsExpanded="{Binding IsExpanded}">
+			<Expander.Header>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="Sending " />
+					<TextBlock FontWeight="Bold" Text="{Binding SelectedFilter.Summary, FallbackValue=?}" />
+					<TextBlock Text=" to " />
+					<TextBlock FontWeight="Bold" Text="{Binding SelectedBranch.name, FallbackValue=?}" />
+				</StackPanel>
+			</Expander.Header>
 
-      <Grid ColumnDefinitions="auto,*,auto, *" RowDefinitions="auto, auto, auto">
+			<Grid ColumnDefinitions="auto,*,auto, *" RowDefinitions="auto, auto, auto">
 
-        <!--  SELECT BRANCH  -->
-        <icons:MaterialIcon
-          Margin="0"
-          VerticalAlignment="Center"
-          Foreground="Gray"
-          Kind="InfoCircle"
-          ToolTip.Tip="Data in a stream can be organized in branches,&#x0a;for instance, to have multiple design options&#x0a;or to store data by discipline.&#x0a;The default branch is called main." />
-        <ComboBox
-          Grid.Column="1"
-          Margin="5,10,5,10"
-          HorizontalAlignment="Stretch"
-          VerticalAlignment="Center"
-          Items="{Binding Branches}"
-          PlaceholderText="Select a branch"
-          SelectedItem="{Binding SelectedBranch}">
-          <ComboBox.ItemTemplate>
-            <DataTemplate>
-              <Grid ColumnDefinitions="auto,*">
-                <icons:MaterialIcon
-                  Margin="0,0,5,0"
-                  Foreground="DarkGray"
-                  Kind="SourceBranch" />
-                <TextBlock
-                  Grid.Column="1"
-                  Text="{Binding name}"
-                  TextTrimming="CharacterEllipsis" />
-              </Grid>
-            </DataTemplate>
-          </ComboBox.ItemTemplate>
-        </ComboBox>
+				<!--  SELECT BRANCH  -->
+				<icons:MaterialIcon
+				  Margin="0"
+				  VerticalAlignment="Center"
+				  Foreground="Gray"
+				  Kind="InfoCircle"
+				  ToolTip.Tip="Data in a stream can be organized in branches,&#x0a;for instance, to have multiple design options&#x0a;or to store data by discipline.&#x0a;The default branch is called main." />
+				<ComboBox
+				  Grid.Column="1"
+				  Margin="5,10,5,10"
+				  HorizontalAlignment="Stretch"
+				  VerticalAlignment="Center"
+				  Items="{Binding Branches}"
+				  PlaceholderText="Select a branch"
+				  SelectedItem="{Binding SelectedBranch}">
+					<ComboBox.ItemTemplate>
+						<DataTemplate>
+							<Grid ColumnDefinitions="auto,*">
+								<icons:MaterialIcon
+								  Margin="0,0,5,0"
+								  Foreground="DarkGray"
+								  Kind="SourceBranch" />
+								<TextBlock
+								  Grid.Column="1"
+								  Text="{Binding name}"
+								  TextTrimming="CharacterEllipsis" />
+							</Grid>
+						</DataTemplate>
+					</ComboBox.ItemTemplate>
+				</ComboBox>
 
-        <!--  SELECT FILTER  -->
-        <icons:MaterialIcon
-          Grid.Column="2"
-          Margin="0"
-          VerticalAlignment="Center"
-          Foreground="Gray"
-          Kind="InfoCircle"
-          ToolTip.Tip="Each connector offers various&#x0a;ways to send data.&#x0a;Select the filter you want to use." />
-        <ComboBox
-          Name="FilterCombo"
-          Grid.Column="3"
-          Margin="5,10,0,10"
-          HorizontalAlignment="Stretch"
-          VerticalAlignment="Center"
-          Items="{Binding AvailableFilters}"
-          PlaceholderText="Select a filter"
-          SelectedIndex="0"
-          SelectedItem="{Binding SelectedFilter}">
-          <ComboBox.ItemTemplate>
-            <DataTemplate>
-              <Grid ColumnDefinitions="auto,*">
-                <icons:MaterialIcon
-                  Margin="0,0,5,0"
-                  Foreground="DarkGray"
-                  Kind="{Binding Filter.Icon}" />
-                <TextBlock
-                  Grid.Column="1"
-                  Text="{Binding Filter.Name}"
-                  TextTrimming="CharacterEllipsis" />
-              </Grid>
-            </DataTemplate>
-          </ComboBox.ItemTemplate>
-        </ComboBox>
-        
-        <!--  FILTER INFO  -->
-        <Grid
-          Grid.Row="1"
-          Grid.ColumnSpan="4"
-          Margin="0,15">
-          <ContentControl Content="{Binding #FilterCombo.SelectedItem.FilterView}" />
-        </Grid>
+				<!--  SELECT FILTER  -->
+				<icons:MaterialIcon
+				  Grid.Column="2"
+				  Margin="0"
+				  VerticalAlignment="Center"
+				  Foreground="Gray"
+				  Kind="InfoCircle"
+				  ToolTip.Tip="Each connector offers various&#x0a;ways to send data.&#x0a;Select the filter you want to use." />
+				<ComboBox
+				  Name="FilterCombo"
+				  Grid.Column="3"
+				  Margin="5,10,0,10"
+				  HorizontalAlignment="Stretch"
+				  VerticalAlignment="Center"
+				  Items="{Binding AvailableFilters}"
+				  PlaceholderText="Select a filter"
+				  SelectedIndex="0"
+				  SelectedItem="{Binding SelectedFilter}">
+					<ComboBox.ItemTemplate>
+						<DataTemplate>
+							<Grid ColumnDefinitions="auto,*">
+								<icons:MaterialIcon
+								  Margin="0,0,5,0"
+								  Foreground="DarkGray"
+								  Kind="{Binding Filter.Icon}" />
+								<TextBlock
+								  Grid.Column="1"
+								  Text="{Binding Filter.Name}"
+								  TextTrimming="CharacterEllipsis" />
+							</Grid>
+						</DataTemplate>
+					</ComboBox.ItemTemplate>
+				</ComboBox>
 
-        <Grid
-          Grid.Row="2"
-          Grid.ColumnSpan="4"
-          Margin="0,15,0,15">
-          <TextBlock
-                  Grid.Column="1"
-                  Margin="0,0,0,30"
-                  Text="Layer to send:"
-                  TextTrimming="CharacterEllipsis" />
-          <StackPanel Grid.Column="2" VerticalAlignment="Center">
-            <ListBox
-              x:Name="ItemsListBox"
-              Margin="0,0,0,15"
-              Items="{Binding GSALayers}"
-              Selection="{Binding SelectedLayer}"
-              SelectionMode="Single, Toggle" />
-          </StackPanel>
-        </Grid>
-        
-        <!--  ADVANCED SETTINGS  -->
-        <Button
-          Grid.Row="3"
-          Grid.ColumnSpan="4"
-          Margin="0,90,0,15"
-          HorizontalAlignment="Center"
-          HorizontalContentAlignment="Center"
-          assists:ShadowAssist.ShadowDepth="Depth0"
-          Background="Transparent"
-          Command="{Binding OpenSettingsCommand}"
-          Foreground="{DynamicResource PrimaryHueMidBrush}">
-          <Grid Margin="0" ColumnDefinitions="auto,*">
-            <icons:MaterialIcon VerticalAlignment="Center" Kind="Settings" />
-            <TextBlock
-              Grid.Column="1"
-              Margin="8,0"
-              Padding="0"
-              VerticalAlignment="Center"
-              Text="Advanced Settings"
-              TextTrimming="CharacterEllipsis" />
-          </Grid>
-        </Button>
+				<!--  FILTER INFO  -->
+				<Grid
+				  Grid.Row="1"
+				  Grid.ColumnSpan="4"
+				  Margin="0,15">
+					<ContentControl Content="{Binding #FilterCombo.SelectedItem.FilterView}" />
+				</Grid>
 
-      </Grid>
+				<Grid
+				  Grid.Row="2"
+				  Grid.ColumnSpan="4"
+				  Margin="0,15,0,15">
+					<TextBlock
+							Grid.Column="1"
+							Margin="0,0,0,30"
+							Text="Layer to send:"
+							TextTrimming="CharacterEllipsis" />
+					<StackPanel Grid.Column="2" VerticalAlignment="Center">
+						<ListBox
+						  x:Name="ItemsListBox"
+						  Margin="0,0,0,15"
+						  Items="{Binding GSALayers}"
+						  Selection="{Binding SelectedLayer}"
+						  SelectionMode="Single, Toggle" />
+					</StackPanel>
+				</Grid>
 
-    </Expander>
+				<Grid Grid.Row="3" Grid.ColumnSpan="4">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="*"/>
+					</Grid.ColumnDefinitions>
+					<!--  ADVANCED SETTINGS  -->
+					<Button Grid.Column="0"
+					  Margin="0,90,0,15"
+					  HorizontalAlignment="Center"
+					  HorizontalContentAlignment="Center"
+					  assists:ShadowAssist.ShadowDepth="Depth0"
+					  Background="Transparent"
+					  Command="{Binding OpenSettingsCommand}"
+					  Foreground="{DynamicResource PrimaryHueMidBrush}">
+						<Grid Margin="0" ColumnDefinitions="auto,*">
+							<icons:MaterialIcon VerticalAlignment="Center" Kind="Settings" />
+							<TextBlock
+							  Grid.Column="1"
+							  Margin="8,0"
+							  Padding="0"
+							  VerticalAlignment="Center"
+							  Text="Advanced Settings"
+							  TextTrimming="CharacterEllipsis" />
+						</Grid>
+					</Button>
+					<!--  RESULTS -->
+					<Button Grid.Column="1"
+					  Margin="0,90,0,15"
+					  HorizontalAlignment="Center"
+					  HorizontalContentAlignment="Center"
+					  assists:ShadowAssist.ShadowDepth="Depth0"
+					  Background="Transparent"
+					  Command="{Binding OpenResultsCommand}"
+					  Foreground="{DynamicResource PrimaryHueMidBrush}">
+						<Grid Margin="0" ColumnDefinitions="auto,*">
+							<icons:MaterialIcon VerticalAlignment="Center" Kind="Database" />
+							<TextBlock
+							  Grid.Column="1"
+							  Margin="8,0"
+							  Padding="0"
+							  VerticalAlignment="Center"
+							  Text="Results"
+							  TextTrimming="CharacterEllipsis" />
+						</Grid>
+					</Button>
+				</Grid>
+
+			</Grid>
+
+		</Expander>
 
 
-    <Grid
-      Grid.Row="1"
-      Margin="15,5"
-      ColumnDefinitions="*,auto">
-      <!--  COMMIT MESSAGE  -->
-      <TextBox
-        Margin="0,0,10,0"
-        Padding="0"
-        HorizontalAlignment="Stretch"
-        HorizontalContentAlignment="Stretch"
-        Classes="Filled Dense"
-        Foreground="Gray"
-        IsEnabled="{Binding Progress.IsProgressing, Converter={x:Static BoolConverters.Not}}"
-        IsReadOnly="{Binding Progress.IsProgressing}"
-        Text="{Binding StreamState.CommitMessage}"
-        Watermark="Message (optional) " />
-      <StackPanel
-        Grid.Column="1"
-        HorizontalAlignment="Right"
-        Orientation="Horizontal"
-        Spacing="10">
+		<Grid
+		  Grid.Row="1"
+		  Margin="15,5"
+		  ColumnDefinitions="*,auto">
+			<!--  COMMIT MESSAGE  -->
+			<TextBox
+			  Margin="0,0,10,0"
+			  Padding="0"
+			  HorizontalAlignment="Stretch"
+			  HorizontalContentAlignment="Stretch"
+			  Classes="Filled Dense"
+			  Foreground="Gray"
+			  IsEnabled="{Binding Progress.IsProgressing, Converter={x:Static BoolConverters.Not}}"
+			  IsReadOnly="{Binding Progress.IsProgressing}"
+			  Text="{Binding StreamState.CommitMessage}"
+			  Watermark="Message (optional) " />
+			<StackPanel
+			  Grid.Column="1"
+			  HorizontalAlignment="Right"
+			  Orientation="Horizontal"
+			  Spacing="10">
 
 
-        <!--  SAVE BTN  -->
-        <m:FloatingButton
-          VerticalAlignment="Center"
-          assists:ShadowAssist.ShadowDepth="Depth0"
-          Background="Transparent"
-          Command="{Binding SaveCommand}"
-          IsEnabled="{Binding Progress.IsProgressing, Converter={x:Static BoolConverters.Not}}"
-          ToolTip.Tip="Save this sender to the file without sending">
-          <Button.Content>
-            <icons:MaterialIcon
-              Width="20"
-              Height="20"
-              assists:ShadowAssist.ShadowDepth="0"
-              Foreground="Gray"
-              Kind="ContentSave" />
+				<!--  SAVE BTN  -->
+				<m:FloatingButton
+				  VerticalAlignment="Center"
+				  assists:ShadowAssist.ShadowDepth="Depth0"
+				  Background="Transparent"
+				  Command="{Binding SaveCommand}"
+				  IsEnabled="{Binding Progress.IsProgressing, Converter={x:Static BoolConverters.Not}}"
+				  ToolTip.Tip="Save this sender to the file without sending">
+					<Button.Content>
+						<icons:MaterialIcon
+						  Width="20"
+						  Height="20"
+						  assists:ShadowAssist.ShadowDepth="0"
+						  Foreground="Gray"
+						  Kind="ContentSave" />
 
-          </Button.Content>
-        </m:FloatingButton>
+					</Button.Content>
+				</m:FloatingButton>
 
-        <!--  SEND BTN  -->
-        <c:SendButton />
-      </StackPanel>
-    </Grid>
+				<!--  SEND BTN  -->
+				<c:SendButton />
+			</StackPanel>
+		</Grid>
 
-  </Grid>
+	</Grid>
 
 </UserControl>

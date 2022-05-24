@@ -15,6 +15,7 @@ using Speckle.Core.Models;
 using Speckle.Core.Transports;
 using Speckle.Newtonsoft.Json;
 using Speckle.GSA.API;
+using ConnectorGSA.Models;
 
 namespace ConnectorGSA.UI
 {
@@ -69,6 +70,8 @@ namespace ConnectorGSA.UI
         Instance.GsaModel.CoincidentNodeAllowance = value;
       }
     }
+
+    public override ResultSettings ResultSettings { get; set; }
 
     public override string GetHostAppNameVersion() => VersionedHostApplications.GSA;
     public override string GetHostAppName() => HostApplications.GSA.Slug;

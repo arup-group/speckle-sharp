@@ -241,6 +241,9 @@
     <Compile Update="Views\Windows\Report.xaml.cs">
       <DependentUpon>Report.xaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\Windows\ResultsStandalone.axaml.cs">
+      <DependentUpon>ResultsStandalone.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Core\Core.csproj" />
