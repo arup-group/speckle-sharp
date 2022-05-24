@@ -214,6 +214,10 @@ namespace Objects.Converter.Bentley
           @base = SolidElementToSpeckle(o);
           Report.Log($"Converted Type2 as Base");
           break;
+        case ConeElement o:
+          @base = ConeElementToSpeckle(o);
+          Report.Log($"Converted Cone as Base");
+          break;
         //case SurfaceOrSolidElement o:
         //  @base = SurfaceOrSolidElementToSpeckle(o);
         //  Report.Log($"Converted Type2 as Base");
@@ -377,6 +381,7 @@ namespace Objects.Converter.Bentley
         case Type2Element _: //Complex header element
         //case BrepCellHeaderElement _:
         case SolidElement _:
+        case ConeElement _:
           return true;
 
 #if (OPENROADS || OPENRAIL || OPENBRIDGE)
