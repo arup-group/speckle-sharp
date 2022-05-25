@@ -402,6 +402,7 @@ namespace ConverterGSA
       }
 
       var sendResults = (Instance.GsaModel.StreamSendConfig == StreamContentConfig.ModelAndResults);
+
       if (!ConvertToSpeckle(allGsaRecords, Instance.GsaModel.StreamLayer, sendResults, modelInfo, out retList))
       {
         return null;

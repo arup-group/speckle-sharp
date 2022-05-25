@@ -34,7 +34,7 @@
 				</StackPanel>
 			</Expander.Header>
 
-			<Grid ColumnDefinitions="auto,*,auto, *" RowDefinitions="auto, auto, auto">
+			<Grid ColumnDefinitions="auto,*,auto, *" RowDefinitions="auto, auto, auto, auto">
 
 				<!--  SELECT BRANCH  -->
 				<icons:MaterialIcon
@@ -112,19 +112,36 @@
 				<Grid
 				  Grid.Row="2"
 				  Grid.ColumnSpan="4"
-				  Margin="0,15,0,15">
-					<TextBlock
-							Grid.Column="1"
-							Margin="0,0,0,30"
-							Text="Layer to send:"
-							TextTrimming="CharacterEllipsis" />
-					<StackPanel Grid.Column="2" VerticalAlignment="Center">
-						<ListBox
-						  x:Name="ItemsListBox"
-						  Margin="0,0,0,15"
-						  Items="{Binding GSALayers}"
-						  Selection="{Binding SelectedLayer}"
-						  SelectionMode="Single, Toggle" />
+				  Margin="0">
+					<StackPanel>
+						<StackPanel>
+							<TextBlock
+									Margin="0,0,0,15"
+									Text="Layer to send:"
+									TextTrimming="CharacterEllipsis" />
+							<StackPanel Grid.Column="2" VerticalAlignment="Center">
+								<ListBox
+								  x:Name="ItemsListBox"
+								  Margin="0,0,0,15"
+								  Items="{Binding GSALayers}"
+								  Selection="{Binding SelectedLayer}"
+								  SelectionMode="Single, Toggle" />
+							</StackPanel>
+						</StackPanel>
+						<StackPanel Orientation="Vertical">
+							<TextBlock
+									Margin="0,0,0,15"
+									Text="Send options:"
+									TextTrimming="CharacterEllipsis" />
+							<StackPanel Grid.Column="2" VerticalAlignment="Center">
+								<ListBox
+								  x:Name="ResultsListBox"
+								  Margin="0,0,0,15"
+								  Items="{Binding ResultsOptions}"
+								  Selection="{Binding SelectedResultOption}"
+								  SelectionMode="Single, Toggle" />
+							</StackPanel>
+						</StackPanel>
 					</StackPanel>
 				</Grid>
 
@@ -135,7 +152,7 @@
 					</Grid.ColumnDefinitions>
 					<!--  ADVANCED SETTINGS  -->
 					<Button Grid.Column="0"
-					  Margin="0,90,0,15"
+					  Margin="0,15,0,15"
 					  HorizontalAlignment="Center"
 					  HorizontalContentAlignment="Center"
 					  assists:ShadowAssist.ShadowDepth="Depth0"
@@ -155,7 +172,7 @@
 					</Button>
 					<!--  RESULTS -->
 					<Button Grid.Column="1"
-					  Margin="0,90,0,15"
+					  Margin="0,15,0,15"
 					  HorizontalAlignment="Center"
 					  HorizontalContentAlignment="Center"
 					  assists:ShadowAssist.ShadowDepth="Depth0"

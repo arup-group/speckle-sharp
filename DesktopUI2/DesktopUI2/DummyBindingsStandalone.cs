@@ -363,5 +363,6 @@ namespace DesktopUI2
 
     public override double CoincidentNodeAllowance { get; set; }
     public override ResultSettings ResultSettings { get; set; }
+    public override bool SendResults { get; set; }
   }
 }

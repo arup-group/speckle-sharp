@@ -47,6 +47,18 @@ namespace ConnectorGSA.UI
       }
     }
 
+    private bool _sendResults;
+    public override bool SendResults
+    {
+      get => _sendResults;
+      set
+      {
+        _sendResults = value;
+        Instance.GsaModel.StreamSendConfig = _sendResults ? StreamContentConfig.ModelAndResults : StreamContentConfig.ModelOnly;
+      }
+    }
+      
+
     private string _units = "millimetres";
     public override string Units
     {
