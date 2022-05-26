@@ -1,6 +1,5 @@
 ﻿using Objects.Geometry;
 using Objects.Primitive;
-using Objects.Other;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -89,6 +88,8 @@ namespace Objects.Converter.Bentley
     {
       throw new NotImplementedException("This converter does not have any settings.");
     }
+
+    public ReceiveMode ReceiveMode { get; set; }
 
     public void SetContextDocument(object session)
     {
@@ -341,7 +342,7 @@ namespace Objects.Converter.Bentley
 #endif
 #if (OPENROADS || OPENRAIL || OPENBRIDGE)
         case Alignment o:
-        Report.Log($"Created Alignment {o.id}");
+          Report.Log($"Created Alignment {o.id}");
           return AlignmentToNative(o);
 #endif
         default:

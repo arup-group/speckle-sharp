@@ -12,7 +12,7 @@ namespace Objects.Converter.Revit
   {
     public List<ApplicationPlaceholderObject> BeamToNative(Beam speckleBeam, StructuralType structuralType = StructuralType.Beam)
     {
-      
+
       if (speckleBeam.baseLine == null)
       {
         throw new Speckle.Core.Logging.SpeckleException("Only line based Beams are currently supported.");
@@ -49,6 +49,9 @@ namespace Objects.Converter.Revit
 
       //try update existing 
       var docObj = GetExistingElementByApplicationId(speckleBeam.applicationId);
+
+      if (docObj != null && ReceiveMode == Speckle.Core.Kits.ReceiveMode.Ignore)
+        return new List<ApplicationPlaceholderObject>() { new ApplicationPlaceholderObject { applicationId = speckleBeam.applicationId, ApplicationGeneratedId = docObj.UniqueId, NativeObject = docObj } }; ;
 
       if (docObj != null)
       {

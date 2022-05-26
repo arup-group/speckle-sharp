@@ -1,7 +1,10 @@
-﻿using DesktopUI2.Views.Pages;
+﻿using DesktopUI2.ViewModels.Share;
+using DesktopUI2.Views.Pages;
+using DesktopUI2.Views.Pages.ShareControls;
 using ReactiveUI;
 using Speckle.Core.Logging;
 using Splat;
+using System;
 using System.Reactive;
 
 namespace DesktopUI2.ViewModels
@@ -31,10 +34,14 @@ namespace DesktopUI2.ViewModels
 
     private void Init()
     {
+      RxApp.DefaultExceptionHandler = Observer.Create<Exception>(CatchReactiveException);
+
       Router = new RoutingState();
 
       Locator.CurrentMutable.Register(() => new StreamEditView(), typeof(IViewFor<StreamViewModel>));
       Locator.CurrentMutable.Register(() => new HomeView(), typeof(IViewFor<HomeViewModel>));
+      Locator.CurrentMutable.Register(() => new CollaboratorsView(), typeof(IViewFor<CollaboratorsViewModel>));
+      Locator.CurrentMutable.Register(() => new SettingsView(), typeof(IViewFor<SettingsPageViewModel>));
       Locator.CurrentMutable.Register(() => Bindings, typeof(ConnectorBindings));
 
       RouterInstance = Router; // makes the router available app-wide
@@ -47,6 +54,12 @@ namespace DesktopUI2.ViewModels
       //var theme = PaletteHelper.GetTheme();
       //theme.SetPrimaryColor(SwatchHelper.Lookup[MaterialColor.Blue600]);
       //PaletteHelper.SetTheme(theme);
+    }
+
+    //https://github.com/AvaloniaUI/Avalonia/issues/5290
+    private void CatchReactiveException(Exception e)
+    {
+      //do nothing
     }
 
     private void Router_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

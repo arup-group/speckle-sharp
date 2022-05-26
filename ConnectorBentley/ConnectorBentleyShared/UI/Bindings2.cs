@@ -107,11 +107,6 @@ namespace Speckle.ConnectorBentley.UI
 
     public override string GetFileName() => Path.GetFileName(File.GetFileName());
 
-    public override List<ISetting> GetSettings()
-    {
-      return new List<ISetting> { };
-    }
-
     public override string GetActiveViewName() => "Entire Document";
 
     public override List<string> GetObjectsInView()
@@ -175,6 +170,16 @@ namespace Speckle.ConnectorBentley.UI
 #endif
 
       return filterList;
+    }
+
+    public override List<ReceiveMode> GetReceiveModes()
+    {
+      return new List<ReceiveMode> { ReceiveMode.Create };
+    }
+
+    public override List<ISetting> GetSettings()
+    {
+      return new List<ISetting>();
     }
 
     //TODO

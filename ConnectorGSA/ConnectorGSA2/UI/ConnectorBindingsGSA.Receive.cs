@@ -31,6 +31,11 @@ namespace ConnectorGSA.UI
 {
   public partial class ConnectorBindingsGSA : ConnectorBindingsStandalone
   {
+    public override List<ReceiveMode> GetReceiveModes()
+    {
+      return new List<ReceiveMode> { ReceiveMode.Create };
+    }
+
     public override async Task<StreamState> ReceiveStream(StreamState state, ProgressViewModel progress)
     {
       var kit = KitManager.GetDefaultKit();

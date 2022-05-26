@@ -54,6 +54,8 @@ namespace ConverterGSA
 
     public List<Base> ContextObjects { get; set; } = new List<Base>();
 
+    public ReceiveMode ReceiveMode { get; set; }
+
     //public List<string> ConvertedObjectsList { get; set; } = new List<string>();
     //The presence of a key (application ID) and non-null speckle object means it's an embedded object yet to be converted to native
     //The presence of a key and null speckle object means there was an embedded object with that application ID that's already converted

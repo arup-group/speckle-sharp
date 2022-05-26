@@ -100,14 +100,13 @@
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>
-
-				<!--  FILTER INFO  -->
-				<Grid
-				  Grid.Row="1"
-				  Grid.ColumnSpan="4"
-				  Margin="0,15">
-					<ContentControl Content="{Binding #FilterCombo.SelectedItem.FilterView}" />
-				</Grid>
+        <!--  FILTER INFO - the magic happens in FilterTemplateSelector.cs -->
+        <Grid
+          Grid.Row="1"
+          Grid.ColumnSpan="4"
+          Margin="0,15">
+          <ContentControl Content="{Binding SelectedFilter}" />
+        </Grid>
 
 				<Grid
 				  Grid.Row="2"
@@ -121,7 +120,8 @@
 									TextTrimming="CharacterEllipsis" />
 							<StackPanel Grid.Column="2" VerticalAlignment="Center">
 								<ListBox
-								  x:Name="ItemsListBox"
+								  x:Name="LayerListBox"
+                  Classes="Chip"
 								  Margin="0,0,0,15"
 								  Items="{Binding GSALayers}"
 								  Selection="{Binding SelectedLayer}"
@@ -136,6 +136,7 @@
 							<StackPanel Grid.Column="2" VerticalAlignment="Center">
 								<ListBox
 								  x:Name="ResultsListBox"
+                  Classes="Chip"
 								  Margin="0,0,0,15"
 								  Items="{Binding ResultsOptions}"
 								  Selection="{Binding SelectedResultOption}"
