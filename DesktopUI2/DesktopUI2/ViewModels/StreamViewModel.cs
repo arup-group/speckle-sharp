@@ -235,6 +235,13 @@ namespace DesktopUI2.ViewModels
         this.RaisePropertyChanged("HasSettings");
       }
     }
+
+    private ResultSettings _resultSettings;
+    public ResultSettings ResultSettings
+    {
+      get => _resultSettings;
+      set => this.RaiseAndSetIfChanged(ref _resultSettings, value);
+    }
     public bool HasSettings => true; //AvailableSettings != null && AvailableSettings.Any();
     public bool HasCommits => Commits != null && Commits.Any();
 

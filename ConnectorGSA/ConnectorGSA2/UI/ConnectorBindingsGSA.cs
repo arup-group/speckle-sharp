@@ -49,6 +49,18 @@ namespace ConnectorGSA.UI
       }
     }
 
+    private bool _sendResults;
+    public override bool SendResults
+    {
+      get => _sendResults;
+      set
+      {
+        _sendResults = value;
+        Instance.GsaModel.StreamSendConfig = _sendResults ? StreamContentConfig.ModelAndResults : StreamContentConfig.ModelOnly;
+      }
+    }
+      
+
     private string _units = "millimetres";
     public override string Units
     {
@@ -72,6 +84,8 @@ namespace ConnectorGSA.UI
         Instance.GsaModel.CoincidentNodeAllowance = value;
       }
     }
+
+    public override ResultSettings ResultSettings { get; set; }
 
     public override string GetHostAppNameVersion() => VersionedHostApplications.GSA;
     public override string GetHostAppName() => HostApplications.GSA.Slug;

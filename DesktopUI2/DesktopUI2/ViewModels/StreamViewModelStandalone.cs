@@ -38,7 +38,10 @@ namespace DesktopUI2.ViewModels
     new public ReactiveCommand<Unit, Unit> GoBack => MainWindowViewModelStandalone.RouterInstance.NavigateBack;
     public List<string> GSALayers { get; set; } = new List<string> { "Design", "Analysis", "Both" };
 
+    public List<string> ResultsOptions { get; set; } = new List<string>() { "Model only", "Model with results" };
+
     public SelectionModel<string> SelectedLayer { get; set; }
+    public SelectionModel<string> SelectedResultOption { get; set; }
 
     //public double CoincidentNodeAllowance { get; set; } = 10;
 
@@ -74,6 +77,11 @@ namespace DesktopUI2.ViewModels
     void SelectedUnitsSelectionChanged(object sender, SelectionModelSelectionChangedEventArgs e)
     {
       Bindings.Units = (string)e.SelectedItems.FirstOrDefault();
+    }
+
+    void SelectedResultSelectionChanged(object sender, SelectionModelSelectionChangedEventArgs<string> e)
+    {
+      Bindings.SendResults = String.Equals(e.SelectedItems.FirstOrDefault(), "Model with results", StringComparison.InvariantCultureIgnoreCase);
     }
 
 
@@ -120,7 +128,14 @@ namespace DesktopUI2.ViewModels
       SelectedLayer.Select(0);
 
       SelectedLayer.SelectionChanged += SelectedLayerSelectionChanged;
+
+      SelectedResultOption = new SelectionModel<string>();
+      SelectedResultOption.SingleSelect = true;
+      SelectedResultOption.Select(0);
+      SelectedResultOption.SelectionChanged += SelectedResultSelectionChanged;
+
     }
+
 
     private void Init()
     {
@@ -414,6 +429,29 @@ namespace DesktopUI2.ViewModels
       catch (Exception e)
       {
       }
+    }
+
+    public async void OpenResultsCommand()
+    {
+      try
+      {
+        var resultsWindow = new ResultsStandalone();
+        resultsWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+
+        var resultsViewModel = new ResultsViewModelStandalone();
+        resultsWindow.DataContext = resultsViewModel;
+        resultsWindow.Title = $"Results for {Stream.name}";
+        var saveResult = await resultsWindow.ShowDialog<bool?>(MainWindowStandalone.Instance);
+
+        if (saveResult != null && (bool)saveResult)
+        {
+          Bindings.ResultSettings = resultsViewModel.ResultSettings;
+        }
+      }
+      catch (Exception e)
+      {
+      }
+
     }
 
 

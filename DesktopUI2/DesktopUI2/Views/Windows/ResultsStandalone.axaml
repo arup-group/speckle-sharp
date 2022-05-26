@@ -1,0 +1,48 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+		x:Name="ResultsWindow"
+        x:Class="DesktopUI2.Views.Windows.ResultsStandalone"
+        Title="Results"
+		  Width="300"
+		  Height="500">
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="auto"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="auto"/>
+		</Grid.RowDefinitions>
+		<StackPanel Grid.Row="0" Orientation="Vertical" Margin="5">
+			<DockPanel LastChildFill="True">
+				<TextBlock DockPanel.Dock="Left" VerticalAlignment="Center" Text="Cases: " Margin="0 5 5 5" />
+				<TextBox Text="{Binding ResultSettings.CasesDescription}"/>
+			</DockPanel>
+			<CheckBox Content="Results in local axis" IsChecked="true" Margin="0 5"/>
+			<DockPanel>
+				<TextBlock DockPanel.Dock="Left" Text="Additional Positions for 1D elements:" VerticalAlignment="Center" Margin="0 5 5 5"/>
+				<TextBox Text="{Binding ResultSettings.Additional1DPositions}"/>
+			</DockPanel>
+		</StackPanel>
+		<ListBox Grid.Row="1" Items="{Binding ResultSettings.ResultSettingItems}">
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+					<CheckBox Content="{Binding Name}" IsChecked="{Binding Selected}"/>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
+		<StackPanel Grid.Row="2"
+      Margin="15"
+      HorizontalAlignment="Right"
+      Orientation="Horizontal">
+			<Button
+        Margin="0,0,10,0"
+        Command="{Binding SaveCommand}"
+        CommandParameter="{Binding ElementName=ResultsWindow}"
+        Content="Save"
+        ToolTip.Tip="Save these settings for sending" />
+		</StackPanel>
+	</Grid>
+	
+</Window>

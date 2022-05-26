@@ -349,6 +349,16 @@ namespace Speckle.ConnectorGSA.Proxy
           }
           i++;
         }
+
+        else if (pieces[i].ToLower() == "all")
+        {
+          int[] tempItems = null;
+
+          GSAObject.EntitiesInList("all", (GsaEntity)type, out tempItems);
+
+          items.AddRange(tempItems);
+        }
+
         else
         {
           try
