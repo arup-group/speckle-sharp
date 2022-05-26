@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,12 +16,14 @@ using Speckle.Core.Models;
 using Speckle.Core.Transports;
 using Speckle.Newtonsoft.Json;
 using Speckle.GSA.API;
+using ConnectorGSA.Models;
+using Speckle.ConnectorGSA.Proxy;
 
 namespace ConnectorGSA.UI
 {
   public partial class ConnectorBindingsGSA : ConnectorBindingsStandalone
   {
-    public GsaModel Model; //{ get => Instance.GsaModel; }
+    public GsaModel Model;
 
     public List<Exception> ConversionErrors { get; set; } = new List<Exception>();
 
@@ -41,7 +44,7 @@ namespace ConnectorGSA.UI
       {
         _layer = value;
         var layer = Enum.TryParse(value, out GSALayer streamLayer);
-        if(layer)
+        if (layer)
           Instance.GsaModel.StreamLayer = streamLayer;
       }
     }
@@ -55,7 +58,7 @@ namespace ConnectorGSA.UI
         _units = value;
         var unit = Enum.TryParse(value, out Models.GsaUnit units);
         if (unit)
-          Instance.GsaModel.Units = Commands.UnitEnumToString(units); 
+          Instance.GsaModel.Units = Commands.UnitEnumToString(units);
       }
     }
 
@@ -72,13 +75,10 @@ namespace ConnectorGSA.UI
 
     public override string GetHostAppNameVersion() => VersionedHostApplications.GSA;
     public override string GetHostAppName() => HostApplications.GSA.Slug;
-    public override string GetDocumentId() => "id"; //GetDocHash(CurrentDoc?.Document);
-
-    private string GetDocHash() => ""; // Speckle.Core.Models.Utilities.hashString(doc.PathName + doc.Title, Speckle.Core.Models.Utilities.HashingFuctions.MD5);
-
-    public override string GetDocumentLocation() => ""; // CurrentDoc.Document.PathName;
-
-    public override string GetFileName() => ""; // CurrentDoc.Document.Title;
+    public override string GetDocumentId() => GetDocHash();
+    private string GetDocHash() => Speckle.Core.Models.Utilities.hashString(((GsaProxy)Model?.Proxy).FilePath, Speckle.Core.Models.Utilities.HashingFuctions.MD5);
+    public override string GetDocumentLocation() => Path.GetDirectoryName(((GsaProxy)Model?.Proxy).FilePath); // CurrentDoc.Document.PathName;
+    public override string GetFileName() => Path.GetFileName(((GsaProxy)Model?.Proxy).FilePath); // CurrentDoc.Document.Title;
     public override string GetActiveViewName()
     {
       return "Entire Document"; // Note: gsa does not have views that filter objects.
