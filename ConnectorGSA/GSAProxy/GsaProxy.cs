@@ -645,7 +645,10 @@ namespace Speckle.ConnectorGSA.Proxy
       {
         lock (syncLock)
         {
-          gwaLines = ((string)GSAObject.GwaCommand(newCommand)).Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+          if (GSAObject != null)
+            gwaLines = ((string)GSAObject.GwaCommand(newCommand)).Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+          else
+            gwaLines = new string[0]; 
         }
       }
       catch
@@ -653,21 +656,25 @@ namespace Speckle.ConnectorGSA.Proxy
         gwaLines = new string[0];
       }
 
-      foreach(var gwa in gwaLines)
+      if (gwaLines.Length > 0)
       {
-
-      var ktd = typeInfo[layer][typeInfoIndicesByKeyword[layer][kw]];
-
-        if (ktd != null)
+        foreach (var gwa in gwaLines)
         {
-          var schemaType = ktd.GetSchemaType(kw);
-          var parser = (IGwaParser)Activator.CreateInstance(ktd.GetParserType(schemaType));
-          if (parser.FromGwa(gwa))
+
+          var ktd = typeInfo[layer][typeInfoIndicesByKeyword[layer][kw]];
+
+          if (ktd != null)
           {
-            retRecords.Add((GsaList)parser.Record);
+            var schemaType = ktd.GetSchemaType(kw);
+            var parser = (IGwaParser)Activator.CreateInstance(ktd.GetParserType(schemaType));
+            if (parser.FromGwa(gwa))
+            {
+              retRecords.Add((GsaList)parser.Record);
+            }
           }
         }
       }
+
 
       records = retRecords;
 

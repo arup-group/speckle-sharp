@@ -51,7 +51,7 @@ namespace Speckle.GSA.API
       }
     }
     public bool SendResults { get => (ResultTypes != null && ResultTypes.Count > 0 && ResultCases != null && ResultCases.Count > 0); }
-    public StreamContentConfig StreamSendConfig { get; set; }
+    public StreamContentConfig StreamSendConfig { get; set; } = StreamContentConfig.ModelOnly;
     public List<string> ResultCases { get; set; }
     public bool ResultInLocalAxis { get; set; }
     public int Result1DNumPosition { get; set; } = 3;

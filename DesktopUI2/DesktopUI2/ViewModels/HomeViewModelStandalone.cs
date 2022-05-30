@@ -28,6 +28,7 @@ namespace DesktopUI2.ViewModels
   {
     //Instance of this HomeViewModel, so that the SavedStreams are kept in memory and not disposed on navigation
     new public static HomeViewModelStandalone Instance { get; private set; }
+    //new public ConnectorBindingsStandalone Bindings { get; set; }
     public override ConnectorBindings Bindings { get; set; }
 
     #region bindings
@@ -46,6 +47,40 @@ namespace DesktopUI2.ViewModels
 
     public string FileStatus { get; set; }
 
+
+    //private StreamViewModelStandalone _selectedSavedStream;
+    //new public StreamViewModelStandalone SelectedSavedStream
+    //{
+    //  set
+    //  {
+    //    if (value != null && !value.NoAccess)
+    //    {
+    //      try
+    //      {
+    //        value.UpdateVisualParentAndInit(HostScreen);
+    //        MainWindowViewModel.RouterInstance.Navigate.Execute(value);
+    //        Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Edit" } });
+    //        _selectedSavedStream = value;
+    //      }
+    //      catch (Exception ex)
+    //      {
+
+    //      }
+    //    }
+    //  }
+    //}
+
+    private ObservableCollection<StreamViewModelStandalone> _savedStreams = new ObservableCollection<StreamViewModelStandalone>();
+    new public ObservableCollection<StreamViewModelStandalone> SavedStreams
+    {
+      get => _savedStreams;
+      set
+      {
+        this.RaiseAndSetIfChanged(ref _savedStreams, value);
+        this.RaisePropertyChanged("HasSavedStreams");
+      }
+    }
+
     #endregion
 
     public HomeViewModelStandalone(IScreen screen) : base(screen)
@@ -54,7 +89,7 @@ namespace DesktopUI2.ViewModels
 
       SavedStreams.CollectionChanged += SavedStreams_CollectionChanged;
 
-      Bindings = Locator.Current.GetService<ConnectorBindingsStandalone>();
+      Bindings = Locator.Current.GetService<ConnectorBindings>();
       this.RaisePropertyChanged("SavedStreams");
       Init();
 
@@ -70,6 +105,35 @@ namespace DesktopUI2.ViewModels
     {
       WriteStreamsToFile();
     }
+
+
+    new internal void AddSavedStream(StreamViewModelStandalone stream)
+    {
+      try
+      {
+        //saved stream has been edited
+        var savedStream = SavedStreams.FirstOrDefault(x => x.StreamState.Id == stream.StreamState.Id);
+        if (savedStream != null)
+        {
+          savedStream = stream;
+          WriteStreamsToFile();
+        }
+        //it's a new saved stream
+        else
+        {
+          //triggers => SavedStreams_CollectionChanged
+          SavedStreams.Add(stream);
+
+        }
+
+        this.RaisePropertyChanged("HasSavedStreams");
+      }
+      catch (Exception ex)
+      {
+
+      }
+    }
+
 
     public override async Task GetStreams()
     {
@@ -98,50 +162,70 @@ namespace DesktopUI2.ViewModels
 
     }
 
-    private async Task SearchStreams()
+    /// <summary>
+    /// This usually gets triggered on file open or view activated
+    /// </summary>
+    /// <param name="streams"></param>
+    new internal void UpdateSavedStreams(List<StreamState> streams)
     {
-      if (SearchQuery == "")
+      try
       {
-        GetStreams().ConfigureAwait(false);
-        return;
+        SavedStreams.CollectionChanged -= SavedStreams_CollectionChanged;
+        SavedStreams = new ObservableCollection<StreamViewModelStandalone>();
+        streams.ForEach(x => SavedStreams.Add(new StreamViewModelStandalone(x, HostScreen, RemoveSavedStreamCommand)));
+        this.RaisePropertyChanged("HasSavedStreams");
+        SavedStreams.CollectionChanged += SavedStreams_CollectionChanged;
       }
-      if (SearchQuery.Length <= 2)
-        return;
-      InProgress = true;
-
-      Streams = new List<StreamAccountWrapper>();
-
-      foreach (var account in Accounts)
+      catch (Exception ex)
       {
-        try
-        {
-          var client = new Client(account.Account);
-          Streams.AddRange((await client.StreamSearch(SearchQuery)).Select(x => new StreamAccountWrapper(x, account.Account)));
-        }
-        catch (Exception e)
-        {
 
-        }
       }
-
-      Streams = Streams.OrderByDescending(x => DateTime.Parse(x.Stream.updatedAt)).ToList();
-
-      InProgress = false;
-
     }
 
-    private void RemoveSavedStream(string id)
-    {
-      var s = SavedStreams.FirstOrDefault(x => x.StreamState.Id == id);
-      if (s != null)
-      {
-        SavedStreams.Remove(s);
-        if (s.StreamState.Client != null)
-          Analytics.TrackEvent(s.StreamState.Client.Account, Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Remove" } });
-      }
+    //private async Task SearchStreams()
+    //{
+    //  if (SearchQuery == "")
+    //  {
+    //    GetStreams().ConfigureAwait(false);
+    //    return;
+    //  }
+    //  if (SearchQuery.Length <= 2)
+    //    return;
+    //  InProgress = true;
 
-      this.RaisePropertyChanged("HasSavedStreams");
-    }
+    //  Streams = new List<StreamAccountWrapper>();
+
+    //  foreach (var account in Accounts)
+    //  {
+    //    try
+    //    {
+    //      var client = new Client(account.Account);
+    //      Streams.AddRange((await client.StreamSearch(SearchQuery)).Select(x => new StreamAccountWrapper(x, account.Account)));
+    //    }
+    //    catch (Exception e)
+    //    {
+
+    //    }
+    //  }
+
+    //  Streams = Streams.OrderByDescending(x => DateTime.Parse(x.Stream.updatedAt)).ToList();
+
+    //  InProgress = false;
+
+    //}
+
+    //private void RemoveSavedStream(string id)
+    //{
+    //  var s = SavedStreams.FirstOrDefault(x => x.StreamState.Id == id);
+    //  if (s != null)
+    //  {
+    //    SavedStreams.Remove(s);
+    //    if (s.StreamState.Client != null)
+    //      Analytics.TrackEvent(s.StreamState.Client.Account, Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Remove" } });
+    //  }
+
+    //  this.RaisePropertyChanged("HasSavedStreams");
+    //}
 
     public override async void NewStreamCommand()
     {
@@ -175,7 +259,7 @@ namespace DesktopUI2.ViewModels
     {
       try
       {
-        var bindings = (ConnectorBindingsStandalone)Bindings;
+        var bindings = (IConnectorBindingsStandalone)Bindings;
         bindings.NewFile();
         HasGSAFile = true;
         FilePath = "New file";
@@ -201,7 +285,7 @@ namespace DesktopUI2.ViewModels
         {
           try
           {
-            var bindings = (ConnectorBindingsStandalone)Bindings;
+            var bindings = (IConnectorBindingsStandalone)Bindings;
             bindings.OpenFile(path);
             HasGSAFile = true;
             FilePath = path;

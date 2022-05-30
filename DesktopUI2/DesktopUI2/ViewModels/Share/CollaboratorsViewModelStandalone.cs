@@ -15,25 +15,24 @@ namespace DesktopUI2.ViewModels.Share
 {
   public class CollaboratorsViewModelStandalone : CollaboratorsViewModel, IRoutableViewModel
   {
-    //public IScreen HostScreen { get; }
-    //public string UrlPathSegment { get; } = "collaborators";
+    new public IScreen HostScreen { get; }
 
-    private ConnectorBindings Bindings;
+    private IConnectorBindingsStandalone Bindings;
 
     #region bindings
 
-    public ReactiveCommand<Unit, Unit> GoBack => MainWindowViewModelStandalone.RouterInstance.NavigateBack;
+    new public ReactiveCommand<Unit, Unit> GoBack => MainWindowViewModelStandalone.RouterInstance.NavigateBack;
 
     #endregion
 
-    private StreamViewModel _stream;
+    private StreamViewModelStandalone _stream;
 
-    public CollaboratorsViewModelStandalone(IScreen screen, StreamViewModel stream) : base(screen, stream)
+    public CollaboratorsViewModelStandalone(IScreen screen, StreamViewModelStandalone stream) : base()
     {
-      //HostScreen = screen;
+      HostScreen = screen;
       _stream = stream;
       Role = stream.Stream.role;
-      Bindings = Locator.Current.GetService<ConnectorBindingsStandalone>();
+      Bindings = Locator.Current.GetService<IConnectorBindingsStandalone>();
 
       userSearchDebouncer = Utils.Debounce(SearchUsers);
 

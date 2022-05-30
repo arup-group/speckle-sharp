@@ -128,6 +128,15 @@
     <AvaloniaXaml Include="Views\Filters\PropertyFilterView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </AvaloniaXaml>
+    <AvaloniaXaml Include="Views\Filters\AllFilterViewStandalone.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaXaml>
+    <AvaloniaXaml Include="Views\Filters\ListFilterViewStandalone.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaXaml>
+    <AvaloniaXaml Include="Views\Filters\PropertyFilterViewStandalone.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaXaml>
     <AvaloniaXaml Include="Views\Pages\ShareControls\AddCollaborators.xaml">
       <Generator>MSBuild:Compile</Generator>
     </AvaloniaXaml>
@@ -231,6 +240,15 @@
     <Compile Update="Views\Filters\PropertyFilterView.xaml.cs">
       <DependentUpon>PropertyFilterView.xaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\Filters\AllFilterViewStandalone.xaml.cs">
+      <DependentUpon>AllFilterViewStandalone.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Filters\ListFilterViewStandalone.xaml.cs">
+      <DependentUpon>ListFilterViewStandalone.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Filters\PropertyFilterViewStandalone.xaml.cs">
+      <DependentUpon>PropertyFilterViewStandalone.xaml</DependentUpon>
+    </Compile>    
     <Compile Update="Views\Pages\ShareControls\AddCollaborators.xaml.cs">
       <DependentUpon>AddCollaborators.xaml</DependentUpon>
     </Compile>

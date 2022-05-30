@@ -14,19 +14,19 @@ namespace DesktopUI2.ViewModels
     new public string TitleFull => "Speckle for " + Bindings.GetHostAppNameVersion();
     new public RoutingState Router { get; private set; }
 
-    new public ConnectorBindingsStandalone Bindings { get; private set; } = new DummyBindingsStandalone();
+    new public ConnectorBindings Bindings { get; private set; } = new DummyBindingsStandalone();
 
     new public static RoutingState RouterInstance { get; private set; }
 
-    //new public ReactiveCommand<Unit, Unit> GoBack => Router.NavigateBack;
+    new public ReactiveCommand<Unit, Unit> GoBack => Router.NavigateBack;
 
-
-    public MainWindowViewModelStandalone(ConnectorBindingsStandalone _bindings) : base()
+    public MainWindowViewModelStandalone(ConnectorBindings _bindings) : base()
     {
       Bindings = _bindings;
       Setup.Init(Bindings.GetHostAppNameVersion(), Bindings.GetHostAppName());
       Init();
     }
+
     public MainWindowViewModelStandalone()
     {
       Init();
@@ -40,7 +40,7 @@ namespace DesktopUI2.ViewModels
       Locator.CurrentMutable.Register(() => new HomeViewStandalone(), typeof(IViewFor<HomeViewModelStandalone>));
       Locator.CurrentMutable.Register(() => new CollaboratorsView(), typeof(IViewFor<CollaboratorsViewModelStandalone>));
       Locator.CurrentMutable.Register(() => new SettingsView(), typeof(IViewFor<SettingsPageViewModelStandalone>));
-      Locator.CurrentMutable.Register(() => Bindings, typeof(ConnectorBindingsStandalone));
+      Locator.CurrentMutable.Register(() => Bindings, typeof(ConnectorBindings));
 
       RouterInstance = Router; // makes the router available app-wide
       Router.Navigate.Execute(new HomeViewModelStandalone(this));

@@ -31,6 +31,7 @@ namespace DesktopUI2.ViewModels
     public static HomeViewModel Instance { get; private set; }
     public IScreen HostScreen { get; }
     public string UrlPathSegment { get; } = "home";
+    //public ConnectorBindings Bindings;
 
     private ConnectorBindings _Bindings;
     public virtual ConnectorBindings Bindings
@@ -100,7 +101,6 @@ namespace DesktopUI2.ViewModels
     {
       get
       {
-
         if (SelectedFilter == ViewModels.HomeViewModel.Filter.all)
           return false;
         else
@@ -341,6 +341,7 @@ namespace DesktopUI2.ViewModels
 
       } 
     }
+
     public virtual async Task GetStreams()
     {
       try

@@ -8,13 +8,13 @@ using System.Linq;
 
 namespace DesktopUI2.ViewModels
 {
-  public class FilterViewModel : ReactiveObject
+  public class FilterViewModelStandalone : FilterViewModel
   {
-    private ConnectorBindings Bindings;
+    new private ConnectorBindings Bindings;
 
     private ISelectionFilter _filter;
 
-    public ISelectionFilter Filter
+    new public ISelectionFilter Filter
     {
       get => _filter;
       set
@@ -25,12 +25,11 @@ namespace DesktopUI2.ViewModels
       }
     }
 
-    public SelectionModel<string> SelectionModel { get; }
+    new public SelectionModel<string> SelectionModel { get; }
 
-    public string Summary { get { return Filter.Summary; } }
+    new public string Summary { get { return Filter.Summary; } }
 
-    public FilterViewModel() { }
-    public FilterViewModel(ISelectionFilter filter)
+    public FilterViewModelStandalone(ISelectionFilter filter) : base()
     {
       try
       {
@@ -45,7 +44,7 @@ namespace DesktopUI2.ViewModels
 
         //TODO should clean up this logic a bit
         //maybe have a model, view and viewmodel for each filter
-        if (filter is ListSelectionFilter l)
+        if (filter is ListSelectionFilterStandalone l)
         {
           _valuesList = SearchResults = new List<string>(l.Values);
         }
@@ -80,33 +79,33 @@ namespace DesktopUI2.ViewModels
 
       }
     }
-    public bool isSearching = false;
-    private string _searchQuery;
-    public string SearchQuery
-    {
-      get => _searchQuery;
-      set
-      {
-        isSearching = true;
-        this.RaiseAndSetIfChanged(ref _searchQuery, value);
+    //private bool isSearching = false;
+    //private string _searchQuery;
+    //public string SearchQuery
+    //{
+    //  get => _searchQuery;
+    //  set
+    //  {
+    //    isSearching = true;
+    //    this.RaiseAndSetIfChanged(ref _searchQuery, value);
 
-        SearchResults = new List<string>(_valuesList.Where(v => v.ToLower().Contains(SearchQuery.ToLower())).ToList());
-        this.RaisePropertyChanged(nameof(SearchResults));
-        isSearching = false;
-        RestoreSelectedItems();
+    //    SearchResults = new List<string>(_valuesList.Where(v => v.ToLower().Contains(SearchQuery.ToLower())).ToList());
+    //    this.RaisePropertyChanged(nameof(SearchResults));
+    //    isSearching = false;
+    //    RestoreSelectedItems();
 
-      }
-    }
+    //  }
+    //}
 
     // searching will change data source and remove selected items in the ListBox, 
     // restore them as the query is cleared
-    public void RestoreSelectedItems()
+    new public void RestoreSelectedItems()
     {
       try
       {
         var itemsToRemove = new List<string>();
 
-        if (Filter.Type == typeof(ListSelectionFilter).ToString())
+        if (Filter.Type == typeof(ListSelectionFilterStandalone).ToString())
         {
           foreach (var item in Filter.Selection)
           {
@@ -130,13 +129,13 @@ namespace DesktopUI2.ViewModels
       }
     }
 
-    public List<string> SearchResults { get; set; } = new List<string>();
+    //public List<string> SearchResults { get; set; } = new List<string>();
     private List<string> _valuesList { get; } = new List<string>();
 
     #endregion
 
     #region MANUAL FILTER
-    public void SetObjectSelection()
+    new public void SetObjectSelection()
     {
       try
       {
@@ -157,7 +156,7 @@ namespace DesktopUI2.ViewModels
       }
     }
 
-    public void AddObjectSelection()
+    new public void AddObjectSelection()
     {
       try
       {
@@ -184,7 +183,7 @@ namespace DesktopUI2.ViewModels
       }
     }
 
-    public void RemoveObjectSelection()
+    new public void RemoveObjectSelection()
     {
       try
       {
@@ -213,7 +212,7 @@ namespace DesktopUI2.ViewModels
       }
     }
 
-    public void ClearObjectSelection()
+    new public void ClearObjectSelection()
     {
       Filter.Selection = new List<string>();
       this.RaisePropertyChanged("Summary");
@@ -225,30 +224,30 @@ namespace DesktopUI2.ViewModels
 
     //not the cleanest way, but it works
     //should create proper view models for each!
-    public string PropertyName
+    new public string PropertyName
     {
-      get => (Filter as PropertySelectionFilter).PropertyName;
+      get => (Filter as PropertySelectionFilterStandalone).PropertyName;
       set
       {
-        (Filter as PropertySelectionFilter).PropertyName = value;
+        (Filter as PropertySelectionFilterStandalone).PropertyName = value;
         this.RaisePropertyChanged("Summary");
       }
     }
-    public string PropertyValue
+    new public string PropertyValue
     {
-      get => (Filter as PropertySelectionFilter).PropertyValue;
+      get => (Filter as PropertySelectionFilterStandalone).PropertyValue;
       set
       {
-        (Filter as PropertySelectionFilter).PropertyValue = value;
+        (Filter as PropertySelectionFilterStandalone).PropertyValue = value;
         this.RaisePropertyChanged("Summary");
       }
     }
-    public string PropertyOperator
+    new public string PropertyOperator
     {
-      get => (Filter as PropertySelectionFilter).PropertyOperator;
+      get => (Filter as PropertySelectionFilterStandalone).PropertyOperator;
       set
       {
-        (Filter as PropertySelectionFilter).PropertyOperator = value;
+        (Filter as PropertySelectionFilterStandalone).PropertyOperator = value;
         this.RaisePropertyChanged("Summary");
       }
     }
@@ -256,15 +255,15 @@ namespace DesktopUI2.ViewModels
 
     #endregion
 
-    public bool IsReady()
+    new public bool IsReady()
     {
       if (Filter is ManualSelectionFilter && !Filter.Selection.Any())
         return false;
 
-      if (Filter is ListSelectionFilter && !Filter.Selection.Any())
+      if (Filter is ListSelectionFilterStandalone && !Filter.Selection.Any())
         return false;
 
-      if (Filter is PropertySelectionFilter p)
+      if (Filter is PropertySelectionFilterStandalone p)
       {
         if (string.IsNullOrEmpty(p.PropertyName) || string.IsNullOrEmpty(p.PropertyOperator) || string.IsNullOrEmpty(p.PropertyValue))
           return false;

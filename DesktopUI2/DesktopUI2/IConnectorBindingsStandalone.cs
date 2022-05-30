@@ -8,10 +8,8 @@ using System.Threading.Tasks;
 
 namespace DesktopUI2
 {
-  public abstract class ConnectorBindingsStandalone : ConnectorBindings
+  public interface IConnectorBindingsStandalone 
   {
-    public ConnectorBindingsStandalone() { }
-
     public abstract string Layer { get; set; } // should be made a settings item
     public abstract string Units { get; set; } // should be made a settings item
     public abstract double CoincidentNodeAllowance { get; set; } // should be made a settings item

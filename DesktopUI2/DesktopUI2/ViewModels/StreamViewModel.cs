@@ -560,7 +560,7 @@ namespace DesktopUI2.ViewModels
     /// <summary>
     /// Update the model Stream state whenever we send, receive or save a stream
     /// </summary>
-    public void UpdateStreamState()
+    public virtual void UpdateStreamState()
     {
       try
       {

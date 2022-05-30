@@ -29,7 +29,7 @@ using System.Collections.Concurrent;
 
 namespace ConnectorGSA.UI
 {
-  public partial class ConnectorBindingsGSA : ConnectorBindingsStandalone
+  public partial class ConnectorBindingsGSA : ConnectorBindings, IConnectorBindingsStandalone
   {
     public override List<ReceiveMode> GetReceiveModes()
     {

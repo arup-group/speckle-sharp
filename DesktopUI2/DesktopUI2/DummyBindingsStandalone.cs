@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace DesktopUI2
 {
-  public class DummyBindingsStandalone : ConnectorBindingsStandalone
+  public class DummyBindingsStandalone : ConnectorBindings, IConnectorBindingsStandalone
   {
     Random rnd = new Random();
 
@@ -88,11 +88,11 @@ namespace DesktopUI2
     {
       return new List<ISelectionFilter>
       {
-        new AllSelectionFilter {Slug="all",  Name = "Everything", Icon = "CubeScan", Description = "Selects all document objects and project information." },
+        new AllSelectionFilterStandalone {Slug="all",  Name = "Everything", Icon = "CubeScan", Description = "Selects all document objects and project information." },
         new ManualSelectionFilter(),
-        new ListSelectionFilter {Slug="view",Name = "View", Icon = "RemoveRedEye", Description = "Hello world. This is a something something filter.", Values = new List<string>() { "Isometric XX", "FloorPlan_xx", "Section 021" } },
-        new ListSelectionFilter {Slug="cat",Name = "Category", Icon = "Category",Description = "Hello world. This is a something something filter.Hello world. This is a something something filter.", Values = new List<string>()  { "Boats", "Rafts", "Barges" }},
-        new PropertySelectionFilter
+        new ListSelectionFilterStandalone {Slug="view",Name = "View", Icon = "RemoveRedEye", Description = "Hello world. This is a something something filter.", Values = new List<string>() { "Isometric XX", "FloorPlan_xx", "Section 021" } },
+        new ListSelectionFilterStandalone {Slug="cat",Name = "Category", Icon = "Category",Description = "Hello world. This is a something something filter.Hello world. This is a something something filter.", Values = new List<string>()  { "Boats", "Rafts", "Barges" }},
+        new PropertySelectionFilterStandalone
         {
           Slug="param",
           Name = "Parameter",
@@ -353,22 +353,22 @@ namespace DesktopUI2
       return new List<ReceiveMode> { ReceiveMode.Update, ReceiveMode.Ignore };
     }
 
-    public override void NewFile()
+    public void NewFile()
     {
       throw new NotImplementedException();
     }
 
-    public override void OpenFile(string filePath)
+    public void OpenFile(string filePath)
     {
       throw new NotImplementedException();
     }
 
-    public override string Layer { get; set; }
+    public string Layer { get; set; }
 
-    public override string Units { get; set; }
+    public string Units { get; set; }
 
-    public override double CoincidentNodeAllowance { get; set; }
-    public override ResultSettings ResultSettings { get; set; }
-    public override bool SendResults { get; set; }
+    public double CoincidentNodeAllowance { get; set; } = 10;
+    public ResultSettings ResultSettings { get; set; }
+    public bool SendResults { get; set; }
   }
 }

@@ -30,7 +30,7 @@ using System.Collections.Concurrent;
 
 namespace ConnectorGSA.UI
 {
-  public partial class ConnectorBindingsGSA : ConnectorBindingsStandalone
+  public partial class ConnectorBindingsGSA : ConnectorBindings, IConnectorBindingsStandalone
   {
     public override async Task<string> SendStream(StreamState state, ProgressViewModel progress)
     {
@@ -45,6 +45,17 @@ namespace ConnectorGSA.UI
       var settings = new Dictionary<string, string>();
       foreach (var setting in state.Settings)
       {
+        if (setting.Slug == "layer")
+        {
+          if (setting.Selection != null)
+          {
+            var layer = Enum.TryParse(setting.Selection, out GSALayer streamLayer);
+            if (layer)
+              Instance.GsaModel.StreamLayer = streamLayer;
+          }
+        } else if (setting.Slug == "send-content") {
+          Instance.GsaModel.StreamSendConfig = setting.Selection == "Model with results" ? StreamContentConfig.ModelAndResults : StreamContentConfig.ModelOnly;
+        }
         settings.Add(setting.Slug, setting.Selection);
       }
       converter.SetConverterSettings(settings);

@@ -21,7 +21,7 @@ using Speckle.ConnectorGSA.Proxy;
 
 namespace ConnectorGSA.UI
 {
-  public partial class ConnectorBindingsGSA : ConnectorBindingsStandalone
+  public partial class ConnectorBindingsGSA : ConnectorBindings, IConnectorBindingsStandalone
   {
     public GsaModel Model;
 
@@ -37,7 +37,7 @@ namespace ConnectorGSA.UI
     }
 
     private string _layer = "Design";
-    public override string Layer
+    public string Layer
     {
       get => _layer;
       set
@@ -50,7 +50,7 @@ namespace ConnectorGSA.UI
     }
 
     private bool _sendResults;
-    public override bool SendResults
+    public bool SendResults
     {
       get => _sendResults;
       set
@@ -62,7 +62,7 @@ namespace ConnectorGSA.UI
       
 
     private string _units = "millimetres";
-    public override string Units
+    public string Units
     {
       get => _units;
       set
@@ -75,7 +75,7 @@ namespace ConnectorGSA.UI
     }
 
     private double _coincidentNodeAllowance = 10;
-    public override double CoincidentNodeAllowance
+    public double CoincidentNodeAllowance
     {
       get => _coincidentNodeAllowance;
       set
@@ -85,7 +85,7 @@ namespace ConnectorGSA.UI
       }
     }
 
-    public override ResultSettings ResultSettings { get; set; }
+    public ResultSettings ResultSettings { get; set; }
 
     public override string GetHostAppNameVersion() => VersionedHostApplications.GSA;
     public override string GetHostAppName() => HostApplications.GSA.Slug;
@@ -119,12 +119,12 @@ namespace ConnectorGSA.UI
       return new List<MenuItem>();
     }
 
-    public override void NewFile()
+    public void NewFile()
     {
       Commands.NewFile();
     }
 
-    public override void OpenFile(string filePath)
+    public void OpenFile(string filePath)
     {
       Commands.OpenFile(filePath, true);
     }

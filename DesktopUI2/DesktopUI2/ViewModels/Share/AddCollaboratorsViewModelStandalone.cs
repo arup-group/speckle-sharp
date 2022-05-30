@@ -4,16 +4,16 @@ using DesktopUI2.Views.Pages.ShareControls;
 using ReactiveUI;
 using Speckle.Core.Api;
 using Speckle.Core.Credentials;
+using Speckle.Core.Logging;
 using Splat;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reactive;
 
 namespace DesktopUI2.ViewModels.Share
 {
-  public class CollaboratorsViewModel : ReactiveObject, IRoutableViewModel
+  public class AddCollaboratorsViewModelStandalone : ReactiveObject, IRoutableViewModel
   {
     public IScreen HostScreen { get; }
     public string UrlPathSegment { get; } = "collaborators";
@@ -22,11 +22,9 @@ namespace DesktopUI2.ViewModels.Share
 
     #region bindings
 
-    public ReactiveCommand<Unit, Unit> GoBack => MainWindowViewModel.RouterInstance.NavigateBack;
+    private string _searchQuery = "";
 
-    public string _searchQuery = "";
-
-    public Action userSearchDebouncer = null;
+    private Action userSearchDebouncer = null;
 
     public string SearchQuery
     {
@@ -41,7 +39,7 @@ namespace DesktopUI2.ViewModels.Share
     public List<AccountViewModel> Users
     {
       get => _users;
-      set
+      private set
       {
         this.RaiseAndSetIfChanged(ref _users, value);
       }
@@ -51,7 +49,7 @@ namespace DesktopUI2.ViewModels.Share
     public ObservableCollection<AccountViewModel> AddedUsers
     {
       get => _selectedUsers;
-      set
+      private set
       {
         this.RaiseAndSetIfChanged(ref _selectedUsers, value);
       }
@@ -77,7 +75,7 @@ namespace DesktopUI2.ViewModels.Share
     public bool DropDownOpen
     {
       get => _dropDownOpen;
-      set
+      private set
       {
         this.RaiseAndSetIfChanged(ref _dropDownOpen, value);
       }
@@ -87,19 +85,9 @@ namespace DesktopUI2.ViewModels.Share
     public bool ShowProgress
     {
       get => _showProgress;
-      set
+      private set
       {
         this.RaiseAndSetIfChanged(ref _showProgress, value);
-      }
-    }
-
-    private string _role;
-    public string Role
-    {
-      get => _role;
-      set
-      {
-        this.RaiseAndSetIfChanged(ref _role, value);
       }
     }
 
@@ -113,33 +101,23 @@ namespace DesktopUI2.ViewModels.Share
       get => SelectionModel.SelectedItems.Any();
     }
 
-    public SelectionModel<AccountViewModel> SelectionModel { get; set; }
+    public SelectionModel<AccountViewModel> SelectionModel { get; private set; }
     #endregion
 
-    private StreamViewModel _stream;
-
-    public CollaboratorsViewModel() { }
-
-    public CollaboratorsViewModel(IScreen screen, StreamViewModel stream)
+    public AddCollaboratorsViewModelStandalone(IScreen screen)
     {
       HostScreen = screen;
-      _stream = stream;
-      Role = stream.Stream.role;
       Bindings = Locator.Current.GetService<ConnectorBindings>();
 
       userSearchDebouncer = Utils.Debounce(SearchUsers);
+      Setup.Init(Bindings.GetHostAppNameVersion(), Bindings.GetHostAppName());
 
       SelectionModel = new SelectionModel<AccountViewModel>();
       SelectionModel.SingleSelect = false;
       SelectionModel.SelectionChanged += SelectionModel_SelectionChanged;
-
-      foreach (var collab in stream.Stream.collaborators)
-      {
-        AddedUsers.Add(new AccountViewModel(collab));
-      }
     }
 
-    public void Search()
+    private void Search()
     {
 
       Focus();
@@ -168,19 +146,19 @@ namespace DesktopUI2.ViewModels.Share
     }
 
     //focus is lost when the dropdown gets closed
-    public void Focus()
+    private void Focus()
     {
       DropDownOpen = false;
-      var searchBox = CollaboratorsView.Instance.FindControl<TextBox>("SearchBox");
+      var searchBox = AddCollaborators.Instance.FindControl<TextBox>("SearchBox");
       searchBox.Focus();
     }
 
-    public void SelectionModel_SelectionChanged(object sender, SelectionModelSelectionChangedEventArgs<AccountViewModel> e)
+    private void SelectionModel_SelectionChanged(object sender, SelectionModelSelectionChangedEventArgs<AccountViewModel> e)
     {
       this.RaisePropertyChanged("HasSelectedUsers");
     }
 
-    public async void SearchUsers()
+    private async void SearchUsers()
     {
       ShowProgress = true;
       var acc = AccountManager.GetDefaultAccount();
@@ -193,73 +171,18 @@ namespace DesktopUI2.ViewModels.Share
 
     }
 
-    public virtual async void SaveCommand()
+    private async void ShareCommand()
     {
-
-      foreach (var user in AddedUsers)
-      {
-        //invite users by email
-        if (Utils.IsValidEmail(user.Name))
-        {
-          try
-          {
-            await _stream.StreamState.Client.StreamInviteCreate(new StreamInviteCreateInput { email = user.Name, streamId = _stream.StreamState.StreamId, message = "I would like to share a model with you via Speckle!" });
-          }
-          catch (Exception e)
-          {
-
-          }
-        }
-        //add new collaborators
-        else if (!_stream.Stream.collaborators.Any(x => x.id == user.Id))
-        {
-          try
-          {
-            await _stream.StreamState.Client.StreamGrantPermission(new StreamGrantPermissionInput { userId = user.Id, streamId = _stream.StreamState.StreamId, role = "stream:contributor" });
-          }
-          catch (Exception e)
-          {
-
-          }
-        }
-      }
-
-      //remove collaborators
-      foreach (var user in _stream.Stream.collaborators)
-      {
-        if (!AddedUsers.Any(x => x.Id == user.id))
-        {
-          try
-          {
-            await _stream.StreamState.Client.StreamRevokePermission(new StreamRevokePermissionInput { userId = user.id, streamId = _stream.StreamState.StreamId });
-          }
-          catch (Exception e)
-          {
-
-          }
-        }
-      }
-
-      try
-      {
-        _stream.Stream = await _stream.StreamState.Client.StreamGet(_stream.StreamState.StreamId);
-        _stream.StreamState.CachedStream = _stream.Stream;
-
-      }
-      catch (Exception e)
-      {
-      }
-
-      MainWindowViewModel.RouterInstance.NavigateBack.Execute();
+      ShareViewModel.RouterInstance.Navigate.Execute(new SendingViewModel(HostScreen, AddedUsers.ToList()));
     }
 
 
-    public void ClearSearchCommand()
+    private void ClearSearchCommand()
     {
       SearchQuery = "";
     }
 
-    public void RemoveSeletedUsersCommand()
+    private void RemoveSeletedUsersCommand()
     {
       foreach (var item in SelectionModel.SelectedItems.ToList())
       {

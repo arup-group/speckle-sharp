@@ -4,7 +4,7 @@ using DesktopUI2.ViewModels;
 
 namespace DesktopUI2.Views.Pages
 {
-  public partial class StreamEditViewStandalone : ReactiveUserControl<StreamViewModelStandalone>
+  public partial class StreamEditViewStandalone : ReactiveUserControl<StreamViewModel>
   {
     public StreamEditViewStandalone()
     {
