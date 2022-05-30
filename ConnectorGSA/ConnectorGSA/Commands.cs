@@ -276,18 +276,18 @@ namespace ConnectorGSA
         {
           foreach (var kvp in dict)
           {
-            if (kvp.Key == "RemoteTransport") statusProgress.Report($"{kvp.Key}: {(double)kvp.Value}");
+            //if (kvp.Key == "RemoteTransport") statusProgress.Report($"{kvp.Key}: {(double)kvp.Value}");
           }
         },
         onErrorAction: (s, e) =>
         {
           state.Errors.Add(e);
-          loggingProgress.Report(new MessageEventArgs(MessageIntent.TechnicalLog, MessageLevel.Error, e));
+          //loggingProgress.Report(new MessageEventArgs(MessageIntent.TechnicalLog, MessageLevel.Error, e));
           Func<string> temp = () => { return null; };
         }
         );
 
-      statusProgress.Report($"{commitObj.GetTotalChildrenCount()} objects sent to server");
+      //statusProgress.Report($"{commitObj.GetTotalChildrenCount()} objects sent to server");
 
       var commitId = "";
       if (transports.Any(t => t is ServerTransport))

@@ -164,8 +164,23 @@ namespace ConnectorGSA
           account = AccountManager.GetAccounts().FirstOrDefault(a => a.userInfo.id == userInfo.id);
           if(account == null)
           {
-            Console.WriteLine("Could not get account info - please check provided server url and/or token");
-            return false;
+            Console.WriteLine("Could not find account in account manager - creating account instance using token");
+
+            var serverInfoTask = Task.Run(() => AccountManager.GetServerInfo(RestApi));
+            serverInfoTask.Wait();
+            ServerInfo serverInfo = serverInfoTask.Result;
+
+            var _account = new Account()
+            {
+                token = ApiToken,
+                refreshToken = "",
+                isDefault = true,
+                serverInfo = serverInfo,
+                userInfo = userInfo
+            };
+
+            _account.serverInfo.url = RestApi;
+            account = _account;
           }
         }          
         else
@@ -339,13 +354,20 @@ namespace ConnectorGSA
 
           var stream = NewStream(client, "GSA data", "GSA data").Result;
           var streamState = new StreamStateOld(userInfo.id, RestApi) { Stream = stream, IsSending = true };
+
+          // check streamState has Client, useful for situation without account manager
+          if (streamState.Client is null)
+          {
+            streamState.Client = new Client(account);
+          }
+            
           streamStates.Add(streamState);
 
           var serverTransport = new ServerTransport(account, streamState.Stream.id);
 
           Console.WriteLine($"Sending to Speckle server...");
           var sent = Commands.SendCommit(commitObj, streamState, "", null, null, null, serverTransport).Result;
-          if (String.IsNullOrEmpty(sent))
+          if (!String.IsNullOrEmpty(sent))
           {
             Console.WriteLine("Sending complete!");
             Console.WriteLine($"New stream created: {streamState.Stream.id}");
