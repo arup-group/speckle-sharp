@@ -3318,36 +3318,38 @@ namespace ConverterGSA
 
       for (var i = 0; i < loadCases.Count(); i++)
       {
-        if (i > 0 && loadFactors[i] > 0) desc += "+";
-        if (loadFactors[i] == 1)
+        if (loadCases[i] != null)
         {
-          //Do nothing
+          if (i > 0 && loadFactors[i] > 0) desc += "+";
+          if (loadFactors[i] == 1)
+          {
+            //Do nothing
+          }
+          else if (loadFactors[i] == -1)
+          {
+            desc += "-";
+          }
+          else
+          {
+            desc += loadFactors[i].ToString();
+          }
+          if (loadCases[i].GetType() == typeof(GSACombinationCase))
+          {
+            desc += "C" + IndexByConversionOrLookup<GsaCombination>(loadCases[i], ref gsaRecords);
+          }
+          else if (loadCases[i].GetType() == typeof(GSAAnalysisCase))
+          {
+            desc += "A" + IndexByConversionOrLookup<GsaAnal>(loadCases[i], ref gsaRecords);
+          }
+          else if (loadCases[i].GetType() == typeof(GSAAnalysisTask))
+          {
+            desc += "T" + IndexByConversionOrLookup<GsaTask>(loadCases[i], ref gsaRecords);
+          }
+          else
+          {
+            return null;
+          }
         }
-        else if (loadFactors[i] == -1)
-        {
-          desc += "-";
-        }
-        else
-        {
-          desc += loadFactors[i].ToString();
-        }
-        if (loadCases[i].GetType() == typeof(GSACombinationCase))
-        {
-          desc += "C" + IndexByConversionOrLookup<GsaCombination>(loadCases[i], ref gsaRecords);
-        }
-        else if (loadCases[i].GetType() == typeof(GSAAnalysisCase))
-        {
-          desc += "A" + IndexByConversionOrLookup<GsaAnal>(loadCases[i], ref gsaRecords);
-        }
-        else if (loadCases[i].GetType() == typeof(GSAAnalysisTask))
-        {
-          desc += "T" + IndexByConversionOrLookup<GsaTask>(loadCases[i], ref gsaRecords);
-        }
-        else
-        {
-          return null;
-        }
-
       }
       return desc;
     }

@@ -356,7 +356,8 @@ namespace Speckle.ConnectorGSA.Proxy
 
           GSAObject.EntitiesInList("all", (GsaEntity)type, out tempItems);
 
-          items.AddRange(tempItems);
+          if (tempItems != null)
+            items.AddRange(tempItems);
         }
 
         else
@@ -648,7 +649,7 @@ namespace Speckle.ConnectorGSA.Proxy
           if (GSAObject != null)
             gwaLines = ((string)GSAObject.GwaCommand(newCommand)).Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
           else
-            gwaLines = new string[0]; 
+            gwaLines = new string[0];
         }
       }
       catch
@@ -679,8 +680,8 @@ namespace Speckle.ConnectorGSA.Proxy
       records = retRecords;
 
       return true;
-    } 
-    
+    }
+
     //Tuple: keyword | index | Application ID | GWA command | Set or Set At
     public bool GetGwaData(GSALayer layer, IProgress<string> loggingProgress, out List<GsaRecord> records, IProgress<int> incrementProgress = null)
     {
@@ -1159,14 +1160,14 @@ namespace Speckle.ConnectorGSA.Proxy
                 var originalSid = "";
                 var kwStr = keyword.Value.GetStringValue();
 
-                //For some GET_ALL calls, records with other keywords are returned, too.  Example: GET_ALL TASK returns TASK, TASK_TAG and ANAL records
-                if (keyword.Value == setKeywords[i])
+                  //For some GET_ALL calls, records with other keywords are returned, too.  Example: GET_ALL TASK returns TASK, TASK_TAG and ANAL records
+                  if (keyword.Value == setKeywords[i])
                 {
                   if (string.IsNullOrEmpty(streamId))
                   {
-                    //Slight hardcoding for optimisation here: the biggest source of GetSidTagValue calls would be from nodes, and knowing
-                    //(at least in GSA v10 build 63) that GET_ALL NODE does return SID tags, the call is avoided for NODE keyword
-                    if (!isNode && !isElement)
+                      //Slight hardcoding for optimisation here: the biggest source of GetSidTagValue calls would be from nodes, and knowing
+                      //(at least in GSA v10 build 63) that GET_ALL NODE does return SID tags, the call is avoided for NODE keyword
+                      if (!isNode && !isElement)
                     {
                       try
                       {
@@ -1182,8 +1183,8 @@ namespace Speckle.ConnectorGSA.Proxy
 
                   if (string.IsNullOrEmpty(appId))
                   {
-                    //Again, the same optimisation as explained above
-                    if (!isNode && !isElement)
+                      //Again, the same optimisation as explained above
+                      if (!isNode && !isElement)
                     {
                       try
                       {
@@ -1378,6 +1379,8 @@ namespace Speckle.ConnectorGSA.Proxy
 
       records = retRecords;
       return true;
+
+
     }
 
     private string FormulateParsingErrorContext(GsaRecord gsaRecord, string typeName)

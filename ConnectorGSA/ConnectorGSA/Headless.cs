@@ -39,7 +39,7 @@ namespace ConnectorGSA
     public bool RunCLI(params string[] args)
     {
       CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
-      CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;      
+      CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 
       var argPairs = new Dictionary<string, string>();
 
@@ -58,7 +58,7 @@ namespace ConnectorGSA
 
       cliMode = args[0];
       if (cliMode == "-h")
-      {        
+      {
         Console.WriteLine("Usage: ConnectorGSA.exe <command>\n\n" +
           "where <command> is one of: receiver, sender\n\n");
         Console.Write("ConnectorGSA.exe <command> -h\thelp on <command>\n");
@@ -135,7 +135,7 @@ namespace ConnectorGSA
         }
       }
       #endregion
-      
+
       // Login
       if (argPairs.ContainsKey("server"))
       {
@@ -162,17 +162,25 @@ namespace ConnectorGSA
         if (userInfo != null)
         {
           account = AccountManager.GetAccounts().FirstOrDefault(a => a.userInfo.id == userInfo.id);
-          if(account == null)
+          if (account == null)
           {
-            Console.WriteLine("Could not get account info - please check provided server url and/or token");
-            return false;
+            var serverInfoTask = Task.Run(() => AccountManager.GetServerInfo(RestApi));
+            serverInfoTask.Wait();
+            var serverInfo = serverInfoTask.Result;
+
+            account = new Account()
+            {
+              token = ApiToken,
+              serverInfo = serverInfo,
+              userInfo = userInfo
+            };
           }
-        }          
+        }
         else
         {
           Console.WriteLine("Could not get account info - please check provided server url and/or token");
           return false;
-        }          
+        }
       }
       Console.WriteLine($"Using server at {RestApi} and account with email {userInfo.email}");
 
@@ -336,21 +344,24 @@ namespace ConnectorGSA
             commitObj['@' + name] = obj;
           }
 
-
           var stream = NewStream(client, "GSA data", "GSA data").Result;
-          var streamState = new StreamStateOld(userInfo.id, RestApi) { Stream = stream, IsSending = true };
+          var streamState = new StreamStateOld() { Client = client, Stream = stream, IsSending = true };
           streamStates.Add(streamState);
 
           var serverTransport = new ServerTransport(account, streamState.Stream.id);
 
+          var statusProgress = new Progress<string>();
+          var percentageProgress = new Progress<double>();
+
           Console.WriteLine($"Sending to Speckle server...");
-          var sent = Commands.SendCommit(commitObj, streamState, "", null, null, null, serverTransport).Result;
-          if (String.IsNullOrEmpty(sent))
+          var sent = Commands.SendCommit(commitObj, streamState, "", loggingProgress, statusProgress, percentageProgress, serverTransport).Result;
+          if (!String.IsNullOrEmpty(sent))
           {
             Console.WriteLine("Sending complete!");
             Console.WriteLine($"New stream created: {streamState.Stream.id}");
             Console.WriteLine($"New commit created: {sent}");
-          } else
+          }
+          else
           {
             Console.WriteLine("Sending failed!");
             return false;

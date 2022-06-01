@@ -308,23 +308,25 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
       var recordIndices = new List<int>() { record.Index.Value };
       var referenceRecords = new List<GsaRecord>();
 
-      GSALayer layer = t == typeof(GsaEl) ? GSALayer.Analysis : GSALayer.Design;
-      
-      if (t == typeof(GsaMemb))
+      if (t == typeof(GsaMemb) || t == typeof(GsaEl))
       {
-        GetPrecedentNatives<GsaMemb>(recordIndices, out referenceRecords);
-      }
+        GSALayer layer = t == typeof(GsaEl) ? GSALayer.Analysis : GSALayer.Design;
 
-      else if (t == typeof(GsaEl))
-      {
-        GetPrecedentNatives<GsaEl>(recordIndices, out referenceRecords);
-      }
+        if (t == typeof(GsaMemb))
+        {
+          GetPrecedentNatives<GsaMemb>(recordIndices, out referenceRecords);
+        }
+        else if (t == typeof(GsaEl))
+        {
+          GetPrecedentNatives<GsaEl>(recordIndices, out referenceRecords);
+        }
 
-      var referenceNodeIndices = referenceRecords.Where(rec => rec.GetType() == typeof(GsaNode)).Select(rec => rec.Index);
+        var referenceNodeIndices = referenceRecords.Where(r => r != null).Where(rec => rec.GetType() == typeof(GsaNode)).Select(rec => rec.Index);
 
-      foreach (var nodeIndex in referenceNodeIndices)
-      {
-        nodeIndicesByLayer.UpsertDictionary(layer, nodeIndex.Value);
+        foreach (var nodeIndex in referenceNodeIndices)
+        {
+          nodeIndicesByLayer.UpsertDictionary(layer, nodeIndex.Value);
+        }
       }
     }
 
