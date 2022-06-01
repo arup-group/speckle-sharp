@@ -305,26 +305,21 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
 
     private void AddNodesToLayer(Type t, GsaRecord record)
     {
-      var recordIndices = new List<int>() { record.Index.Value };
-      var referenceRecords = new List<GsaRecord>();
-
-      GSALayer layer = t == typeof(GsaEl) ? GSALayer.Analysis : GSALayer.Design;
-      
-      if (t == typeof(GsaMemb))
+      if (t == typeof(GsaMemb) || t == typeof(GsaEl))
       {
-        GetPrecedentNatives<GsaMemb>(recordIndices, out referenceRecords);
-      }
+        var recordIndices = new List<int>() { record.Index.Value };
+        var referenceRecords = new List<GsaRecord>();
 
-      else if (t == typeof(GsaEl))
-      {
-        GetPrecedentNatives<GsaEl>(recordIndices, out referenceRecords);
-      }
+        GSALayer layer = t == typeof(GsaEl) ? GSALayer.Analysis : GSALayer.Design;
 
-      var referenceNodeIndices = referenceRecords.Where(rec => rec.GetType() == typeof(GsaNode)).Select(rec => rec.Index);
+        GetPrecedentNatives(t, recordIndices, out referenceRecords);
 
-      foreach (var nodeIndex in referenceNodeIndices)
-      {
-        nodeIndicesByLayer.UpsertDictionary(layer, nodeIndex.Value);
+        var referenceNodeIndices = referenceRecords.Where(rec => rec.GetType() == typeof(GsaNode)).Select(rec => rec.Index);
+
+        foreach (var nodeIndex in referenceNodeIndices)
+        {
+          nodeIndicesByLayer.UpsertDictionary(layer, nodeIndex.Value);
+        }
       }
     }
 
@@ -378,23 +373,8 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
         {
           var precendentRecords = new List<GsaRecord>();
 
-          switch (listRecord.Type.ToUpper())
-          {
-            case "MEMBER":
-              GetPrecedentNatives<GsaMemb>(listRecord.Definition, out precendentRecords);
-              break;
-            case "ELEMENT":
-              GetPrecedentNatives<GsaEl>(listRecord.Definition, out precendentRecords);
-              break;
-            case "NODE":
-              GetPrecedentNatives<GsaNode>(listRecord.Definition, out precendentRecords);
-              break;
-            case "CASE":
-              GetPrecedentNatives<GsaLoadCase>(listRecord.Definition, out precendentRecords);
-              break;
-            default:
-              break;
-          }
+          GetPrecedentNatives(listRecord.GetType(), listRecord.Definition, out precendentRecords);
+
           records.AddRange(precendentRecords);
         }
       }
@@ -403,15 +383,15 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
       return true;
     }
 
-    public bool GetPrecedentNatives<T>(List<int> recordIndices, out List<GsaRecord> precendentRecords)
+    public bool GetPrecedentNatives(Type type, List<int> recordIndices, out List<GsaRecord> precendentRecords)
     {
-      var t = typeof(T);
+      //var t = typeof(T);
 
       var records = new List<GsaRecord>();
 
       foreach (var index in recordIndices)
       {
-        if (t == typeof(GsaMemb))
+        if (type == typeof(GsaMemb))
         {
           GetNative<GsaMemb>(index, out var memberRecord);
           if (memberRecord != null)
@@ -519,7 +499,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
           }
         }
 
-        else if (t == typeof(GsaEl))
+        else if (type == typeof(GsaEl))
         {
           GetNative<GsaEl>(index, out var elementRecord);
           if (elementRecord != null)
@@ -565,7 +545,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
                 if (memberRecord != null)
                 {
                   // Drills down recursively to hit typeof(GsaMemb) base case
-                  GetPrecedentNatives<GsaMemb>(new List<int>() { memberRecord.Index.Value }, out var embeddedMemberRecords);
+                  GetPrecedentNatives(type, new List<int>() { memberRecord.Index.Value }, out var embeddedMemberRecords);
 
                   var uniqueRecords = embeddedMemberRecords.Where(rec => !records.Contains(rec)).ToList();
 
@@ -604,7 +584,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
                 memberRecord = (GsaMemb)memberRecord;
 
                 // Drills down recursively to hit typeof(GsaMemb) base case
-                GetPrecedentNatives<GsaMemb>(new List<int>() { memberRecord.Index.Value }, out var embeddedMemberRecords);
+                GetPrecedentNatives(type, new List<int>() { memberRecord.Index.Value }, out var embeddedMemberRecords);
 
                 var uniqueRecords = embeddedMemberRecords.Where(rec => !records.Contains(rec)).ToList();
 
@@ -614,7 +594,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
           }
         }
 
-        else if (t == typeof(GsaNode))
+        else if (type == typeof(GsaNode))
         {
           GetNative<GsaNode>(index, out var nodeRecord);
           if (nodeRecord != null)
@@ -643,7 +623,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
           }
         }
 
-        else if (t == typeof(GsaLoadCase))
+        else if (type == typeof(GsaLoadCase))
         {
           GetNative<GsaLoadCase>(index, out var loadCaseRecord);
           if (loadCaseRecord != null)
