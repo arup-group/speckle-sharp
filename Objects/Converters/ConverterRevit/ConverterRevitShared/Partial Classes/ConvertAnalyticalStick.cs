@@ -37,11 +37,12 @@ namespace Objects.Converter.Revit
             revitBrace.baseLine = speckleStick.baseLine;
             placeholders = BraceToNative(revitBrace);
             DB.FamilyInstance nativeRevitBrace = (DB.FamilyInstance)placeholders[0].NativeObject;
-            AnalyticalModelStick analyticalModel = (AnalyticalModelStick)nativeRevitBrace.GetAnalyticalModel();
-            analyticalModel.SetReleases(true, Convert.ToBoolean(speckleStick.end1Releases.stiffnessX), Convert.ToBoolean(speckleStick.end1Releases.stiffnessY), Convert.ToBoolean(speckleStick.end1Releases.stiffnessZ), Convert.ToBoolean(speckleStick.end1Releases.stiffnessXX), Convert.ToBoolean(speckleStick.end1Releases.stiffnessYY), Convert.ToBoolean(speckleStick.end1Releases.stiffnessZZ));
-            analyticalModel.SetReleases(false, Convert.ToBoolean(speckleStick.end2Releases.stiffnessX), Convert.ToBoolean(speckleStick.end2Releases.stiffnessY), Convert.ToBoolean(speckleStick.end2Releases.stiffnessZ), Convert.ToBoolean(speckleStick.end2Releases.stiffnessXX), Convert.ToBoolean(speckleStick.end2Releases.stiffnessYY), Convert.ToBoolean(speckleStick.end2Releases.stiffnessZZ));
-            analyticalModel.SetOffset(AnalyticalElementSelector.StartOrBase, offset1);
-            analyticalModel.SetOffset(AnalyticalElementSelector.EndOrTop, offset2);
+            SetAnalyticalPros(nativeRevitBrace, speckleStick, offset1, offset2);
+            //AnalyticalModelStick analyticalModel = (AnalyticalModelStick)nativeRevitBrace.GetAnalyticalModel();
+            //analyticalModel.SetReleases(true, Convert.ToBoolean(speckleStick.end1Releases.stiffnessX), Convert.ToBoolean(speckleStick.end1Releases.stiffnessY), Convert.ToBoolean(speckleStick.end1Releases.stiffnessZ), Convert.ToBoolean(speckleStick.end1Releases.stiffnessXX), Convert.ToBoolean(speckleStick.end1Releases.stiffnessYY), Convert.ToBoolean(speckleStick.end1Releases.stiffnessZZ));
+            //analyticalModel.SetReleases(false, Convert.ToBoolean(speckleStick.end2Releases.stiffnessX), Convert.ToBoolean(speckleStick.end2Releases.stiffnessY), Convert.ToBoolean(speckleStick.end2Releases.stiffnessZ), Convert.ToBoolean(speckleStick.end2Releases.stiffnessXX), Convert.ToBoolean(speckleStick.end2Releases.stiffnessYY), Convert.ToBoolean(speckleStick.end2Releases.stiffnessZZ));
+            //analyticalModel.SetOffset(AnalyticalElementSelector.StartOrBase, offset1);
+            //analyticalModel.SetOffset(AnalyticalElementSelector.EndOrTop, offset2);
             return placeholders;
           }
           else
@@ -63,11 +64,12 @@ namespace Objects.Converter.Revit
             revitBeam.baseLine = speckleStick.baseLine;
             placeholders = BeamToNative(revitBeam);
             DB.FamilyInstance nativeRevitBeam = (DB.FamilyInstance)placeholders[0].NativeObject;
-            AnalyticalModelStick analyticalModel = (AnalyticalModelStick)nativeRevitBeam.GetAnalyticalModel();
-            analyticalModel.SetReleases(true, Convert.ToBoolean(speckleStick.end1Releases.stiffnessX), Convert.ToBoolean(speckleStick.end1Releases.stiffnessY), Convert.ToBoolean(speckleStick.end1Releases.stiffnessZ), Convert.ToBoolean(speckleStick.end1Releases.stiffnessXX), Convert.ToBoolean(speckleStick.end1Releases.stiffnessYY), Convert.ToBoolean(speckleStick.end1Releases.stiffnessZZ));
-            analyticalModel.SetReleases(false, Convert.ToBoolean(speckleStick.end2Releases.stiffnessX), Convert.ToBoolean(speckleStick.end2Releases.stiffnessY), Convert.ToBoolean(speckleStick.end2Releases.stiffnessZ), Convert.ToBoolean(speckleStick.end2Releases.stiffnessXX), Convert.ToBoolean(speckleStick.end2Releases.stiffnessYY), Convert.ToBoolean(speckleStick.end2Releases.stiffnessZZ));
-            analyticalModel.SetOffset(AnalyticalElementSelector.StartOrBase, offset1);
-            analyticalModel.SetOffset(AnalyticalElementSelector.EndOrTop, offset2);
+            SetAnalyticalPros(nativeRevitBeam, speckleStick, offset1, offset2);
+            //AnalyticalModelStick analyticalModel = (AnalyticalModelStick)nativeRevitBeam.GetAnalyticalModel();
+            //analyticalModel.SetReleases(true, Convert.ToBoolean(speckleStick.end1Releases.stiffnessX), Convert.ToBoolean(speckleStick.end1Releases.stiffnessY), Convert.ToBoolean(speckleStick.end1Releases.stiffnessZ), Convert.ToBoolean(speckleStick.end1Releases.stiffnessXX), Convert.ToBoolean(speckleStick.end1Releases.stiffnessYY), Convert.ToBoolean(speckleStick.end1Releases.stiffnessZZ));
+            //analyticalModel.SetReleases(false, Convert.ToBoolean(speckleStick.end2Releases.stiffnessX), Convert.ToBoolean(speckleStick.end2Releases.stiffnessY), Convert.ToBoolean(speckleStick.end2Releases.stiffnessZ), Convert.ToBoolean(speckleStick.end2Releases.stiffnessXX), Convert.ToBoolean(speckleStick.end2Releases.stiffnessYY), Convert.ToBoolean(speckleStick.end2Releases.stiffnessZZ));
+            //analyticalModel.SetOffset(AnalyticalElementSelector.StartOrBase, offset1);
+            //analyticalModel.SetOffset(AnalyticalElementSelector.EndOrTop, offset2);
             return placeholders;
           }
         case MemberType.Column:
@@ -107,10 +109,11 @@ namespace Objects.Converter.Revit
       //var analyticalModel = AnalyticalToPhysical
       var analyticalModel = (AnalyticalMember)element;
       analyticalModel.SetReleaseConditions(new ReleaseConditions(true, Convert.ToBoolean(element1d.end1Releases.stiffnessX), Convert.ToBoolean(element1d.end1Releases.stiffnessY), Convert.ToBoolean(element1d.end1Releases.stiffnessZ), Convert.ToBoolean(element1d.end1Releases.stiffnessXX), Convert.ToBoolean(element1d.end1Releases.stiffnessYY), Convert.ToBoolean(element1d.end1Releases.stiffnessZZ)));
-      analyticalModel.SetReleaseConditions(new ReleaseConditions(false, Convert.ToBoolean(element1d.end2Releases.stiffnessX), Convert.ToBoolean(element1d.end2Releases.stiffnessY), Convert.ToBoolean(element1d.end2Releases.stiffnessZ), Convert.ToBoolean(element1d.end2Releases.stiffnessXX), Convert.ToBoolean(element1d.end2Releases.stiffnessYY), Convert.ToBoolean(element1d.end2Releases.stiffnessZZ)));
+      analyticalModel.SetReleaseConditions(new ReleaseConditions(false, Convert.ToBoolean(element1d.end2Releases.stiffnessX), Convert.ToBoolean(element1d.end2Releases.stiffnessY), Convert.ToBoolean(element1d.end2Releases.stiffnessZ), Convert.ToBoolean(element1d.end2Releases.stiffnessXX), Convert.ToBoolean(element1d.end2Releases.stiffnessYY), Convert.ToBoolean(element1d.end2Releases.stiffnessZZ)));      
       //TODO set offsets?
 #endif
     }
+
 #if !REVIT2023
     private Element1D AnalyticalStickToSpeckle(AnalyticalModelStick revitStick)
     {
@@ -417,11 +420,28 @@ namespace Objects.Converter.Revit
       speckleElement1D.property = prop;
 
       GetAllRevitParamsAndIds(speckleElement1D, revitStick);
-      
+
       var points = baseLine.start.ToList();
       points.AddRange(baseLine.end.ToList());
       speckleElement1D.displayValue = new Objects.Geometry.Polyline(points, speckleElement1D.units); //GetElementDisplayMesh(revitStick.Document.GetElement(revitStick.GetElementId()));
       return speckleElement1D;
+    }
+
+    private Geometry.Line AnalyticalCurvesToBaseline(AnalyticalModelStick analyticalStick)
+    {
+      var curves = analyticalStick.GetCurves(AnalyticalCurveType.RigidLinkHead).ToList();
+      curves.AddRange(analyticalStick.GetCurves(AnalyticalCurveType.ActiveCurves));
+      curves.AddRange(analyticalStick.GetCurves(AnalyticalCurveType.RigidLinkTail));
+
+      if (curves.Count > 1)
+      {
+        var curveList = CurveListToSpeckle(curves);
+        var firstSegment = (Geometry.Line)curveList.segments[0];
+        var lastSegment = (Geometry.Line)curveList.segments[-1];
+        return new Geometry.Line(firstSegment.start, lastSegment.end);
+
+      }
+      return LineToSpeckle((Line)curves[0]);
     }
 
 #else
@@ -431,7 +451,7 @@ namespace Objects.Converter.Revit
       var speckleElement1D = new Element1D();
       switch (revitStick.StructuralRole)
       {
-        case AnalyticalStructuralRole.StructuralRoleColumn :
+        case AnalyticalStructuralRole.StructuralRoleColumn:
           speckleElement1D.type = ElementType1D.Column;
           break;
         case AnalyticalStructuralRole.StructuralRoleBeam:
@@ -445,10 +465,7 @@ namespace Objects.Converter.Revit
           break;
       }
 
-
       speckleElement1D.baseLine = (Objects.Geometry.Line)CurveToSpeckle(revitStick.GetCurve());
-
-
 
       var startRelease = GetParamValue<int>(revitStick, BuiltInParameter.STRUCTURAL_START_RELEASE_TYPE);
       var endRelease = GetParamValue<int>(revitStick, BuiltInParameter.STRUCTURAL_END_RELEASE_TYPE);
@@ -483,11 +500,11 @@ namespace Objects.Converter.Revit
       }
 
       var prop = new Property1D();
-  
+
       var stickFamily = (Autodesk.Revit.DB.FamilySymbol)revitStick.Document.GetElement(revitStick.SectionTypeId);
 
       var section = stickFamily.GetStructuralSection();
-      
+
       var speckleSection = new SectionProfile();
       speckleSection.name = section.StructuralSectionShapeName;
 
@@ -626,7 +643,7 @@ namespace Objects.Converter.Revit
         case StructuralMaterialType.Concrete:
           var concreteMaterial = new Concrete
           {
-             name = stickFamily.Document.GetElement(revitStick.MaterialId).Name,
+            name = stickFamily.Document.GetElement(revitStick.MaterialId).Name,
             //type = Structural.MaterialType.Concrete,
             grade = null,
             designCode = null,
@@ -699,6 +716,39 @@ namespace Objects.Converter.Revit
           break;
       }
 
+      prop.profile = speckleSection;
+      prop.material = speckleMaterial;
+      prop.name = stickFamily.Name;
+
+
+      var mark = GetParamValue<string>(stickFamily, BuiltInParameter.ALL_MODEL_MARK);
+
+      //TODO: how to differenciate between column and beam?
+
+      //if (revitStick is AnalyticalModelColumn)
+      //{
+      //  speckleElement1D.type = ElementType1D.Column;
+      //  //prop.memberType = MemberType.Column;
+      //  var locationMark = GetParamValue<string>(stickFamily, BuiltInParameter.COLUMN_LOCATION_MARK);
+      //  if (locationMark == null)
+      //    speckleElement1D.name = mark;
+      //  else
+      //    speckleElement1D.name = locationMark;
+      //}
+      //else
+      //{
+      //prop.memberType = MemberType.Beam;
+      speckleElement1D.name = mark;
+      //}
+
+      speckleElement1D.property = prop;
+
+      GetAllRevitParamsAndIds(speckleElement1D, revitStick);
+      //speckleElement1D.displayValue = GetElementDisplayMesh(stickFamily);
+      return speckleElement1D;
+    }
+#endif
+
     private ISection ISectionToSpeckle(DB.Structure.StructuralSections.StructuralSection section, string name = null)
     {
       return new ISection()
@@ -735,39 +785,6 @@ namespace Objects.Converter.Revit
       };
     }
 
-      prop.profile = speckleSection;
-      prop.material = speckleMaterial;
-      prop.name = stickFamily.Name;
-
-
-      var mark = GetParamValue<string>(stickFamily, BuiltInParameter.ALL_MODEL_MARK);
-
-      //TODO: how to differenciate between column and beam?
-
-      //if (revitStick is AnalyticalModelColumn)
-      //{
-      //  speckleElement1D.type = ElementType1D.Column;
-      //  //prop.memberType = MemberType.Column;
-      //  var locationMark = GetParamValue<string>(stickFamily, BuiltInParameter.COLUMN_LOCATION_MARK);
-      //  if (locationMark == null)
-      //    speckleElement1D.name = mark;
-      //  else
-      //    speckleElement1D.name = locationMark;
-      //}
-      //else
-      //{
-      prop.memberType = MemberType.Beam;
-      speckleElement1D.name = mark;
-      //}
-
-      speckleElement1D.property = prop;
-
-      GetAllRevitParamsAndIds(speckleElement1D, revitStick);
-      //speckleElement1D.displayValue = GetElementDisplayMesh(stickFamily);
-      return speckleElement1D;
-    }
-#endif
-  }
     private Rectangular RectangularHollowSectionToSpeckle(DB.Structure.StructuralSections.StructuralSection section, string name = null)
     {
       var wallThickness = ScaleToSpeckle((double)typeof(DB.Structure.StructuralSections.StructuralSectionGeneralH).GetProperty("WallNominalThickness")?.GetValue(section));
@@ -871,21 +888,6 @@ namespace Objects.Converter.Revit
       };
     }
 
-    private Geometry.Line AnalyticalCurvesToBaseline(AnalyticalModelStick analyticalStick)
-    {
-      var curves = analyticalStick.GetCurves(AnalyticalCurveType.RigidLinkHead).ToList();
-      curves.AddRange(analyticalStick.GetCurves(AnalyticalCurveType.ActiveCurves));
-      curves.AddRange(analyticalStick.GetCurves(AnalyticalCurveType.RigidLinkTail));
 
-      if (curves.Count > 1)
-      {
-        var curveList = CurveListToSpeckle(curves);
-        var firstSegment = (Geometry.Line)curveList.segments[0];
-        var lastSegment = (Geometry.Line)curveList.segments[-1];
-        return new Geometry.Line(firstSegment.start, lastSegment.end);
-
-      }
-      return LineToSpeckle((Line)curves[0]);
-    }
   }
 }
