@@ -108,7 +108,7 @@
           <ContentControl Content="{Binding SelectedFilter}" />
         </Grid>
 
-				<Grid
+				<!--<Grid
 				  Grid.Row="2"
 				  Grid.ColumnSpan="4"
 				  Margin="0">
@@ -144,7 +144,7 @@
 							</StackPanel>
 						</StackPanel>
 					</StackPanel>
-				</Grid>
+				</Grid>-->
 
 				<Grid Grid.Row="3" Grid.ColumnSpan="4">
 					<Grid.ColumnDefinitions>

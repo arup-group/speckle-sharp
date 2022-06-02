@@ -18,9 +18,7 @@ namespace DesktopUI2
   {
     public static async void ShowDialog(string title, string message, DialogIconKind icon)
     {
-      Dialog d = new Dialog(title, message, icon);
-      d.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-      await d.ShowDialog(MainWindow.Instance);
+      ShowDialog(MainWindow.Instance, title, message, icon);
     }
 
     public static async void ShowDialog(Window owner, string title, string message, DialogIconKind icon)

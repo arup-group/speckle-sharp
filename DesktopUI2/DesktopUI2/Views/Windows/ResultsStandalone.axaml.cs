@@ -1,22 +1,28 @@
 using Avalonia;
-using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.ReactiveUI;
+using DesktopUI2.ViewModels;
+
 
 namespace DesktopUI2.Views.Windows
 {
-  public partial class ResultsStandalone : Window
+  public partial class ResultsStandalone : ReactiveWindow<ResultsViewModelStandalone>
   {
+    public static ResultsStandalone Instance { get; private set; }
+
     public ResultsStandalone()
     {
-      InitializeComponent();
+      AvaloniaXamlLoader.Load(this);
+      Instance = this;
 #if DEBUG
       this.AttachDevTools();
 #endif
     }
 
-    private void InitializeComponent()
+    private void Close_Click(object sender, RoutedEventArgs e)
     {
-      AvaloniaXamlLoader.Load(this);
+      this.Close();
     }
   }
 }

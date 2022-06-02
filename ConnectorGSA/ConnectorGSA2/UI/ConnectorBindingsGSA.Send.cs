@@ -49,13 +49,14 @@ namespace ConnectorGSA.UI
         {
           if (setting.Selection != null)
           {
-            var layer = Enum.TryParse(setting.Selection, out GSALayer streamLayer);
-            if (layer)
+            if (Enum.TryParse(setting.Selection, out GSALayer streamLayer))
               Instance.GsaModel.StreamLayer = streamLayer;
           }
-        } else if (setting.Slug == "send-content") {
-          Instance.GsaModel.StreamSendConfig = setting.Selection == "Model with results" ? StreamContentConfig.ModelAndResults : StreamContentConfig.ModelOnly;
         }
+        //else if (setting.Slug == "send-content")
+        //{
+        //  Instance.GsaModel.StreamSendConfig = ((CheckBoxSetting)setting).IsChecked ? StreamContentConfig.ModelAndResults : StreamContentConfig.ModelOnly;
+        //}
         settings.Add(setting.Slug, setting.Selection);
       }
       converter.SetConverterSettings(settings);
@@ -84,8 +85,12 @@ namespace ConnectorGSA.UI
 
       percentage += 20;
 
-      if (ResultSettings != null)
+      if (ResultSettings != null && ResultSettings.SendResults)
       {
+        Instance.GsaModel.StreamSendConfig = ResultSettings.SendResults ? StreamContentConfig.ModelAndResults : StreamContentConfig.ModelOnly;
+        Instance.GsaModel.Result1DNumPosition = ResultSettings.Additional1DPositions; //end points (2) plus additional
+        Instance.GsaModel.ResultInLocalAxis = ResultSettings.UseLocalAxis;
+
         var resultsToSend = ResultSettings.ResultSettingItems.Where(rsi => rsi.Selected).ToList();
 
         if (resultsToSend != null && resultsToSend.Count() > 0 && !string.IsNullOrEmpty(ResultSettings.CasesDescription)
@@ -107,7 +112,7 @@ namespace ConnectorGSA.UI
             var expanded = ((GsaProxy)Instance.GsaModel.Proxy).ExpandLoadCasesAndCombinations(ResultSettings.CasesDescription, analIndices, comboIndices);
             if (expanded != null && expanded.Count() > 0)
             {
-              //loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Information, "Resolved load cases"));
+              progress.Report.Log("Resolved load cases");
 
               Instance.GsaModel.ResultCases = expanded;
 
@@ -138,7 +143,7 @@ namespace ConnectorGSA.UI
       }
       startTime = DateTime.Now;
 
-      if (Instance.GsaModel.SendResults)
+      if (ResultSettings != null && ResultSettings.SendResults)
       {
         try
         {
@@ -228,6 +233,7 @@ namespace ConnectorGSA.UI
       progress.Report.Log($"Sending to server: {state.ServerUrl}");
 
       var commitObj = new Base();
+      var resultsObj = new Base();
       foreach (var obj in objs)
       {
         var typeName = obj.GetType().Name;
@@ -246,37 +252,68 @@ namespace ConnectorGSA.UI
         else if (typeName.ToLower().Contains("result"))
         {
           name = "Results";
+          if (ResultSettings.UseLocalTransport)
+          {
+            //resultsObj = obj;
+            resultsObj['@' + name] = obj;
+          }
+          if (!ResultSettings.UseServerTransport)
+          {
+            continue;
+          }
         }
 
         commitObj['@' + name] = obj;
       }
 
-      //var fileTransport = new DiskTransport.DiskTransport(System.IO.Path.Combine(@"C:\Speckle_Reference\DiskTransport", state.StreamId));
       var serverTransport = new ServerTransport(account, state.StreamId);
       var sent = await Commands.SendCommit(commitObj, state, progress, ((GsaModel)Instance.GsaModel).LastCommitId, serverTransport);
 
       if (!String.IsNullOrEmpty(sent))
       {
         progress.Report.Log("Successfully sent data to stream");
-        //Commands.UpsertSavedReceptionStreamInfo(true, null, state);
+        Commands.UpsertSavedReceptionStreamInfo(true, null, state);
         Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "totalChildrenCountSentObject", commitObj.GetTotalChildrenCount() } });
 
         duration = DateTime.Now - startTime;
         if (duration.Seconds > 0)
         {
-          progress.Report.Log("Duration of sending to Speckle: " + duration.ToString(@"hh\:mm\:ss"));
+          progress.Report.Log("Duration of sending to Speckle server: " + duration.ToString(@"hh\:mm\:ss"));
           Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "timeToSend", duration.ToString(@"hh\:mm\:ss") } });
         }
         startTime = DateTime.Now;
-
-        return sent;
       }
       else
       {
         progress.Report.LogOperationError(new Exception("Unable to send data to stream"));
+        return null;
       }
 
-      return null;
+      if (ResultSettings.SendResults && ResultSettings.UseLocalTransport)
+      {
+        var basePath = System.IO.Path.Combine(GetDocumentLocation(), state.StreamId);
+        var sqliteTransport = new SQLiteTransport(basePath, "SpeckleGSA", "Results");
+        var sentLocal = await Commands.SendObject(resultsObj, progress, sqliteTransport);
+
+        if (!String.IsNullOrEmpty(sentLocal))
+        {
+          progress.Report.Log($"Successfully sent results data to local SQLite file at: {System.IO.Path.Combine(basePath, "SpeckleGSA", "Results.db")}");
+
+          duration = DateTime.Now - startTime;
+          if (duration.Seconds > 0)
+          {
+            progress.Report.Log("Duration of sending to local SQLite file: " + duration.ToString(@"hh\:mm\:ss"));
+            Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "timeToSendLocal", duration.ToString(@"hh\:mm\:ss") } });
+          }
+          startTime = DateTime.Now;
+        }
+        else
+        {
+          progress.Report.LogOperationError(new Exception("Unable to send results data to local SQLite file"));
+        }
+      }
+
+      return sent;
     }
   }
 }

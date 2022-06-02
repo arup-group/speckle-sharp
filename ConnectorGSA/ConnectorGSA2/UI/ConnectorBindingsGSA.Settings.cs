@@ -21,7 +21,8 @@ namespace ConnectorGSA.UI
   {
     const string MappingStream = "Default Section Mapping Stream";
     private List<string> Layers = new List<string> { "Design", "Analysis", "Both" };
-    private List<string> SendContent = new List<string> { "Model only", "Model with results" };
+    //private List<string> SendContent = new List<string> { "Model only", "Model with results" };
+    private List<string> DistanceUnits = new List<string> { "Millimetres", "Metres", "Inches" };
 
     public override List<ISetting> GetSettings()
     {
@@ -29,10 +30,12 @@ namespace ConnectorGSA.UI
 
       return new List<ISetting>
       {
-        new ListBoxSetting {Slug = "section-mapping", Name = "Section Mapping", Icon ="Repeat", Values = mappingStream, Description = "Sends or receives structural stick objects (ex. columns, beams) using the section name-family/family type mappings contained in this stream"},
-        new ListBoxSetting {Slug = "layer", Name = "Layer to send", Icon ="Repeat", Values = Layers, Description = "Which layer to send"},
-        new ListBoxSetting {Slug = "send-content", Name = "Model only or model and results", Icon ="Repeat", Values = SendContent, Description = "Whether to send model only or model and results"}
-      }; 
+        new ListBoxSetting {Slug = "layer", Name = "Layer to send", Icon ="mdiLayers", Values = Layers, Description = "Which layer to send", Selection = "Design"},
+        //new CheckBoxSetting {Slug = "send-content", Name = "Send results", Icon ="Repeat", IsChecked= false, Description = "Whether to send the model only or the model and results"},
+        new TextBoxSetting {Slug = "node-coincidence-allowance", Name = "Coincident node allowance", Icon = "mdiCounter", Description = "Tolerance within which nodes are assumed to be coincident" , Selection = "10"},
+        new ListBoxSetting {Slug = "unit", Name = "Distance unit", Icon ="mdiLayers", Values = DistanceUnits, Description = "Which distance units to use", Selection = "Millimetres"},
+        new ListBoxSetting {Slug = "section-mapping", Name = "Section mapping", Icon ="mdiArrowLeftRight", Values = mappingStream, Description = "Sends or receives structural stick objects (ex. columns, beams) using the section name-family/family type mappings contained in this stream"}
+      };
     }
 
     public async Task<string> GetSectionMappingData(StreamState state, ProgressViewModel progress)

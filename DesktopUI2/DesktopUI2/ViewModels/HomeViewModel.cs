@@ -28,7 +28,7 @@ namespace DesktopUI2.ViewModels
   public class HomeViewModel : ReactiveObject, IRoutableViewModel
   {
     //Instance of this HomeViewModel, so that the SavedStreams are kept in memory and not disposed on navigation
-    public static HomeViewModel Instance { get; private set; }
+    public static HomeViewModel Instance { get; internal set; }
     public IScreen HostScreen { get; }
     public string UrlPathSegment { get; } = "home";
     //public ConnectorBindings Bindings;
@@ -305,7 +305,7 @@ namespace DesktopUI2.ViewModels
     //write changes to file every time they happen
     //this is because if there is an active document change we need to swap saved streams and restore them later
     //even if the doc has not been saved
-    private void SavedStreams_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    internal void SavedStreams_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
       WriteStreamsToFile();
     }

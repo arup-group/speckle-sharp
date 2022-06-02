@@ -148,7 +148,7 @@
               </MenuItem.Header>
               <MenuItem
                 Classes="Profile"
-                Command="{Binding $parent[local:HomeViewStandalone].DataContext.OpenProfileCommand}"
+                Command="{Binding $parent[local:HomeView].DataContext.OpenProfileCommand}"
                 CommandParameter="{Binding Account}"
                 DataContext="{Binding Accounts[0]}" />
               <Separator />
@@ -186,12 +186,12 @@
                   <DataTemplate>
                     <MenuItem Classes="Profile">
                       <MenuItem
-                        Command="{Binding $parent[local:HomeViewStandalone].DataContext.OpenProfileCommand}"
+                        Command="{Binding $parent[local:HomeView].DataContext.OpenProfileCommand}"
                         CommandParameter="{Binding Account}"
                         Header="View online"
                         Icon="{icons:MaterialIconExt ExternalLink}" />
                       <MenuItem
-                        Command="{Binding $parent[local:HomeViewStandalone].DataContext.RemoveAccountCommand}"
+                        Command="{Binding $parent[local:HomeView].DataContext.RemoveAccountCommand}"
                         CommandParameter="{Binding Account}"
                         Header="Remove account"
                         Icon="{icons:MaterialIconExt AccountMinus}" />
@@ -205,7 +205,7 @@
                 Header="Add another account"
                 Icon="{icons:MaterialIconExt AccountPlus}" />-->
               <MenuItem
-                Command="{Binding $parent[local:HomeViewStandalone].DataContext.LaunchManagerCommand}"
+                Command="{Binding $parent[local:HomeView].DataContext.LaunchManagerCommand}"
                 Header="Manage accounts in Manager"
                 Icon="{icons:MaterialIconExt AccountCog}" />
 
@@ -290,62 +290,62 @@
             TextTrimming="CharacterEllipsis" />       
       </Grid>
 
-        <!--  SEARCH STREAMS  -->
-        <Grid Grid.Row="2" Margin="0">
-          <m:Card
-            Margin="5,0"
+      <!--  SEARCH STREAMS  -->
+      <Grid Grid.Row="2" Margin="0">
+        <m:Card
+          Margin="5,0"
+          Padding="0"
+          HorizontalAlignment="Stretch"
+          CornerRadius="25">
+          <TextBox
+            Margin="0"
             Padding="0"
-            HorizontalAlignment="Stretch"
-            CornerRadius="25">
-            <TextBox
-              Margin="0"
-              Padding="0"
-              Classes="Solo Small"
-              Text="{Binding SearchQuery}"
-              Watermark="Search streams">
-              <TextBox.InnerRightContent>
-                <StackPanel Orientation="Horizontal">
-                  <m:FloatingButton
-                    Grid.Column="1"
-                    VerticalAlignment="Center"
-                    assists:ShadowAssist.ShadowDepth="Depth0"
-                    Background="Transparent"
-                    Classes="Mini"
-                    Command="{Binding ClearSearchCommand}"
-                    IsVisible="{Binding SearchQuery, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-                    ToolTip.Tip="Clear">
-                    <Button.Content>
-                      <icons:MaterialIcon
-                        Width="15"
-                        Height="15"
-                        assists:ShadowAssist.ShadowDepth="0"
-                        Foreground="{DynamicResource MaterialDesignBody}"
-                        Kind="CloseCircle" />
-                    </Button.Content>
-                  </m:FloatingButton>
+            Classes="Solo Small"
+            Text="{Binding SearchQuery}"
+            Watermark="Search streams">
+            <TextBox.InnerRightContent>
+              <StackPanel Orientation="Horizontal">
+                <m:FloatingButton
+                  Grid.Column="1"
+                  VerticalAlignment="Center"
+                  assists:ShadowAssist.ShadowDepth="Depth0"
+                  Background="Transparent"
+                  Classes="Mini"
+                  Command="{Binding ClearSearchCommand}"
+                  IsVisible="{Binding SearchQuery, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                  ToolTip.Tip="Clear">
+                  <Button.Content>
+                    <icons:MaterialIcon
+                      Width="15"
+                      Height="15"
+                      assists:ShadowAssist.ShadowDepth="0"
+                      Foreground="{DynamicResource MaterialDesignBody}"
+                      Kind="CloseCircle" />
+                  </Button.Content>
+                </m:FloatingButton>
 
 
-                  <Menu
-                    Grid.Column="1"
-                    Margin="2,0,0,0"
-                    VerticalAlignment="Center"
-                    ToolTip.Tip="Filter streams by ownership of favorite">
+                <Menu
+                  Grid.Column="1"
+                  Margin="2,0,0,0"
+                  VerticalAlignment="Center"
+                  ToolTip.Tip="Filter streams by ownership or favorite">
 
-                    <MenuItem
-                      Width="30"
-                      Height="30"
-                      Padding="0"
-                      Classes="NoHighlight">
-                      <MenuItem.Header>
-                        <Grid>
-                          <icons:MaterialIcon IsVisible="{Binding !ActiveFilter}" Kind="FilterVariant" />
-                          <icons:MaterialIcon
-                            Foreground="Red"
-                            IsVisible="{Binding ActiveFilter}"
-                            Kind="FilterVariant" />
-                        </Grid>
-                      </MenuItem.Header>
-                      <!--<ListBox>
+                  <MenuItem
+                    Width="30"
+                    Height="30"
+                    Padding="0"
+                    Classes="NoHighlight">
+                    <MenuItem.Header>
+                      <Grid>
+                        <icons:MaterialIcon IsVisible="{Binding !ActiveFilter}" Kind="FilterVariant" />
+                        <icons:MaterialIcon
+                          Foreground="Red"
+                          IsVisible="{Binding ActiveFilter}"
+                          Kind="FilterVariant" />
+                      </Grid>
+                    </MenuItem.Header>
+                    <!--<ListBox>
 
                       <TextBlock Text="all" />
                       <TextBlock Text="owner" />
@@ -353,52 +353,52 @@
                       <TextBlock Text="reviewer" />
                       <icons:MaterialIcon VerticalAlignment="Center" Kind="Heart" />
                     </ListBox>-->
-                      <RadioButton
-                        HorizontalContentAlignment="Center"
-                        Classes="Button"
-                        Content="all"
-                        GroupName="3"
-                        IsChecked="{Binding SelectedFilter, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=all}" />
+                    <RadioButton
+                      HorizontalContentAlignment="Center"
+                      Classes="Button"
+                      Content="all"
+                      GroupName="3"
+                      IsChecked="{Binding SelectedFilter, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=all}" />
 
-                      <RadioButton
-                        HorizontalContentAlignment="Center"
-                        Classes="Button"
-                        Content="owner"
-                        GroupName="3"
-                        IsChecked="{Binding Path=SelectedFilter, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=owner}" />
-                      <RadioButton
-                        HorizontalContentAlignment="Center"
-                        Classes="Button"
-                        Content="contributor"
-                        GroupName="3"
-                        IsChecked="{Binding Path=SelectedFilter, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=contributor}" />
-                      <RadioButton
-                        HorizontalContentAlignment="Center"
-                        Classes="Button"
-                        Content="reviewer"
-                        GroupName="3"
-                        IsChecked="{Binding Path=SelectedFilter, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=reviewer}" />
-                      <RadioButton
-                        Classes="Button"
-                        Content="{icons:MaterialIconExt Kind=Heart}"
-                        GroupName="3"
-                        IsChecked="{Binding Path=SelectedFilter, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=favorite}" />
+                    <RadioButton
+                      HorizontalContentAlignment="Center"
+                      Classes="Button"
+                      Content="owner"
+                      GroupName="3"
+                      IsChecked="{Binding Path=SelectedFilter, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=owner}" />
+                    <RadioButton
+                      HorizontalContentAlignment="Center"
+                      Classes="Button"
+                      Content="contributor"
+                      GroupName="3"
+                      IsChecked="{Binding Path=SelectedFilter, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=contributor}" />
+                    <RadioButton
+                      HorizontalContentAlignment="Center"
+                      Classes="Button"
+                      Content="reviewer"
+                      GroupName="3"
+                      IsChecked="{Binding Path=SelectedFilter, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=reviewer}" />
+                    <RadioButton
+                      Classes="Button"
+                      Content="{icons:MaterialIconExt Kind=Heart}"
+                      GroupName="3"
+                      IsChecked="{Binding Path=SelectedFilter, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=favorite}" />
 
-                    </MenuItem>
-                  </Menu>
-                </StackPanel>
+                  </MenuItem>
+                </Menu>
+              </StackPanel>
 
-              </TextBox.InnerRightContent>
-              <TextBox.InnerLeftContent>
-                <icons:MaterialIcon
-                  Width="15"
-                  Height="15"
-                  Margin="5,0,0,0"
-                  Kind="Search" />
-              </TextBox.InnerLeftContent>
-            </TextBox>
-          </m:Card>
-        </Grid>
+            </TextBox.InnerRightContent>
+            <TextBox.InnerLeftContent>
+              <icons:MaterialIcon
+                Width="15"
+                Height="15"
+                Margin="5,0,0,0"
+                Kind="Search" />
+            </TextBox.InnerLeftContent>
+          </TextBox>
+        </m:Card>
+      </Grid>
 
 
         <!--  CREATE/ADD STREAMS  -->
@@ -491,7 +491,7 @@
                   Classes="NoScroll"
                   IsEnabled="{Binding InProgress, Converter={x:Static BoolConverters.Not}}"
                   IsVisible="{Binding HasStreams}"
-                  Items="{Binding Streams}"
+                  Items="{Binding FilteredStreams}"
                   SelectedItem="{Binding SelectedStream}">
                   <ListBox.Styles>
                     <Style Selector="ListBoxItem:not(:pointerover) StackPanel#HoverButtons">
@@ -611,7 +611,7 @@
                             assists:ShadowAssist.ShadowDepth="0"
                             Background="Transparent"
                             Classes="Mini"
-                            Command="{Binding $parent[local:HomeView].DataContext.ViewOnlineCommand}"
+                            Command="{Binding $parent[local:HomeViewStandalone].DataContext.ViewOnlineCommand}"
                             CommandParameter="{Binding}"
                             ToolTip.Tip="View online">
                             <Button.Content>

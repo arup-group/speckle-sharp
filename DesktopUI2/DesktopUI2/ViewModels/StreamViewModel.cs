@@ -43,6 +43,8 @@ namespace DesktopUI2.ViewModels
 
     public ICommand RemoveSavedStreamCommand { get; set; }
 
+    public bool IsStandalone { get; set; } = true;
+
     #region bindings
     private Stream _stream;
     public Stream Stream
@@ -364,6 +366,12 @@ namespace DesktopUI2.ViewModels
         //use dependency injection to get bindings
         Bindings = Locator.Current.GetService<ConnectorBindings>();
 
+        IConnectorBindingsStandalone bindingsStandalone = Bindings as IConnectorBindingsStandalone;
+        if (bindingsStandalone != null)
+        {
+          IsStandalone = true;
+        }
+
         if (Client == null)
         {
           NoAccess = true;
@@ -673,6 +681,9 @@ namespace DesktopUI2.ViewModels
 
     public virtual void ShareCommand()
     {
+      //if(IsStandalone)
+      //  MainWindowViewModelStandalone.RouterInstance.Navigate.Execute(new CollaboratorsViewModel(HostScreen, this));
+      //else
       MainWindowViewModel.RouterInstance.Navigate.Execute(new CollaboratorsViewModel(HostScreen, this));
     }
 
@@ -702,7 +713,10 @@ namespace DesktopUI2.ViewModels
 
     public void EditSavedStreamCommand()
     {
-      MainWindowViewModel.RouterInstance.Navigate.Execute(this);
+      if (IsStandalone)
+        MainWindowViewModelStandalone.RouterInstance.Navigate.Execute(this);
+      else
+        MainWindowViewModel.RouterInstance.Navigate.Execute(this);
       Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Edit" } });
     }
 
@@ -731,12 +745,12 @@ namespace DesktopUI2.ViewModels
 
         HomeViewModel.Instance.AddSavedStream(this); //save the stream as well
 
-      Reset();
-      Progress.ProgressTitle = "Sending to Speckle 🚀";
-      Progress.IsProgressing = true;
+        Reset();
+        Progress.ProgressTitle = "Sending to Speckle 🚀";
+        Progress.IsProgressing = true;
 
-      var commitId = await Task.Run(() => Bindings.SendStream(StreamState, Progress));
-      Progress.IsProgressing = false;
+        var commitId = await Task.Run(() => Bindings.SendStream(StreamState, Progress));
+        Progress.IsProgressing = false;
 
         if (!Progress.CancellationTokenSource.IsCancellationRequested && commitId != null)
         {
@@ -771,13 +785,13 @@ namespace DesktopUI2.ViewModels
         //save the stream as well
         HomeViewModel.Instance.AddSavedStream(this);
 
-      Reset();
+        Reset();
 
-      Progress.ProgressTitle = "Receiving from Speckle 🚀";
-      Progress.IsProgressing = true;
+        Progress.ProgressTitle = "Receiving from Speckle 🚀";
+        Progress.IsProgressing = true;
 
-      await Task.Run(() => Bindings.ReceiveStream(StreamState, Progress));
-      Progress.IsProgressing = false;
+        await Task.Run(() => Bindings.ReceiveStream(StreamState, Progress));
+        Progress.IsProgressing = false;
 
         if (!Progress.CancellationTokenSource.IsCancellationRequested)
         {
@@ -825,6 +839,9 @@ namespace DesktopUI2.ViewModels
         report.Title = $"Report of the last operation, {LastUsed.ToLower()}";
         report.DataContext = Progress;
         report.WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterOwner;
+        //if(IsStandalone)
+        //  report.ShowDialog(MainWindowStandalone.Instance);
+        //else
         report.ShowDialog(MainWindow.Instance);
         Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Open Report" } });
       }
@@ -834,11 +851,37 @@ namespace DesktopUI2.ViewModels
       }
     }
 
+    public virtual async void OpenResultsCommand()
+    {
+      ResultSettings = ((IConnectorBindingsStandalone)Bindings).ResultSettings;
+
+      try
+      {            
+        var resultsViewModel = new ResultsViewModelStandalone(this);
+
+        var resultsWindow = new ResultsStandalone();
+        resultsWindow.DataContext = resultsViewModel;
+        resultsWindow.Title = $"Results for {Stream.name}";
+        resultsWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+        resultsWindow.ShowDialog(MainWindow.Instance);
+
+        //((IConnectorBindingsStandalone)Bindings).ResultSettings = resultsViewModel._resultSettings;
+
+      }
+      catch (Exception e)
+      {
+      }
+
+    }
+
     private void SaveCommand()
     {
       try
       {
         UpdateStreamState();
+        //if(IsStandalone)
+        //  MainWindowViewModelStandalone.RouterInstance.Navigate.Execute(HomeViewModelStandalone.Instance);
+        //else
         MainWindowViewModel.RouterInstance.Navigate.Execute(HomeViewModel.Instance);
         HomeViewModel.Instance.AddSavedStream(this);
 
@@ -865,6 +908,9 @@ namespace DesktopUI2.ViewModels
       {
 
         var settingsPageViewModel = new SettingsPageViewModel(HostScreen, Settings.Select(x => new SettingViewModel(x)).ToList(), this);
+        //if(IsStandalone)
+        //  MainWindowViewModelStandalone.RouterInstance.Navigate.Execute(settingsPageViewModel);
+        //else
         MainWindowViewModel.RouterInstance.Navigate.Execute(settingsPageViewModel);
         Analytics.TrackEvent(null, Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Settings Open" } });
 

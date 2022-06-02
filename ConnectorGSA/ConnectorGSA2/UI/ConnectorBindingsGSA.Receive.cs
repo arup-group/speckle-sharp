@@ -70,6 +70,20 @@ namespace ConnectorGSA.UI
             setting.Selection = mappingKey;
           }
         }
+        else if (setting.Slug == "node-coincidence-allowance")
+        {
+          if (double.TryParse(setting.Selection, out var allowance))
+          {
+            Instance.GsaModel.CoincidentNodeAllowance = allowance;
+          }
+        }
+        else if (setting.Slug == "unit")
+        {
+          if (Enum.TryParse(setting.Selection, out Models.GsaUnit units))
+          {
+            Instance.GsaModel.Units = Commands.UnitEnumToString(units);
+          }            
+        }
         settings.Add(setting.Slug, setting.Selection);
       }
 
@@ -148,7 +162,7 @@ namespace ConnectorGSA.UI
         {
           streamId = stream?.id,
           commitId = myCommit?.id,
-          message = myCommit?.message, 
+          message = myCommit?.message,
           sourceApplication = VersionedHostApplications.GSA
         });
       }
@@ -166,7 +180,7 @@ namespace ConnectorGSA.UI
       {
         return null;
       }
-      
+
       duration = DateTime.Now - startTime;
 
       progress.Report.Log("Duration of reception from Speckle and scaling: " + duration.ToString(@"hh\:mm\:ss"));

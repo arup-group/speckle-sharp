@@ -109,7 +109,10 @@ namespace DesktopUI2
     {
       return new List<ISetting>
       {
-        new ListBoxSetting {Name = "Reference Point", Icon = "mdiCrosshairsGps", Description = "Hello world. This is a setting.", Values = new List<string>() {"Default", "Project Base Point", "Survey Point"} }
+        new ListBoxSetting {Name = "Reference Point", Icon = "mdiCrosshairsGps", Description = "Hello world. This is a setting.", Values = new List<string>() {"Default", "Project Base Point", "Survey Point"} },
+        new CheckBoxSetting {Slug = "linkedmodels-send", Name = "Send Linked Models", Icon ="Link", IsChecked= false, Description = "Include Linked Models in the selection filters when sending"},
+        new CheckBoxSetting {Slug = "linkedmodels-receive", Name = "Receive Linked Models", Icon ="Link", IsChecked= false, Description = "Include Linked Models when receiving"},
+        new TextBoxSetting {Slug = "tolerance", Name = "Tolerance", Icon = "mdiCounter", Description = "Hello world. This is a text box setting." },
       };
     }
 
@@ -363,12 +366,6 @@ namespace DesktopUI2
       throw new NotImplementedException();
     }
 
-    public string Layer { get; set; }
-
-    public string Units { get; set; }
-
-    public double CoincidentNodeAllowance { get; set; } = 10;
-    public ResultSettings ResultSettings { get; set; }
-    public bool SendResults { get; set; }
+    public ResultSettings ResultSettings { get; set; } = new ResultSettings();
   }
 }
