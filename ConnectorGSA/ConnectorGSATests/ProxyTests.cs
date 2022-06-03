@@ -126,13 +126,13 @@ namespace ConnectorGSATests
       {
         foreach (var i in indices)
         {
-          if (Instance.GsaModel.Proxy.GetResultRecords(ResultGroup.Element1d, i, out var records))
+          if (Instance.GsaModel.Proxy.GetResultRecords(ResultGroup.Elem_1d, i, out var records))
           {
-            csvRecordsByGroup[ResultGroup.Element1d].AddRange(records);
+            csvRecordsByGroup[ResultGroup.Elem_1d].AddRange(records);
           }
-          if (Instance.GsaModel.Proxy.GetResultRecords(ResultGroup.Element2d, i, out records))
+          if (Instance.GsaModel.Proxy.GetResultRecords(ResultGroup.Elem_2d, i, out records))
           {
-            csvRecordsByGroup[ResultGroup.Element2d].AddRange(records);
+            csvRecordsByGroup[ResultGroup.Elem_2d].AddRange(records);
           }
         }
       }
@@ -174,11 +174,11 @@ namespace ConnectorGSATests
         var rtStr = rt.ToString();
         if (rtStr.Contains("1d"))
         {
-          resultTypes[ResultGroup.Element1d].Add(rt);
+          resultTypes[ResultGroup.Elem_1d].Add(rt);
         }
         else if (rtStr.Contains("2d"))
         {
-          resultTypes[ResultGroup.Element2d].Add(rt);
+          resultTypes[ResultGroup.Elem_2d].Add(rt);
         }
         else if (rtStr.Contains("Assembly"))
         {

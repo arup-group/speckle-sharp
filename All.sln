@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectorDynamoExtension", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectorDynamoFunctions", "ConnectorDynamo\ConnectorDynamoFunctions\ConnectorDynamoFunctions.csproj", "{8F4D907B-A2DF-4B40-8EA6-D79F9ED6D906}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConnectorGrasshopper", "ConnectorGrasshopper\ConnectorGrasshopper\ConnectorGrasshopper.csproj", "{BDEC781D-F322-49B0-8001-2CA66C182174}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConnectorGrasshopper", "ConnectorGrasshopper\ConnectorGrasshopper\ConnectorGrasshopper.csproj", "{109B3382-634B-408A-8A5C-4CD09CB92641}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesktopUI", "DesktopUI\DesktopUI\DesktopUI.csproj", "{A97C3046-2D55-4C49-AB40-A3C2194B82FA}"
 EndProject
@@ -296,14 +296,6 @@ Global
 		{8F4D907B-A2DF-4B40-8EA6-D79F9ED6D906}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8F4D907B-A2DF-4B40-8EA6-D79F9ED6D906}.Release|x64.ActiveCfg = Release|Any CPU
 		{8F4D907B-A2DF-4B40-8EA6-D79F9ED6D906}.Release|x64.Build.0 = Release|Any CPU
-		{109B3382-634B-408A-8A5C-4CD09CB92641}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{109B3382-634B-408A-8A5C-4CD09CB92641}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{109B3382-634B-408A-8A5C-4CD09CB92641}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{109B3382-634B-408A-8A5C-4CD09CB92641}.Debug|x64.Build.0 = Debug|Any CPU
-		{109B3382-634B-408A-8A5C-4CD09CB92641}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{109B3382-634B-408A-8A5C-4CD09CB92641}.Release|Any CPU.Build.0 = Release|Any CPU
-		{109B3382-634B-408A-8A5C-4CD09CB92641}.Release|x64.ActiveCfg = Release|Any CPU
-		{109B3382-634B-408A-8A5C-4CD09CB92641}.Release|x64.Build.0 = Release|Any CPU
 		{A97C3046-2D55-4C49-AB40-A3C2194B82FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A97C3046-2D55-4C49-AB40-A3C2194B82FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A97C3046-2D55-4C49-AB40-A3C2194B82FA}.Debug|x64.ActiveCfg = Debug|x64

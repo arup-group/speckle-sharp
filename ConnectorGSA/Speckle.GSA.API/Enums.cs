@@ -35,8 +35,8 @@ namespace Speckle.GSA.API
   {
     Unknown = 0,
     Node = 1,
-    Element1d = 2,
-    Element2d = 3,
+    Elem_1d = 2,
+    Elem_2d = 3,
     Assembly = 4,
     Global = 5
   }

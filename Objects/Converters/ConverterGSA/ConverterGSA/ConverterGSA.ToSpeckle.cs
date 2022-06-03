@@ -1822,7 +1822,7 @@ namespace ConverterGSA
     public bool GsaElement1dResultToSpeckle(int gsaElementIndex, Element1D speckleElement, out List<Result1D> speckleResults)
     {
       speckleResults = null;
-      if (Instance.GsaModel.Proxy.GetResultRecords(ResultGroup.Element1d, gsaElementIndex, out var csvRecord))
+      if (Instance.GsaModel.Proxy.GetResultRecords(ResultGroup.Elem_1d, gsaElementIndex, out var csvRecord))
       {
         speckleResults = new List<Result1D>();
         var gsaElement1dResults = csvRecord.FindAll(so => so is CsvElem1d).Select(so => (CsvElem1d)so).ToList();
@@ -1889,7 +1889,7 @@ namespace ConverterGSA
     public bool GsaElement2dResultToSpeckle(int gsaElementIndex, Element2D speckleElement, out List<Result2D> speckleResults)
     {
       speckleResults = null;
-      if (Instance.GsaModel.Proxy.GetResultRecords(ResultGroup.Element2d, gsaElementIndex, out var csvRecord))
+      if (Instance.GsaModel.Proxy.GetResultRecords(ResultGroup.Elem_2d, gsaElementIndex, out var csvRecord))
       {
         speckleResults = new List<Result2D>();
         var gsaElement2dResults = csvRecord.FindAll(so => so is CsvElem2d).Select(so => (CsvElem2d)so).ToList();

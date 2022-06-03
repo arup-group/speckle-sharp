@@ -109,7 +109,9 @@ namespace ConnectorGSA.UI
             {
               comboIndices.AddRange(comboRecords.Select(r => r.Index.Value));
             }
-            var expanded = ((GsaProxy)Instance.GsaModel.Proxy).ExpandLoadCasesAndCombinations(ResultSettings.CasesDescription, analIndices, comboIndices);
+
+            var description = String.IsNullOrEmpty(ResultSettings.CasesDescription) ? "all" : ResultSettings.CasesDescription.ToUpper();
+            var expanded = ((GsaProxy)Instance.GsaModel.Proxy).ExpandLoadCasesAndCombinations(description, analIndices, comboIndices);
             if (expanded != null && expanded.Count() > 0)
             {
               progress.Report.Log("Resolved load cases");
@@ -160,6 +162,8 @@ namespace ConnectorGSA.UI
           {
             progress.Report.Log("Duration of preparing results: " + duration.ToString(@"hh\:mm\:ss"));
           }
+
+          //Instance.GsaModel.ResultCases = null;
         }
         catch
         {
@@ -289,28 +293,61 @@ namespace ConnectorGSA.UI
         return null;
       }
 
-      if (ResultSettings.SendResults && ResultSettings.UseLocalTransport)
+      if (ResultSettings != null && ResultSettings.SendResults)
       {
-        var basePath = System.IO.Path.Combine(GetDocumentLocation(), state.StreamId);
-        var sqliteTransport = new SQLiteTransport(basePath, "SpeckleGSA", "Results");
-        var sentLocal = await Commands.SendObject(resultsObj, progress, sqliteTransport);
-
-        if (!String.IsNullOrEmpty(sentLocal))
+        if (ResultSettings.UseLocalTransport)
         {
-          progress.Report.Log($"Successfully sent results data to local SQLite file at: {System.IO.Path.Combine(basePath, "SpeckleGSA", "Results.db")}");
+          var basePath = System.IO.Path.Combine(GetDocumentLocation(), state.StreamId);
+          var sqliteTransport = new SQLiteTransport(basePath, "SpeckleGSA", "Results");
+          var sentLocal = await Commands.SendObject(resultsObj, progress, sqliteTransport);
 
-          duration = DateTime.Now - startTime;
-          if (duration.Seconds > 0)
+          if (!String.IsNullOrEmpty(sentLocal))
           {
-            progress.Report.Log("Duration of sending to local SQLite file: " + duration.ToString(@"hh\:mm\:ss"));
-            Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "timeToSendLocal", duration.ToString(@"hh\:mm\:ss") } });
+            progress.Report.Log($"Successfully sent results data to local SQLite file at: {System.IO.Path.Combine(basePath, "SpeckleGSA", "Results.db")}");
+
+            duration = DateTime.Now - startTime;
+            if (duration.Seconds > 0)
+            {
+              progress.Report.Log("Duration of sending to local SQLite file: " + duration.ToString(@"hh\:mm\:ss"));
+              Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "timeToSendLocal", duration.ToString(@"hh\:mm\:ss") } });
+            }
+            startTime = DateTime.Now;
           }
-          startTime = DateTime.Now;
+          else
+          {
+            progress.Report.LogOperationError(new Exception("Unable to send results data to local SQLite file"));
+          }
         }
-        else
+        if (ResultSettings.SaveResultsToCsv)
         {
-          progress.Report.LogOperationError(new Exception("Unable to send results data to local SQLite file"));
+          var basePath = System.IO.Path.Combine(GetDocumentLocation(), state.StreamId, "SpeckleGSA", "GSAExport");
+          System.IO.Directory.CreateDirectory(basePath);
+
+          var exportDir = ((GsaProxy)Instance.GsaModel.Proxy).resultDir;
+
+          foreach (var rg in Instance.GsaModel.ResultGroups)
+          {
+            var res = Enum.GetName(typeof(ResultGroup), rg).ToLower();
+            var fileName = $"result_{res}.csv";
+            var filePath = System.IO.Path.Combine(exportDir, $"result_{res}", fileName);
+            var exists = System.IO.File.Exists(filePath);
+            if (exists)
+            {
+              var exportFile = System.IO.Path.Combine(basePath, fileName);
+              try
+              {
+                System.IO.File.Copy(filePath, exportFile, true);
+              }
+              catch
+              {
+                progress.Report.Log($"Unable to copy raw GSA results export (csv file)");
+              }
+            }
+          }
+
+          progress.Report.Log($"Raw GSA results export (csv files) saved at: {basePath}");
         }
+
       }
 
       return sent;
