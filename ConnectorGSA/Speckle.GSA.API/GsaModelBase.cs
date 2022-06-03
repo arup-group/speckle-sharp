@@ -25,23 +25,23 @@ namespace Speckle.GSA.API
         {
           foreach (var rts in ResultTypes.Select(rt => rt.ToString().ToLower()))
           {
-            if (rts.Contains("1d") && !retList.Contains(ResultGroup.Element1d) && !retList.Contains(ResultGroup.Element1d))
+            if (rts.Contains("1d") && !retList.Contains(ResultGroup.Elem_1d))
             {
-              retList.Add(ResultGroup.Element1d);
+              retList.Add(ResultGroup.Elem_1d);
             }
-            else if (rts.Contains("2d") && !retList.Contains(ResultGroup.Element2d) && !retList.Contains(ResultGroup.Element2d))
+            else if (rts.Contains("2d") && !retList.Contains(ResultGroup.Elem_2d))
             {
-              retList.Add(ResultGroup.Element2d);
+              retList.Add(ResultGroup.Elem_2d);
             }
-            else if (rts.Contains("assembly") && !retList.Contains(ResultGroup.Assembly) && !retList.Contains(ResultGroup.Assembly))
+            else if (rts.Contains("assembly") && !retList.Contains(ResultGroup.Assembly))
             {
               retList.Add(ResultGroup.Assembly);
             }
-            else if ((rts.Contains("nodal") || rts.Contains("constraint")) && !retList.Contains(ResultGroup.Node) && !retList.Contains(ResultGroup.Node))
+            else if ((rts.Contains("nodal") || rts.Contains("constraint")) && !retList.Contains(ResultGroup.Node))
             {
               retList.Add(ResultGroup.Node);
             }
-            else if (!retList.Contains(ResultGroup.Global) && !retList.Contains(ResultGroup.Global))
+            else if ((rts.Contains("total") || rts.Contains("dynamic")) && !retList.Contains(ResultGroup.Global))
             {
               retList.Add(ResultGroup.Global);
             }

@@ -141,7 +141,7 @@ namespace Speckle.ConnectorGSA.Proxy
     public char GwaDelimiter { get => _GwaDelimiter; }
 
     //Results-related
-    private string resultDir = null;
+    public string resultDir = null;
     private Dictionary<ResultGroup, IResultsProcessor> resultProcessors = new Dictionary<ResultGroup, IResultsProcessor>();
     private List<ResultType> allResultTypes;
 
@@ -2238,11 +2238,11 @@ namespace Speckle.ConnectorGSA.Proxy
       {
         resultProcessors.Add(group, new ResultsAssemblyProcessor(Path.Combine(resultDir, @"result_assembly\result_assembly.csv"), unitData, allResultTypes, cases, elemIds));
       }
-      else if (group == ResultGroup.Element1d)
+      else if (group == ResultGroup.Elem_1d)
       {
         resultProcessors.Add(group, new Results1dProcessor(Path.Combine(resultDir, @"result_elem_1d\result_elem_1d.csv"), unitData, allResultTypes, cases, elemIds));
       }
-      else if (group == ResultGroup.Element2d)
+      else if (group == ResultGroup.Elem_2d)
       {
         resultProcessors.Add(group, new Results2dProcessor(Path.Combine(resultDir, @"result_elem_2d\result_elem_2d.csv"), unitData, allResultTypes, cases, elemIds));
       }

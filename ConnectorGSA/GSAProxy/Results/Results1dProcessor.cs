@@ -7,7 +7,7 @@ namespace Speckle.ConnectorGSA.Results
 {
   public class Results1dProcessor : ResultsProcessorBase<CsvElem1dAnnotated>  
   {
-    public override ResultGroup Group => ResultGroup.Element1d;
+    public override ResultGroup Group => ResultGroup.Elem_1d;
 
 
     private List<ResultType> possibleResultTypes = new List<ResultType>()

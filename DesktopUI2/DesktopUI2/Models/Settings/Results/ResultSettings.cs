@@ -43,7 +43,26 @@ namespace DesktopUI2.Models
       }
     }
 
-    public bool UseLocalAxis { get; set; } = true;
+    private bool _saveResultsToCsv = false;
+    public bool SaveResultsToCsv
+    {
+      get => _saveResultsToCsv;
+      set
+      {
+        this.RaiseAndSetIfChanged(ref _saveResultsToCsv, value);
+      }
+    }
+
+    private bool _useLocalAxis = true;
+    public bool UseLocalAxis
+    {
+      get => _useLocalAxis;
+      set
+      {
+        this.RaiseAndSetIfChanged(ref _useLocalAxis, value);
+      }
+    }
+
     public List<ResultSettingItem> ResultSettingItems { get; set; }
     public string CasesDescription { get; set; }
     public int Additional1DPositions { get; set; } = 3;
