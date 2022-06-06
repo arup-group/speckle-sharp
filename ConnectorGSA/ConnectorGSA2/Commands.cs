@@ -718,7 +718,9 @@ namespace ConnectorGSA
           {
             objects.AddRange(FlattenCommitObject(@base[prop], IsSingleObjectFn, uniques));
           }
-          foreach (var kvp in @base.GetMembers())
+
+          var temp = @base.GetMembers();
+          foreach (var kvp in temp)
           {
             var prop = kvp.Key;
             objects.AddRange(FlattenCommitObject(@base[prop], IsSingleObjectFn, uniques));

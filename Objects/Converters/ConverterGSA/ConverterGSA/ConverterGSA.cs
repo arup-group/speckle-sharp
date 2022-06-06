@@ -23,6 +23,7 @@ using Speckle.Core.Transports;
 using Speckle.Core.Serialisation;
 using Speckle.Newtonsoft.Json;
 using Objects.Structural.ApplicationSpecific.GSA.GeneralData;
+using Speckle.ConnectorGSA.Proxy;
 
 namespace ConverterGSA
 {
@@ -132,7 +133,8 @@ namespace ConverterGSA
     public bool CanConvertToNative(Base @object)
     {
       var t = @object.GetType();
-      return ToNativeFns.ContainsKey(t);
+
+      return ToNativeFns.Any(kvp => Helper.InheritsOrImplements(t, kvp.Key));
     }
 
     public bool CanConvertToSpeckle(object @object)
@@ -327,11 +329,37 @@ namespace ConverterGSA
 
       try
       {
-        if (CanConvertToNative(so) && ToNativeFns.ContainsKey(t))
+        if (CanConvertToNative(so))
         {
-          var natives = ToNativeFns[t](so);
+          // add check so.speckle_type to see if structural - skip if not
+          List<GsaRecord> natives = new List<GsaRecord>();
+
+          if (ToNativeFns.ContainsKey(t)) natives = ToNativeFns[t](so);
+
+          else
+          {
+            var currentChild = t.IsGenericType ? t.GetGenericTypeDefinition() : t;
+
+            while (currentChild != typeof(object))
+            {
+              if (ToNativeFns.ContainsKey(currentChild))
+              {
+                natives = ToNativeFns[currentChild](so);
+                break;
+              }
+
+              currentChild = currentChild.BaseType != null
+                             && currentChild.BaseType.IsGenericType
+                                 ? currentChild.BaseType.GetGenericTypeDefinition()
+                                 : currentChild.BaseType;
+
+              if (currentChild == null)
+                break;
+            }
+          }
 
           retList.AddRange(natives);
+
           if (Instance.GsaModel.ConversionProgress != null)
           {
             Instance.GsaModel.ConversionProgress.Report(natives != null);

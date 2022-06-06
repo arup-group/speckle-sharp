@@ -20,6 +20,7 @@ using System.Linq;
 using Restraint = Objects.Structural.Geometry.Restraint;
 using AxisDirection6 = Objects.Structural.GSA.Geometry.AxisDirection6;
 using GwaAxisDirection6 = Speckle.GSA.API.GwaSchema.AxisDirection6;
+using StructuralMaterial = Objects.Structural.Materials.Material;
 using Objects.Structural.Materials;
 using Objects.Structural.GSA.Bridge;
 using Objects.Structural.GSA.Analysis;
@@ -3624,11 +3625,11 @@ namespace ConverterGSA
     /// <param name="index">GSA material index</param>
     /// <param name="type">GSA material type</param>
     /// <returns></returns>
-    private Material GetMaterialFromIndex(int index, Property2dMaterialType type)
+    private StructuralMaterial GetMaterialFromIndex(int index, Property2dMaterialType type)
     {
       //Initialise
       GsaRecord gsaMat;
-      Material speckleMaterial = null;
+      StructuralMaterial speckleMaterial = null;
 
       //Get material based on type and gsa index
       //Convert gsa material to speckle material
@@ -3656,11 +3657,11 @@ namespace ConverterGSA
     /// <param name="index">GSA material index</param>
     /// <param name="type">GSA material type</param>
     /// <returns></returns>
-    private Material GetMaterialFromIndex(int index, Section1dMaterialType type)
+    private StructuralMaterial GetMaterialFromIndex(int index, Section1dMaterialType type)
     {
       //Initialise
       GsaRecord gsaMat;
-      Material speckleMaterial = null;
+      StructuralMaterial speckleMaterial = null;
 
       //Get material based on type and gsa index
       //Convert gsa material to speckle material

@@ -16,6 +16,7 @@ using Objects.Structural.GSA.Bridge;
 using GwaAxisDirection6 = Speckle.GSA.API.GwaSchema.AxisDirection6;
 using AxisDirection6 = Objects.Structural.GSA.Geometry.AxisDirection6;
 using Restraint = Objects.Structural.Geometry.Restraint;
+using StructuralMaterial = Objects.Structural.Materials.Material;
 using Speckle.Core.Kits;
 using Objects.Structural.Loading;
 using Objects.Structural;
@@ -87,6 +88,7 @@ namespace ConverterGSA
         { typeof(Steel), SteelToNative },
         { typeof(GSAConcrete), GSAConcreteToNative },
         { typeof(Concrete), ConcreteToNative },
+        { typeof(StructuralMaterial), MaterialToNative },
         //Properties
         { typeof(Property1D), Property1dToNative },
         { typeof(GSAProperty1D), GsaProperty1dToNative },
@@ -1809,6 +1811,7 @@ namespace ConverterGSA
         fy = speckleSteel.yieldStrength * conversionFactors.stress;
         eps = GetSteelStrain(speckleSteel.yieldStrength) * StrainUnits.GetConversionFactor(StrainUnits.Strain, conversionFactors.nativeModelUnits.strain);
       }
+      if (speckleSteel.yieldStrength == 0 && speckleSteel.strength > 0) fy = speckleSteel.strength * conversionFactors.stress;
       if (speckleSteel.elasticModulus > 0) e = speckleSteel.elasticModulus * conversionFactors.stress;
       if (speckleSteel.poissonsRatio > 0) nu = speckleSteel.poissonsRatio;
       if (speckleSteel.shearModulus > 0) g = speckleSteel.shearModulus * conversionFactors.stress;
@@ -1984,6 +1987,7 @@ namespace ConverterGSA
         beta = GetBeta(speckleConcrete.compressiveStrength);
         eps = GetEpsMax(speckleConcrete.compressiveStrength) * strainFactor;
       }
+      if (speckleConcrete.compressiveStrength == 0 && speckleConcrete.strength > 0) fc = speckleConcrete.strength * conversionFactors.stress;
       if (speckleConcrete.elasticModulus > 0) e = speckleConcrete.elasticModulus * conversionFactors.stress;
       if (speckleConcrete.tensileStrength > 0) ft = speckleConcrete.tensileStrength * conversionFactors.stress;
       if (speckleConcrete.poissonsRatio > 0) nu = speckleConcrete.poissonsRatio;
@@ -2102,6 +2106,27 @@ namespace ConverterGSA
       //  double flexuralStrength
       return new List<GsaRecord>() { gsaConcrete };
     }
+
+    private List<GsaRecord> MaterialToNative(Base speckleObject)
+    {
+      var speckleMaterial = (StructuralMaterial)speckleObject;
+
+      switch (speckleMaterial.materialType)
+      {
+        case MaterialType.Steel:
+          var speckleSteelMaterial = new Steel();
+          speckleMaterial.ShallowConvert<Steel>(ref speckleSteelMaterial);
+          return SteelToNative(speckleSteelMaterial);
+        case MaterialType.Concrete:
+          var speckleConcreteMaterial = new Concrete();
+          speckleMaterial.ShallowConvert<Concrete>(ref speckleConcreteMaterial);
+          return ConcreteToNative(speckleConcreteMaterial);
+        default:
+          Report.ConversionErrors.Add(new Exception($"Conversion for {speckleMaterial.materialType} not supported"));
+          return new List<GsaRecord>();
+      }
+    }
+    
     #endregion
 
     #region Properties

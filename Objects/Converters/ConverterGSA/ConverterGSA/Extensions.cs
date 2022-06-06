@@ -1667,5 +1667,19 @@ namespace ConverterGSA
                    .GroupBy(i => i.Group, g => g.Item)
                    .ToList();
     }
+
+    // MOVE TO DYNAMIC BASE EXT AND PR TO SPECKLE?
+    public static void ShallowConvert<T>(this Base parent, ref T child)
+    {
+      var typedProperties = parent.GetInstanceMembers();
+
+      foreach (var parentProp in typedProperties)
+      {
+        if (parentProp.CanWrite)
+        {
+          parentProp.SetValue(child, parentProp.GetValue(parent));
+        }
+      }
+    }
   }
 }

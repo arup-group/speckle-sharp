@@ -210,7 +210,13 @@ namespace Speckle.Core.Models
         dic.Add(pi.Name, pi.GetValue(this));
       //dynamic members
       foreach (var kvp in properties)
-        dic.Add(kvp.Key, kvp.Value);
+      {
+
+        if (!dic.ContainsKey(kvp.Key))
+        {
+          dic.Add(kvp.Key, kvp.Value);
+        }
+      }
       return dic;
     }
 

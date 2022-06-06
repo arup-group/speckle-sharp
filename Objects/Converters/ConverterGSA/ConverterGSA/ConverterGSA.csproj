@@ -54,6 +54,10 @@
     <Compile Include="Units.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\ConnectorGSA\GSAProxy\GSAProxy.csproj">
+      <Project>{11DB7D37-A6ED-4C8A-B354-D9FB3C82386C}</Project>
+      <Name>GSAProxy</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\..\ConnectorGSA\Speckle.GSA.API\Speckle.GSA.API.csproj">
       <Project>{b17705b9-0d8f-41c8-a868-d46ef3e45e40}</Project>
       <Name>Speckle.GSA.API</Name>
