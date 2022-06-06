@@ -309,7 +309,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
       var referenceRecords = new List<GsaRecord>();
 
       GSALayer layer = t == typeof(GsaEl) ? GSALayer.Analysis : GSALayer.Design;
-      
+
       if (t == typeof(GsaMemb))
       {
         GetPrecedentNatives<GsaMemb>(recordIndices, out referenceRecords);
@@ -429,7 +429,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
                 foreach (var node in gsaMemb.NodeIndices)
                 {
                   GetNative<GsaNode>(node, out var nodeRecord);
-                  records.Add(nodeRecord);
+                  if (nodeRecord != null) records.Add(nodeRecord);
                 }
               }
 
@@ -437,14 +437,14 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
               if (gsaMemb.OrientationNodeIndex.IsIndex())
               {
                 GetNative<GsaNode>(gsaMemb.OrientationNodeIndex.Value, out var nodeRecord);
-                records.Add(nodeRecord);
+                if (nodeRecord != null) records.Add(nodeRecord);
               }
 
               // Section
               if (gsaMemb.PropertyIndex.IsIndex())
               {
                 GetNative<GsaSection>(gsaMemb.PropertyIndex.Value, out var propertyRecord);
-                records.Add(propertyRecord);
+                if (propertyRecord != null) records.Add(propertyRecord);
               }
             }
 
@@ -456,7 +456,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
                 foreach (var node in gsaMemb.NodeIndices)
                 {
                   GetNative<GsaNode>(node, out var nodeRecord);
-                  records.Add(nodeRecord);
+                  if (nodeRecord != null) records.Add(nodeRecord);
                 }
               }
 
@@ -468,7 +468,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
                   foreach (var node in vd)
                   {
                     GetNative<GsaNode>(node, out var nodeRecord);
-                    records.Add(nodeRecord);
+                    if (nodeRecord != null) records.Add(nodeRecord);
                   }
                 }
               }
@@ -481,7 +481,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
                   foreach (var node in polyline)
                   {
                     GetNative<GsaNode>(node, out var nodeRecord);
-                    records.Add(nodeRecord);
+                    if (nodeRecord != null) records.Add(nodeRecord);
                   }
                 }
               }
@@ -492,7 +492,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
                 foreach (var node in gsaMemb.PointNodeIndices)
                 {
                   GetNative<GsaNode>(node, out var nodeRecord);
-                  records.Add(nodeRecord);
+                  if (nodeRecord != null) records.Add(nodeRecord);
                 }
               }
 
@@ -504,7 +504,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
                   foreach (var node in area)
                   {
                     GetNative<GsaNode>(node, out var nodeRecord);
-                    records.Add(nodeRecord);
+                    if (nodeRecord != null) records.Add(nodeRecord);
                   }
                 }
               }
@@ -513,7 +513,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
               if (gsaMemb.PropertyIndex.IsIndex())
               {
                 GetNative<GsaProp2d>(gsaMemb.PropertyIndex.Value, out var propertyRecord);
-                records.Add(propertyRecord);
+                if (propertyRecord != null) records.Add(propertyRecord);
               }
             }
           }
@@ -536,7 +536,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
                 foreach (var node in gsaEl.NodeIndices)
                 {
                   GetNative<GsaNode>(node, out var nodeRecord);
-                  records.Add(nodeRecord);
+                  if (nodeRecord != null) records.Add(nodeRecord);
                 }
               }
 
@@ -544,14 +544,14 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
               if (gsaEl.OrientationNodeIndex.IsIndex())
               {
                 GetNative<GsaNode>(gsaEl.OrientationNodeIndex.Value, out var nodeRecord);
-                records.Add(nodeRecord);
+                if (nodeRecord != null) records.Add(nodeRecord);
               }
 
               // Section
               if (gsaEl.PropertyIndex.IsIndex())
               {
                 GetNative<GsaSection>(gsaEl.PropertyIndex.Value, out var propertyRecord);
-                records.Add(propertyRecord);
+                if (propertyRecord != null) records.Add(propertyRecord);
               }
 
               // Parent member
@@ -559,11 +559,12 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
               {
                 GetNative<GsaMemb>(gsaEl.ParentIndex.Value, out var memberRecord);
 
-                records.Add(memberRecord);
-
                 memberRecord = (GsaMemb)memberRecord;
+
                 if (memberRecord != null)
                 {
+                  records.Add(memberRecord);
+
                   // Drills down recursively to hit typeof(GsaMemb) base case
                   GetPrecedentNatives<GsaMemb>(new List<int>() { memberRecord.Index.Value }, out var embeddedMemberRecords);
 
@@ -582,7 +583,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
                 foreach (var node in gsaEl.NodeIndices)
                 {
                   GetNative<GsaNode>(node, out var nodeRecord);
-                  records.Add(nodeRecord);
+                  if (nodeRecord != null) records.Add(nodeRecord);
                 }
               }
 
@@ -591,7 +592,7 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
               {
                 GetNative<GsaProp2d>(gsaEl.PropertyIndex.Value, out var propertyRecord);
 
-                records.Add(propertyRecord);
+                if (propertyRecord != null) records.Add(propertyRecord);
               }
 
               // Parent member
@@ -599,16 +600,19 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
               {
                 GetNative<GsaMemb>(gsaEl.ParentIndex.Value, out var memberRecord);
 
-                records.Add(memberRecord);
-
                 memberRecord = (GsaMemb)memberRecord;
 
-                // Drills down recursively to hit typeof(GsaMemb) base case
-                GetPrecedentNatives<GsaMemb>(new List<int>() { memberRecord.Index.Value }, out var embeddedMemberRecords);
+                if (memberRecord != null)
+                {
+                  records.Add(memberRecord);
 
-                var uniqueRecords = embeddedMemberRecords.Where(rec => !records.Contains(rec)).ToList();
+                  // Drills down recursively to hit typeof(GsaMemb) base case
+                  GetPrecedentNatives<GsaMemb>(new List<int>() { memberRecord.Index.Value }, out var embeddedMemberRecords);
 
-                records.AddRange(uniqueRecords);
+                  var uniqueRecords = embeddedMemberRecords.Where(rec => !records.Contains(rec)).ToList();
+
+                  records.AddRange(uniqueRecords);
+                }
               }
             }
           }
@@ -620,11 +624,9 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
           if (nodeRecord != null)
           {
             records.Add(nodeRecord);
-
             var gsaNode = (GsaNode)nodeRecord;
 
             // Get node precedents:
-
             // Mass property
             if (gsaNode.MassPropertyIndex.IsIndex())
             {
