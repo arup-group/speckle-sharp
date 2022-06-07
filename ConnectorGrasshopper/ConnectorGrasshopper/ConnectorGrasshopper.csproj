@@ -92,6 +92,7 @@
     <Compile Include="Extras\DebounceDispatcher.cs" />
     <Compile Include="Extras\GenericAccessParam.cs" />
     <Compile Include="Extras\GH_SpeckleGoo.cs" />
+    <Compile Include="Extras\QueryDownloadedStream.cs" />
     <Compile Include="Extras\SendReceiveDataParam.cs" />
     <Compile Include="Extras\Speckle.IGH_Goo.cs" />
     <Compile Include="Extras\SpeckleBaseParam.cs" />
@@ -238,7 +239,7 @@
       <Name>ConnectorGrasshopperUtils</Name>
     </ProjectReference>
   </ItemGroup>
-   <ItemGroup>
+  <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -250,22 +251,19 @@
       <DependentUpon>SchemaBuilderGen.tt</DependentUpon>
     </Compile>
   </ItemGroup>
-   <ItemGroup>
-     <EmbeddedResource Include="Properties\Resources.resx" />
-   </ItemGroup>
-    <Target Name="BeforeRebuild">
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx" />
+  </ItemGroup>
+  <Target Name="BeforeRebuild">
     <Message Text="Restoring T4 tool..." Importance="high" />
     <Exec Command="dotnet tool restore" />
     <Message Text="Generating T4 templates..." Importance="high" />
     <Exec Command="dotnet t4 -o &quot;$(SolutionDir)ConnectorGrasshopper\SchemaBuilder\SchemaBuilderGen.cs&quot; &quot;$(SolutionDir)ConnectorGrasshopper\SchemaBuilder\SchemaBuilderGen.tt&quot; -P=&quot;$(SolutionDir)ConnectorGrasshopper\SchemaBuilder&quot;" />
   </Target>
-  
   <Target Name="Clean">
     <RemoveDir Directories="$(TargetDir);$(AppData)\Grasshopper\Libraries\SpeckleGrasshopper2" />
   </Target>
-
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Condition="$([MSBuild]::IsOsPlatform('Windows'))" Command="Copy &quot;$(TargetDir)$(AssemblyName).dll&quot; &quot;$(TargetDir)$(AssemblyName).gha&quot;" />
     <Exec Condition="$([MSBuild]::IsOsPlatform('OSX'))" Command="cp '$(TargetDir)$(AssemblyName).dll' '$(TargetDir)$(AssemblyName).gha'" />
