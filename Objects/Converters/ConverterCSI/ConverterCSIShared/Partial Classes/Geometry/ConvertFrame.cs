@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Objects.Geometry;
 using Objects.Structural.Geometry;
 using Objects.Structural.Analysis;
+using Objects.Structural.Properties;
 using Speckle.Core.Models;
 using Objects.Structural.CSI.Geometry;
 using Objects.Structural.CSI.Properties;
@@ -28,7 +29,7 @@ namespace Objects.Converter.CSI
       Model.PropFrame.GetNameList(ref number, ref properties);
       if (!properties.Contains(element1D.property.name))
       {
-        Property1DToNative(element1D.property);
+        Property1DToNative((Property1D)element1D.property);
         Model.PropFrame.GetNameList(ref number, ref properties);
       }
       if (baseline != null)
