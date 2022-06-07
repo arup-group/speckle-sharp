@@ -1662,6 +1662,10 @@ namespace Objects.Converter.Bentley
             speckleElement = ColumnToSpeckle(properties, u);
             break;
 
+          case (Category.Opening):
+            speckleElement = OpeningToSpeckle(properties, segments, u);
+            break;
+
           case (Category.Piles):
             speckleElement = PileToSpeckle(properties, u);
             break;
@@ -1833,6 +1837,10 @@ namespace Objects.Converter.Bentley
       else if (part.Contains("Column"))
       {
         category = Category.Columns;
+      }
+      else if (part.Contains("Opening"))
+      {
+        category = Category.Opening;
       }
       else if (part.Contains("Pile"))
       {
