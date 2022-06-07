@@ -95,6 +95,7 @@ namespace ConverterGSA
         { typeof(GSAProperty2D), GsaProperty2dToNative },
         { typeof(PropertySpring), PropertySpringToNative },
         { typeof(PropertyMass), PropertyMassToNative },
+        { typeof(GSAPropertyLink), GSAPropertyLinkToNative },
         //Constraints
         { typeof(GSARigidConstraint), GSARigidConstraintToNative },
         { typeof(GSAGeneralisedRestraint), GSAGeneralisedRestraintToNative },
@@ -2688,6 +2689,22 @@ namespace ConverterGSA
       }
 
       return new List<GsaRecord>() { gsaPropMass };
+    }
+
+    private List<GsaRecord> GSAPropertyLinkToNative(Base speckleObject)
+    {
+      var specklePropertyLink = (GSAPropertyLink)speckleObject;
+      var gsaPropLink = new GsaPropLink()
+      {
+        Index = specklePropertyLink.GetIndex<GsaPropLink>(),
+        Name = specklePropertyLink.name,
+        ApplicationId = specklePropertyLink.applicationId,
+        Colour = specklePropertyLink.colour.ColourToNative(),
+        Type = specklePropertyLink.type.ToNative(),
+        LinkedCondition = GetRigidConstraint(specklePropertyLink.constraintCondition)
+      };
+
+      return new List<GsaRecord>() { gsaPropLink };
     }
 
     private List<GsaRecord> PropertySpringToNative(Base speckleObject)

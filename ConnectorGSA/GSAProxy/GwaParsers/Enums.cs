@@ -76,6 +76,8 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
     PROP_2D,
     [StringValue("PROP_MASS")]
     PROP_MASS,
+    [StringValue("PROP_LINK")]
+    PROP_LINK,
     [StringValue("ALIGN")]
     ALIGN,
     [StringValue("ANAL")]

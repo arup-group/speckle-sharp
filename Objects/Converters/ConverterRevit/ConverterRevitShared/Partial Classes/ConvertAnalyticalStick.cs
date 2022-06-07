@@ -23,8 +23,16 @@ namespace Objects.Converter.Revit
       XYZ offset1 = VectorToNative(speckleStick.end1Offset);
       XYZ offset2 = VectorToNative(speckleStick.end2Offset);
 
-      var profileName = speckleStick.property != null && speckleStick.property.profile != null ? speckleStick.property.profile.name : null;
-      var mappings = UseMappings ? GetMappingFromProfileName(profileName) : null;
+      var profileName = String.Empty; var mappings = new Dictionary<string, string>();
+      if (speckleStick.property != null)
+      {
+        var speckleProp1d = speckleStick.property as Property1D;
+        if (speckleProp1d != null)
+        {
+          profileName = speckleProp1d.profile != null ? speckleProp1d.profile.name : null;
+          mappings = UseMappings ? GetMappingFromProfileName(profileName) : null;
+        }
+      }
 
       switch (speckleStick.memberType)
       {

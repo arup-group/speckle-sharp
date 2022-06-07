@@ -77,6 +77,7 @@ namespace ConverterGSA
         //{ typeof(GsaProp3d), GsaProperty3dToSpeckle }, not supported yet
         { typeof(GsaPropMass), GsaPropertyMassToSpeckle },
         { typeof(GsaPropSpr), GsaPropertySpringToSpeckle },
+        { typeof(GsaPropLink), GsaPropertyLinkToSpeckle },
         //Constraints
         { typeof(GsaRigid), GsaRigidToSpeckle },
         { typeof(GsaGenRest), GsaGenRestToSpeckle },
@@ -331,8 +332,8 @@ namespace ConverterGSA
         return null;
       }
       speckleElement1d.baseLine = new Line(speckleElement1d.end1Node.basePoint, speckleElement1d.end2Node.basePoint);
-      speckleElement1d.displayValue = GetBasePolyline(new List<Point> { speckleElement1d.end1Node.basePoint, speckleElement1d.end2Node.basePoint });
-      if (gsaEl.PropertyIndex.IsIndex()) speckleElement1d.property = GetProperty1dFromIndex(gsaEl.PropertyIndex.Value);
+      //speckleElement1d.displayValue = GetBasePolyline(new List<Point> { speckleElement1d.end1Node.basePoint, speckleElement1d.end2Node.basePoint });
+      if (gsaEl.PropertyIndex.IsIndex()) speckleElement1d.property = GetPropertyFromIndex(gsaEl.Type, gsaEl.PropertyIndex.Value);
       if (gsaEl.OrientationNodeIndex.IsIndex())
       {
         speckleElement1d.orientationNode = GetNodeFromIndex(gsaEl.OrientationNodeIndex.Value);
@@ -989,7 +990,7 @@ namespace ConverterGSA
         positions = positions,
       };
       //if (gsaLoad.MemberIndices.HasValues()) designLoad.elements = gsaLoad.MemberIndices.Select(i => GetMemberFromIndex(i)).ToList();
-      if (gsaLoad.MemberIndices.HasValues()) designLoad.elementRefs = gsaLoad.MemberIndices.Select(i => GetMemberFromIndex(i)).Select(m => m.applicationId).ToList();
+      if (gsaLoad.MemberIndices.HasValues()) designLoad.elementRefs = gsaLoad.MemberIndices.Select(i => GetMemberFromIndex(i)).Where(memb => memb != null).Select(m => m.applicationId).ToList();
       if (layer == GSALayer.Analysis || layer == GSALayer.Both)
       {
         //analysis layer
@@ -1008,7 +1009,7 @@ namespace ConverterGSA
           positions = positions,
         };
         //if (gsaLoad.ElementIndices.HasValues()) analysisLoad.elements = gsaLoad.ElementIndices.Select(i => GetElementFromIndex(i)).ToList();
-        if (gsaLoad.ElementIndices.HasValues()) analysisLoad.elementRefs = gsaLoad.ElementIndices.Select(i => GetElementFromIndex(i)).Select(m => m.applicationId).ToList();
+        if (gsaLoad.ElementIndices.HasValues()) analysisLoad.elementRefs = gsaLoad.ElementIndices.Select(i => GetElementFromIndex(i)).Where(el => el != null).Select(e => e.applicationId).ToList();
       }
 
       var toSpeckleResult = (analysisLoad == null) ? new ToSpeckleResult(designLayerOnlyObjects: new List<Base>() { designLoad })
@@ -1079,7 +1080,7 @@ namespace ConverterGSA
         gravityFactors = gravityFactors,
       };
       //if (gsaLoad.MemberIndices.HasValues()) designLoad.elements = gsaLoad.MemberIndices.Select(i => GetMemberFromIndex(i)).ToList();
-      if (gsaLoad.MemberIndices.HasValues()) designLoad.elementRefs = gsaLoad.MemberIndices.Select(i => GetMemberFromIndex(i)).Select(m => m.applicationId).ToList();
+      if (gsaLoad.MemberIndices.HasValues()) designLoad.elementRefs = gsaLoad.MemberIndices.Select(i => GetMemberFromIndex(i)).Where(memb => memb != null).Select(m => m.applicationId).ToList();
 
       if (layer == GSALayer.Analysis || layer == GSALayer.Both)
       {
@@ -1094,7 +1095,7 @@ namespace ConverterGSA
           gravityFactors = gravityFactors,
         };
         //if (gsaLoad.ElementIndices.HasValues()) analysisLoad.elements = gsaLoad.ElementIndices.Select(i => GetElementFromIndex(i)).ToList();
-        if (gsaLoad.ElementIndices.HasValues()) analysisLoad.elementRefs = gsaLoad.ElementIndices.Select(i => GetElementFromIndex(i)).Select(m => m.applicationId).ToList();
+        if (gsaLoad.ElementIndices.HasValues()) analysisLoad.elementRefs = gsaLoad.ElementIndices.Select(i => GetElementFromIndex(i)).Where(el => el != null).Select(e => e.applicationId).ToList();
       }
 
       AddToMeaningfulNodeIndices(nodes.Select(n => n.applicationId));
@@ -1134,7 +1135,7 @@ namespace ConverterGSA
         values = gsaLoad.Values,
       };
       //if (gsaLoad.MemberIndices.HasValues()) designLoad.elements = gsaLoad.MemberIndices.Select(i => (Element1D)GetMemberFromIndex(i)).ToList();
-      if (gsaLoad.MemberIndices.HasValues()) designLoad.elementRefs = gsaLoad.MemberIndices.Select(i => GetMemberFromIndex(i)).Select(m => m.applicationId).ToList();
+      if (gsaLoad.MemberIndices.HasValues()) designLoad.elementRefs = gsaLoad.MemberIndices.Select(i => GetMemberFromIndex(i)).Where(memb => memb != null).Select(m => m.applicationId).ToList();
 
       if (layer == GSALayer.Analysis || layer == GSALayer.Both)
       {
@@ -1149,7 +1150,7 @@ namespace ConverterGSA
           values = gsaLoad.Values,
         };
         //if (gsaLoad.ElementIndices.HasValues()) analysisLoad.elements = gsaLoad.ElementIndices.Select(i => (Element1D)GetElement1DFromIndex(i)).ToList();
-        if (gsaLoad.ElementIndices.HasValues()) analysisLoad.elementRefs = gsaLoad.ElementIndices.Select(i => GetElementFromIndex(i)).Select(m => m.applicationId).ToList();
+        if (gsaLoad.ElementIndices.HasValues()) analysisLoad.elementRefs = gsaLoad.ElementIndices.Select(i => GetElementFromIndex(i)).Where(el => el != null).Select(e => e.applicationId).ToList();
       }
 
       return new ToSpeckleResult(designLayerOnlyObjects: new List<Base>() { designLoad }, analysisLayerOnlyObjects: new List<Base>() { analysisLoad });
@@ -1184,7 +1185,7 @@ namespace ConverterGSA
         values = gsaLoad.Values,
       };
       //if (gsaLoad.MemberIndices.HasValues()) designLoad.elements = gsaLoad.MemberIndices.Select(i => (Element2D)GetMemberFromIndex(i)).ToList();
-      if (gsaLoad.MemberIndices.HasValues()) designLoad.elementRefs = gsaLoad.MemberIndices.Select(i => GetMemberFromIndex(i)).Select(m => m.applicationId).ToList();
+      if (gsaLoad.MemberIndices.HasValues()) designLoad.elementRefs = gsaLoad.MemberIndices.Select(i => GetMemberFromIndex(i)).Where(memb => memb != null).Select(m => m.applicationId).ToList();
 
       if (layer == GSALayer.Analysis || layer == GSALayer.Both)
       {
@@ -1199,7 +1200,7 @@ namespace ConverterGSA
           values = gsaLoad.Values,
         };
         //if (gsaLoad.ElementIndices.HasValues()) analysisLoad.elements = gsaLoad.ElementIndices.Select(i => (Element2D)GetElement2DFromIndex(i)).ToList();
-        if (gsaLoad.ElementIndices.HasValues()) analysisLoad.elementRefs = gsaLoad.ElementIndices.Select(i => GetElementFromIndex(i)).Select(m => m.applicationId).ToList();
+        if (gsaLoad.ElementIndices.HasValues()) analysisLoad.elementRefs = gsaLoad.ElementIndices.Select(i => GetElementFromIndex(i)).Where(el => el != null).Select(e => e.applicationId).ToList();
       }
 
       return new ToSpeckleResult(designLayerOnlyObjects: new List<Base>() { designLoad }, analysisLayerOnlyObjects: new List<Base>() { analysisLoad });
@@ -1729,6 +1730,30 @@ namespace ConverterGSA
       }
 
       return new ToSpeckleResult(specklePropertyMass);
+    }
+
+    private ToSpeckleResult GsaPropertyLinkToSpeckle(GsaRecord nativeObject, GSALayer layer = GSALayer.Both)
+    {
+      var gsaPropLink = (GsaPropLink)nativeObject;
+      var specklePropertyLink = new GSAPropertyLink()
+      {
+        name = gsaPropLink.Name,
+        colour = gsaPropLink.Colour.ToString(),
+        nativeId = gsaPropLink.Index ?? 0,
+      };
+      if (gsaPropLink.Index.IsIndex()) specklePropertyLink.applicationId = Instance.GsaModel.Cache.GetApplicationId<GsaPropLink>(gsaPropLink.Index.Value);
+
+      GSAConstraintCondition constraintCondition = new GSAConstraintCondition();
+      if (gsaPropLink.Type == LinkType.Custom)
+      {
+        constraintCondition = GetRigidConstraint(gsaPropLink.LinkedCondition);
+        specklePropertyLink.constraintCondition = constraintCondition;
+      }
+
+      var type = gsaPropLink.Type.ToSpeckle();
+      specklePropertyLink.type = type;
+
+      return new ToSpeckleResult(specklePropertyLink);
     }
 
     private ToSpeckleResult GsaPropertySpringToSpeckle(GsaRecord nativeObject, GSALayer layer = GSALayer.Both)
@@ -4025,6 +4050,20 @@ namespace ConverterGSA
     {
       return (Instance.GsaModel.Cache.GetSpeckleObjects<GsaSection, Property1D>(index, out var speckleObjects) && speckleObjects != null && speckleObjects.Count > 0)
         ? speckleObjects.First() : null;
+    }
+
+    private Property GetPropertyFromIndex(ElementType elementType, int index)
+    {
+      if (elementType == ElementType.Link)
+      {
+        return (Instance.GsaModel.Cache.GetSpeckleObjects<GsaPropLink, PropertyLink>(index, out var speckleObjects) && speckleObjects != null && speckleObjects.Count > 0)
+        ? speckleObjects.First() : null;
+      }
+      else
+      {
+        return (Instance.GsaModel.Cache.GetSpeckleObjects<GsaSection, Property1D>(index, out var speckleObjects) && speckleObjects != null && speckleObjects.Count > 0)
+          ? speckleObjects.First() : null;
+      }
     }
 
     #region Profiles

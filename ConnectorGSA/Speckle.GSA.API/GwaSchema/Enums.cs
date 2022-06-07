@@ -504,6 +504,23 @@
     Custom
   }
 
+  public enum LinkType
+  {
+    NotSet = 0,
+    ALL,
+    PIN,
+    XY_PLANE,
+    YZ_PLANE,
+    ZX_PLANE,
+    XY_PLANE_PIN,
+    YZ_PLANE_PIN,
+    ZX_PLANE_PIN,
+    BAR,
+    TENS,
+    COMP,
+    Custom
+  }
+
   public enum Section1dStandardProfileType
   {
     [StringValue("R")] Rectangular,

@@ -7,6 +7,7 @@ using Objects.Geometry;
 using Objects.Structural;
 using Objects.Structural.Geometry;
 using Objects.Structural.GSA.Geometry;
+using Objects.Structural.GSA.Properties;
 using Objects.Structural.Loading;
 using Speckle.GSA.API.GwaSchema;
 using MemberType = Objects.Structural.Geometry.MemberType;
@@ -682,6 +683,26 @@ namespace ConverterGSA
       }
     }
 
+    public static LinkPropertyType ToSpeckle(this LinkType gsaType)
+    {
+      switch (gsaType)
+      {
+        case LinkType.ALL: return LinkPropertyType.ALL;
+        case LinkType.XY_PLANE: return LinkPropertyType.XY_PLANE;
+        case LinkType.YZ_PLANE: return LinkPropertyType.YZ_PLANE;
+        case LinkType.ZX_PLANE: return LinkPropertyType.ZX_PLANE;
+        case LinkType.PIN: return LinkPropertyType.PIN;
+        case LinkType.XY_PLANE_PIN: return LinkPropertyType.XY_PLANE_PIN;
+        case LinkType.YZ_PLANE_PIN: return LinkPropertyType.YZ_PLANE_PIN;
+        case LinkType.ZX_PLANE_PIN: return LinkPropertyType.ZX_PLANE_PIN;
+        case LinkType.BAR: return LinkPropertyType.BAR;
+        case LinkType.TENS: return LinkPropertyType.TENS;
+        case LinkType.COMP: return LinkPropertyType.COMP;
+        case LinkType.Custom: return LinkPropertyType.Custom;
+        default: return LinkPropertyType.NotSet;
+      }
+    }
+
     public static AxisDirection6 ToSpeckle(this GwaAxisDirection6 gsa)
     {
       switch (gsa)
@@ -1071,6 +1092,26 @@ namespace ConverterGSA
         case LinkageType.ZX_PLATE_PIN: return RigidConstraintType.ZX_PLATE_PIN;
         case LinkageType.Custom: return RigidConstraintType.Custom;
         default: return RigidConstraintType.NotSet;
+      }
+    }
+
+    public static LinkType ToNative(this LinkPropertyType speckleType)
+    {
+      switch (speckleType)
+      {
+        case LinkPropertyType.ALL: return LinkType.ALL;
+        case LinkPropertyType.XY_PLANE: return LinkType.XY_PLANE;
+        case LinkPropertyType.YZ_PLANE: return LinkType.YZ_PLANE;
+        case LinkPropertyType.ZX_PLANE: return LinkType.ZX_PLANE;
+        case LinkPropertyType.PIN: return LinkType.PIN;
+        case LinkPropertyType.XY_PLANE_PIN: return LinkType.XY_PLANE_PIN;
+        case LinkPropertyType.YZ_PLANE_PIN: return LinkType.YZ_PLANE_PIN;
+        case LinkPropertyType.ZX_PLANE_PIN: return LinkType.ZX_PLANE_PIN;
+        case LinkPropertyType.BAR: return LinkType.BAR;
+        case LinkPropertyType.TENS: return LinkType.TENS;
+        case LinkPropertyType.COMP: return LinkType.COMP;
+        case LinkPropertyType.Custom: return LinkType.Custom;
+        default: return LinkType.NotSet;
       }
     }
     #endregion

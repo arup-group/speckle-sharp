@@ -1030,7 +1030,6 @@ namespace Speckle.ConnectorGSA.Proxy
         return false;
       }
 
-      //progress.Max = 0;
       var parseProgressDict = new ConcurrentDictionary<string, int>();
       parseProgressDict["Parsing"] = 0;
 
@@ -1115,6 +1114,7 @@ namespace Speckle.ConnectorGSA.Proxy
                   else
                     progress.Report.Log($"Parsed GWA data for {schemaType.Name}");
                   parseProgressDict["Parsing"]++;
+                  progress.Max = parseProgressDict["Parsing"];
                   progress.Update(parseProgressDict);
                 }
                 else if (progress != null)
@@ -1244,6 +1244,7 @@ namespace Speckle.ConnectorGSA.Proxy
                       else
                         progress.Report.Log($"Parsed GWA data for {schemaType.Name}");
                       parseProgressDict["Parsing"]++;
+                      progress.Max = parseProgressDict["Parsing"];
                       progress.Update(parseProgressDict);
                     }
                     else if (progress != null)
@@ -1364,6 +1365,7 @@ namespace Speckle.ConnectorGSA.Proxy
                   else
                     progress.Report.Log($"Parsed GWA data for {schemaType.Name}");
                   parseProgressDict["Parsing"]++;
+                  progress.Max = parseProgressDict["Parsing"];
                   progress.Update(parseProgressDict);
                 }
                 else if (progress != null)

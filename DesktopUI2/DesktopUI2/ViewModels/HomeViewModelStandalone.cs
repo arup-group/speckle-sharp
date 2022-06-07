@@ -53,7 +53,7 @@ namespace DesktopUI2.ViewModels
 
       Bindings = Locator.Current.GetService<ConnectorBindings>();
       this.RaisePropertyChanged("SavedStreams");
-      Init();
+      //Init();
 
       var config = ConfigManager.Load();
       ChangeTheme(config.DarkTheme);

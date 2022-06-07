@@ -168,9 +168,7 @@ namespace ConnectorGSA.UI
           if (duration.Seconds > 0)
           {
             progress.Report.Log("Duration of preparing results: " + duration.ToString(@"hh\:mm\:ss"));
-          }
-
-          //Instance.GsaModel.ResultCases = null;
+          }          
         }
         catch
         {
@@ -357,7 +355,7 @@ namespace ConnectorGSA.UI
 
           progress.Report.Log($"Raw GSA results export (csv files) saved at: {basePath}");
         }
-
+        Instance.GsaModel.ResultCases = null;
       }
 
       return sent;

@@ -15,7 +15,7 @@ namespace Objects.Structural.Geometry
     public ICurve baseLine { get; set; }
 
     [DetachProperty]
-    public Property1D property { get; set; }
+    public Property property { get; set; }
     public MemberType memberType { get; set; } = MemberType.NotSet;
     public ElementType1D type { get; set; }
     public Restraint end1Releases { get; set; }

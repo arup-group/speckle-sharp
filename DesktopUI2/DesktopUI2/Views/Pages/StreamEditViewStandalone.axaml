@@ -109,14 +109,14 @@
           Classes="Mini"
           Command="{Binding ShareCommand}"
           ToolTip.Tip="Share">
-          <Button.Content>
+          <!--<Button.Content>
             <icons:MaterialIcon
               Width="15"
               Height="15"
               assists:ShadowAssist.ShadowDepth="0"
               Foreground="{DynamicResource MaterialDesignBody}"
               Kind="UsersAdd" />
-          </Button.Content>
+          </Button.Content>-->
         </m:FloatingButton>
         <Menu Grid.Column="3" Items="{Binding MenuItems}">
           <Menu.Styles>
