@@ -44,13 +44,13 @@ namespace DesktopUI2.ViewModels
       {
         IsStandalone = true;
       }
-
-      Locator.CurrentMutable.Register(() => new StreamEditViewStandalone(), typeof(IViewFor<StreamViewModel>));      
+      
       Locator.CurrentMutable.Register(() => new CollaboratorsView(), typeof(IViewFor<CollaboratorsViewModel>));
       Locator.CurrentMutable.Register(() => new SettingsView(), typeof(IViewFor<SettingsPageViewModel>));
       Locator.CurrentMutable.Register(() => Bindings, typeof(ConnectorBindings));
 
       if (IsStandalone) {
+        Locator.CurrentMutable.Register(() => new StreamEditViewStandalone(), typeof(IViewFor<StreamViewModel>));
         Locator.CurrentMutable.Register(() => new HomeViewStandalone(), typeof(IViewFor<HomeViewModelStandalone>));
         RouterInstance = Router; // makes the router available app-wide
         Router.Navigate.Execute(new HomeViewModelStandalone(this));
@@ -59,6 +59,7 @@ namespace DesktopUI2.ViewModels
         Bindings.UpdateSelectedStream = HomeViewModel.Instance.UpdateSelectedStream;
       } else
       {
+        Locator.CurrentMutable.Register(() => new StreamEditView(), typeof(IViewFor<StreamViewModel>));
         Locator.CurrentMutable.Register(() => new HomeView(), typeof(IViewFor<HomeViewModel>));
         RouterInstance = Router; // makes the router available app-wide
         Router.Navigate.Execute(new HomeViewModel(this));
