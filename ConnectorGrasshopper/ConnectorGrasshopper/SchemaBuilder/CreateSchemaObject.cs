@@ -23,7 +23,7 @@ namespace ConnectorGrasshopper
 {
   public class CreateSchemaObject : SelectKitComponentBase, IGH_VariableParameterComponent
   {
-    public override GH_Exposure Exposure => GH_Exposure.quarternary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
     private ConstructorInfo SelectedConstructor;
     private bool readFailed;

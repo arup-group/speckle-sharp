@@ -10,11 +10,10 @@ using Grasshopper.Kernel.Parameters;
 
 namespace ConnectorGrasshopper.Extras
 {
-  public class SpeckleStatefulParam : Param_GenericObject
+  public abstract class SpeckleStatefulParam : Param_GenericObject
   {
     public override GH_Exposure Exposure => GH_Exposure.hidden;
     public bool Detachable { get; set; } = true;
-    public override Guid ComponentGuid => new Guid("5B5A49FC-ACDE-4C09-9317-9C466374C163");
 
     public override GH_StateTagList StateTags
     {
@@ -111,9 +110,7 @@ namespace ConnectorGrasshopper.Extras
       base.AppendAdditionalMenuItems(menu);
     }
 
-    protected virtual void Menu_AppendCustomMenuItems(ToolStripDropDown menu)
-    {
-    }
+    protected abstract void Menu_AppendCustomMenuItems(ToolStripDropDown menu);
 
     public void InheritNickname()
     {
