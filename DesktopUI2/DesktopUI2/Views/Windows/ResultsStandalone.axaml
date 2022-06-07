@@ -8,9 +8,9 @@
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   xmlns:vm="clr-namespace:DesktopUI2.ViewModels"
   Title="Results"
-  Width="400"
+  Width="515"
   Height="500"
-  d:DesignHeight="400"
+  d:DesignHeight="515"
   d:DesignWidth="500"
   Icon="avares://DesktopUI2/Assets/icon.ico"
   mc:Ignorable="d">
@@ -35,7 +35,7 @@
     <StackPanel Grid.Row="0" Orientation="Vertical" Margin="10">
       <CheckBox Content="Send results" IsChecked="{Binding ResultSettings.SendResults}" Margin="0 5"/>
       <CheckBox Content="Send to Speckle Server (ie. use server transport)" IsEnabled="{Binding ResultSettings.SendResults}" IsChecked="{Binding ResultSettings.UseServerTransport}" Margin="25 5"/>
-      <CheckBox Content="Send to SQLite database (ie. use local SQLite transport)" IsEnabled="{Binding ResultSettings.SendResults}" IsChecked="{Binding ResultSettings.UseLocalTransport}" Margin="25 5"/>
+      <CheckBox Content="Save Speckle results object to local SQLite file (ie. use SQLite transport)" IsEnabled="{Binding ResultSettings.SendResults}" IsChecked="{Binding ResultSettings.UseLocalTransport}" Margin="25 5"/>
       <CheckBox Content="Save raw GSA results export (CSV files) locally" IsEnabled="{Binding ResultSettings.SendResults}" IsChecked="{Binding ResultSettings.SaveResultsToCsv}" Margin="25 5"/>
       <DockPanel LastChildFill="True">
         <TextBlock DockPanel.Dock="Left" VerticalAlignment="Center" Text="Cases: " Margin="0 5 5 5" />

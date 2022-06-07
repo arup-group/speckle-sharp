@@ -85,7 +85,9 @@ namespace ConnectorGSA.UI
 
       percentage += 20;
 
-      if (ResultSettings != null && ResultSettings.SendResults)
+      var sendResults = ResultSettings != null && ResultSettings.SendResults;
+      var loadedResults = false;
+      if (sendResults)
       {
         Instance.GsaModel.StreamSendConfig = ResultSettings.SendResults ? StreamContentConfig.ModelAndResults : StreamContentConfig.ModelOnly;
         Instance.GsaModel.Result1DNumPosition = ResultSettings.Additional1DPositions; //end points (2) plus additional
@@ -128,6 +130,11 @@ namespace ConnectorGSA.UI
                 }
               }
               Instance.GsaModel.ResultTypes = resultTypes;
+
+              loadedResults = true;
+            } else
+            {
+              progress.Report.LogOperationError(new Exception("Unable to resolve load cases - does the file have results?"));
             }
           }
           catch
@@ -144,12 +151,12 @@ namespace ConnectorGSA.UI
         Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "timeToHydrateCache", duration.ToString(@"hh\:mm\:ss") } });
       }
       startTime = DateTime.Now;
-
-      if (ResultSettings != null && ResultSettings.SendResults)
+      
+      if (sendResults && loadedResults)
       {
         try
         {
-          Instance.GsaModel.Proxy.PrepareResults(Instance.GsaModel.ResultTypes);
+          loadedResults = Instance.GsaModel.Proxy.PrepareResults(Instance.GsaModel.ResultTypes);
           foreach (var rg in Instance.GsaModel.ResultGroups)
           {
             ((GsaProxy)Instance.GsaModel.Proxy).LoadResults(rg, out int numErrorRows, Instance.GsaModel.ResultCases);
@@ -167,7 +174,7 @@ namespace ConnectorGSA.UI
         }
         catch
         {
-
+          progress.Report.LogOperationError(new Exception("Failed to load results from file"));
         }
         startTime = DateTime.Now;
       }
@@ -258,7 +265,6 @@ namespace ConnectorGSA.UI
           name = "Results";
           if (ResultSettings.UseLocalTransport)
           {
-            //resultsObj = obj;
             resultsObj['@' + name] = obj;
           }
           if (!ResultSettings.UseServerTransport)
@@ -293,7 +299,7 @@ namespace ConnectorGSA.UI
         return null;
       }
 
-      if (ResultSettings != null && ResultSettings.SendResults)
+      if (sendResults && loadedResults)
       {
         if (ResultSettings.UseLocalTransport)
         {
@@ -321,7 +327,11 @@ namespace ConnectorGSA.UI
         if (ResultSettings.SaveResultsToCsv)
         {
           var basePath = System.IO.Path.Combine(GetDocumentLocation(), state.StreamId, "SpeckleGSA", "GSAExport");
-          System.IO.Directory.CreateDirectory(basePath);
+          var baseDir = System.IO.Directory.CreateDirectory(basePath);
+          foreach (System.IO.FileInfo file in baseDir.GetFiles())
+          {
+            file.Delete();
+          }
 
           var exportDir = ((GsaProxy)Instance.GsaModel.Proxy).resultDir;
 
@@ -340,7 +350,7 @@ namespace ConnectorGSA.UI
               }
               catch
               {
-                progress.Report.Log($"Unable to copy raw GSA results export (csv file)");
+                progress.Report.LogOperationError(new Exception("Unable to copy raw GSA results export (csv file)"));
               }
             }
           }

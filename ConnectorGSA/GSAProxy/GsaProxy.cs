@@ -1160,14 +1160,14 @@ namespace Speckle.ConnectorGSA.Proxy
                 var originalSid = "";
                 var kwStr = keyword.Value.GetStringValue();
 
-                  //For some GET_ALL calls, records with other keywords are returned, too.  Example: GET_ALL TASK returns TASK, TASK_TAG and ANAL records
-                  if (keyword.Value == setKeywords[i])
+                //For some GET_ALL calls, records with other keywords are returned, too.  Example: GET_ALL TASK returns TASK, TASK_TAG and ANAL records
+                if (keyword.Value == setKeywords[i])
                 {
                   if (string.IsNullOrEmpty(streamId))
                   {
-                      //Slight hardcoding for optimisation here: the biggest source of GetSidTagValue calls would be from nodes, and knowing
-                      //(at least in GSA v10 build 63) that GET_ALL NODE does return SID tags, the call is avoided for NODE keyword
-                      if (!isNode && !isElement)
+                    //Slight hardcoding for optimisation here: the biggest source of GetSidTagValue calls would be from nodes, and knowing
+                    //(at least in GSA v10 build 63) that GET_ALL NODE does return SID tags, the call is avoided for NODE keyword
+                    if (!isNode && !isElement)
                     {
                       try
                       {
@@ -1183,8 +1183,8 @@ namespace Speckle.ConnectorGSA.Proxy
 
                   if (string.IsNullOrEmpty(appId))
                   {
-                      //Again, the same optimisation as explained above
-                      if (!isNode && !isElement)
+                    //Again, the same optimisation as explained above
+                    if (!isNode && !isElement)
                     {
                       try
                       {
@@ -1267,10 +1267,14 @@ namespace Speckle.ConnectorGSA.Proxy
         for (int i = 0; i < setAtKeywords.Count(); i++)
         {
           int highestIndex = 0;
-          lock (syncLock)
+          try
           {
-            highestIndex = GSAObject.GwaCommand("HIGHEST" + GwaDelimiter + setAtKeywords[i]);
+            lock (syncLock)
+            {
+              highestIndex = GSAObject.GwaCommand("HIGHEST" + GwaDelimiter + setAtKeywords[i]);
+            }
           }
+          catch { }
 
           for (int j = 1; j <= highestIndex; j++)
           {

@@ -212,7 +212,7 @@
             </MenuItem>
           </Menu>
 
-          <!--  UPDATE NOTIFICATION  -->
+          <!--  UPDATE NOTIFICATION  --><!--
           <Menu
             VerticalAlignment="Center"
             IsVisible="{Binding HasUpdate}"
@@ -227,7 +227,7 @@
                 Header="An update for this connector is available, install it now!"
                 Icon="{icons:MaterialIconExt ExternalLink}" />
             </MenuItem>
-          </Menu>
+          </Menu>-->
           
         </StackPanel>
       </Grid>
@@ -325,7 +325,7 @@
                 </m:FloatingButton>
 
 
-                <Menu
+                <!--<Menu
                   Grid.Column="1"
                   Margin="2,0,0,0"
                   VerticalAlignment="Center"
@@ -345,14 +345,14 @@
                           Kind="FilterVariant" />
                       </Grid>
                     </MenuItem.Header>
-                    <!--<ListBox>
+                    --><!--<ListBox>
 
                       <TextBlock Text="all" />
                       <TextBlock Text="owner" />
                       <TextBlock Text="contributor" />
                       <TextBlock Text="reviewer" />
                       <icons:MaterialIcon VerticalAlignment="Center" Kind="Heart" />
-                    </ListBox>-->
+                    </ListBox>--><!--
                     <RadioButton
                       HorizontalContentAlignment="Center"
                       Classes="Button"
@@ -385,7 +385,7 @@
                       IsChecked="{Binding Path=SelectedFilter, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=favorite}" />
 
                   </MenuItem>
-                </Menu>
+                </Menu>-->
               </StackPanel>
 
             </TextBox.InnerRightContent>

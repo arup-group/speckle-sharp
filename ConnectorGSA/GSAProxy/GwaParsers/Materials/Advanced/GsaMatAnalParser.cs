@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Speckle.ConnectorGSA.Proxy.GwaParsers
 {
-  [GsaType(GwaKeyword.MAT_ANAL, GwaSetCommandType.Set, false, false, true)]
+  [GsaType(GwaKeyword.MAT_ANAL, GwaSetCommandType.Set, true)]
   public class GsaMatAnalParser : GwaParser<GsaMatAnal>
   {
     public GsaMatAnalParser(GsaMatAnal gsaMatAnal) : base(gsaMatAnal)  {  }
@@ -119,6 +119,12 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
         return false;
       }
 
+      if (record.Index > 0)
+      {
+        //Not embedded
+        Embedded = false;
+      }
+
       //Process common items
       if (Embedded)
       {
@@ -138,22 +144,22 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
         case MatAnalType.MAT_ELAS_ISO:
           //MAT_ANAL | num | MAT_ELAS_ISO | name | colour | 6 | E | nu | rho | alpha | G | damp |
           //2 additional items are undocumented based on GSA 10.1 gwas
-          AddItems(ref items, record.E, record.Nu, record.Rho, record.Alpha, record.G, record.Damp, 0, 0);
+          AddItems(ref items, record.E, record.Nu, record.Rho, record.Alpha, record.G, record.Damp ?? 0, 0, 0);
           break;
         case MatAnalType.MAT_DRUCKER_PRAGER:
           //MAT_ANAL | num | MAT_DRUCKER_PRAGER | name | colour | 10 | G | nu | rho | cohesion | phi | psi | record.Eh | scribe | alpha | damp
           //2 additional items are undocumented based on GSA 10.1 gwas
-          AddItems(ref items, record.G, record.Nu, record.Rho, record.Cohesion, record.Phi, record.Psi, record.Eh, record.Scribe, record.Alpha, record.Damp, 0, 0);
+          AddItems(ref items, record.G, record.Nu, record.Rho, record.Cohesion, record.Phi, record.Psi, record.Eh, record.Scribe, record.Alpha, record.Damp ?? 0, 0, 0);
           break;
         case MatAnalType.MAT_ELAS_ORTHO:
           //MAT_ANAL | num | MAT_ELAS_ORTHO | name | colour | 14 | record.Ex | record.Ey | record.Ez | nuxy | nuyz | nuzx | rho | alphax | alphay | alphaz | record.Gxy | record.Gyz | record.Gzx | damp
           //2 additional items are undocumented based on GSA 10.1 gwas
-          AddItems(ref items, record.Ex, record.Ey, record.Ez, record.Nuxy, record.Nuyz, record.Nuzx, record.Rho, record.Alphax, record.Alphay, record.Alphaz, record.Gxy, record.Gyz, record.Gzx, record.Damp, 0, 0);
+          AddItems(ref items, record.Ex, record.Ey, record.Ez, record.Nuxy, record.Nuyz, record.Nuzx, record.Rho, record.Alphax, record.Alphay, record.Alphaz, record.Gxy, record.Gyz, record.Gzx, record.Damp ?? 0, 0, 0);
           break;
         case MatAnalType.MAT_ELAS_PLAS_ISO:
           //MAT_ANAL | num | MAT_ELAS_PLAS_ISO | name | colour | 9 | E | nu | rho | alpha | yield | ultimate | record.Eh | beta | damp
           //2 additional items are undocumented based on GSA 10.1 gwas
-          AddItems(ref items, record.E, record.Nu, record.Rho, record.Alpha, record.Yield, record.Ultimate, record.Eh, record.Beta, record.Damp, 0, 0);
+          AddItems(ref items, record.E, record.Nu, record.Rho, record.Alpha, record.Yield, record.Ultimate, record.Eh, record.Beta, record.Damp ?? 0, 0, 0);
           break;
         case MatAnalType.MAT_FABRIC:
           //MAT_ANAL | num | MAT_FABRIC | name | colour | 4 | record.Ex | record.Ey | nu | G | 1 | comp
@@ -163,7 +169,7 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
         case MatAnalType.MAT_MOHR_COULOMB:
           //MAT_ANAL | num | MAT_MOHR_COULOMB | name | colour | 9 | G | nu | rho | cohesion | phi | psi | record.Eh | alpha | damp
           //2 additional items are undocumented based on GSA 10.1 gwas
-          AddItems(ref items, record.G, record.Nu, record.Rho, record.Cohesion, record.Phi, record.Psi, record.Eh, record.Alpha, record.Damp, 0, 0);
+          AddItems(ref items, record.G, record.Nu, record.Rho, record.Cohesion, record.Phi, record.Psi, record.Eh, record.Alpha, record.Damp ?? 0, 0, 0);
           break;
         default:
           break;

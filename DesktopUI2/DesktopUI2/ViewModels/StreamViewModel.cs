@@ -749,6 +749,15 @@ namespace DesktopUI2.ViewModels
         Progress.ProgressTitle = "Sending to Speckle 🚀";
         Progress.IsProgressing = true;
 
+        Window dialog = null;
+        if (IsStandalone)
+        {
+          dialog = new QuickOpsDialog();
+          dialog.DataContext = Progress;
+          dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+          dialog.ShowDialog(MainWindow.Instance);
+        }
+
         var commitId = await Task.Run(() => Bindings.SendStream(StreamState, Progress));
         Progress.IsProgressing = false;
 
@@ -763,6 +772,10 @@ namespace DesktopUI2.ViewModels
         else
         {
           Notification = "Nothing sent!";
+          if (IsStandalone)
+          {
+            dialog.Close();
+          }
         }
 
         if (Progress.Report.ConversionErrorsCount > 0 || Progress.Report.OperationErrorsCount > 0)
@@ -790,6 +803,15 @@ namespace DesktopUI2.ViewModels
         Progress.ProgressTitle = "Receiving from Speckle 🚀";
         Progress.IsProgressing = true;
 
+        Window dialog = null;
+        if (IsStandalone)
+        {
+          dialog = new QuickOpsDialog();
+          dialog.DataContext = Progress;
+          dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+          dialog.ShowDialog(MainWindow.Instance);
+        }
+
         await Task.Run(() => Bindings.ReceiveStream(StreamState, Progress));
         Progress.IsProgressing = false;
 
@@ -797,6 +819,12 @@ namespace DesktopUI2.ViewModels
         {
           LastUsed = DateTime.Now.ToString();
           Analytics.TrackEvent(StreamState.Client.Account, Analytics.Events.Receive, new Dictionary<string, object>() { { "mode", StreamState.ReceiveMode }, { "auto", StreamState.AutoReceive } });
+        } else
+        {
+          if (IsStandalone)
+          {
+            dialog.Close();
+          }
         }
 
         if (Progress.Report.ConversionErrorsCount > 0 || Progress.Report.OperationErrorsCount > 0)

@@ -16,6 +16,7 @@ namespace Objects.Structural.Results
   public class ResultSetNode : Result
   {
     [DetachProperty]
+    [Chunkable(1000)]
     public List<ResultNode> resultsNode { get; set; }
     public ResultSetNode() { }
 
@@ -30,6 +31,7 @@ namespace Objects.Structural.Results
   {
     [DetachProperty]
     public Node node { get; set; }
+    public string nodeRef { get; set; }
     public float? dispX { get; set; }
     public float? dispY { get; set; }
     public float? dispZ { get; set; }
@@ -97,6 +99,7 @@ namespace Objects.Structural.Results
       this.accXX = accXX;
       this.accYY = accYY;
       this.accZZ = accZZ;
+      this.nodeRef = node.applicationId;
     }
 
     [SchemaInfo("ResultNode (load combination)", "Creates a Speckle structural nodal result object", "Structural", "Results")]
@@ -134,6 +137,7 @@ namespace Objects.Structural.Results
       this.accXX = accXX;
       this.accYY = accYY;
       this.accZZ = accZZ;
+      this.nodeRef = node.applicationId;
     }
   }
 }

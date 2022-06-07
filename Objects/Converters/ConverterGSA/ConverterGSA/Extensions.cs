@@ -292,122 +292,6 @@ namespace ConverterGSA
       }
     }
 
-    //public static Catalogue GetMappingFromProfileName(string speckleSectionTypeName)
-    //{
-    //  #region mock variables - move to unit testing
-    //  var mockRelationalMappings = new Dictionary<object, Dictionary<string, object>>()
-    //  {
-    //    { 1, new Dictionary<string, object>()
-    //      {
-    //        { "gsa", 2 },
-    //        { "grs", 1 }
-    //      }
-    //    },
-    //    { 2, new Dictionary<string, object>()
-    //      {
-    //        { "gsa", 1 },
-    //        { "grs", 2 }
-    //      }
-    //    }
-    //  };
-
-    //  var mockSections = new Dictionary<string, List<object>>()
-    //  {
-    //    { "grs",
-    //      new List<object>()
-    //      { new Dictionary<string, object>
-    //        {
-    //          { "grs_key", 1 },
-    //          { "grs_type", "UKB1016x305x584 +" },
-    //          { "grs_catalogue", "GB Master File" },
-    //          { "grs_structural column family", "Arup_Column_Steel I Section_UKB_GB" },
-    //          { "grs_structural framing family", "Arup_Beam_Steel I Section_UKB_GB" }
-    //         },
-    //        new Dictionary<string, object>
-    //        {
-    //          { "grs_key", 2 },
-    //          { "grs_type", "UKB1016x305x494 +" },
-    //          { "grs_catalogue", "GB Master File" },
-    //          { "grs_structural column family", "Arup_Column_Steel I Section_UKB_GB" },
-    //          { "grs_structural framing family", "Arup_Beam_Steel I Section_UKB_GB" }
-    //        }
-    //      }
-    //    },
-    //    { "gsa",
-    //      new List<object>()
-    //      { new Dictionary<string, object>
-    //        {
-    //          { "gsa_key", 1 },
-    //          { "gsa_type", "UB1016x305x494" },
-    //          { "gsa_catalogue", "British" },
-    //          { "gsa_family name", "Universal beams(UB) - EN10365:2017" },
-    //          { "gsa_section abbrev", "BSI-UB" },
-    //          { "gsa_cat abbrev", "BSI" },
-    //          { "gsa_date", "some date" }
-    //         },
-    //        new Dictionary<string, object>
-    //        {
-    //          { "gsa_key", 2 },
-    //          { "gsa_type", "UB1016x305x584" },
-    //          { "gsa_catalogue", "British" },
-    //          { "gsa_family name", "Universal beams(UB) - EN10365:2017" },
-    //          { "gsa_section abbrev", "BSI-UB" },
-    //          { "gsa_cat abbrev", "BSI" },
-    //          { "gsa_date", "some date" }
-    //        }
-    //      }
-    //    }
-    //  };
-
-    //  var mockSectionMapping = new SectionMapping() { NativeSoftware = "grs", NativeCatalogue = "GB Master File" };
-
-    //  // mock override
-    //  speckleSectionTypeName = "UKB1016x305x494 +";
-    //  #endregion
-
-    //  var sectionNativeKey = 0;
-
-    //  var sections = mockSections[mockSectionMapping.NativeSoftware];
-
-    //  foreach (var section in sections)
-    //  {
-    //    var castedSection = (Dictionary<string, object>)section;
-
-    //    if (castedSection[$"{mockSectionMapping.NativeSoftware}_type"] == speckleSectionTypeName)
-    //    {
-    //      sectionNativeKey = (int)castedSection[$"{mockSectionMapping.NativeSoftware}_key"];
-    //      break;
-    //    }
-    //  }
-
-    //  // No mapping exists
-    //  if (sectionNativeKey == 0)
-    //  {
-    //    return null;
-    //  }
-
-    //  // Conversion to int necessary as object to object is based on reference opposed to value.
-    //  var gsaSectionKey = Convert.ToInt32(mockRelationalMappings[sectionNativeKey]["gsa"]);
-
-    //  var gsaSections = mockSections["gsa"];
-
-    //  // TEMP VARIABLE
-    //  var gsaSectionName = "";
-
-    //  foreach (var gsaSection in gsaSections)
-    //  {
-    //    var castedGsaSection = (Dictionary<string, object>)gsaSection;
-    //    if (Convert.ToInt32(castedGsaSection["gsa_key"]) == gsaSectionKey)
-    //    {
-    //      // IMPLEMENT LOGIC TO POPULATE CATALOGUE WITH DESCRIPTION, CATALOGUE ETC.
-    //      // TEMP VARIABLE
-    //      gsaSectionName = castedGsaSection["gsa_type"].ToString();
-    //    }
-    //  }
-
-    //  return new Catalogue();
-    //}
-
     public static PropertyType2D ToSpeckle(this Property2dType gsaType)
     {
       switch (gsaType)
@@ -433,6 +317,37 @@ namespace ConverterGSA
         case PropertyType2D.Shell: return Property2dType.Shell;
         case PropertyType2D.Stress: return Property2dType.Stress;
         default: throw new Exception(propertyType.ToString() + " can not be converted to a valid native 2D property type.");
+      }
+    }
+
+    public static MaterialType ToSpeckle(this Section1dMaterialType speckleType)
+    {
+      switch (speckleType)
+      {
+        case Section1dMaterialType.GENERIC: return MaterialType.Generic;
+        case Section1dMaterialType.STEEL: return MaterialType.Steel;
+        case Section1dMaterialType.CONCRETE: return MaterialType.Concrete;
+        case Section1dMaterialType.ALUMINIUM: return MaterialType.Aluminium;
+        case Section1dMaterialType.TIMBER: return MaterialType.Timber;
+        case Section1dMaterialType.GLASS: return MaterialType.Glass;
+        case Section1dMaterialType.REBAR: return MaterialType.Rebar;
+        default: return MaterialType.Generic;
+      }
+    }
+
+    public static MaterialType ToSpeckle(this MatType gsaType)
+    {
+      switch (gsaType)
+      {
+        case MatType.STEEL: return MaterialType.Steel;
+        case MatType.CONCRETE: return MaterialType.Concrete;
+        case MatType.FRP: return MaterialType.FRP;
+        case MatType.ALUMINIUM: return MaterialType.Aluminium;
+        case MatType.TIMBER: return MaterialType.Timber;
+        case MatType.GLASS: return MaterialType.Glass;
+        case MatType.FABRIC: return MaterialType.Fabric;
+        case MatType.REBAR: return MaterialType.Rebar;
+        default: return MaterialType.Other;
       }
     }
 
@@ -832,6 +747,21 @@ namespace ConverterGSA
 
     #region ToNative
 
+
+    public static Section1dMaterialType ToNative(this MaterialType speckleType)
+    {
+      switch (speckleType)
+      {
+        case MaterialType.Generic: return Section1dMaterialType.GENERIC;
+        case MaterialType.Steel: return Section1dMaterialType.STEEL;
+        case MaterialType.Concrete: return Section1dMaterialType.CONCRETE;
+        case MaterialType.Aluminium: return Section1dMaterialType.ALUMINIUM;
+        case MaterialType.Timber: return Section1dMaterialType.TIMBER;
+        case MaterialType.Glass: return Section1dMaterialType.GLASS;
+        case MaterialType.Rebar: return Section1dMaterialType.REBAR;
+        default: return Section1dMaterialType.GENERIC;
+      }
+    }
 
     public static ElementPropertyType ToNative(this PropertyType speckleType)
     {

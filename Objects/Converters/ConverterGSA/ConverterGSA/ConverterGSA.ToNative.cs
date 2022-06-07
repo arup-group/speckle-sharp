@@ -87,6 +87,7 @@ namespace ConverterGSA
         { typeof(Steel), SteelToNative },
         { typeof(GSAConcrete), GSAConcreteToNative },
         { typeof(Concrete), ConcreteToNative },
+        { typeof(GSAMaterial), GSAAnalysisMaterialToNative },
         //Properties
         { typeof(Property1D), Property1dToNative },
         { typeof(GSAProperty1D), GsaProperty1dToNative },
@@ -2102,6 +2103,102 @@ namespace ConverterGSA
       //  double flexuralStrength
       return new List<GsaRecord>() { gsaConcrete };
     }
+
+    private List<GsaRecord> GSAAnalysisMaterialToNative(Base speckleObject)
+    {
+      var speckleMatAnal = (GSAMaterial)speckleObject;
+
+      var gsaMatAnal = new GsaMatAnal()
+      {
+        ApplicationId = speckleMatAnal.applicationId,
+        Index = speckleMatAnal.GetIndex<GsaMatAnal>(),
+        Name = speckleMatAnal.name,
+        Colour = speckleMatAnal.colour?.ColourToNative() ?? Colour.NotSet,
+      };
+
+      double? e = null, nu = null, g = null, rho = null, alpha = null, damp = null;
+      if (speckleMatAnal.strength > 0) e = speckleMatAnal.elasticModulus * conversionFactors.stress;
+      if (speckleMatAnal.elasticModulus > 0) e = speckleMatAnal.elasticModulus * conversionFactors.stress;
+      if (speckleMatAnal.poissonsRatio > 0) nu = speckleMatAnal.poissonsRatio;
+      if (speckleMatAnal.shearModulus > 0) g = speckleMatAnal.shearModulus * conversionFactors.stress;
+      if (speckleMatAnal.density > 0) rho = speckleMatAnal.density * conversionFactors.DensityFactorToNative();
+      if (speckleMatAnal.thermalExpansivity > 0) alpha = speckleMatAnal.thermalExpansivity * conversionFactors.ThermalExapansionFactorToNative();
+      if (speckleMatAnal.dampingRatio > 0) damp = speckleMatAnal.dampingRatio;
+      gsaMatAnal.E = e;
+      gsaMatAnal.Nu = nu;
+      gsaMatAnal.Rho = rho;
+      gsaMatAnal.Alpha = alpha;
+      gsaMatAnal.G = g;
+      gsaMatAnal.Damp = damp;
+
+      var dynamicMembers = speckleMatAnal.GetMembers();
+      gsaMatAnal.NumParams = speckleMatAnal.GetDynamicValue<int>("NumParams", dynamicMembers);
+
+      var type = speckleMatAnal.GetDynamicEnum<MatAnalType>("Type", dynamicMembers);
+      gsaMatAnal.Type = type;
+      switch (type)
+      {
+        case MatAnalType.MAT_ELAS_ISO:
+          break;
+        case MatAnalType.MAT_ELAS_PLAS_ISO:
+          double? yield = speckleMatAnal.GetDynamicValue<double?>("Yield", dynamicMembers) * conversionFactors.stress;
+          double? ultimate = speckleMatAnal.GetDynamicValue<double?>("Ultimate", dynamicMembers) * conversionFactors.stress;
+          double? eh = speckleMatAnal.GetDynamicValue<double?>("Eh", dynamicMembers) * conversionFactors.stress;
+          gsaMatAnal.Yield = yield;
+          gsaMatAnal.Ultimate = ultimate;
+          gsaMatAnal.Eh = eh;
+          gsaMatAnal.Beta = speckleMatAnal.GetDynamicValue<double?>("Beta", dynamicMembers);
+          break;
+        case MatAnalType.MAT_DRUCKER_PRAGER:
+          double? cohesion = speckleMatAnal.GetDynamicValue<double?>("Cohesion", dynamicMembers) * conversionFactors.stress;
+          gsaMatAnal.Cohesion = cohesion;
+          gsaMatAnal.Phi = speckleMatAnal.GetDynamicValue<double?>("Phi", dynamicMembers);
+          gsaMatAnal.Psi = speckleMatAnal.GetDynamicValue<double?>("Psi", dynamicMembers);
+          gsaMatAnal.Scribe = speckleMatAnal.GetDynamicValue<double?>("Scribe", dynamicMembers);
+          break;
+        case MatAnalType.MAT_ELAS_ORTHO:
+          double? ex = speckleMatAnal.GetDynamicValue<double?>("Ex", dynamicMembers) * conversionFactors.stress;
+          double? ey = speckleMatAnal.GetDynamicValue<double?>("Ey", dynamicMembers) * conversionFactors.stress;
+          double? ez = speckleMatAnal.GetDynamicValue<double?>("Ez", dynamicMembers) * conversionFactors.stress;
+          double? nuxy = speckleMatAnal.GetDynamicValue<double?>("Nuxy", dynamicMembers);
+          double? nuyz = speckleMatAnal.GetDynamicValue<double?>("Nuyz", dynamicMembers);
+          double? nuzx = speckleMatAnal.GetDynamicValue<double?>("Nuzx", dynamicMembers);
+          double? alphax = speckleMatAnal.GetDynamicValue<double?>("Alphax", dynamicMembers) * conversionFactors.ThermalExapansionFactorToNative();
+          double? alphay = speckleMatAnal.GetDynamicValue<double?>("Alphay", dynamicMembers) * conversionFactors.ThermalExapansionFactorToNative();
+          double? alphaz = speckleMatAnal.GetDynamicValue<double?>("Alphaz", dynamicMembers) * conversionFactors.ThermalExapansionFactorToNative();
+          double? gxy = speckleMatAnal.GetDynamicValue<double?>("Gxy", dynamicMembers) * conversionFactors.stress;
+          double? gyz= speckleMatAnal.GetDynamicValue<double?>("Gyz", dynamicMembers) * conversionFactors.stress;
+          double? gzx = speckleMatAnal.GetDynamicValue<double?>("Gzx", dynamicMembers) * conversionFactors.stress;
+          gsaMatAnal.Ex = ex;
+          gsaMatAnal.Ey = ey;
+          gsaMatAnal.Ez = ez;
+          gsaMatAnal.Nuxy = nuxy;
+          gsaMatAnal.Nuyz = nuyz;
+          gsaMatAnal.Nuzx = nuzx;
+          gsaMatAnal.Alphax = alphax;
+          gsaMatAnal.Alphay = alphay;
+          gsaMatAnal.Alphaz = alphaz;
+          gsaMatAnal.Gxy = gxy;
+          gsaMatAnal.Gyz = gyz;
+          gsaMatAnal.Gzx = gzx;
+          break;
+        case MatAnalType.MAT_FABRIC:
+          ex = speckleMatAnal.GetDynamicValue<double?>("Ex", dynamicMembers) * (conversionFactors.force / conversionFactors.length);
+          ey = speckleMatAnal.GetDynamicValue<double?>("Ey", dynamicMembers) * (conversionFactors.force / conversionFactors.length);
+          g = speckleMatAnal.shearModulus * (conversionFactors.force / conversionFactors.length);
+          gsaMatAnal.Ex = ex;
+          gsaMatAnal.Ey = ey;
+          gsaMatAnal.G = g;
+          gsaMatAnal.Comp = speckleMatAnal.GetDynamicValue<double?>("Comp", dynamicMembers);
+          break;
+        default:
+          Report.ConversionErrors.Add(new Exception("GSAMaterial: material model type (" + type.ToString() + ") is not currently supported"));
+          break;
+      }
+
+      return new List<GsaRecord>() { gsaMatAnal };
+    }
+
     #endregion
 
     #region Properties
@@ -2121,9 +2218,9 @@ namespace ConverterGSA
         if (speckleProperty.designMaterial != null && gsaSection.Components != null && gsaSection.Components.Count > 0)
         {
           var sectionComp = (SectionComp)gsaSection.Components.First();
+          sectionComp.MaterialType = speckleProperty.designMaterial.materialType.ToNative();
           if (speckleProperty.designMaterial.materialType == MaterialType.Steel && speckleProperty.designMaterial != null)
           {
-            sectionComp.MaterialType = Section1dMaterialType.STEEL;
             sectionComp.MaterialIndex = IndexByConversionOrLookup<GsaMatSteel>(speckleProperty.designMaterial, ref retList);
 
             var gsaSectionSteel = new SectionSteel()
@@ -2142,7 +2239,6 @@ namespace ConverterGSA
           }
           else if (speckleProperty.designMaterial.materialType == MaterialType.Concrete && speckleProperty.designMaterial != null)
           {
-            sectionComp.MaterialType = Section1dMaterialType.CONCRETE;
             sectionComp.MaterialIndex = IndexByConversionOrLookup<GsaMatConcrete>(speckleProperty.designMaterial, ref retList);
 
             var gsaSectionConc = new SectionConc();
@@ -2156,6 +2252,10 @@ namespace ConverterGSA
           }
           else
           {
+            if (speckleProperty.material != null)
+            {
+              sectionComp.MatAnalIndex = IndexByConversionOrLookup<GsaMatAnal>(speckleProperty.material, ref retList);
+            }
             //Not supported yet
           }
         }
@@ -2241,6 +2341,10 @@ namespace ConverterGSA
         }
         else
         {
+          sectionComp.MaterialType = Section1dMaterialType.GENERIC;
+          sectionComp.MatAnalIndex = IndexByConversionOrLookup<GsaMatAnal>(speckleProperty.material, ref retList);
+          gsaSection.Components.Add(sectionComp);
+
           //Not supported yet
         }
       }

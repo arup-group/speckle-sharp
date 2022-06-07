@@ -471,22 +471,27 @@ namespace ConverterGSA
       var modelsByLayer = new Dictionary<GSALayer, Model>() { };
       var modelHasData = new Dictionary<GSALayer, bool>() { };
 
+      var applicationId = String.Empty;
       if (sendLayer == GSALayer.Design)
       {
-        modelsByLayer = new Dictionary<GSALayer, Model>() { { GSALayer.Design, new Model() { specs = modelInfo, layerDescription = "Design" } } };
+        applicationId = Speckle.Core.Models.Utilities.hashString($"{Instance.GsaModel.Proxy.FilePath}-Design", Speckle.Core.Models.Utilities.HashingFuctions.MD5);
+        modelsByLayer = new Dictionary<GSALayer, Model>() { { GSALayer.Design, new Model() { specs = modelInfo, layerDescription = "Design", applicationId = applicationId } } };
         modelHasData = new Dictionary<GSALayer, bool>() { { GSALayer.Design, false } };
       }
       if (sendLayer == GSALayer.Analysis)
       {
-        modelsByLayer = new Dictionary<GSALayer, Model>() { { GSALayer.Analysis, new Model() { specs = modelInfo, layerDescription = "Analysis" } } };
+        applicationId = Speckle.Core.Models.Utilities.hashString($"{Instance.GsaModel.Proxy.FilePath}-Analysis", Speckle.Core.Models.Utilities.HashingFuctions.MD5);
+        modelsByLayer = new Dictionary<GSALayer, Model>() { { GSALayer.Analysis, new Model() { specs = modelInfo, layerDescription = "Analysis", applicationId = applicationId } } };
         modelHasData = new Dictionary<GSALayer, bool>() { { GSALayer.Analysis, false } };
       }
       if (sendLayer == GSALayer.Both)
       {
-        modelsByLayer = new Dictionary<GSALayer, Model>() { { GSALayer.Design, new Model() { specs = modelInfo, layerDescription = "Design" } } };
+        applicationId = Speckle.Core.Models.Utilities.hashString($"{Instance.GsaModel.Proxy.FilePath}-Design", Speckle.Core.Models.Utilities.HashingFuctions.MD5);
+        modelsByLayer = new Dictionary<GSALayer, Model>() { { GSALayer.Design, new Model() { specs = modelInfo, layerDescription = "Design", applicationId = applicationId } } };
         modelHasData = new Dictionary<GSALayer, bool>() { { GSALayer.Design, false } };
 
-        modelsByLayer.Add(GSALayer.Analysis, new Model() { specs = modelInfo, layerDescription = "Analysis" });
+        applicationId = Speckle.Core.Models.Utilities.hashString($"{Instance.GsaModel.Proxy.FilePath}-Analysis", Speckle.Core.Models.Utilities.HashingFuctions.MD5);
+        modelsByLayer.Add(GSALayer.Analysis, new Model() { specs = modelInfo, layerDescription = "Analysis", applicationId = applicationId });
         modelHasData.Add(GSALayer.Analysis, false);
 
         //nodeDependentSchemaTypesByLayer.Add(GSALayer.Analysis, Instance.GsaModel.Proxy.GetNodeDependentTypes(GSALayer.Analysis));
@@ -511,6 +516,7 @@ namespace ConverterGSA
       var nodesTemp = new Dictionary<GsaRecord, ToSpeckleResult>();
 
       var rsa = new ResultSetAll();
+      rsa.applicationId = Speckle.Core.Models.Utilities.hashString($"{Instance.GsaModel.Proxy.FilePath}-Results", Speckle.Core.Models.Utilities.HashingFuctions.MD5);
       bool resultSetHasData = false;
 
       foreach (var gen in typeGens)

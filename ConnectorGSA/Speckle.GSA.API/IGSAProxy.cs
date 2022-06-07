@@ -15,6 +15,7 @@ namespace Speckle.GSA.API
     int NodeAt(double x, double y, double z, double coincidenceTol);
 
     char GwaDelimiter { get; }
+    string FilePath { get; set; }
 
     //METHODS
     void CalibrateNodeAt();
