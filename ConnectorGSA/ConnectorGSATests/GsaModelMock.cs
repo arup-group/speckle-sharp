@@ -68,6 +68,8 @@ namespace ConnectorGSATests
     public List<List<Type>> TxTypeDependencyGenerations => throw new NotImplementedException();
 
     public char GwaDelimiter => '\t';
+
+    public string FilePath { get; set; }
     #endregion
 
     #region proxy_related
