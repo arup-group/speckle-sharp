@@ -23,6 +23,7 @@ namespace ConverterGSATests
     //protected Dictionary<Type, GwaKeyword> KeywordsByType;
     
     public char GwaDelimiter => throw new NotImplementedException();
+    public string FilePath { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
     public GsaProxyMockForConverterTests()
     {
