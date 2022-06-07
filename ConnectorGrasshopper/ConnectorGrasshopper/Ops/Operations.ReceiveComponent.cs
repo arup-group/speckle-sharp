@@ -496,7 +496,8 @@ namespace ConnectorGrasshopper.Ops
           Done();
           return;
         }
-        receiveComponent.Tracker.TrackNodeSend(client.Account, receiveComponent.AutoReceive);
+
+        Logging.Analytics.TrackEvent(client.Account, Logging.Analytics.Events.Receive, new Dictionary<string, object>() { { "auto", receiveComponent.AutoReceive } });
 
         var remoteTransport = new ServerTransport(InputWrapper?.GetAccount().Result, InputWrapper?.StreamId);
         remoteTransport.TransportName = "R";

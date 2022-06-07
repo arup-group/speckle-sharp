@@ -38,12 +38,6 @@ namespace ConnectorGrasshopper.Ops
     {
       pManager.AddGenericParameter("localDataId", "id", "ID of the local data sent.", GH_ParamAccess.item);
     }
-
-    protected override void SolveInstance(IGH_DataAccess DA)
-    {
-      base.SolveInstance(DA);
-      if(DA.Iteration == 0) Tracker.TrackNodeRun();
-    }
   }
 
   public class SendLocalWorker : WorkerInstance
@@ -61,6 +55,8 @@ namespace ConnectorGrasshopper.Ops
       try
       {
         Parent.Message = "Sending...";
+        Logging.Analytics.TrackEvent(Logging.Analytics.Events.NodeRun, new Dictionary<string, object>() { { "name", "Send Local" } });
+
         var converter = (Parent as SendLocalComponent)?.Converter;
         converter?.SetContextDocument(Rhino.RhinoDoc.ActiveDoc);
         var converted = Utilities.DataTreeToNestedLists(data, converter);

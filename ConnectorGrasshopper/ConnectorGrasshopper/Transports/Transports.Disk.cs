@@ -6,7 +6,7 @@ using Logging = Speckle.Core.Logging;
 
 namespace ConnectorGrasshopper.Transports
 {
-  public class DiskTransportComponent : GH_SpeckleComponent
+  public class DiskTransportComponent : GH_Component
   {
     public override Guid ComponentGuid { get => new Guid("BA068B11-2BC0-4669-BC73-09CF16820659"); }
 
@@ -37,7 +37,9 @@ namespace ConnectorGrasshopper.Transports
       }
 
       if (DA.Iteration == 0)
-        Tracker.TrackNodeRun();
+      {
+        Logging.Analytics.TrackEvent(Logging.Analytics.Events.NodeRun, new Dictionary<string, object>() { { "name", "Disk Transport" } });
+      }
 
       string basePath = null;
       DA.GetData(0, ref basePath);

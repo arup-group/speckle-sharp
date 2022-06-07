@@ -70,7 +70,9 @@ namespace ConnectorGrasshopper.Objects
         }
 
         if (DA.Iteration == 0)
-          Tracker.TrackNodeRun("Expand Object");
+        {
+          Logging.Analytics.TrackEvent(Logging.Analytics.Events.NodeRun, new Dictionary<string, object>() { { "name", "Expand Object" } });
+        }
 
 
         var task = Task.Run(() => DoWork(@base));

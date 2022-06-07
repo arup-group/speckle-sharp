@@ -7,7 +7,7 @@ using Logging = Speckle.Core.Logging;
 
 namespace ConnectorGrasshopper.Transports
 {
-  public class MemoryTransportComponent : GH_SpeckleComponent
+  public class MemoryTransportComponent : GH_Component
   {
     public override Guid ComponentGuid { get => new Guid("B3E7A1E0-FB96-45AE-9F47-54D1B495AAC9"); }
 
@@ -38,7 +38,9 @@ namespace ConnectorGrasshopper.Transports
       }
 
       if (DA.Iteration == 0)
-        Tracker.TrackNodeRun();
+      {
+        Logging.Analytics.TrackEvent(Logging.Analytics.Events.NodeRun, new Dictionary<string, object>() { { "name", "Memory Transport" } });
+      }
 
       string name = null;
       DA.GetData(0, ref name);

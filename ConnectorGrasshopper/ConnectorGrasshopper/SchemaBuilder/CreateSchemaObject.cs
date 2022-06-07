@@ -353,7 +353,9 @@ namespace ConnectorGrasshopper
 
 
       if (DA.Iteration == 0)
-        Tracker.TrackNodeRun("Create Schema Object", Name);
+      {
+        Logging.Analytics.TrackEvent(Logging.Analytics.Events.NodeRun, new Dictionary<string, object>() { { "name", "Create Schema Object" }, { "node", Name } });
+      }
 
 
       var units = Units.GetUnitsFromString(Rhino.RhinoDoc.ActiveDoc.GetUnitSystemName(true, false, false, false));
