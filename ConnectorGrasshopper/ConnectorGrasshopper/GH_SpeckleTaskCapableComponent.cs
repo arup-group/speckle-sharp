@@ -25,11 +25,7 @@ namespace ConnectorGrasshopper
     {
       base.AddedToDocument(document);
       // If the node is new (i.e. GH has not called Read(...) ) we log the node creation event.
-      if (IsNew)
-      {
-        Tracker.TrackNodeCreation();
-        IsNew = false;
-      }
+      if (IsNew) Tracker.TrackNodeCreation();
     }
   }
 }
