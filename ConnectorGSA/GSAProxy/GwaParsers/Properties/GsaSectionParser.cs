@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Speckle.ConnectorGSA.Proxy.GwaParsers
 {
-  [GsaType(GwaKeyword.SECTION, GwaSetCommandType.Set, true, true, true, GwaKeyword.MAT_CONCRETE ,GwaKeyword.MAT_STEEL)]
+  [GsaType(GwaKeyword.SECTION, GwaSetCommandType.Set, true, true, true, GwaKeyword.MAT_CONCRETE ,GwaKeyword.MAT_STEEL, GwaKeyword.MAT_ANAL)]
   public class GsaSectionParser : GwaParser<GsaSection>
   {
     public GsaSectionParser(GsaSection gsaSection) : base(gsaSection) { }

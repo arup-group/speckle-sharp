@@ -20,7 +20,7 @@ using Speckle.Newtonsoft.Json;
 
 namespace ConnectorGSA.UI
 {
-  public partial class ConnectorBindingsGSA : ConnectorBindingsStandalone
+  public partial class ConnectorBindingsGSA : ConnectorBindings, IConnectorBindingsStandalone
   {
     public override List<string> GetSelectedObjects()
     {
@@ -40,10 +40,12 @@ namespace ConnectorGSA.UI
 
       return new List<ISelectionFilter>()
       {
+        //new AllSelectionFilterStandalone { Slug ="all", Name = "Everything", Icon = "CubeScan", Description = "Selects all model objects." },
         new AllSelectionFilter { Slug ="all", Name = "Everything", Icon = "CubeScan", Description = "Selects all model objects." },
         //new ListSelectionFilter { Slug ="type", Name = "Type", Icon = "Category", Values = types, Description ="Selects all objects belonging to the specified categories."},
         new ListSelectionFilter { Slug ="list", Name = "List", Icon = "LayersTriple", Values = listNames, Description ="Selects all objects belonging to the specified list."},
-        //new ManualSelectionFilter()
+        //new ListSelectionFilterStandalone { Slug ="list", Name = "List", Icon = "LayersTriple", Values = listNames, Description ="Selects all objects belonging to the specified list."},
+        new ManualSelectionFilter()
       };
     }
 

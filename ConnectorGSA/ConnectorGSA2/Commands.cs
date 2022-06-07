@@ -161,48 +161,54 @@ namespace ConnectorGSA
 
     public static bool UpsertSavedReceptionStreamInfo(bool? receive, bool? send, params StreamState[] streamStates)
     {            
-      var sid = ((GsaProxy)Instance.GsaModel.Proxy).GetTopLevelSid();
-      List<StreamState> allSs = null;
-      try
+      if(((GsaProxy)Instance.GsaModel.Proxy) != null)
       {
-        allSs = JsonConvert.DeserializeObject<List<StreamState>>(sid);
-      }
-      catch (JsonException ex)
-      {
-        //Could not deserialise, probably because it has a v1-format of stream information.  In this case, ignore the info
-
-        //TO DO: write technical long line here
-      }
-
-      if (allSs == null || allSs.Count() == 0)
-      {
-        allSs = streamStates.ToList();
-      }
-      else
-      {
-        var merged = new List<StreamState>();
-        foreach (var ss in streamStates)
+        var sid = ((GsaProxy)Instance.GsaModel.Proxy).GetTopLevelSid();
+        List<StreamState> allSs = null;
+        try
         {
-          var matching = allSs.FirstOrDefault(s => s.Equals(ss));
-          if (matching != null)
-          {
-            //if (matching.IsReceiving != ss.IsReceiving)
-            //{
-            //  matching.IsReceiving = true;  //This is merging of two booleans, where a true value is to be set if any are true
-            //}
-            //if (matching.IsSending != ss.IsSending)
-            //{
-            //  matching.IsSending = true;  //This is merging of two booleans, where a true value is to be set if any are true
-            //}
-            merged.Add(ss);
-          }
+          allSs = JsonConvert.DeserializeObject<List<StreamState>>(sid);
+        }
+        catch (JsonException ex)
+        {
+          //Could not deserialise, probably because it has a v1-format of stream information.  In this case, ignore the info
+
+          //TO DO: write technical long line here
         }
 
-        allSs = allSs.Union(streamStates.Except(merged)).ToList();
-      }
+        if (allSs == null || allSs.Count() == 0)
+        {
+          allSs = streamStates.ToList();
+        }
+        else
+        {
+          var merged = new List<StreamState>();
+          foreach (var ss in streamStates)
+          {
+            var matching = allSs.FirstOrDefault(s => s.Equals(ss));
+            if (matching != null)
+            {
+              //if (matching.IsReceiving != ss.IsReceiving)
+              //{
+              //  matching.IsReceiving = true;  //This is merging of two booleans, where a true value is to be set if any are true
+              //}
+              //if (matching.IsSending != ss.IsSending)
+              //{
+              //  matching.IsSending = true;  //This is merging of two booleans, where a true value is to be set if any are true
+              //}
+              merged.Add(ss);
+            }
+          }
 
-      var newSid = JsonConvert.SerializeObject(allSs);
-      return ((GsaProxy)Instance.GsaModel.Proxy).SetTopLevelSid(newSid);
+          allSs = allSs.Union(streamStates.Except(merged)).ToList();
+        }
+
+        var newSid = JsonConvert.SerializeObject(allSs);
+        return ((GsaProxy)Instance.GsaModel.Proxy).SetTopLevelSid(newSid);
+      } else
+      {
+        return false;
+      }      
     }
 
     public static bool CloseFile(string filePath, bool visible)
@@ -282,16 +288,16 @@ namespace ConnectorGSA
       return convertedObjs;
     }
 
-    public static async Task<string> SendCommit(Base commitObj, DesktopUI2.Models.StreamState state, ProgressViewModel progress, string parent, params ITransport[] transports)
+    public static async Task<string> SendObject(Base obj, ProgressViewModel progress, params ITransport[] transports)
     {
       var startTime = DateTime.Now;
 
-      var commitObjId = await Operations.Send(
-        @object: commitObj,
+      var objId = await Operations.Send(
+        @object: obj,
         cancellationToken: progress.CancellationTokenSource.Token,
         transports: transports.ToList(),
         useDefaultCache: true,
-        onProgressAction: dict => 
+        onProgressAction: dict =>
         {
           progress.Update(dict);
           if (dict.ContainsKey("RemoteTransport"))
@@ -302,7 +308,7 @@ namespace ConnectorGSA
               progress.Report.Log($"Sending - {dict["RemoteTransport"]} objects sent so far...");
               startTime = DateTime.Now;
             }
-          }             
+          }
         },
         onErrorAction: (s, e) =>
         {
@@ -315,38 +321,46 @@ namespace ConnectorGSA
       if (progress.CancellationTokenSource.Token.IsCancellationRequested)
         return null;
 
-      var commitId = "";
-      if (transports.Any(t => t is ServerTransport))
+      return objId;
+    }
+
+    public static async Task<string> SendCommit(Base commitObj, DesktopUI2.Models.StreamState state, ProgressViewModel progress, string parent, params ITransport[] transports)
+    {
+      var objId = await Commands.SendObject(commitObj, progress, transports);
+      if(objId != null)
       {
-        var actualCommit = new CommitCreateInput
+        if (transports.Any(t => t is ServerTransport))
         {
-          streamId = state.StreamId,
-          objectId = commitObjId,
-          branchName = state.BranchName,
-          message = state.CommitMessage != null ? state.CommitMessage : $"Sent data from from {VersionedHostApplications.GSA}.",
-          sourceApplication = VersionedHostApplications.GSA
-        };
+          var actualCommit = new CommitCreateInput
+          {
+            streamId = state.StreamId,
+            objectId = objId,
+            branchName = state.BranchName,
+            message = state.CommitMessage != null ? state.CommitMessage : $"Sent data from from {VersionedHostApplications.GSA}.",
+            sourceApplication = VersionedHostApplications.GSA
+          };
 
-        if (!string.IsNullOrEmpty(parent))
-        {
-          actualCommit.parents = new List<string>() { parent };
-        }
+          if (!string.IsNullOrEmpty(parent))
+          {
+            actualCommit.parents = new List<string>() { parent };
+          }
 
-        //if (state.PreviousCommitId != null) { actualCommit.parents = new List<string>() { state.PreviousCommitId }; }
-        if (state.PreviousCommitId != null) { actualCommit.parents = new List<string>() { state.PreviousCommitId }; }
+          if (state.PreviousCommitId != null) { actualCommit.parents = new List<string>() { state.PreviousCommitId }; }
 
-        try
-        {
-          commitId = await state.Client.CommitCreate(actualCommit);
-          ((GsaModel)Instance.GsaModel).LastCommitId = commitId;
-        }
-        catch (Exception e)
-        {
-          progress.Report.OperationErrors.Add(e);
+          try
+          {
+            var commitId = await state.Client.CommitCreate(actualCommit);
+            ((GsaModel)Instance.GsaModel).LastCommitId = commitId;
+            return commitId;
+          }
+          catch (Exception e)
+          {
+            progress.Report.OperationErrors.Add(e);
+          }
         }
       }
 
-      return commitId;
+      return null;
     }
 
     internal static async Task<bool> Receive(TabCoordinator coordinator, IProgress<MessageEventArgs> loggingProgress, IProgress<string> statusProgress, IProgress<double> percentageProgress)

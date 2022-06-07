@@ -19,6 +19,7 @@ namespace Objects.Structural
         Rebar,
         Tendon,
         ColdFormed,
+        Generic,
         Other
     }
 }

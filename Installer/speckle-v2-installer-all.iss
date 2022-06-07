@@ -9,7 +9,7 @@
 #define DynamoExtensionVersion  GetFileVersion("..\ConnectorDynamo\ConnectorDynamoExtension\bin\Release\SpeckleConnectorDynamoExtension.dll")
 #define DynamoFunctionsVersion  GetFileVersion("..\ConnectorDynamo\ConnectorDynamoFunctions\bin\Release\SpeckleConnectorDynamoFunctions.dll")
 
-#define GrasshopperVersion  GetFileVersion("..\ConnectorGrasshopper\ConnectorGrasshopper\bin\net472\SpeckleConnectorGrasshopper.dll")
+#define GrasshopperVersion  GetFileVersion("..\ConnectorGrasshopper\ConnectorGrasshopper\bin\Release\SpeckleConnectorGrasshopper.dll")
 
 #define Revit2019Version  GetFileVersion("..\ConnectorRevit\ConnectorRevit2019\bin\Release\SpeckleConnectorRevit.dll")
 #define Revit2020Version  GetFileVersion("..\ConnectorRevit\ConnectorRevit2020\bin\Release\SpeckleConnectorRevit.dll")
@@ -115,7 +115,7 @@ Source: "..\ConnectorRhino\ConnectorRhino6\bin\Release\*"; DestDir: "{userappdat
 Source: "..\ConnectorRhino\ConnectorRhino7\bin\Release\*"; DestDir: "{userappdata}\McNeel\Rhinoceros\7.0\Plug-ins\SpeckleRhino2 (8dd5f30b-a13d-4a24-abdc-3e05c8c87143)\"; Flags: ignoreversion recursesubdirs; Components: rhino7
 
 ;gh
-Source: "..\ConnectorGrasshopper\ConnectorGrasshopper\bin\net472\*"; DestDir: "{userappdata}\Grasshopper\Libraries\SpeckleGrasshopper2\"; Flags: ignoreversion recursesubdirs; Components: gh
+Source: "..\ConnectorGrasshopper\ConnectorGrasshopper\bin\Release\*"; DestDir: "{userappdata}\Grasshopper\Libraries\SpeckleGrasshopper2\"; Flags: ignoreversion recursesubdirs; Components: gh
 Source: "..\Objects\Converters\ConverterRhinoGh\ConverterRhino6\bin\Release\netstandard2.0\Objects.Converter.Rhino6.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects\"; Flags: ignoreversion recursesubdirs; Components: rhino6 gh
 Source: "..\Objects\Converters\ConverterRhinoGh\ConverterRhino7\bin\Release\net48\Objects.Converter.Rhino7.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects\"; Flags: ignoreversion recursesubdirs; Components: rhino7 gh
 Source: "..\Objects\Converters\ConverterRhinoGh\ConverterGrasshopper6\bin\Release\netstandard2.0\Objects.Converter.Grasshopper6.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects\"; Flags: ignoreversion recursesubdirs; Components: rhino6 gh

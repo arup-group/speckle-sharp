@@ -40,33 +40,33 @@ namespace Objects.Converter.Bentley
       return null;
     }
 
-    private static Point Rotate(Point point, double angle)
+    private static Point RotateZ(Point point, double angle)
     {
       double sin = Math.Sin(angle);
       double cos = Math.Cos(angle);
-      Point p = new Point(cos * point.x - sin * point.y, sin * point.x + cos * point.y);
+      Point p = new Point(cos * point.x - sin * point.y, sin * point.x + cos * point.y, point.z);
       p.units = point.units;
       return p;
     }
 
-    private static Vector Rotate(Vector vector, double angle)
+    private static Vector RotateZ(Vector vector, double angle)
     {
       double sin = Math.Sin(angle);
       double cos = Math.Cos(angle);
-      Vector v = new Vector(cos * vector.x - sin * vector.y, sin * vector.x + cos * vector.y, vector.units);
+      Vector v = new Vector(cos * vector.x - sin * vector.y, sin * vector.x + cos * vector.y, vector.z, vector.units);
       return v;
     }
 
-    private static Point Translate(Point point, double deltaX, double deltaY)
+    private static Point TranslateXY(Point point, double deltaX, double deltaY)
     {
-      Point p = new Point(point.x + deltaX, point.y + deltaY);
+      Point p = new Point(point.x + deltaX, point.y + deltaY, point.z);
       p.units = point.units;
       return p;
     }
 
-    private static Vector Translate(Vector vector, double deltaX, double deltaY)
+    private static Vector TranslateXY(Vector vector, double deltaX, double deltaY)
     {
-      Vector v = new Vector(vector.x + deltaX, vector.y + deltaY, vector.units);
+      Vector v = new Vector(vector.x + deltaX, vector.y + deltaY, vector.z, vector.units);
       return v;
     }
 
@@ -206,8 +206,8 @@ namespace Objects.Converter.Bentley
               break;
 
             case TFdGridCurveType.TFdGridCurveType_Radial:
-              Point startPoint = Translate(Rotate(new Point(0, 0, 0, u), angle), origin.X, origin.Y);
-              Point endPoint = Translate(Rotate(Rotate(new Point(maximumRadius, 0, 0, u), gridValue * UoR), angle), origin.X, origin.Y);
+              Point startPoint = TranslateXY(RotateZ(new Point(0, 0, 0, u), angle), origin.X, origin.Y);
+              Point endPoint = TranslateXY(RotateZ(RotateZ(new Point(maximumRadius, 0, 0, u), gridValue * UoR), angle), origin.X, origin.Y);
               baseLine = new Line(startPoint, endPoint, u);
               break;
 
@@ -226,16 +226,16 @@ namespace Objects.Converter.Bentley
       if (c is Line)
       {
         Line line = (Line)c;
-        Point start = Translate(Rotate(line.start, angle), origin.X, origin.Y);
-        Point end = Translate(Rotate(line.end, angle), origin.X, origin.Y);
+        Point start = TranslateXY(RotateZ(line.start, angle), origin.X, origin.Y);
+        Point end = TranslateXY(RotateZ(line.end, angle), origin.X, origin.Y);
         return new Line(start, end, line.units);
       }
       else if (c is Arc)
       {
         Arc arc = (Arc)c;
-        Point startPoint = Translate(Rotate(arc.startPoint, angle), origin.X, origin.Y);
-        Point midPoint = Translate(Rotate(arc.midPoint, angle), origin.X, origin.Y);
-        Point endPoint = Translate(Rotate(arc.endPoint, angle), origin.X, origin.Y);
+        Point startPoint = TranslateXY(RotateZ(arc.startPoint, angle), origin.X, origin.Y);
+        Point midPoint = TranslateXY(RotateZ(arc.midPoint, angle), origin.X, origin.Y);
+        Point endPoint = TranslateXY(RotateZ(arc.endPoint, angle), origin.X, origin.Y);
         Plane plane = TransformPlane(arc.plane, origin, angle);
         Arc transformed = new Arc(plane, (double)arc.radius, (double)arc.startAngle + angle + Math.PI * 2, (double)arc.endAngle + angle + Math.PI * 2, (double)arc.angleRadians, arc.units);
         transformed.startPoint = startPoint;
@@ -258,9 +258,9 @@ namespace Objects.Converter.Bentley
 
     private Plane TransformPlane(Plane plane, DPoint3d origin, double angle)
     {
-      Point planeOrigin = Translate(plane.origin, origin.X, origin.Y);
-      Vector xdir = Translate(Rotate(plane.xdir, angle), origin.X, origin.Y);
-      Vector ydir = Translate(Rotate(plane.ydir, angle), origin.X, origin.Y);
+      Point planeOrigin = TranslateXY(plane.origin, origin.X, origin.Y);
+      Vector xdir = TranslateXY(RotateZ(plane.xdir, angle), origin.X, origin.Y);
+      Vector ydir = TranslateXY(RotateZ(plane.ydir, angle), origin.X, origin.Y);
       return new Plane(planeOrigin, plane.normal, xdir, ydir, plane.units);
     }
 
@@ -282,8 +282,8 @@ namespace Objects.Converter.Bentley
           if (maximumValue == 0)
             maximumValue = maximumValueY;
 
-          startPoint = Translate(Rotate(new Point(gridValue, minimumValue, 0, units), angle), origin.X, origin.Y);
-          endPoint = Translate(Rotate(new Point(gridValue, maximumValue, 0, units), angle), origin.X, origin.Y);
+          startPoint = TranslateXY(RotateZ(new Point(gridValue, minimumValue, 0, units), angle), origin.X, origin.Y);
+          endPoint = TranslateXY(RotateZ(new Point(gridValue, maximumValue, 0, units), angle), origin.X, origin.Y);
           baseLine = new Line(startPoint, endPoint, units);
           break;
 
@@ -293,8 +293,8 @@ namespace Objects.Converter.Bentley
           if (maximumValue == 0)
             maximumValue = maximumValueX;
 
-          startPoint = Translate(Rotate(new Point(minimumValue, gridValue, 0, units), angle), origin.X, origin.Y);
-          endPoint = Translate(Rotate(new Point(maximumValue, gridValue, 0, units), angle), origin.X, origin.Y);
+          startPoint = TranslateXY(RotateZ(new Point(minimumValue, gridValue, 0, units), angle), origin.X, origin.Y);
+          endPoint = TranslateXY(RotateZ(new Point(maximumValue, gridValue, 0, units), angle), origin.X, origin.Y);
           baseLine = new Line(startPoint, endPoint, units);
           break;
 

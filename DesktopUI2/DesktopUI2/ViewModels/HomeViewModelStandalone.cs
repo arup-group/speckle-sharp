@@ -26,9 +26,6 @@ namespace DesktopUI2.ViewModels
 {
   public class HomeViewModelStandalone : HomeViewModel, IRoutableViewModel
   {
-    //Instance of this HomeViewModel, so that the SavedStreams are kept in memory and not disposed on navigation
-    new public static HomeViewModelStandalone Instance { get; private set; }
-    public override ConnectorBindings Bindings { get; set; }
 
     #region bindings
     public bool HasGSAFile { get; set; }
@@ -54,128 +51,21 @@ namespace DesktopUI2.ViewModels
 
       SavedStreams.CollectionChanged += SavedStreams_CollectionChanged;
 
-      Bindings = Locator.Current.GetService<ConnectorBindingsStandalone>();
+      Bindings = Locator.Current.GetService<ConnectorBindings>();
       this.RaisePropertyChanged("SavedStreams");
-      Init();
+      //Init();
 
       var config = ConfigManager.Load();
       ChangeTheme(config.DarkTheme);
     }
 
 
-    //write changes to file every time they happen
-    //this is because if there is an active document change we need to swap saved streams and restore them later
-    //even if the doc has not been saved
-    private void SavedStreams_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-    {
-      WriteStreamsToFile();
-    }
-
-    public override async Task GetStreams()
-    {
-      if (!HasAccounts)
-        return;
-
-      InProgress = true;
-
-      Streams = new List<StreamAccountWrapper>();
-
-      foreach (var account in Accounts)
-      {
-        try
-        {
-          var client = new Client(account.Account);
-          Streams.AddRange((await client.StreamsGet()).Select(x => new StreamAccountWrapper(x, account.Account)));
-        }
-        catch (Exception e)
-        {
-          Dialogs.ShowDialog(MainWindowStandalone.Instance, $"Could not get streams for {account.Account.userInfo.email} on {account.Account.serverInfo.url}.", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
-        }
-      }
-      Streams = Streams.OrderByDescending(x => DateTime.Parse(x.Stream.updatedAt)).ToList();
-
-      InProgress = false;
-
-    }
-
-    private async Task SearchStreams()
-    {
-      if (SearchQuery == "")
-      {
-        GetStreams().ConfigureAwait(false);
-        return;
-      }
-      if (SearchQuery.Length <= 2)
-        return;
-      InProgress = true;
-
-      Streams = new List<StreamAccountWrapper>();
-
-      foreach (var account in Accounts)
-      {
-        try
-        {
-          var client = new Client(account.Account);
-          Streams.AddRange((await client.StreamSearch(SearchQuery)).Select(x => new StreamAccountWrapper(x, account.Account)));
-        }
-        catch (Exception e)
-        {
-
-        }
-      }
-
-      Streams = Streams.OrderByDescending(x => DateTime.Parse(x.Stream.updatedAt)).ToList();
-
-      InProgress = false;
-
-    }
-
-    private void RemoveSavedStream(string id)
-    {
-      var s = SavedStreams.FirstOrDefault(x => x.StreamState.Id == id);
-      if (s != null)
-      {
-        SavedStreams.Remove(s);
-        if (s.StreamState.Client != null)
-          Analytics.TrackEvent(s.StreamState.Client.Account, Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Remove" } });
-      }
-
-      this.RaisePropertyChanged("HasSavedStreams");
-    }
-
-    public override async void NewStreamCommand()
-    {
-      var dialog = new NewStreamDialog(Accounts);
-      dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-      await dialog.ShowDialog(MainWindowStandalone.Instance);
-
-      if (dialog.Create)
-      {
-        try
-        {
-          var client = new Client(dialog.Account);
-          var streamId = await client.StreamCreate(new StreamCreateInput { description = dialog.Description, name = dialog.StreamName, isPublic = dialog.IsPublic });
-          var stream = await client.StreamGet(streamId);
-          var streamState = new StreamState(dialog.Account, stream);
-
-          OpenStream(streamState);
-
-          Analytics.TrackEvent(dialog.Account, Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Create" } });
-
-          GetStreams().ConfigureAwait(false); //update streams
-        }
-        catch (Exception e)
-        {
-          Dialogs.ShowDialog(MainWindowStandalone.Instance, "Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
-        }
-      }
-    }
 
     public async void NewFileCommand()
     {
       try
       {
-        var bindings = (ConnectorBindingsStandalone)Bindings;
+        var bindings = (IConnectorBindingsStandalone)Bindings;
         bindings.NewFile();
         HasGSAFile = true;
         FilePath = "New file";
@@ -183,7 +73,7 @@ namespace DesktopUI2.ViewModels
       }
       catch (Exception e)
       {
-        Dialogs.ShowDialog(MainWindowStandalone.Instance, "Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
+        Dialogs.ShowDialog(MainWindow.Instance, "Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
       }
     }
 
@@ -192,7 +82,7 @@ namespace DesktopUI2.ViewModels
     {
       var dialog = new OpenFileDialog();
       dialog.Filters.Add(new FileDialogFilter() { Name = "GSA Files", Extensions = { "gwb", "gwa" } });
-      var result = await dialog.ShowAsync(MainWindowStandalone.Instance);
+      var result = await dialog.ShowAsync(MainWindow.Instance);
 
       if (result != null)
       {
@@ -201,7 +91,7 @@ namespace DesktopUI2.ViewModels
         {
           try
           {
-            var bindings = (ConnectorBindingsStandalone)Bindings;
+            var bindings = (IConnectorBindingsStandalone)Bindings;
             bindings.OpenFile(path);
             HasGSAFile = true;
             FilePath = path;
@@ -209,7 +99,7 @@ namespace DesktopUI2.ViewModels
           }
           catch (Exception e)
           {
-            Dialogs.ShowDialog(MainWindowStandalone.Instance, "Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
+            Dialogs.ShowDialog(MainWindow.Instance, "Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
           }
         }
       }
@@ -240,11 +130,6 @@ namespace DesktopUI2.ViewModels
         return new Tuple<bool, string>(false, "Name is too short.");
 
       return new Tuple<bool, string>(true, "");
-    }
-   
-    public override void OpenStream(StreamState streamState)
-    {
-      MainWindowViewModelStandalone.RouterInstance.Navigate.Execute(new StreamViewModelStandalone(streamState, HostScreen, RemoveSavedStreamCommand));
     }
 
     private void ChangeTheme(bool isDark)

@@ -64,63 +64,36 @@ namespace Objects.Converter.Revit
 
       //try update existing 
       var docObj = GetExistingElementByApplicationId(speckleColumn.applicationId);
+      if (docObj != null && ReceiveMode == Speckle.Core.Kits.ReceiveMode.Ignore)
+        return new List<ApplicationPlaceholderObject> { new ApplicationPlaceholderObject { applicationId = speckleColumn.applicationId, ApplicationGeneratedId = docObj.UniqueId, NativeObject = docObj } }; ;
+
       bool isUpdate = false;
       if (docObj != null)
       {
         try
         {
-          var analyticalStick = docObj as AnalyticalModelStick;
           var revitType = Doc.GetElement(docObj.GetTypeId()) as ElementType;
-          
-          // Gets physical element associated with analytical element
-          var revitElement = Doc.GetElement(analyticalStick.GetElementId()) as DB.FamilyInstance;
-          
+
           // if family changed, tough luck. delete and let us create a new one.
-          if (familySymbol.FamilyName != revitElement.Symbol.FamilyName)
+          if (familySymbol.FamilyName != revitType.FamilyName)
           {
             Doc.Delete(docObj.Id);
           }
-
           else
           {
-            revitColumn = (DB.FamilyInstance)revitElement;
-            var revitStickLocation = AnalyticalCurvesToBaseline(analyticalStick);
-
-            if (revitColumn.Location is LocationCurve)
+            revitColumn = (DB.FamilyInstance)docObj;
+            switch (revitColumn.Location)
             {
-              var crv = revitColumn.Location as LocationCurve;
-
-              if (crv.Curve != baseLine) 
-              {
+              case LocationCurve crv:
                 crv.Curve = baseLine;
-              }
+                break;
+              case LocationPoint pt:
+                pt.Point = baseLine.GetEndPoint(0);
+                break;
             }
-
-            // column location must be LocationPoint
-            else
-            {
-              var pt = revitColumn.Location as LocationPoint;
-
-              var convertedStartPoint = PointToNative(revitStickLocation.start);
-
-              if (!convertedStartPoint.IsAlmostEqualTo(startPoint))
-              {
-                pt.Point = startPoint;
-              }
-            }
-
-            //switch (revitColumn.Location)
-            //{
-            //  case LocationCurve crv:
-            //    crv.Curve = baseLine;
-            //    break;
-            //  case LocationPoint pt:
-            //    pt.Point = startPoint;
-            //    break;
-            //}
 
             // check for a type change
-            if (!string.IsNullOrEmpty(familySymbol.Name) && familySymbol.Name != revitElement.Name)
+            if (!string.IsNullOrEmpty(familySymbol.FamilyName) && familySymbol.FamilyName != revitType.Name)
             {
               revitColumn.ChangeTypeId(familySymbol.Id);
             }
@@ -160,11 +133,11 @@ namespace Objects.Converter.Revit
       //rotate
       if (speckleRevitColumn != null && revitColumn != null)
       {
-        var currentRotation = (revitColumn.Location as LocationPoint).Rotation;
-        if (currentRotation != speckleRevitColumn.rotation)
+        var currentRotation = (revitColumn.Location as LocationPoint)?.Rotation;
+        if (currentRotation != null && currentRotation != speckleRevitColumn.rotation)
         {
           var axis = DB.Line.CreateBound(new XYZ(basePoint.X, basePoint.Y, 0), new XYZ(basePoint.X, basePoint.Y, 10000));
-          var s = (revitColumn.Location as LocationPoint).Rotate(axis, speckleRevitColumn.rotation - currentRotation);
+          var s = (revitColumn.Location as LocationPoint).Rotate(axis, speckleRevitColumn.rotation - (double)currentRotation);
         }
       }
 

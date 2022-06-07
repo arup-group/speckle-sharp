@@ -185,6 +185,10 @@ namespace Objects.Converter.Revit
       speckleElement["elementId"] = revitElement.Id.ToString();
       speckleElement.applicationId = revitElement.UniqueId;
       speckleElement["units"] = ModelUnits;
+      speckleElement["isRevitLinkedModel"] = revitElement.Document.IsLinked;
+      speckleElement["revitLinkedModelPath"] = revitElement.Document.PathName;
+
+
     }
 
     //private List<string> alltimeExclusions = new List<string> { 
@@ -263,6 +267,13 @@ namespace Objects.Converter.Revit
           }
           break;
         case StorageType.Integer:
+#if REVIT2023
+
+          if (rp.Definition.GetDataType() == SpecTypeId.Boolean.YesNo)
+            sp.value = Convert.ToBoolean(rp.AsInteger());
+          else
+            sp.value = rp.AsInteger();
+#else
           switch (rp.Definition.ParameterType)
           {
             case ParameterType.YesNo:
@@ -272,6 +283,7 @@ namespace Objects.Converter.Revit
               sp.value = rp.AsInteger();
               break;
           }
+#endif
           break;
         case StorageType.String:
           sp.value = rp.AsString();
@@ -397,6 +409,7 @@ namespace Objects.Converter.Revit
         }
         else
         {
+#if !REVIT2023
           switch (sp.value)
           {
             case int _:
@@ -414,6 +427,7 @@ namespace Objects.Converter.Revit
             default:
               break;
           }
+#endif
         }
       }
     }
@@ -433,6 +447,7 @@ namespace Objects.Converter.Revit
       }
     }
 
+#if !REVIT2023
     private DB.Parameter CreateInstanceParameter(string parameterName, ParameterType parameterType, Element revitElement)
     {
       // create shared parameter file
@@ -474,6 +489,7 @@ namespace Objects.Converter.Revit
       }
       else return null;
     }
+#endif
 
     //private bool IsValid(DB.Parameter rp)
     //{
@@ -520,9 +536,9 @@ namespace Objects.Converter.Revit
       }
     }
 
-    #endregion
+#endregion
 
-    #region  element types
+#region  element types
 
     private T GetElementType<T>(string family, string type)
     {
@@ -671,9 +687,9 @@ namespace Objects.Converter.Revit
       }
     }
 
-    #endregion
+#endregion
 
-    #region conversion "edit existing if possible" utilities
+#region conversion "edit existing if possible" utilities
 
     /// <summary>
     /// Returns, if found, the corresponding doc element.
@@ -683,20 +699,26 @@ namespace Objects.Converter.Revit
     /// <returns>The element, if found, otherwise null</returns>
     public DB.Element GetExistingElementByApplicationId(string applicationId)
     {
-      if (applicationId == null)
+      if (applicationId == null || ReceiveMode == Speckle.Core.Kits.ReceiveMode.Create)
         return null;
 
       var @ref = PreviousContextObjects.FirstOrDefault(o => o.applicationId == applicationId);
 
+      Element element = null;
       if (@ref == null)
       {
         //element was not cached in a PreviousContex but might exist in the model
         //eg: user sends some objects, moves them, receives them 
-        return Doc.GetElement(applicationId);
+        element = Doc.GetElement(applicationId);
+      }
+      else
+      {
+
+        //return the cached object, if it's still in the model
+        element = Doc.GetElement(@ref.ApplicationGeneratedId);
       }
 
-      //return the cached object, if it's still in the model
-      return Doc.GetElement(@ref.ApplicationGeneratedId);
+      return element;
     }
 
     public List<string> SubdividePropertyName(string propertyName)
@@ -752,9 +774,9 @@ namespace Objects.Converter.Revit
       return param;
     }
 
-    #endregion
+#endregion
 
-    #region Section Mapping
+#region Section Mapping
     const string MappingStreamId = "Default Section Mapping Stream";
 
     private static SQLiteTransport MappingStorage = new SQLiteTransport(scope: "Mappings");
@@ -862,9 +884,9 @@ namespace Objects.Converter.Revit
       return mappingData;
     }
 
-    #endregion
+#endregion
 
-    #region Reference Point
+#region Reference Point
 
     // CAUTION: these strings need to have the same values as in the connector bindings
     const string InternalOrigin = "Internal Origin (default)";
@@ -895,7 +917,8 @@ namespace Objects.Converter.Revit
     ////////////////////////////////////////////////
     private DB.Transform GetReferencePointTransform(string type)
     {
-      // get the correct base point from settings
+      // get the correct base point from
+      // settings
       var referencePointTransform = DB.Transform.Identity;
 
       var points = new FilteredElementCollector(Doc).OfClass(typeof(BasePoint)).Cast<BasePoint>().ToList();
@@ -953,9 +976,9 @@ namespace Objects.Converter.Revit
     {
       return (isPoint) ? ReferencePointTransform.OfPoint(p) : ReferencePointTransform.OfVector(p);
     }
-    #endregion
+#endregion
 
-    #region Floor/ceiling/roof openings
+#region Floor/ceiling/roof openings
 
     //a floor/roof/ceiling outline can have "voids/holes" for 3 reasons:
     // - there is a shaft cutting through it > we don't need to create an opening (the shaft will be created on its own)
@@ -1026,9 +1049,9 @@ namespace Objects.Converter.Revit
       return false;
     }
 
-    #endregion
+#endregion
 
-    #region misc
+#region misc
 
     public string GetTemplatePath(string templateName)
     {
@@ -1046,7 +1069,7 @@ namespace Objects.Converter.Revit
 
       return templatePath;
     }
-    #endregion
+#endregion
 
     private List<ICurve> GetProfiles(DB.SpatialElement room)
     {
@@ -1086,7 +1109,7 @@ namespace Objects.Converter.Revit
       }
     }
 
-    #region materials
+#region materials
     public RenderMaterial GetElementRenderMaterial(DB.Element element)
     {
       var matId = element.GetMaterialIds(false).FirstOrDefault();
@@ -1130,7 +1153,7 @@ namespace Objects.Converter.Revit
       if (existing != null) return existing.Id;
 
       // Create new material
-      ElementId materialId = DB.Material.Create(Doc, speckleMaterial.name);
+      ElementId materialId = DB.Material.Create(Doc, speckleMaterial.name ?? Guid.NewGuid().ToString());
       Material mat = Doc.GetElement(materialId) as Material;
 
       var sysColor = System.Drawing.Color.FromArgb(speckleMaterial.diffuse);
@@ -1195,16 +1218,16 @@ namespace Objects.Converter.Revit
 
       var supportedCategories = new[]
       {
-            BuiltInCategory.OST_PipeFitting,
-            BuiltInCategory.OST_DuctFitting,
-            BuiltInCategory.OST_DuctAccessory,
-            BuiltInCategory.OST_PipeAccessory,
-            //BuiltInCategory.OST_MechanicalEquipment,
-          };
+        BuiltInCategory.OST_PipeFitting,
+        BuiltInCategory.OST_DuctFitting,
+        BuiltInCategory.OST_DuctAccessory,
+        BuiltInCategory.OST_PipeAccessory,
+        //BuiltInCategory.OST_MechanicalEquipment,
+      };
 
       return supportedCategories.Any(cat => e.Category.Id == categories.get_Item(cat).Id);
     }
 
-    #endregion
+#endregion
   }
 }

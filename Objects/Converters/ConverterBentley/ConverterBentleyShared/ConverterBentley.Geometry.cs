@@ -4,13 +4,13 @@ using Bentley.DgnPlatformNET.Elements;
 using Bentley.ECObjects.Instance;
 using Bentley.ECObjects.Schema;
 using Bentley.GeometryNET;
+using Bentley.MstnPlatformNET;
 using Objects.Geometry;
 using Objects.Primitive;
-using Speckle.Core.Logging;
 using Speckle.Core.Models;
 using System;
-using System.Drawing;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using Arc = Objects.Geometry.Arc;
 using BIM = Bentley.Interop.MicroStationDGN;
@@ -18,20 +18,16 @@ using BMIU = Bentley.MstnPlatformNET.InteropServices.Utilities;
 using Box = Objects.Geometry.Box;
 using Circle = Objects.Geometry.Circle;
 using Curve = Objects.Geometry.Curve;
+using DisplayStyle = Objects.Other.DisplayStyle;
 using Ellipse = Objects.Geometry.Ellipse;
-using FamilyInstance = Objects.BuiltElements.Revit.FamilyInstance;
 using Interval = Objects.Primitive.Interval;
 using Line = Objects.Geometry.Line;
 using Mesh = Objects.Geometry.Mesh;
 using Plane = Objects.Geometry.Plane;
 using Point = Objects.Geometry.Point;
 using Polyline = Objects.Geometry.Polyline;
-using RevitBeam = Objects.BuiltElements.Revit.RevitBeam;
-using RevitColumn = Objects.BuiltElements.Revit.RevitColumn;
-using RevitFloor = Objects.BuiltElements.Revit.RevitFloor;
 using Surface = Objects.Geometry.Surface;
 using Vector = Objects.Geometry.Vector;
-using DisplayStyle = Objects.Other.DisplayStyle;
 
 namespace Objects.Converter.Bentley
 {
@@ -89,11 +85,10 @@ namespace Objects.Converter.Bentley
 
     public DPoint2d Point2dToNative(Point pt)
     {
-      var myPoint = new DPoint2d(
+      var point = new DPoint2d(
         ScaleToNative(pt.x, pt.units, UoR),
         ScaleToNative(pt.y, pt.units, UoR));
-
-      return myPoint;
+      return point;
     }
 
     public Point Point3dToSpeckle(DPoint3d pt, string units = null)
@@ -108,91 +103,90 @@ namespace Objects.Converter.Bentley
       return new Point(ScaleToSpeckle(pt.X, UoR), ScaleToSpeckle(pt.Y, UoR), ScaleToSpeckle(pt.Z, UoR), u);
     }
 
-    public DPoint3d Point3dToNative(Point pt)
+    public DPoint3d Point3dToNative(Point specklePoint)
     {
-      var myPoint = new DPoint3d(
-        ScaleToNative(pt.x, pt.units, UoR),
-        ScaleToNative(pt.y, pt.units, UoR),
-        ScaleToNative(pt.z, pt.units, UoR));
-
-      return myPoint;
+      var point = new DPoint3d(
+        ScaleToNative(specklePoint.x, specklePoint.units, UoR),
+        ScaleToNative(specklePoint.y, specklePoint.units, UoR),
+        ScaleToNative(specklePoint.z, specklePoint.units, UoR));
+      return point;
     }
 
-    public LineElement PointToNative(Point pt)
+    public LineElement PointToNative(Point specklePoint)
     {
-      DSegment3d dSegment = new DSegment3d(Point3dToNative(pt), Point3dToNative(pt));
-      var _line = new LineElement(Model, null, dSegment);
-      return _line;
+      DSegment3d dSegment = new DSegment3d(Point3dToNative(specklePoint), Point3dToNative(specklePoint));
+      var nativeElement = new LineElement(Model, null, dSegment);
+      return nativeElement;
     }
 
     // Vector (2d and 3d)
-    public Vector Vector2dToSpeckle(DVector2d pt, string units = null)
+    public Vector Vector2dToSpeckle(DVector2d nativeVector, string units = null)
     {
-      return new Vector(pt.X, pt.Y, units ?? ModelUnits);
+      return new Vector(nativeVector.X, nativeVector.Y, units ?? ModelUnits);
     }
 
-    public DVector2d Vector2dToNative(Vector pt)
+    public DVector2d Vector2dToNative(Vector speckleVector)
     {
       return new DVector2d(
-        ScaleToNative(pt.x, pt.units, UoR),
-        ScaleToNative(pt.y, pt.units, UoR));
+        ScaleToNative(speckleVector.x, speckleVector.units, UoR),
+        ScaleToNative(speckleVector.y, speckleVector.units, UoR));
     }
 
-    public Vector Vector3dToSpeckle(DVector3d pt, string units = null)
+    public Vector Vector3dToSpeckle(DVector3d nativeVector, string units = null)
     {
-      return new Vector(pt.X, pt.Y, pt.Z, units ?? ModelUnits);
+      return new Vector(nativeVector.X, nativeVector.Y, nativeVector.Z, units ?? ModelUnits);
     }
 
-    public DVector3d VectorToNative(Vector pt)
+    public DVector3d VectorToNative(Vector speckleVector)
     {
       return new DVector3d(
-        ScaleToNative(pt.x, pt.units, UoR),
-        ScaleToNative(pt.y, pt.units, UoR),
-        ScaleToNative(pt.z, pt.units, UoR));
+        ScaleToNative(speckleVector.x, speckleVector.units, UoR),
+        ScaleToNative(speckleVector.y, speckleVector.units, UoR),
+        ScaleToNative(speckleVector.z, speckleVector.units, UoR));
     }
 
     // Interval
-    public Interval IntervalToSpeckle(DRange1d range)
+    public Interval IntervalToSpeckle(DRange1d nativeRange)
     {
-      return new Interval(ScaleToSpeckle(range.Low, UoR), ScaleToSpeckle(range.High, UoR));
+      return new Interval(ScaleToSpeckle(nativeRange.Low, UoR), ScaleToSpeckle(nativeRange.High, UoR));
     }
 
-    public Interval IntervalToSpeckle(DSegment1d segment)
+    public Interval IntervalToSpeckle(DSegment1d nativeSegment)
     {
-      return new Interval(ScaleToSpeckle(segment.Start, UoR), ScaleToSpeckle(segment.End, UoR));
+      return new Interval(ScaleToSpeckle(nativeSegment.Start, UoR), ScaleToSpeckle(nativeSegment.End, UoR));
     }
 
-    public DRange1d IntervalToNative(Interval interval)
+    public DRange1d IntervalToNative(Interval speckleInterval)
     {
-      return DRange1d.From(ScaleToNative((double)interval.start, ModelUnits, UoR), ScaleToNative((double)interval.end, ModelUnits, UoR));
+      return DRange1d.From(ScaleToNative((double)speckleInterval.start, ModelUnits, UoR), ScaleToNative((double)speckleInterval.end, ModelUnits, UoR));
     }
 
-    public Interval2d Interval2dToSpeckle(DRange2d range)
+    public Interval2d Interval2dToSpeckle(DRange2d nativeRange)
     {
-      var u = new Interval(range.Low.X, range.Low.Y);
-      var v = new Interval(range.High.X, range.High.Y);
+      var u = new Interval(nativeRange.Low.X, nativeRange.Low.Y);
+      var v = new Interval(nativeRange.High.X, nativeRange.High.Y);
       return new Interval2d(u, v);
     }
 
-    public DRange2d Interval2dToNative(Interval2d interval)
+    public DRange2d Interval2dToNative(Interval2d speckleInterval2d)
     {
-      var u = new DPoint2d((double)interval.u.start, (double)interval.u.end);
-      var v = new DPoint2d((double)interval.v.start, (double)interval.v.end); ;
+      var u = new DPoint2d((double)speckleInterval2d.u.start, (double)speckleInterval2d.u.end);
+      var v = new DPoint2d((double)speckleInterval2d.v.start, (double)speckleInterval2d.v.end); ;
       return DRange2d.FromPoints(u, v);
     }
 
     // Plane 
-    public Plane PlaneToSpeckle(DPlane3d plane, string units = null)
+    public Plane PlaneToSpeckle(DPlane3d nativePlane, string units = null)
     {
-      DPoint3d origin = plane.Origin;
-      DVector3d normal = plane.Normal;
+      DPoint3d origin = nativePlane.Origin;
+      DVector3d normal = nativePlane.Normal;
 
-      DVector3d xAxis = DVector3d.UnitY.CrossProduct(plane.Normal);
+      DVector3d xAxis = DVector3d.UnitY.CrossProduct(nativePlane.Normal);
       DVector3d yAxis = normal.CrossProduct(xAxis);
 
       var u = units ?? ModelUnits;
-      var _plane = new Plane(Point3dToSpeckle(origin), Vector3dToSpeckle(normal), Vector3dToSpeckle(xAxis), Vector3dToSpeckle(yAxis), u);
-      return _plane;
+      var specklePlane = new Plane(Point3dToSpeckle(origin), Vector3dToSpeckle(normal), Vector3dToSpeckle(xAxis), Vector3dToSpeckle(yAxis), u);
+      return specklePlane;
     }
 
     public Plane PlaneToSpeckle(DPoint3d pt1, DPoint3d pt2, DPoint3d pt3, string units = null)
@@ -209,19 +203,19 @@ namespace Objects.Converter.Bentley
       DVector3d yAxis = normal.CrossProduct(xAxis);
 
       var u = units ?? ModelUnits;
-      var _plane = new Plane(Point3dToSpeckle(origin), Vector3dToSpeckle(normal), Vector3dToSpeckle(xAxis), Vector3dToSpeckle(yAxis), u);
-      return _plane;
+      var specklePlane = new Plane(Point3dToSpeckle(origin), Vector3dToSpeckle(normal), Vector3dToSpeckle(xAxis), Vector3dToSpeckle(yAxis), u);
+      return specklePlane;
     }
 
-    public DPlane3d PlaneToNative(Plane plane)
+    public DPlane3d PlaneToNative(Plane specklePlane)
     {
-      return new DPlane3d(Point3dToNative(plane.origin), VectorToNative(plane.normal));
+      return new DPlane3d(Point3dToNative(specklePlane.origin), VectorToNative(specklePlane.normal));
     }
 
     // Line (when the start and end point are the same, return line as point)
-    public Base LineToSpeckle(LineElement line, string units = null)
+    public Base LineToSpeckle(LineElement nativeLine, string units = null)
     {
-      CurvePathQuery q = CurvePathQuery.GetAsCurvePathQuery(line);
+      CurvePathQuery q = CurvePathQuery.GetAsCurvePathQuery(nativeLine);
       if (q != null)
       {
         CurveVector vec = q.GetCurveVector();
@@ -234,116 +228,117 @@ namespace Objects.Converter.Bentley
           double length = vec.SumOfLengths() / UoR;
 
           var u = units ?? ModelUnits;
-          var _line = new Line(Point3dToSpeckle(startPoint), Point3dToSpeckle(endPoint), u);
-          _line.length = length;
-          _line.domain = new Interval(0, length);
+          var speckleLine = new Line(Point3dToSpeckle(startPoint), Point3dToSpeckle(endPoint), u);
+          speckleLine.length = length;
+          speckleLine.domain = new Interval(0, length);
 
           vec.GetRange(out var range);
           bool worldXY = range.Low.Z == 0 && range.High.Z == 0 ? true : false;
-          _line.bbox = BoxToSpeckle(range, worldXY);
+          speckleLine.bbox = BoxToSpeckle(range, worldXY);
 
-          return _line;
+          GetNativeProperties(nativeLine, speckleLine);
+
+          return speckleLine;
         }
       }
 
       return new Line();
     }
 
-    public Line LineToSpeckle(DSegment3d line, string units = null)
+    public Line LineToSpeckle(DSegment3d nativeLine, string units = null)
     {
       var u = units ?? ModelUnits;
-      var _line = new Line(Point3dToSpeckle(line.StartPoint), Point3dToSpeckle(line.EndPoint), u);
-      _line.length = line.Length / UoR;
-      _line.domain = new Interval(0, line.Length);
+      var speckleLine = new Line(Point3dToSpeckle(nativeLine.StartPoint), Point3dToSpeckle(nativeLine.EndPoint), u);
+      speckleLine.length = nativeLine.Length / UoR;
+      speckleLine.domain = new Interval(0, nativeLine.Length);
 
-      var range = DRange3d.FromPoints(line.StartPoint, line.EndPoint);
+      var range = DRange3d.FromPoints(nativeLine.StartPoint, nativeLine.EndPoint);
       bool worldXY = range.Low.Z == 0 && range.High.Z == 0 ? true : false;
-      _line.bbox = BoxToSpeckle(range, worldXY);
+      speckleLine.bbox = BoxToSpeckle(range, worldXY);
 
-      return _line;
+      return speckleLine;
     }
 
     public Line LineToSpeckle(DPoint3d start, DPoint3d end, string units = null)
     {
       var u = units ?? ModelUnits;
-      var _line = new Line(Point3dToSpeckle(start), Point3dToSpeckle(end), u);
+      var speckleLine = new Line(Point3dToSpeckle(start), Point3dToSpeckle(end), u);
       double deltaX = end.X - start.X;
       double deltaY = end.Y - start.Y;
       double deltaZ = end.Z - start.Z;
       double length = Math.Sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
-      _line.length /= UoR;
-      _line.domain = new Interval(0, length);
+      speckleLine.length /= UoR;
+      speckleLine.domain = new Interval(0, length);
 
       var range = DRange3d.FromPoints(start, end);
       bool worldXY = range.Low.Z == 0 && range.High.Z == 0 ? true : false;
-      _line.bbox = BoxToSpeckle(range, worldXY);
+      speckleLine.bbox = BoxToSpeckle(range, worldXY);
 
-      return _line;
+      return speckleLine;
     }
 
-    public LineElement LineToNative(Line line)
+    public LineElement LineToNative(Line speckleLine)
     {
-      DSegment3d dSegment = new DSegment3d(Point3dToNative(line.start), Point3dToNative(line.end));
-      var _line = new LineElement(Model, null, dSegment);
-      return _line;
+      DSegment3d dSegment = new DSegment3d(Point3dToNative(speckleLine.start), Point3dToNative(speckleLine.end));
+      var nativeLine = new LineElement(Model, null, dSegment);
+      return nativeLine;
     }
 
     // All arcs
-    public ICurve ArcToSpeckle(ArcElement arc, string units = null)
+    public ICurve ArcToSpeckle(ArcElement nativeArc, string units = null)
     {
-      double axisRatio = GetElementProperty(arc, "AxisRatio").DoubleValue;
+      double axisRatio = GetElementProperty(nativeArc, "AxisRatio").DoubleValue;
 
-      CurveVector vec = arc.GetCurveVector();
+      CurveVector vec = nativeArc.GetCurveVector();
       vec.GetStartEnd(out DPoint3d startPoint, out DPoint3d endPoint);
 
       if (axisRatio == 1)
       {
         if (startPoint == endPoint)
         {
-          return CircleToSpeckle(arc, units);
+          return CircleToSpeckle(nativeArc, units);
         }
         else
         {
-          return CircularArcToSpeckle(arc, units); // Axis 1 == Axis 2
+          return CircularArcToSpeckle(nativeArc, units); // Axis 1 == Axis 2
         }
       }
       else
       {
-        return EllipticArcToSpeckle(arc, units); // Axis 1 != Axis 2 (return Curve instead of Arc)
+        return EllipticArcToSpeckle(nativeArc, units); // Axis 1 != Axis 2 (return Curve instead of Arc)
       }
     }
 
-
-    public ICurve ArcToSpeckle(DEllipse3d ellipse, string units = null)
+    public ICurve ArcToSpeckle(DEllipse3d nativeEllipse, string units = null)
     {
-      ellipse.GetMajorMinorData(out DPoint3d center, out DMatrix3d matrix, out double majorAxis, out double minorAxis, out Angle startAngle, out Angle endAngle);
-      var startPoint = ellipse.PointAtAngle(startAngle);
-      var endPoint = ellipse.PointAtAngle(endAngle);
+      nativeEllipse.GetMajorMinorData(out DPoint3d center, out DMatrix3d matrix, out double majorAxis, out double minorAxis, out Angle startAngle, out Angle endAngle);
+      var startPoint = nativeEllipse.PointAtAngle(startAngle);
+      var endPoint = nativeEllipse.PointAtAngle(endAngle);
       var axisRatio = majorAxis / minorAxis;
 
       if (axisRatio == 1)
       {
         if (startPoint == endPoint)
         {
-          return CircleToSpeckle(ellipse, units);
+          return CircleToSpeckle(nativeEllipse, units);
         }
         else
         {
-          return CircularArcToSpeckle(ellipse, units); // Axis 1 == Axis 2
+          return CircularArcToSpeckle(nativeEllipse, units); // Axis 1 == Axis 2
         }
       }
       else
       {
-        return EllipticArcToSpeckle(ellipse, units); // Axis 1 != Axis 2 (return Curve instead of Arc)
+        return EllipticArcToSpeckle(nativeEllipse, units); // Axis 1 != Axis 2 (return Curve instead of Arc)
       }
     }
 
     // Arc
-    public Arc CircularArcToSpeckle(ArcElement arc, string units = null)
+    public Arc CircularArcToSpeckle(ArcElement nativeArc, string units = null)
     {
       var u = units ?? ModelUnits;
 
-      CurvePathQuery q = CurvePathQuery.GetAsCurvePathQuery(arc);
+      CurvePathQuery q = CurvePathQuery.GetAsCurvePathQuery(nativeArc);
       if (q != null)
       {
         CurveVector vec = q.GetCurveVector();
@@ -362,127 +357,124 @@ namespace Objects.Converter.Bentley
       return new Arc();
     }
 
-    public Arc CircularArcToSpeckle(DEllipse3d ellipse, string units = null)
+    public Arc CircularArcToSpeckle(DEllipse3d nativeEllipse, string units = null)
     {
-      ellipse.IsCircular(out double radius, out DVector3d normal);
-      var length = ellipse.ArcLength();
-      var range = DRange3d.FromEllipse(ellipse);
+      nativeEllipse.IsCircular(out double radius, out DVector3d normal);
+      var length = nativeEllipse.ArcLength();
+      var range = DRange3d.FromEllipse(nativeEllipse);
 
-      var sweep = ellipse.SweepAngle.Radians;
-      var rotation = Angle.NormalizeRadiansToPositive(ellipse.Vector0.AngleXY.Radians);
+      var sweep = nativeEllipse.SweepAngle.Radians;
+      var rotation = Angle.NormalizeRadiansToPositive(nativeEllipse.Vector0.AngleXY.Radians);
 
-      var startAngle = ellipse.StartAngle.Radians;
-      var endAngle = ellipse.EndAngle.Radians;
+      var startAngle = nativeEllipse.StartAngle.Radians;
+      var endAngle = nativeEllipse.EndAngle.Radians;
 
       startAngle = startAngle + rotation;
       endAngle = endAngle + rotation;
 
-      var center = ellipse.Center;
+      var center = nativeEllipse.Center;
 
-      var startPoint = ellipse.PointAtAngle(ellipse.StartAngle);
-      var endPoint = ellipse.PointAtAngle(ellipse.EndAngle);
+      var startPoint = nativeEllipse.PointAtAngle(nativeEllipse.StartAngle);
+      var endPoint = nativeEllipse.PointAtAngle(nativeEllipse.EndAngle);
 
-      var midPoint = ellipse.PointAtAngle(ellipse.StartAngle + Angle.Multiply(ellipse.SweepAngle, 0.5));
+      var midPoint = nativeEllipse.PointAtAngle(nativeEllipse.StartAngle + Angle.Multiply(nativeEllipse.SweepAngle, 0.5));
 
-      var _arc = new Arc();
-      _arc.radius = radius / UoR;
-      _arc.angleRadians = sweep;
-      _arc.startPoint = Point3dToSpeckle(startPoint);
-      _arc.endPoint = Point3dToSpeckle(endPoint);
-      _arc.midPoint = Point3dToSpeckle(midPoint);
+      var speckleArc = new Arc();
+      speckleArc.radius = radius / UoR;
+      speckleArc.angleRadians = sweep;
+      speckleArc.startPoint = Point3dToSpeckle(startPoint);
+      speckleArc.endPoint = Point3dToSpeckle(endPoint);
+      speckleArc.midPoint = Point3dToSpeckle(midPoint);
 
-      _arc.startAngle = startAngle;
-      _arc.endAngle = endAngle;
+      speckleArc.startAngle = startAngle;
+      speckleArc.endAngle = endAngle;
 
       DPlane3d plane = new DPlane3d(center, new DVector3d(normal));
-      _arc.plane = PlaneToSpeckle(plane);
+      speckleArc.plane = PlaneToSpeckle(plane);
 
-      _arc.length = length / UoR;
-      _arc.domain = new Interval(0, length / UoR);
+      speckleArc.length = length / UoR;
+      speckleArc.domain = new Interval(0, length / UoR);
 
       bool worldXY = startPoint.Z == 0 && endPoint.Z == 0 ? true : false;
-      _arc.bbox = BoxToSpeckle(range, worldXY);
-      _arc.units = units ?? ModelUnits;
+      speckleArc.bbox = BoxToSpeckle(range, worldXY);
+      speckleArc.units = units ?? ModelUnits;
 
-      return _arc;
+      return speckleArc;
     }
 
     // Elliptic arc
-    public Curve EllipticArcToSpeckle(ArcElement arc, string units = null)
+    public Curve EllipticArcToSpeckle(ArcElement nativeArc, string units = null)
     {
-      var vec = arc.GetCurveVector();
+      var vec = nativeArc.GetCurveVector();
       var primitive = vec.GetPrimitive(0); // assume one primitve in vector for single curve element
 
       primitive.TryGetArc(out DEllipse3d curve);
 
-      var _spline = MSBsplineCurve.CreateFromDEllipse3d(ref curve);
-      var _splineElement = new BSplineCurveElement(Model, null, _spline);
+      var spline = MSBsplineCurve.CreateFromDEllipse3d(ref curve);
+      var splineElement = new BSplineCurveElement(Model, null, spline);
 
-      return BSplineCurveToSpeckle(_splineElement, units);
+      return BSplineCurveToSpeckle(splineElement, units);
     }
 
-    public Curve EllipticArcToSpeckle(DEllipse3d ellipse, string units = null)
+    public Curve EllipticArcToSpeckle(DEllipse3d nativeEllipse, string units = null)
     {
-      var _spline = MSBsplineCurve.CreateFromDEllipse3d(ref ellipse);
-      var _splineElement = new BSplineCurveElement(Model, null, _spline);
+      var spline = MSBsplineCurve.CreateFromDEllipse3d(ref nativeEllipse);
+      var splineElement = new BSplineCurveElement(Model, null, spline);
 
-      return BSplineCurveToSpeckle(_splineElement, units);
+      return BSplineCurveToSpeckle(splineElement, units);
     }
 
-    public ArcElement ArcToNative(Arc arc)
+    public ArcElement ArcToNative(Arc speckleArc)
     {
-      var radius = (double)arc.radius;
-      var startAngle = (double)arc.startAngle;
-      var endAngle = (double)arc.endAngle;
-      var center = Point3dToNative(arc.plane.origin);
+      DEllipse3d.TryCircularArcFromStartMiddleEnd(Point3dToNative(speckleArc.startPoint), Point3dToNative(speckleArc.midPoint), Point3dToNative(speckleArc.endPoint), out DEllipse3d ellipse);
 
-      DEllipse3d.TryCircularArcFromStartMiddleEnd(Point3dToNative(arc.startPoint), Point3dToNative(arc.midPoint), Point3dToNative(arc.endPoint), out DEllipse3d ellipse);
-
-      var _arc = new ArcElement(Model, null, ellipse);
-      return _arc;
+      var nativeArc = new ArcElement(Model, null, ellipse);
+      return nativeArc;
     }
 
     // Ellipse
-    public Ellipse EllipseWithoutRotationToSpeckle(EllipseElement ellipse, string units = null)
+    public Ellipse EllipseWithoutRotationToSpeckle(EllipseElement nativeEllipse, string units = null)
     {
-      double length = ellipse.GetCurveVector().SumOfLengths() / UoR;
-      double axis1 = GetElementProperty(ellipse, "PrimaryAxis").DoubleValue / UoR;
-      double axis2 = GetElementProperty(ellipse, "SecondaryAxis").DoubleValue / UoR;
+      double length = nativeEllipse.GetCurveVector().SumOfLengths() / UoR;
+      double axis1 = GetElementProperty(nativeEllipse, "PrimaryAxis").DoubleValue / UoR;
+      double axis2 = GetElementProperty(nativeEllipse, "SecondaryAxis").DoubleValue / UoR;
 
-      var vec = ellipse.GetCurveVector();
+      var vec = nativeEllipse.GetCurveVector();
       vec.GetRange(out DRange3d range);
       vec.CentroidNormalArea(out DPoint3d center, out DVector3d normal, out double area);
 
       DPlane3d plane = new DPlane3d(center, new DVector3d(normal));
 
       var u = units ?? ModelUnits;
-      var _ellipse = new Ellipse(PlaneToSpeckle(plane), axis1, axis2, u);
-      _ellipse.domain = new Interval(0, length);
-      _ellipse.length = length;
+      var speckleEllipse = new Ellipse(PlaneToSpeckle(plane), axis1, axis2, u);
+      speckleEllipse.domain = new Interval(0, length);
+      speckleEllipse.length = length;
 
       bool worldXY = range.Low.Z == 0 && range.High.Z == 0 ? true : false;
-      _ellipse.bbox = BoxToSpeckle(range, worldXY);
+      speckleEllipse.bbox = BoxToSpeckle(range, worldXY);
 
-      _ellipse.area = area / Math.Pow(UoR, 2);
+      speckleEllipse.area = area / Math.Pow(UoR, 2);
 
-      return _ellipse;
+      GetNativeProperties(nativeEllipse, speckleEllipse);
+
+      return speckleEllipse;
     }
 
-    public EllipseElement EllipseToNative(Ellipse ellipse)
+    public EllipseElement EllipseToNative(Ellipse speckleEllipse)
     {
-      var plane = PlaneToNative((Plane)ellipse.plane);
+      var plane = PlaneToNative((Plane)speckleEllipse.plane);
 
       DPlacementZX placement = new DPlacementZX(plane.Origin);
-      var _ellipse = new DEllipse3d(placement, (double)ellipse.firstRadius, (double)ellipse.secondRadius, Angle.Zero, Angle.TWOPI);
-      var ellipseElement = new EllipseElement(Model, null, _ellipse);
+      var ellipse = new DEllipse3d(placement, (double)speckleEllipse.firstRadius, (double)speckleEllipse.secondRadius, Angle.Zero, Angle.TWOPI);
+      var nativeEllipse = new EllipseElement(Model, null, ellipse);
 
-      return ellipseElement;
+      return nativeEllipse;
     }
 
     // Ellipse element with rotation (converted to curve)
-    public Curve EllipseWithRotationToSpeckle(EllipseElement ellipse, string units = null)
+    public Curve EllipseWithRotationToSpeckle(EllipseElement nativeEllipse, string units = null)
     {
-      var vec = ellipse.GetCurveVector();
+      var vec = nativeEllipse.GetCurveVector();
       var primitive = vec.GetPrimitive(0); // assume one primitve in vector for single curve element
       primitive.TryGetArc(out DEllipse3d curve);
 
@@ -493,9 +485,9 @@ namespace Objects.Converter.Bentley
     }
 
     // Circle
-    public Circle CircleToSpeckle(EllipseElement ellipse, string units = null)
+    public Circle CircleToSpeckle(EllipseElement nativeEllipse, string units = null)
     {
-      var vec = ellipse.GetCurveVector();
+      var vec = nativeEllipse.GetCurveVector();
       vec.GetRange(out DRange3d range);
       vec.CentroidNormalArea(out DPoint3d center, out DVector3d normal, out double area);
       double radius = (vec.SumOfLengths() / (Math.PI * 2)) / UoR;
@@ -512,12 +504,14 @@ namespace Objects.Converter.Bentley
       bool worldXY = range.Low.Z == 0 && range.High.Z == 0 ? true : false;
       speckleCircle.bbox = BoxToSpeckle(range, worldXY);
 
+      GetNativeProperties(nativeEllipse, speckleCircle);
+
       return speckleCircle;
     }
 
-    public Circle CircleToSpeckle(ArcElement arc, string units = null)
+    public Circle CircleToSpeckle(ArcElement nativeArc, string units = null)
     {
-      CurveVector vec = arc.GetCurveVector();
+      CurveVector vec = nativeArc.GetCurveVector();
       vec.GetRange(out DRange3d range);
       vec.WireCentroid(out double length, out DPoint3d center);
       double radius = (vec.SumOfLengths() / (Math.PI * 2)) / UoR;
@@ -540,11 +534,11 @@ namespace Objects.Converter.Bentley
       return speckleCircle;
     }
 
-    public Circle CircleToSpeckle(DEllipse3d ellipse, string units = null)
+    public Circle CircleToSpeckle(DEllipse3d nativeEllipse, string units = null)
     {
-      ellipse.GetMajorMinorData(out DPoint3d center, out DMatrix3d matrix, out double majorAxis, out double minorAxis, out Angle startAngle, out Angle endAngle);
-      ellipse.IsCircular(out double radius, out DVector3d normal);
-      var range = DRange3d.FromEllipse(ellipse);
+      nativeEllipse.GetMajorMinorData(out DPoint3d center, out DMatrix3d matrix, out double majorAxis, out double minorAxis, out Angle startAngle, out Angle endAngle);
+      nativeEllipse.IsCircular(out double radius, out DVector3d normal);
+      var range = DRange3d.FromEllipse(nativeEllipse);
 
       Plane specklePlane = PlaneToSpeckle(new DPlane3d(center, normal));
 
@@ -561,49 +555,49 @@ namespace Objects.Converter.Bentley
       return speckleCircle;
     }
 
-    public EllipseElement CircleToNative(Circle ellipse)
+    public EllipseElement CircleToNative(Circle speckleCircle)
     {
-      var radius = (double)ellipse.radius;
-      var plane = ellipse.plane;
+      var radius = (double)speckleCircle.radius;
+      var plane = speckleCircle.plane;
       var center = Point3dToNative(plane.origin);
       var normal = VectorToNative(plane.normal);
 
-      var e = DEllipse3d.FromCenterRadiusNormal(center, ScaleToNative(radius, ellipse.units, UoR), normal);
-      var _ellipse = new EllipseElement(Model, null, e);
+      var ellipse = DEllipse3d.FromCenterRadiusNormal(center, ScaleToNative(radius, speckleCircle.units, UoR), normal);
+      var nativeEllipse = new EllipseElement(Model, null, ellipse);
 
-      return _ellipse;
+      return nativeEllipse;
     }
 
     // All ellipse cases (as a circle, as a curve - , as an ellipse)
-    public ICurve EllipseToSpeckle(EllipseElement ellipse, string units = null)
+    public ICurve EllipseToSpeckle(EllipseElement nativeEllipse, string units = null)
     {
-      double axisRatio = GetElementProperty(ellipse, "AxisRatio").DoubleValue;
-      double rotation = GetElementProperty(ellipse, "RotationAngle").DoubleValue;
+      double axisRatio = GetElementProperty(nativeEllipse, "AxisRatio").DoubleValue;
+      double rotation = GetElementProperty(nativeEllipse, "RotationAngle").DoubleValue;
 
       if (axisRatio == 1)
       {
         // primary axis = secondary axis, treat as circle
-        return CircleToSpeckle(ellipse, units);
+        return CircleToSpeckle(nativeEllipse, units);
       }
       else
       {
         if (rotation != 0 && rotation % (Math.PI * 2) != 0)
         {
-          return EllipseWithRotationToSpeckle(ellipse, units);
+          return EllipseWithRotationToSpeckle(nativeEllipse, units);
         }
         else
         {
-          return EllipseWithoutRotationToSpeckle(ellipse, units);
+          return EllipseWithoutRotationToSpeckle(nativeEllipse, units);
         }
       }
     }
 
     // Line string element
-    public Polyline PolylineToSpeckle(LineStringElement lineString, string units = null)
+    public Polyline PolylineToSpeckle(LineStringElement nativeLineString, string units = null)
     {
       var specklePolyline = new Polyline();
 
-      CurveVector curveVector = CurvePathQuery.ElementToCurveVector(lineString);
+      CurveVector curveVector = CurvePathQuery.ElementToCurveVector(nativeLineString);
       if (curveVector != null)
       {
         var vertices = new List<DPoint3d>();
@@ -623,6 +617,8 @@ namespace Objects.Converter.Bentley
         specklePolyline.bbox = BoxToSpeckle(range, worldXY);
         specklePolyline.units = units ?? ModelUnits;
       }
+
+      GetNativeProperties(nativeLineString, specklePolyline);
 
       return specklePolyline;
     }
@@ -657,21 +653,21 @@ namespace Objects.Converter.Bentley
       return specklePolyline;
     }
 
-    public LineStringElement PolylineToNative(Polyline polyline)
+    public LineStringElement PolylineToNative(Polyline specklePolyline)
     {
-      var points = PointListToNative(polyline.value, polyline.units).ToList();
-      if (polyline.closed)
+      var points = PointListToNative(specklePolyline.value, specklePolyline.units).ToList();
+      if (specklePolyline.closed)
         points.Add(points[0]);
 
-      LineStringElement nativeLineString = new LineStringElement(Model, null, points.ToArray());
-      return nativeLineString;
+      LineStringElement nativePolyline = new LineStringElement(Model, null, points.ToArray());
+      return nativePolyline;
     }
 
     // Complex string element (complex chain)
-    public Polycurve PolycurveToSpeckle(ComplexStringElement complexString, string units = null)
+    public Polycurve PolycurveToSpeckle(ComplexStringElement nativeComplexString, string units = null)
     {
       var segments = new List<ICurve>();
-      CurveVector curveVector = CurvePathQuery.ElementToCurveVector(complexString);
+      CurveVector curveVector = CurvePathQuery.ElementToCurveVector(nativeComplexString);
       foreach (var primitive in curveVector)
       {
         var curvePrimitiveType = primitive.GetCurvePrimitiveType();
@@ -702,12 +698,12 @@ namespace Objects.Converter.Bentley
       }
 
       Processor processor = new Processor();
-      ElementGraphicsOutput.Process(complexString, processor);
+      ElementGraphicsOutput.Process(nativeComplexString, processor);
 
       DRange3d range = new DRange3d();
       double length = 0;
       bool closed = false;
-      CurvePathQuery q = CurvePathQuery.GetAsCurvePathQuery(complexString);
+      CurvePathQuery q = CurvePathQuery.GetAsCurvePathQuery(nativeComplexString);
       if (q != null)
       {
         CurveVector vec = q.GetCurveVector();
@@ -728,17 +724,19 @@ namespace Objects.Converter.Bentley
       bool worldXY = range.Low.Z == 0 && range.High.Z == 0 ? true : false;
       specklePolycurve.bbox = BoxToSpeckle(range, worldXY);
 
+      GetNativeProperties(nativeComplexString, specklePolycurve);
+
       return specklePolycurve;
     }
 
     //// Complex string element (complex chain)
-    public ComplexStringElement PolycurveToNative(Polycurve polycurve)
+    public ComplexStringElement PolycurveToNative(Polycurve specklePolycurve)
     {
       var nativePolycurve = new ComplexStringElement(Model, null);
 
-      for (int i = 0; i < polycurve.segments.Count; i++)
+      for (int i = 0; i < specklePolycurve.segments.Count; i++)
       {
-        var segment = polycurve.segments[i];
+        var segment = specklePolycurve.segments[i];
         var _curve = CurveToNative(segment);
         nativePolycurve.AddComponentElement(_curve);
       }
@@ -781,19 +779,19 @@ namespace Objects.Converter.Bentley
     }
 
     // Splines
-    public Curve BSplineCurveToSpeckle(BSplineCurveElement curve, string units = null)
+    public Curve BSplineCurveToSpeckle(BSplineCurveElement nativeCurve, string units = null)
     {
-      var vec = curve.GetCurveVector();
+      var vec = nativeCurve.GetCurveVector();
       vec.GetRange(out DRange3d range);
 
       var primitive = vec.GetPrimitive(0); // assume one primitve in vector for single curve element
       var curveType = primitive.GetCurvePrimitiveType();
-      var _curve = new Curve();
+      var speckleCurve = new Curve();
 
       bool isSpiral = curveType == CurvePrimitive.CurvePrimitiveType.Spiral;
       if (isSpiral)
       {
-        _curve = SpiralCurveElementToCurve(primitive);
+        speckleCurve = SpiralCurveElementToCurve(primitive);
       }
       else
       {
@@ -837,13 +835,13 @@ namespace Objects.Converter.Bentley
           v.TryGetLineString(polyPoints);
 
         // get control points
-        var controlPoints = GetElementProperty(curve, "ControlPointData.ControlPoints").ContainedValues;
+        var controlPoints = GetElementProperty(nativeCurve, "ControlPointData.ControlPoints").ContainedValues;
 
         // get weights
-        var controlPointWeights = GetElementProperty(curve, "ControlPointData.ControlPointsWeights").ContainedValues;
+        var controlPointWeights = GetElementProperty(nativeCurve, "ControlPointData.ControlPointsWeights").ContainedValues;
 
         // get knots
-        var knotData = GetElementProperty(curve, "KnotData.Knots").ContainedValues;
+        var knotData = GetElementProperty(nativeCurve, "KnotData.Knots").ContainedValues;
 
         var _points = new List<DPoint3d>();
         if (controlPoints.Count() > 0)
@@ -864,16 +862,16 @@ namespace Objects.Converter.Bentley
         }
 
         // set nurbs curve info
-        _curve.points = PointsToFlatList(_points).ToList();
-        _curve.knots = knots;
-        _curve.weights = weights;
-        _curve.degree = degree;
-        _curve.periodic = periodic;
-        _curve.rational = (bool)rational;
-        _curve.closed = (bool)closed;
-        _curve.length = length / UoR;
-        _curve.domain = new Interval(0, length / UoR);
-        _curve.units = units ?? ModelUnits;
+        speckleCurve.points = PointsToFlatList(_points).ToList();
+        speckleCurve.knots = knots;
+        speckleCurve.weights = weights;
+        speckleCurve.degree = degree;
+        speckleCurve.periodic = periodic;
+        speckleCurve.rational = (bool)rational;
+        speckleCurve.closed = (bool)closed;
+        speckleCurve.length = length / UoR;
+        speckleCurve.domain = new Interval(0, length / UoR);
+        speckleCurve.units = units ?? ModelUnits;
 
         // handle the display polyline
         try
@@ -883,39 +881,41 @@ namespace Objects.Converter.Bentley
             _polyPoints.Add(new DPoint3d(pt.X * UoR, pt.Y * UoR, pt.Z * UoR));
 
           var poly = new Polyline(PointsToFlatList(polyPoints), ModelUnits);
-          _curve.displayValue = poly;
+          speckleCurve.displayValue = poly;
         }
         catch { }
       }
 
       bool worldXY = range.Low.Z == 0 && range.High.Z == 0 ? true : false;
-      _curve.bbox = BoxToSpeckle(range, worldXY);
+      speckleCurve.bbox = BoxToSpeckle(range, worldXY);
 
-      return _curve;
+      GetNativeProperties(nativeCurve, speckleCurve);
+
+      return speckleCurve;
     }
 
-    public Curve BSplineCurveToSpeckle(MSBsplineCurve curve, string units = null)
+    public Curve BSplineCurveToSpeckle(MSBsplineCurve nativeSpline, string units = null)
     {
-      var degree = curve.Order - 1;
-      var closed = curve.IsClosed;
-      var rational = curve.IsRational;
+      var degree = nativeSpline.Order - 1;
+      var closed = nativeSpline.IsClosed;
+      var rational = nativeSpline.IsRational;
 
-      var range = curve.GetRange();
+      var range = nativeSpline.GetRange();
 
       //var periodic = primitive.IsPeriodicFractionSpace(out double period);
-      var length = curve.Length();
-      var points = curve.Poles;
+      var length = nativeSpline.Length();
+      var points = nativeSpline.Poles;
       if (closed)
         points.Add(points[0]);
-      var knots = (List<double>)curve.Knots;
-      var weights = (List<double>)curve.Weights;
+      var knots = (List<double>)nativeSpline.Knots;
+      var weights = (List<double>)nativeSpline.Weights;
       if (weights == null)
         weights = Enumerable.Repeat((double)1, points.Count()).ToList();
 
       var polyPoints = new List<DPoint3d>();
       for (int i = 0; i <= 100; i++)
       {
-        curve.FractionToPoint(out DPoint3d point, (double)i / 100);
+        nativeSpline.FractionToPoint(out DPoint3d point, (double)i / 100);
         polyPoints.Add(point);
       }
 
@@ -1000,25 +1000,25 @@ namespace Objects.Converter.Bentley
       return _curve;
     }
 
-    public Curve SpiralCurveElementToCurve(MSBsplineCurve _spline)
+    public Curve SpiralCurveElementToCurve(MSBsplineCurve nativeSpline)
     {
-      var degree = _spline.Order - 1;
-      var closed = _spline.IsClosed;
-      var rational = _spline.IsRational;
+      var degree = nativeSpline.Order - 1;
+      var closed = nativeSpline.IsClosed;
+      var rational = nativeSpline.IsRational;
       //var periodic = primitive.IsPeriodicFractionSpace(out double period);
-      var length = _spline.Length();
-      var points = _spline.Poles;
+      var length = nativeSpline.Length();
+      var points = nativeSpline.Poles;
       if (closed)
         points.Add(points[0]);
-      var knots = (List<double>)_spline.Knots;
-      var weights = (List<double>)_spline.Weights;
+      var knots = (List<double>)nativeSpline.Knots;
+      var weights = (List<double>)nativeSpline.Weights;
       if (weights == null)
         weights = Enumerable.Repeat((double)1, points.Count()).ToList();
 
       var polyPoints = new List<DPoint3d>();
       for (int i = 0; i <= 100; i++)
       {
-        _spline.FractionToPoint(out DPoint3d point, i / 100);
+        nativeSpline.FractionToPoint(out DPoint3d point, i / 100);
         polyPoints.Add(point);
       }
 
@@ -1050,13 +1050,13 @@ namespace Objects.Converter.Bentley
       return _curve;
     }
 
-    public BSplineCurveElement BSplineCurveToNative(Curve curve)
+    public BSplineCurveElement BSplineCurveToNative(Curve speckleCurve)
     {
-      var points = PointListToNative(curve.points, curve.units).ToArray();
-      var weights = (curve.weights.Distinct().Count() == 1) ? null : curve.weights;
-      var knots = curve.knots;
-      var order = curve.degree + 1;
-      var closed = curve.closed;
+      var points = PointListToNative(speckleCurve.points, speckleCurve.units).ToArray();
+      var weights = (speckleCurve.weights.Distinct().Count() == 1) ? null : speckleCurve.weights;
+      var knots = speckleCurve.knots;
+      var order = speckleCurve.degree + 1;
+      var closed = speckleCurve.closed;
 
       //var _points = PointListToNative(curve.points, curve.units).ToList();
       //if (curve.closed && curve.periodic)
@@ -1079,19 +1079,19 @@ namespace Objects.Converter.Bentley
       //if (curve.closed && curve.periodic) // handles closed periodic curves
       //    _weights = curve.weights.GetRange(0, _points.Count);
 
-      var _spline = MSBsplineCurve.CreateFromPoles(points, weights, knots, order, closed, false);
+      var spline = MSBsplineCurve.CreateFromPoles(points, weights, knots, order, closed, false);
 
-      if (curve.closed)
-        _spline.MakeClosed();
+      if (speckleCurve.closed)
+        spline.MakeClosed();
 
-      var _curve = new BSplineCurveElement(Model, null, _spline);
-      return _curve;
+      var nativeSpline = new BSplineCurveElement(Model, null, spline);
+      return nativeSpline;
     }
 
     // All curves
-    public DisplayableElement CurveToNative(ICurve curve)
+    public DisplayableElement CurveToNative(ICurve speckleCurve)
     {
-      switch (curve)
+      switch (speckleCurve)
       {
         case Circle circle:
           return CircleToNative(circle);
@@ -1119,9 +1119,9 @@ namespace Objects.Converter.Bentley
       }
     }
 
-    public ICurve CurveToSpeckle(DisplayableElement curve, string units = null)
+    public ICurve CurveToSpeckle(DisplayableElement nativeCurve, string units = null)
     {
-      switch (curve)
+      switch (nativeCurve)
       {
         case ComplexStringElement polyCurve:
           return PolycurveToSpeckle(polyCurve, units);
@@ -1147,14 +1147,14 @@ namespace Objects.Converter.Bentley
     }
 
     // Box
-    public Box BoxToSpeckle(DRange3d range, bool OrientToWorldXY = false, string units = null)
+    public Box BoxToSpeckle(DRange3d nativeRange, bool OrientToWorldXY = false, string units = null)
     {
       try
       {
-        Box box = null;
+        Box speckleBox = null;
 
-        var min = range.Low;
-        var max = range.High;
+        var min = nativeRange.Low;
+        var max = nativeRange.High;
 
         // get dimension intervals
         Interval xSize = new Interval(ScaleToSpeckle(min.X, UoR), ScaleToSpeckle(max.X, UoR));
@@ -1171,7 +1171,7 @@ namespace Objects.Converter.Bentley
           DVector3d normal = normal = new DVector3d(0, 0, 1 * UoR);
 
           var plane = PlaneToSpeckle(new DPlane3d(origin, normal));
-          box = new Box(plane, xSize, ySize, zSize, ModelUnits) { area = area, volume = volume };
+          speckleBox = new Box(plane, xSize, ySize, zSize, ModelUnits) { area = area, volume = volume };
         }
         else
         {
@@ -1185,10 +1185,10 @@ namespace Objects.Converter.Bentley
           var cross = v1.CrossProduct(v2);
           var plane = PlaneToSpeckle(new DPlane3d(origin, cross));
           var u = units ?? ModelUnits;
-          box = new Box(plane, xSize, ySize, zSize, u) { area = area, volume = volume };
+          speckleBox = new Box(plane, xSize, ySize, zSize, u) { area = area, volume = volume };
         }
 
-        return box;
+        return speckleBox;
       }
       catch
       {
@@ -1196,21 +1196,21 @@ namespace Objects.Converter.Bentley
       }
     }
 
-    public DRange3d BoxToNative(Box box)
+    public DRange3d BoxToNative(Box speckleBox)
     {
-      var _startPoint = new Point((double)box.xSize.start, (double)box.ySize.start, (double)box.zSize.start);
-      var _endPoint = new Point((double)box.xSize.end, (double)box.ySize.end, (double)box.zSize.end);
-      var startPoint = Point3dToNative(_startPoint);
-      var endPoint = Point3dToNative(_endPoint);
+      var speckleStartPoint = new Point((double)speckleBox.xSize.start, (double)speckleBox.ySize.start, (double)speckleBox.zSize.start);
+      var SpeckleEndPoint = new Point((double)speckleBox.xSize.end, (double)speckleBox.ySize.end, (double)speckleBox.zSize.end);
+      var startPoint = Point3dToNative(speckleStartPoint);
+      var endPoint = Point3dToNative(SpeckleEndPoint);
 
-      var _range = DRange3d.FromPoints(startPoint, endPoint);
-      return _range;
+      var nativeRange = DRange3d.FromPoints(startPoint, endPoint);
+      return nativeRange;
     }
 
     // Shape
-    public Polyline ShapeToSpeckle(ShapeElement shape)
+    public Polyline ShapeToSpeckle(ShapeElement nativeShape)
     {
-      var vec = shape.GetCurveVector();
+      var vec = nativeShape.GetCurveVector();
       vec.CentroidNormalArea(out DPoint3d center, out DVector3d normal, out double area);
       vec.GetRange(out DRange3d range);
       var length = vec.SumOfLengths();
@@ -1222,29 +1222,31 @@ namespace Objects.Converter.Bentley
         vertices.AddRange(pPoints.Distinct());
       }
 
-      var _polyline = new Polyline(PointsToFlatList(vertices), ModelUnits) { closed = true };
+      var specklePolyline = new Polyline(PointsToFlatList(vertices), ModelUnits) { closed = true };
 
-      _polyline.length = length / UoR;
-      _polyline.area = area / Math.Pow(UoR, 2);
+      specklePolyline.length = length / UoR;
+      specklePolyline.area = area / Math.Pow(UoR, 2);
 
       bool worldXY = range.Low.Z == 0 && range.High.Z == 0 ? true : false;
-      _polyline.bbox = BoxToSpeckle(range, worldXY);
+      specklePolyline.bbox = BoxToSpeckle(range, worldXY);
 
-      return _polyline;
+      GetNativeProperties(nativeShape, specklePolyline);
+
+      return specklePolyline;
     }
 
     // should closed polylines be converted to shapes?
-    public ShapeElement ShapeToNative(Polyline shape)
+    public ShapeElement ShapeToNative(Polyline specklePolyline)
     {
-      var vertices = PointListToNative(shape.value, shape.units).ToArray();
-      var _shape = new ShapeElement(Model, null, vertices);
-      return _shape;
+      var vertices = PointListToNative(specklePolyline.value, specklePolyline.units).ToArray();
+      var nativeShape = new ShapeElement(Model, null, vertices);
+      return nativeShape;
     }
 
-    public Polycurve ComplexShapeToSpeckle(ComplexShapeElement shape, string units = null)
+    public Polycurve ComplexShapeToSpeckle(ComplexShapeElement nativeComplexShape, string units = null)
     {
       //terrible, need to figure out how to avoid using COM interface!! 
-      BIM.ComplexShapeElement complexShapeElement = BMIU.ComApp.ActiveModelReference.GetElementByID(shape.ElementId) as BIM.ComplexShapeElement;
+      BIM.ComplexShapeElement complexShapeElement = BMIU.ComApp.ActiveModelReference.GetElementByID(nativeComplexShape.ElementId) as BIM.ComplexShapeElement;
 
       var closed = complexShapeElement.IsClosedElement();
       var length = complexShapeElement.Perimeter();
@@ -1253,7 +1255,7 @@ namespace Objects.Converter.Bentley
       var segments = ProcessComplexElementSegments(subElements);
 
       DRange3d range = new DRange3d();
-      CurvePathQuery q = CurvePathQuery.GetAsCurvePathQuery(shape);
+      CurvePathQuery q = CurvePathQuery.GetAsCurvePathQuery(nativeComplexShape);
       if (q != null)
       {
         CurveVector vec = q.GetCurveVector();
@@ -1264,107 +1266,57 @@ namespace Objects.Converter.Bentley
         }
       }
 
-      var _polycurve = new Polycurve();
-      _polycurve.units = units ?? ModelUnits;
-      _polycurve.closed = closed;
-      _polycurve.length = length;
-      _polycurve.segments = segments;
+      var specklePolycurve = new Polycurve();
+      specklePolycurve.units = units ?? ModelUnits;
+      specklePolycurve.closed = closed;
+      specklePolycurve.length = length;
+      specklePolycurve.segments = segments;
 
       bool worldXY = range.Low.Z == 0 && range.High.Z == 0 ? true : false;
-      _polycurve.bbox = BoxToSpeckle(range, worldXY);
+      specklePolycurve.bbox = BoxToSpeckle(range, worldXY);
 
-      return _polycurve;
+      GetNativeProperties(nativeComplexShape, specklePolycurve);
+
+      return specklePolycurve;
     }
 
     // should closed polycurves be converted to complex shapes automatically?
-    public ComplexShapeElement ComplexShapeToNative(Polycurve shape)
+    public ComplexShapeElement ComplexShapeToNative(Polycurve specklePolycurve)
     {
-      var _shape = new ComplexShapeElement(Model, null);
+      var nativeComplexShape = new ComplexShapeElement(Model, null);
 
-      for (int i = 0; i < shape.segments.Count; i++)
+      for (int i = 0; i < specklePolycurve.segments.Count; i++)
       {
-        var segment = shape.segments[i];
+        var segment = specklePolycurve.segments[i];
         var _curve = CurveToNative(segment);
-        _shape.AddComponentElement(_curve);
+        nativeComplexShape.AddComponentElement(_curve);
       }
 
-      return _shape;
+      return nativeComplexShape;
     }
 
-    public Mesh MeshToSpeckle(MeshHeaderElement mesh, string units = null)
+    public Mesh MeshToSpeckle(MeshHeaderElement nativeMesh, string units = null)
     {
-      var u = units ?? ModelUnits;
+      PolyfaceHeader meshData = nativeMesh.GetMeshData();
+      var speckleMesh = GetMeshFromPolyfaceHeader(meshData, units);
 
-      PolyfaceHeader meshData = mesh.GetMeshData();
-
-      // get vertices
-      var _vertices = meshData.Point.ToArray();
-
-      // get faces
-      var faces = new List<int>();
-
-      var _pointIndex = meshData.PointIndex.ToList();
-      var _faceIndices = new List<int>();
-      for (int i = 0; i < _pointIndex.Count(); i++)
-      {
-        if (_pointIndex[i] != 0) // index of 0 is face loop pad/terminator
-          _faceIndices.Add(_pointIndex[i] - 1);
-        else
-        {
-          switch (_faceIndices.Count())
-          {
-            case 3:
-              _faceIndices.Insert(0, 0);
-              break;
-            case 4:
-              _faceIndices.Insert(0, 1);
-              break;
-            default:
-              _faceIndices.Insert(0, _faceIndices.Count());
-              break;
-          }
-          faces.AddRange(_faceIndices);
-          _faceIndices.Clear();
-        }
-      }
-
-      // create speckle mesh
-      var vertices = PointsToFlatList(_vertices);
-
-      /*
-      List<int> _colorIndex = meshData.ColorIndex.ToList();
-      var defaultColour = System.Drawing.Color.FromArgb(255, 100, 100, 100);
-      var colors = Enumerable.Repeat(defaultColour.ToArgb(), vertices.Count()).ToList();
-      */
-
-      var _mesh = new Mesh(vertices, faces);
-      _mesh.units = u;
-
-      meshData.ComputePrincipalAreaMoments(out double area, out DPoint3d centoid, out DMatrix3d axes, out DVector3d moments);
-      _mesh.area = area / Math.Pow(UoR, 2);
-
-      var range = meshData.PointRange();
-      bool worldXY = range.Low.Z == 0 && range.High.Z == 0 ? true : false;
-      _mesh.bbox = BoxToSpeckle(range, worldXY);
-
-      meshData.Dispose();
-
-      return _mesh;
+      GetNativeProperties(nativeMesh, speckleMesh);
+      return speckleMesh;
     }
 
-    public MeshHeaderElement MeshToNative(Mesh mesh)
+    public MeshHeaderElement MeshToNative(Mesh speckleMesh)
     {
-      var vertices = PointListToNative(mesh.vertices, mesh.units).ToArray();
+      var vertices = PointListToNative(speckleMesh.vertices, speckleMesh.units).ToArray();
 
       var meshData = new PolyfaceHeader();
 
       int j = 0;
-      while (j < mesh.faces.Count)
+      while (j < speckleMesh.faces.Count)
       {
-        int n = mesh.faces[j];
+        int n = speckleMesh.faces[j];
         if (n < 3) n += 3; // 0 -> 3, 1 -> 4 to preserve backwards compatibility
 
-        List<DPoint3d> faceVertices = mesh.faces.GetRange(j + 1, n).Select(x => vertices[x]).ToList();
+        List<DPoint3d> faceVertices = speckleMesh.faces.GetRange(j + 1, n).Select(x => vertices[x]).ToList();
 
         if (faceVertices.Count > 0)
           meshData.AddPolygon(faceVertices, new List<DVector3d>(), new List<DPoint2d>());
@@ -1372,19 +1324,19 @@ namespace Objects.Converter.Bentley
         j += n + 1;
       }
 
-      var _mesh = new MeshHeaderElement(Model, null, meshData);
+      var nativeMesh = new MeshHeaderElement(Model, null, meshData);
 
       meshData.Dispose();
 
-      return _mesh;
+      return nativeMesh;
     }
 
     // Nurbs surface
-    public Surface SurfaceToSpeckle(BSplineSurfaceElement surface, string units = null)
+    public Surface SurfaceToSpeckle(BSplineSurfaceElement nativeSurface, string units = null)
     {
       var u = units ?? ModelUnits;
 
-      var nurbsSurface = surface.GetBsplineSurface();
+      var nurbsSurface = nativeSurface.GetBsplineSurface();
 
       var knotsU = new List<double>();
       for (int i = 0; i < nurbsSurface.UKnotCount; i++)
@@ -1401,7 +1353,7 @@ namespace Objects.Converter.Bentley
       var range = nurbsSurface.GetPoleRange();
       nurbsSurface.GetParameterRegion(out double uMin, out double uMax, out double vMin, out double vMax);
 
-      var _surface = new Surface()
+      var speckleSurface = new Surface()
       {
         degreeU = nurbsSurface.UOrder - 1,
         degreeV = nurbsSurface.VOrder - 1,
@@ -1416,10 +1368,10 @@ namespace Objects.Converter.Bentley
         domainV = new Interval(vMin, vMax)
       };
 
-      _surface.units = u;
+      speckleSurface.units = u;
 
-      double area = GetElementProperty(surface, "SurfaceArea").DoubleValue;
-      _surface.area = area / Math.Pow(UoR, 2);
+      double area = GetElementProperty(nativeSurface, "SurfaceArea").DoubleValue;
+      speckleSurface.area = area / Math.Pow(UoR, 2);
 
       //var _points = new List<DPoint3d>();
       //for (int i = 0; i < nurbsSurface.PoleCount; i++)
@@ -1453,13 +1405,15 @@ namespace Objects.Converter.Bentley
       //    }                
       //}
 
-      var _points = ControlPointsToSpeckle(nurbsSurface);
-      _surface.SetControlPoints(_points);
+      var controlPoints = ControlPointsToSpeckle(nurbsSurface);
+      speckleSurface.SetControlPoints(controlPoints);
 
       bool worldXY = range.Low.Z == 0 && range.High.Z == 0 ? true : false;
-      _surface.bbox = BoxToSpeckle(range, worldXY);
+      speckleSurface.bbox = BoxToSpeckle(range, worldXY);
 
-      return _surface;
+      GetNativeProperties(nativeSurface, speckleSurface);
+
+      return speckleSurface;
     }
 
     public List<List<ControlPoint>> ControlPointsToSpeckle(MSBsplineSurface surface)
@@ -1478,30 +1432,30 @@ namespace Objects.Converter.Bentley
       return points;
     }
 
-    public Base ExtendedElementToSpeckle(ExtendedElementElement extendedElement, string units = null)
+    public Base ExtendedElementToSpeckle(ExtendedElementElement nativeElement, string units = null)
     {
       // check for primitive solid
-      var solidPrimitive = SolidPrimitiveQuery.ElementToSolidPrimitive(extendedElement);
+      var solidPrimitive = SolidPrimitiveQuery.ElementToSolidPrimitive(nativeElement);
 
       // check for smart solid
-      Convert1.ElementToBody(out var entity, extendedElement, true, false, false);
+      Convert1.ElementToBody(out var entity, nativeElement, true, false, false);
       var solidSmartSolid = entity.EntityType == SolidKernelEntity.KernelEntityType.Solid;
 
-      var element = new Base();
+      var speckleElement = new Base();
       var u = units ?? ModelUnits;
 
       if (solidPrimitive != null || solidSmartSolid)
       {
         MeshProcessor meshProcessor = new MeshProcessor();
-        ElementGraphicsOutput.Process(extendedElement, meshProcessor);
+        ElementGraphicsOutput.Process(nativeElement, meshProcessor);
 
         var mesh = meshProcessor.polyfaceHeader;
-        element["@displayValue"] = GetMeshFromPolyfaceHeader(mesh, u);
+        speckleElement["@displayValue"] = GetMeshFromPolyfaceHeader(mesh, u);
       }
       else
       {
         Processor processor = new Processor();
-        ElementGraphicsOutput.Process(extendedElement, processor);
+        ElementGraphicsOutput.Process(nativeElement, processor);
 
         var segments = new List<ICurve>();
         var curves = processor.curveVectors;
@@ -1542,116 +1496,102 @@ namespace Objects.Converter.Bentley
           }
         }
 
-        element["segments"] = segments;
+        speckleElement["segments"] = segments;
       }
 
-      return element;
+      GetNativeProperties(nativeElement, speckleElement);
+
+      return speckleElement;
     }
 
-    public Base CellHeaderElementToSpeckle(CellHeaderElement cellHeader, string units = null)
+    public Base CellHeaderElementToSpeckle(CellHeaderElement nativeCellHeader, string units = null)
     {
-      var element = new Base();
+      var speckleElement = new Base();
       var u = units ?? ModelUnits;
 
-      var cellChildren = cellHeader.GetChildren();
+      var cellChildren = nativeCellHeader.GetChildren();
       List<Base> children = new List<Base> { };
       foreach (var child in cellChildren)
       {
         if (CanConvertToSpeckle(child)) children.Add(ConvertToSpeckle(child));
       }
 
-      DgnECInstanceCollection instanceCollection = GetElementProperties(cellHeader);
-      Dictionary<string, object> properties = new Dictionary<string, object>();
-      foreach (IDgnECInstance instance in instanceCollection)
-      {
-        foreach (IECPropertyValue propertyValue in instance)
-        {
-          if (propertyValue != null)
-          {
-            properties = GetValue(properties, propertyValue);
-          }
-        }
-        var instanceName = instance.ClassDefinition.Name;
-      }
+      speckleElement["@children"] = children;
+      speckleElement["cellDesription"] = nativeCellHeader.CellDescription;
+      speckleElement["cellName"] = nativeCellHeader.CellName;
+      speckleElement["description"] = nativeCellHeader.Description;
+      speckleElement["typeName"] = nativeCellHeader.TypeName;
+      speckleElement["elementType"] = nativeCellHeader.ElementType;
 
-      Base bentleyProperties = new Base();
-      foreach (string propertyName in properties.Keys)
-      {
-        Object value = properties[propertyName];
+      GetNativeProperties(nativeCellHeader, speckleElement);
 
-        if (value.GetType().Name == "DPoint3d")
-        {
-          bentleyProperties[propertyName] = ConvertToSpeckle(value);
-        }
-        else
-        {
-          bentleyProperties[propertyName] = value;
-        }
-      }
-
-      element["@children"] = children;
-      element["@properties"] = bentleyProperties;
-      element["cellDesription"] = cellHeader.CellDescription;
-      element["cellName"] = cellHeader.CellName;
-      element["description"] = cellHeader.Description;
-      element["typeName"] = cellHeader.TypeName;
-      element["elementType"] = cellHeader.ElementType;
-
-      return element;
+      return speckleElement;
     }
 
-    public CellHeaderElement CellHeaderElementToNative(Base cellHeader, string units = null)
+    public CellHeaderElement CellHeaderElementToNative(Base speckleCellHeader, string units = null)
     {
       var element = new CellHeaderElement(Model, "", new DPoint3d(), new DMatrix3d(), new List<Element>() { });
       return element;
     }
 
-    public Base Type2ElementToSpeckle(Type2Element cellHeader, string units = null)
+    public Base Type2ElementToSpeckle(Type2Element nativeType2Element, string units = null)
     {
-      Base element = new Base();
       var u = units ?? ModelUnits;
 
-      DgnECInstanceCollection instanceCollection = GetElementProperties(cellHeader);
+      Base speckleElement = new Base();
+
       Dictionary<string, object> properties = new Dictionary<string, object>();
-      foreach (IDgnECInstance instance in instanceCollection)
+      using (DgnECInstanceCollection instanceCollection = GetElementProperties(nativeType2Element))
       {
-        foreach (IECPropertyValue propertyValue in instance)
+        foreach (IDgnECInstance instance in instanceCollection)
         {
-          if (propertyValue != null)
+          foreach (IECPropertyValue propertyValue in instance)
           {
-            properties = GetValue(properties, propertyValue);
+            if (propertyValue != null)
+            {
+              properties = GetValue(properties, propertyValue);
+            }
           }
         }
-        var instanceName = instance.ClassDefinition.Name;
-      }
+      };
 
-      Base bentleyProperties = new Base();
-      foreach (string propertyName in properties.Keys)
-      {
-        Object value = properties[propertyName];
-
-        if (value.GetType().Name == "DPoint3d")
-        {
-          bentleyProperties[propertyName] = ConvertToSpeckle(value);
-        }
-        else
-        {
-          bentleyProperties[propertyName] = value;
-        }
-      }
-
-      if (cellHeader is BrepCellHeaderElement) // smart solids
+      if (nativeType2Element is BrepCellHeaderElement) // smart solids
       {
         MeshProcessor meshProcessor = new MeshProcessor();
-        ElementGraphicsOutput.Process(cellHeader, meshProcessor);
+        ElementGraphicsOutput.Process(nativeType2Element, meshProcessor);
         var mesh = meshProcessor.polyfaceHeader;
         //element["@displayValue"] = GetMeshFromPolyfaceHeader(mesh, u);
-        element = GetMeshFromPolyfaceHeader(mesh, u);
+        if (mesh != null)
+          speckleElement = GetMeshFromPolyfaceHeader(mesh, u);
+
+
+        var speckleBrep = new Brep(displayValue: GetMeshFromPolyfaceHeader(mesh, u), provenance: BentleyAppName, units: u);
+
+        SolidProcessor solidProcessor = new SolidProcessor();
+        ElementGraphicsOutput.Process(nativeType2Element, solidProcessor);
+
+        var vertices = solidProcessor.vertices;
+        speckleBrep.Vertices = vertices
+                .Select(vertex => Point3dToSpeckle(vertex, u)).ToList();
+
+
+        var faces = solidProcessor.faces;
+
+        //// Faces
+        //speckleBrep.Faces = faces
+        //  .Select(f => new BrepFace(
+        //    speckleBrep,
+        //    faces.IndexOf(f),
+        //    f.Loops.Select(l => l.LoopIndex).ToList(),
+        //    f.OuterLoop.LoopIndex,
+        //    f.OrientationIsReversed
+        //  )).ToList();
+
       }
       else
       {
         Processor processor = new Processor();
-        ElementGraphicsOutput.Process(cellHeader, processor);
+        ElementGraphicsOutput.Process(nativeType2Element, processor);
 
         var segments = new List<ICurve>();
         var curves = processor.curveVectors;
@@ -1693,7 +1633,7 @@ namespace Objects.Converter.Bentley
           }
         }
 
-        element["segments"] = segments;
+        speckleElement["segments"] = segments;
 
 #if (OPENBUILDINGS)
         string part = (string)properties["PART"];
@@ -1711,38 +1651,44 @@ namespace Objects.Converter.Bentley
         switch (category)
         {
           case (Category.Beams):
-            element = BeamToSpeckle(properties, u);
+            speckleElement = BeamToSpeckle(properties, u);
             break;
 
           case (Category.CappingBeams):
-            element = CappingBeamToSpeckle(properties, u);
+            speckleElement = CappingBeamToSpeckle(properties, u);
             break;
 
           case (Category.Columns):
-            element = ColumnToSpeckle(properties, u);
+            speckleElement = ColumnToSpeckle(properties, u);
+            break;
+
+          case (Category.Opening):
+            speckleElement = OpeningToSpeckle(properties, segments, u);
             break;
 
           case (Category.Piles):
-            element = PileToSpeckle(properties, u);
+            speckleElement = PileToSpeckle(properties, u);
             break;
 
           case (Category.FoundationSlabs):
           case (Category.Slabs):
-            element = SlabToSpeckle(properties, segments, u);
+            speckleElement = SlabToSpeckle(properties, segments, u);
             break;
 
           case (Category.Walls):
-            element = WallToSpeckle(properties, segments, u);
+            speckleElement = WallToSpeckle(properties, segments, u);
             break;
 
           default:
-            element = new Base();
+            speckleElement = new Base();
             break;
         }
 #endif
       }
-      element["@properties"] = bentleyProperties;
-      return element;
+
+      GetNativeProperties(nativeType2Element, speckleElement);
+
+      return speckleElement;
     }
 
     private static Dictionary<string, object> GetValue(Dictionary<string, object> properties, IECPropertyValue propertyValue)
@@ -1755,22 +1701,10 @@ namespace Objects.Converter.Bentley
 
       string type = propertyValue.GetType().Name;
 
-      propertyValue.TryGetDoubleValue(out double doubleValue);
-      propertyValue.TryGetIntValue(out int intValue);
-      propertyValue.TryGetNativeValue(out object nativeValue);
-      propertyValue.TryGetStringValue(out string stringValue);
-
       switch (type)
       {
-        case "ECDBooleanValue":
-          if (nativeValue != null)
-          {
-            AddProperty(properties, propertyName, nativeValue);
-          }
-          break;
-
         case "ECDIntegerValue":
-          if (nativeValue != null)
+          if (propertyValue.TryGetIntValue(out int intValue))
           {
             AddProperty(properties, propertyName, intValue);
           }
@@ -1778,57 +1712,61 @@ namespace Objects.Converter.Bentley
 
         case "ECDLongValue":
         case "ECDDoubleValue":
-          if (nativeValue != null)
+          if (propertyValue.TryGetDoubleValue(out double doubleValue))
           {
             AddProperty(properties, propertyName, doubleValue);
           }
           break;
 
         case "ECDDateTimeValue":
-          if (stringValue != null)
-          {
-            AddProperty(properties, propertyName, stringValue);
-          }
-          break;
-
-        case "ECDArrayValue":
-          Dictionary<string, object> arrayProperties = GetArrayValues(propertyValue);
-          arrayProperties.ToList().ForEach(x => properties.Add(x.Key, x.Value));
-          break;
-
-        case "ECDStructValue":
-          if (nativeValue != null)
-          {
-            Dictionary<string, object> structProperties = GetStructValues((IECStructValue)nativeValue);
-            structProperties.ToList().ForEach(x => properties.Add(x.Key, x.Value));
-          }
-          break;
-
-        case "ECDStructArrayValue":
-          if (nativeValue != null)
-          {
-            Dictionary<string, object> structArrayProperties = GetStructArrayValues((IECPropertyValue)nativeValue);
-            structArrayProperties.ToList().ForEach(x => properties.Add(x.Key, x.Value));
-          }
-          break;
-
         case "ECDStringValue":
         case "ECDCalculatedStringValue":
-          if (stringValue != null)
+          if (propertyValue.TryGetStringValue(out string stringValue))
           {
             AddProperty(properties, propertyName, stringValue);
           }
           break;
 
         case "ECDDPoint3dValue":
-          if (nativeValue != null)
+        case "ECDBooleanValue":
+        case "ECDArrayValue":
+        case "ECDStructValue":
+        case "ECDStructArrayValue":
+          if (propertyValue.TryGetNativeValue(out object nativeValue))
           {
-            DPoint3d point = (DPoint3d)nativeValue;
-            AddProperty(properties, propertyName, point);
+            if (nativeValue != null)
+            {
+              if (type == "ECDDPoint3dValue")
+              {
+                DPoint3d point = (DPoint3d)nativeValue;
+                AddProperty(properties, propertyName, point);
+                break;
+              }
+              else if (type == "ECDBooleanValue")
+              {
+                AddProperty(properties, propertyName, nativeValue);
+                break;
+              }
+              else if (type == "ECDArrayValue")
+              {
+                Dictionary<string, object> arrayProperties = GetArrayValues(propertyValue);
+                arrayProperties.ToList().ForEach(x => properties.Add(x.Key, x.Value));
+                break;
+              }
+              else if (type == "ECDStructValue")
+              {
+                Dictionary<string, object> structProperties = GetStructValues((IECStructValue)nativeValue);
+                structProperties.ToList().ForEach(x => properties.Add(x.Key, x.Value));
+                break;
+              }
+              else if (type == "ECDStructArrayValue")
+              {
+                Dictionary<string, object> structArrayProperties = GetStructArrayValues((IECPropertyValue)nativeValue);
+                structArrayProperties.ToList().ForEach(x => properties.Add(x.Key, x.Value));
+                break;
+              }
+            }
           }
-          break;
-
-        case "ECDBinaryValue":
           break;
 
         default:
@@ -1900,6 +1838,10 @@ namespace Objects.Converter.Bentley
       {
         category = Category.Columns;
       }
+      else if (part.Contains("Opening"))
+      {
+        category = Category.Opening;
+      }
       else if (part.Contains("Pile"))
       {
         category = Category.Piles;
@@ -1922,11 +1864,7 @@ namespace Objects.Converter.Bentley
 
     private static Dictionary<string, object> AddProperty(Dictionary<string, object> properties, string propertyName, object value)
     {
-      if (properties.ContainsKey(propertyName))
-      {
-        throw new SpeckleException("Can´t convert duplicate property " + propertyName + " with key " + value + ".");
-      }
-      else
+      if (!properties.ContainsKey(propertyName))
       {
         properties.Add(propertyName, value);
       }
@@ -1941,6 +1879,74 @@ namespace Objects.Converter.Bentley
         return value;
       }
       return null;
+    }
+
+    public class SolidProcessor : ElementGraphicsProcessor
+    {
+      public DTransform3d _transform;
+      public PolyfaceHeader polyfaceHeader;
+      public List<DPoint3d> vertices = new List<DPoint3d>();
+      public List<CurveVector> faces = new List<CurveVector>();
+      public IEnumerable<SubEntity> edges;
+
+      public override void AnnounceTransform(DTransform3d trans)
+      {
+        _transform = trans;
+      }
+
+      public override bool ProcessAsBody(bool isCurved)
+      {
+        return true;
+      }
+
+      public override bool ProcessAsFacets(bool isPolyface)
+      {
+        return false;
+      }
+
+      public override BentleyStatus ProcessBody(SolidKernelEntity entity)
+      {
+        SolidUtil.GetBodyVertices(out SubEntity[] bodyVertices, entity);
+        foreach (var v in bodyVertices)
+        {
+          Convert1.EvaluateVertex(out DPoint3d pointOut, v);
+          vertices.Add(pointOut);
+        }
+
+
+        SolidUtil.GetBodyFaces(out SubEntity[] bodyFaces, entity);
+        foreach (var f in bodyFaces)
+        {
+          SolidUtil.GetFaceParameterRange(out var uRange, out var vRange, f);
+
+          DPoint2d uvParam = new DPoint2d();
+          uvParam.X = (uRange.Low + uRange.High) * 0.5;
+          uvParam.Y = (vRange.Low + vRange.High) * 0.5;
+          Convert1.EvaluateFace(out var pointOut, out var normalOut, out var uDirOut, out var vDirOut, f, uvParam);
+          Convert1.SubEntityToCurveVector(out var curvesOut, f);
+          faces.Add(curvesOut);
+        }
+
+        SolidUtil.GetBodyEdges(out SubEntity[] bodyEdges, entity);
+        edges = bodyEdges;
+
+
+
+        return BentleyStatus.Success;
+      }
+
+      public override BentleyStatus ProcessFacets(PolyfaceHeader meshData, bool filled)
+      {
+        var polyfaceHeaderData = new PolyfaceHeader();
+        polyfaceHeaderData.CopyFrom(meshData);
+        polyfaceHeader = polyfaceHeaderData;
+        return BentleyStatus.Success;
+      }
+
+      public override bool WantClipping()
+      {
+        return false;
+      }
     }
 
 
@@ -1977,7 +1983,6 @@ namespace Objects.Converter.Bentley
         return false;
       }
     }
-
 
     public class Processor : ElementGraphicsProcessor
     {
@@ -2088,7 +2093,6 @@ namespace Objects.Converter.Bentley
           case CurvePrimitive.CurvePrimitiveType.BsplineCurve:
             var curve = curvePrimitive.GetBsplineCurve();
             break;
-
         }
 
         return BentleyStatus.Success;
@@ -2113,46 +2117,38 @@ namespace Objects.Converter.Bentley
       return children;
     }
 
-    public Element BrepToNative(Brep brep, string units = null)
+    public Element BrepToNative(Brep speckleBrep, string units = null)
     {
       //create solid from mesh
-      var displayMesh = brep.displayValue;
+      var displayMesh = speckleBrep.displayValue;
       var mesh = displayMesh.Select(m => MeshToNative(m));
-      Convert1.ElementToBody(out var ent1, mesh.First(), true, true, true);
-      Convert1.BodyToElement(out var element, ent1, null, Model);
+      Convert1.ElementToBody(out var entity, mesh.First(), true, true, true);
+      Convert1.BodyToElement(out var nativeElement, entity, null, Model);
 
-
-      //CustomItemHost customItemHost = new CustomItemHost(element, true);
-      //IDgnECInstance ecInstance = customItemHost.ApplyCustomItem(itemType);
-      //ecInstance.SetString("ApplicationId", brep.applicationId);
-      //ecInstance.SetValue("ApplicationId", brep.applicationId);
-      //ecInstance.WriteChanges();
-
-      return element;
+      return nativeElement;
     }
 
-    public Brep SolidElementToSpeckle(SolidElement solid, string units = null)
+    public Brep SolidElementToSpeckle(SolidElement nativeSolid, string units = null)
     {
-      var solidPrim = solid.GetSolidPrimitive();
-      Convert1.ElementToBody(out var entity, solid, true, true, true);
+      var solidPrim = nativeSolid.GetSolidPrimitive();
+      Convert1.ElementToBody(out var entity, nativeSolid, true, true, true);
       SolidUtil.GetBodyFaces(out var subEntities, entity);
 
       foreach (var e in subEntities)
       {
         var subType = e.EntitySubType;
         Convert1.SubEntityToCurveVector(out var curves, e);
-
       }
 
       var u = units ?? ModelUnits;
-      var brep = new Brep();
-      brep.units = u;
+      var speckleBrep = new Brep();
+      speckleBrep.units = u;
 
-      brep["description"] = solid.Description;
-      brep["typeName"] = solid.TypeName;
-      brep["elementType"] = solid.ElementType;
+      speckleBrep["description"] = nativeSolid.Description;
+      speckleBrep["typeName"] = nativeSolid.TypeName;
+      speckleBrep["elementType"] = nativeSolid.ElementType;
 
-      if (solid is null) return null;
+      if (nativeSolid is null) return null;
 
       var faceIndex = 0;
       var edgeIndex = 0;
@@ -2162,7 +2158,14 @@ namespace Objects.Converter.Bentley
       var trimIndex = 0;
       var surfaceIndex = 0;
 
-      brep.displayValue = new List<Mesh> { GetMeshFromSolid(solid, u) };
+      speckleBrep.displayValue = new List<Mesh> { GetMeshFromSolid(nativeSolid, u) };
+
+
+      SolidProcessor processor = new SolidProcessor();
+      ElementGraphicsOutput.Process(nativeSolid, processor);
+
+
+
 
       //var speckleFaces = new Dictionary<Face, BrepFace>();
       //var speckleEdges = new Dictionary<Edge, BrepEdge>();
@@ -2257,219 +2260,433 @@ namespace Objects.Converter.Bentley
       //brep.Loops = speckleLoops;
       //brep.displayValue = GetMeshesFromSolids(new[] { solid });
 
-      return brep;
+      GetNativeProperties(nativeSolid, speckleBrep);
+
+      return speckleBrep;
     }
+
+
+    public Brep ConeElementToSpeckle(ConeElement nativeSolid, string units = null)
+    {
+      var u = units ?? ModelUnits;
+      var mesh = GetMeshFromSolid(nativeSolid, u);
+      var speckleBrep = new Brep(displayValue: mesh, provenance: BentleyAppName, units: u);
+
+      var solidPrim = nativeSolid.GetSolidPrimitive();
+      Convert1.ElementToBody(out var entity, nativeSolid, true, true, true);
+      SolidUtil.GetBodyFaces(out var subEntities, entity);
+
+      foreach (var e in subEntities)
+      {
+        var subType = e.EntitySubType;
+        Convert1.SubEntityToCurveVector(out var curves, e);
+      }
+
+
+
+      speckleBrep["description"] = nativeSolid.Description;
+      speckleBrep["typeName"] = nativeSolid.TypeName;
+      speckleBrep["elementType"] = nativeSolid.ElementType;
+
+
+      SolidProcessor processor = new SolidProcessor();
+      ElementGraphicsOutput.Process(nativeSolid, processor);
+
+      var vertices = processor.vertices;
+      //var converted = new List<CurveVector> { };
+      //foreach (var v in vertices)
+      //{
+      //  Convert1.SubEntityToCurveVector(out var curves, v);
+      //  converted.Add(curves);
+      //}
+
+
+      // Vertices, uv curves, 3d curves and surfaces
+      //speckleBrep.Vertices = Vertices
+      //  .Select(vertex => PointToSpeckle(vertex, u)).ToList();
+
+      if (nativeSolid is null) return null;
+
+      var faceIndex = 0;
+      var edgeIndex = 0;
+      var curve2dIndex = 0;
+      var curve3dIndex = 0;
+      var loopIndex = 0;
+      var trimIndex = 0;
+      var surfaceIndex = 0;
+
+
+
+      speckleBrep.displayValue = new List<Mesh> { mesh };
+
+      //var speckleFaces = new Dictionary<Face, BrepFace>();
+      //var speckleEdges = new Dictionary<Edge, BrepEdge>();
+      //var speckleEdgeIndexes = new Dictionary<Edge, int>();
+      //var speckle3dCurves = new ICurve[solid.Edges.Size];
+      //var speckle2dCurves = new List<ICurve>();
+      //var speckleLoops = new List<BrepLoop>();
+      //var speckleTrims = new List<BrepTrim>();
+
+      //foreach (var face in solid.Faces.Cast<Face>())
+      //{
+      //  var surface = FaceToSpeckle(face, out bool orientation, 0.0);
+      //  var iterator = face.EdgeLoops.ForwardIterator();
+      //  var loopIndices = new List<int>();
+
+      //  while (iterator.MoveNext())
+      //  {
+      //    var loop = iterator.Current as EdgeArray;
+      //    var loopTrimIndices = new List<int>();
+      //    // Loop through the edges in the loop.
+      //    var loopIterator = loop.ForwardIterator();
+      //    while (loopIterator.MoveNext())
+      //    {
+      //      // Each edge should create a 2d curve, a 3d curve, a BrepTrim and a BrepEdge.
+      //      var edge = loopIterator.Current as Edge;
+      //      var faceA = edge.GetFace(0);
+
+      //      // Determine what face side are we currently on.
+      //      var edgeSide = face == faceA ? 0 : 1;
+
+      //      // Get curve, create trim and save index
+      //      var trim = edge.GetCurveUV(edgeSide);
+      //      var sTrim = new BrepTrim(brep, edgeIndex, faceIndex, loopIndex, curve2dIndex, 0, BrepTrimType.Boundary, edge.IsFlippedOnFace(edgeSide), -1, -1);
+      //      var sTrimIndex = trimIndex;
+      //      loopTrimIndices.Add(sTrimIndex);
+
+      //      // Add curve and trim, increase index counters.
+      //      speckle2dCurves.Add(CurveToSpeckle(trim.As3DCurveInXYPlane(), Units.None));
+      //      speckleTrims.Add(sTrim);
+      //      curve2dIndex++;
+      //      trimIndex++;
+
+      //      // Check if we have visited this edge before.
+      //      if (!speckleEdges.ContainsKey(edge))
+      //      {
+      //        // First time we visit this edge, add 3d curve and create new BrepEdge.
+      //        var edgeCurve = edge.AsCurve();
+      //        speckle3dCurves[curve3dIndex] = CurveToSpeckle(edgeCurve, u);
+      //        var sCurveIndex = curve3dIndex;
+      //        curve3dIndex++;
+
+      //        // Create a trim with just one of the trimIndices set, the second one will be set on the opposite condition.
+      //        var sEdge = new BrepEdge(brep, sCurveIndex, new[] { sTrimIndex }, -1, -1, edge.IsFlippedOnFace(face), null);
+      //        speckleEdges.Add(edge, sEdge);
+      //        speckleEdgeIndexes.Add(edge, edgeIndex);
+      //        edgeIndex++;
+      //      }
+      //      else
+      //      {
+      //        // Already visited this edge, skip curve 3d
+      //        var sEdge = speckleEdges[edge];
+      //        var sEdgeIndex = speckleEdgeIndexes[edge];
+      //        sTrim.EdgeIndex = sEdgeIndex;
+
+      //        // Update trim indices with new item.
+      //        // TODO: Make this better.
+      //        var trimIndices = sEdge.TrimIndices.ToList();
+      //        trimIndices.Append(sTrimIndex); //TODO Append is a pure function and the return is unused
+      //        sEdge.TrimIndices = trimIndices.ToArray();
+      //      }
+      //    }
+
+      //    var speckleLoop = new BrepLoop(brep, faceIndex, loopTrimIndices, BrepLoopType.Outer);
+      //    speckleLoops.Add(speckleLoop);
+      //    var sLoopIndex = loopIndex;
+      //    loopIndex++;
+      //    loopIndices.Add(sLoopIndex);
+      //  }
+
+      //  speckleFaces.Add(face,
+      //    new BrepFace(brep, surfaceIndex, loopIndices, loopIndices[0], !face.OrientationMatchesSurfaceOrientation));
+      //  faceIndex++;
+      //  brep.Surfaces.Add(surface);
+      //  surfaceIndex++;
+      //}
+
+      //brep.Faces = speckleFaces.Values.ToList();
+      //brep.Curve2D = speckle2dCurves;
+      //brep.Curve3D = speckle3dCurves.ToList();
+      //brep.Trims = speckleTrims;
+      //brep.Edges = speckleEdges.Values.ToList();
+      //brep.Loops = speckleLoops;
+      //brep.displayValue = GetMeshesFromSolids(new[] { solid });
+
+      GetNativeProperties(nativeSolid, speckleBrep);
+
+      return speckleBrep;
+    }
+
 
     public Mesh GetMeshFromPolyfaceHeader(PolyfaceHeader meshData, string units = null)
     {
-      meshData.Triangulate();
+      //meshData.Triangulate();
 
       // get vertices
-      var _vertices = meshData.Point.ToArray();
+      var vertices = meshData.Point.ToArray();
 
       // get faces
-      var _faces = new List<int[]>();
-      var _faceIndices = new List<int>();
-      var _pointIndex = meshData.PointIndex.ToList();
-      for (int i = 0; i < _pointIndex.Count(); i++)
+      var faces = new List<int>();
+
+      var faceIndices = new List<int>();
+      var pointIndex = meshData.PointIndex.ToList();
+
+
+      // check NumberPerFace property
+      if(meshData.NumberPerFace > 1)
       {
-        var index = _pointIndex.ElementAt(i);
-
-        // index of 0 is face loop pad/terminator
-        if (index != 0)
+        var faceCount = 0;
+        for (int i = 0; i < pointIndex.Count(); i++)
         {
-          _faceIndices.Add(Math.Abs(index) - 1);
-        }
-        else
-        {
-          if (_faceIndices.Count() == 4)
+          if (faceCount < meshData.NumberPerFace && pointIndex[i] != 0)
           {
-            _faceIndices.Insert(0, 1);
-          }
-          else if (_faceIndices.Count() == 3)
-          {
-            _faceIndices.Insert(0, 0);
-          }
-          else if (_faceIndices.Count() % 3 == 0) // split ngon to tris
-          {
-            var _nFaceIndices = new List<int>();
-
-            for (int j = 0; j < _faceIndices.Count(); j += 3)
-            {
-              var _subIndices = _faceIndices.GetRange(j, Math.Min(3, _faceIndices.Count() - j));
-              _subIndices.Insert(0, 0);
-              _nFaceIndices.AddRange(_subIndices);
-            }
-
-            _faceIndices = _nFaceIndices;
-          }
-          else { return null; }
-          var faceIndices = _faceIndices.ToArray();
-          _faces.Add(faceIndices);
-          _faceIndices = new List<int>();
-        }
-      }
-      _faces.ToArray();
-
-      // create speckle mesh
-      var vertices = PointsToFlatList(_vertices);
-      var faces = _faces.SelectMany(o => o).ToList();
-      var _mesh = new Mesh(vertices, faces);
-      _mesh.units = units;
-      return _mesh;
-    }
-
-    /// <summary>
-    /// Given a collection of <paramref name="solids"/>, will create one <see cref="Mesh"/>
-    /// </summary>
-    /// <param name="solids"></param>
-    /// <returns></returns>
-    public Mesh GetMeshFromSolid(SolidElement solid, string units = null)
-    {
-      Processor processor = new Processor();
-      ElementGraphicsOutput.Process(solid, processor);
-      var meshData = processor.polyfaceHeader;
-      meshData.Triangulate();
-
-      // get vertices
-      var _vertices = meshData.Point.ToArray();
-
-      // get faces
-      var _faces = new List<int[]>();
-      var _faceIndices = new List<int>();
-      var _pointIndex = meshData.PointIndex.ToList();
-      for (int i = 0; i < _pointIndex.Count(); i++)
-      {
-        var index = _pointIndex.ElementAt(i);
-
-        // index of 0 is face loop pad/terminator
-        if (index != 0)
-        {
-          _faceIndices.Add(Math.Abs(index) - 1);
-        }
-        else
-        {
-          if (_faceIndices.Count() == 4)
-          {
-            _faceIndices.Insert(0, 1);
-          }
-          else if (_faceIndices.Count() == 3)
-          {
-            _faceIndices.Insert(0, 0);
-          }
-          else if (_faceIndices.Count() % 3 == 0) // split ngon to tris
-          {
-            var _nFaceIndices = new List<int>();
-
-            for (int j = 0; j < _faceIndices.Count(); j += 3)
-            {
-              var _subIndices = _faceIndices.GetRange(j, Math.Min(3, _faceIndices.Count() - j));
-              _subIndices.Insert(0, 0);
-              _nFaceIndices.AddRange(_subIndices);
-            }
-
-            _faceIndices = _nFaceIndices;
-          }
-          else { return null; }
-          var faceIndices = _faceIndices.ToArray();
-          _faces.Add(faceIndices);
-          _faceIndices = new List<int>();
-        }
-      }
-      _faces.ToArray();
-
-      // create speckle mesh
-      var vertices = PointsToFlatList(_vertices);
-      var faces = _faces.SelectMany(o => o).ToList();
-      var _mesh = new Mesh(vertices, faces);
-      _mesh.units = units;
-      return _mesh;
-    }
-
-
-    /// <summary>
-    /// Given a collection of <paramref name="solids"/>, will create one <see cref="Mesh"/>
-    /// </summary>
-    /// <param name="solids"></param>
-    /// <returns></returns>
-    public List<Mesh> GetMeshesFromSolids(IEnumerable<SolidElement> solids)
-    {
-      MeshBuildHelper meshBuildHelper = new MeshBuildHelper();
-
-      var meshes = new List<Mesh> { };
-      foreach (SolidElement solid in solids)
-      {
-        //Convert1.ElementToBody(out var entity, solid, true, true, true);
-        //SolidUtil.GetBodyFaces(out var faces, entity);
-        //foreach (var face in faces)
-        //{
-        //  var subType = face.EntitySubType;
-        //  Convert1.SubEntityToCurveVector(out var edges, face);
-        //  Mesh m = meshBuildHelper.GetOrCreateMesh(null, ModelUnits);
-        //  var poly = new PolyfaceHeader();
-
-        //  ConvertMeshData(face.Triangulate(), m.faces, m.vertices);
-        //}
-
-        MeshProcessor processor = new MeshProcessor();
-        ElementGraphicsOutput.Process(solid, processor);
-        var meshData = processor.polyfaceHeader;
-        meshData.Triangulate();
-
-        // get vertices
-        var _vertices = meshData.Point.ToArray();
-
-        // get faces
-        var _faces = new List<int[]>();
-        var _faceIndices = new List<int>();
-        var _pointIndex = meshData.PointIndex.ToList();
-        for (int i = 0; i < _pointIndex.Count(); i++)
-        {
-          var index = _pointIndex.ElementAt(i);
-
-          // index of 0 is face loop pad/terminator
-          if (index != 0)
-          {
-            _faceIndices.Add(Math.Abs(index) - 1);
+            faceIndices.Add(Math.Abs(pointIndex[i]) - 1);
+            faceCount++;
           }
           else
           {
-            if (_faceIndices.Count() == 4)
+            switch (faceIndices.Count())
             {
-              _faceIndices.Insert(0, 1);
+              //case 3:
+              //  faceIndices.Insert(0, 0);
+              //  break;
+              //case 4:
+              //  faceIndices.Insert(0, 1);
+              //  break;
+              default:
+                faceIndices.Insert(0, faceIndices.Count());
+                break;
             }
-            else if (_faceIndices.Count() == 3)
-            {
-              _faceIndices.Insert(0, 0);
-            }
-            else if (_faceIndices.Count() % 3 == 0) // split ngon to tris
-            {
-              var _nFaceIndices = new List<int>();
+            faces.AddRange(faceIndices);
+            faceIndices.Clear();
+            faceCount = 0;
 
-              for (int j = 0; j < _faceIndices.Count(); j += 3)
-              {
-                var _subIndices = _faceIndices.GetRange(j, Math.Min(3, _faceIndices.Count() - j));
-                _subIndices.Insert(0, 0);
-                _nFaceIndices.AddRange(_subIndices);
-              }
-
-              _faceIndices = _nFaceIndices;
+            if (i < pointIndex.Count() && pointIndex[i] != 0)
+            {
+              faceIndices.Add(Math.Abs(pointIndex[i]) - 1);
+              faceCount = 1;
             }
-            else { return null; }
-            var faceIndices = _faceIndices.ToArray();
-            _faces.Add(faceIndices);
-            _faceIndices = new List<int>();
           }
         }
-        _faces.ToArray();
+      } else
+      {
+        for (int i = 0; i < pointIndex.Count(); i++)
+        {
+          if (pointIndex[i] != 0 && (pointIndex[i] != pointIndex[i + 1])) // index of 0 is face loop pad/terminator
+            faceIndices.Add(Math.Abs(pointIndex[i]) - 1);
+          else
+          {
+            if (i < pointIndex.Count() - 1)
+            {
+              if (pointIndex[i] == pointIndex[i + 1])
+              {
+                faceIndices.Add(Math.Abs(pointIndex[i]) - 1);
+              }
+            }
+            else
+            {
 
-        // create speckle mesh
-        var vertices = PointsToFlatList(_vertices);
-        var faces = _faces.SelectMany(o => o).ToList();
-        var _mesh = new Mesh(vertices, faces);
-        meshes.Add(_mesh);
+            }
+
+            switch (faceIndices.Count())
+            {
+              //case 3:
+              //  faceIndices.Insert(0, 0);
+              //  break;
+              //case 4:
+              //  faceIndices.Insert(0, 1);
+              //  break;
+              default:
+                faceIndices.Insert(0, faceIndices.Count());
+                break;
+            }
+            faces.AddRange(faceIndices);
+            faceIndices.Clear();
+          }
+        }
       }
 
+      // face loop terminator is 0 for planar mesh
+      // for non planar mesh, use number of points per face as terminator
+      //if (pointIndex.Contains(0))
+      //{
+      //  for (int i = 0; i < pointIndex.Count(); i++)
+      //  {
+      //    if (pointIndex[i] != 0 && (pointIndex[i] != pointIndex[i + 1])) // index of 0 is face loop pad/terminator
+      //      faceIndices.Add(Math.Abs(pointIndex[i]) - 1);
+      //    else
+      //    {
+      //      if (i < pointIndex.Count() -1)
+      //      {
+      //        if (pointIndex[i] == pointIndex[i + 1])
+      //        {
+      //          faceIndices.Add(Math.Abs(pointIndex[i]) - 1);
+      //        }
+      //      }
+      //      else { 
+            
+      //      }
+
+      //      switch (faceIndices.Count())
+      //      {
+      //        //case 3:
+      //        //  faceIndices.Insert(0, 0);
+      //        //  break;
+      //        //case 4:
+      //        //  faceIndices.Insert(0, 1);
+      //        //  break;
+      //        default:
+      //          faceIndices.Insert(0, faceIndices.Count());
+      //          break;
+      //      }
+      //      faces.AddRange(faceIndices);
+      //      faceIndices.Clear();
+      //    }
+      //  }
+      //}
+      //else
+      //{
+      //  var faceCount = 0;
+      //  for (int i = 0; i <= pointIndex.Count(); i++)
+      //  {
+      //    if (faceCount < meshData.NumberPerFace)
+      //    {
+      //      faceIndices.Add(Math.Abs(pointIndex[i]) - 1);
+      //      faceCount++;
+      //    }
+      //    else
+      //    {
+      //      switch (faceIndices.Count())
+      //      {
+      //        case 3:
+      //          faceIndices.Insert(0, 0);
+      //          break;
+      //        case 4:
+      //          faceIndices.Insert(0, 1);
+      //          break;
+      //        default:
+      //          faceIndices.Insert(0, faceIndices.Count());
+      //          break;
+      //      }
+      //      faces.AddRange(faceIndices);
+      //      faceIndices.Clear();
+
+      //      if (i < pointIndex.Count())
+      //      {
+      //        faceIndices.Add(Math.Abs(pointIndex[i]) - 1);
+      //        faceCount = 1;
+      //      }
+      //    }
+      //  }
+      //}
+
+      //if (meshData.NumberPerFace > 1)
+      //{
+      //  var faceCounter = 0;
+      //  for (int i = 0; i <= pointIndex.Count(); i++)
+      //  {
+      //    if (faceCounter < meshData.NumberPerFace) {
+      //      faceIndices.Add(Math.Abs(pointIndex[i]));
+      //      faceCounter++;
+      //    } else
+      //    {
+      //      faceIndices.Insert(0, (int)meshData.NumberPerFace);
+      //      faces.AddRange(faceIndices);
+      //      faceIndices.Clear();
+      //      faceCounter = 0;
+      //    }
+      //  }
+      //}
+      //else
+      //{
+      //  for (int i = 0; i < pointIndex.Count(); i++)
+      //  {
+      //    if (pointIndex[i] != 0) // index of 0 is face loop pad/terminator for planar mesh
+      //      faceIndices.Add(Math.Abs(pointIndex[i]) - 1);
+      //    else
+      //    {
+      //      switch (faceIndices.Count())
+      //      {
+      //        case 3:
+      //          faceIndices.Insert(0, 0);
+      //          break;
+      //        case 4:
+      //          faceIndices.Insert(0, 1);
+      //          break;
+      //        default:
+      //          faceIndices.Insert(0, faceIndices.Count());
+      //          break;
+      //      }
+      //      faces.AddRange(faceIndices);
+      //      faceIndices.Clear();
+      //    }
+      //  }
+      //}
+
+      //if (pointIndex[i] != 0) // index of 0 is face loop pad/terminator
+      //  faceIndices.Add(Math.Abs(pointIndex[i]) - 1);
+      //else
+      //{
+      //  switch (faceIndices.Count())
+      //  {
+      //    case 3:
+      //      faceIndices.Insert(0, 0);
+      //      break;
+      //    case 4:
+      //      faceIndices.Insert(0, 1);
+      //      break;
+      //    default:
+      //      faceIndices.Insert(0, faceIndices.Count());
+      //      break;
+      //  }
+      //  faces.AddRange(faceIndices);
+      //  faceIndices.Clear();
+      //}
+
+
+      // create speckle mesh
+      var speckleMesh = new Mesh(PointsToFlatList(vertices), faces);
+      var u = units ?? ModelUnits;
+      speckleMesh.units = u;
+
+      meshData.ComputePrincipalAreaMoments(out double area, out DPoint3d centoid, out DMatrix3d axes, out DVector3d moments);
+      speckleMesh.area = area / Math.Pow(UoR, 2);
+
+      meshData.ComputePrincipalMomentsAllowMissingSideFacets(out double volume, out var centroid, out var axes1, out var moments1, false, 1.0e-8);
+      speckleMesh.volume = volume / Math.Pow(UoR, 3);
+
+      var range = meshData.PointRange();
+      bool worldXY = range.Low.Z == 0 && range.High.Z == 0 ? true : false;
+      speckleMesh.bbox = BoxToSpeckle(range, worldXY);
+
+      meshData.Dispose();
+
+      return speckleMesh;
+    }
+
+    /// <summary>
+    /// Given a collection of <paramref name="solids"/>, will create one <see cref="Mesh"/>
+    /// </summary>
+    /// <param name="solids"></param>
+    /// <returns></returns>
+    public Mesh GetMeshFromSolid(Element nativeSolid, string units = null)
+    {
+      MeshProcessor meshProcessor = new MeshProcessor();
+      ElementGraphicsOutput.Process(nativeSolid, meshProcessor);
+      PolyfaceHeader meshData = meshProcessor.polyfaceHeader;
+      return GetMeshFromPolyfaceHeader(meshData, units);
+    }
+
+    /// <summary>
+    /// Given a collection of <paramref name="nativeSolids"/>, will create one <see cref="Mesh"/>
+    /// </summary>
+    /// <param name="nativeSolids"></param>
+    /// <returns></returns>
+    public List<Mesh> GetMeshesFromSolids(IEnumerable<SolidElement> nativeSolids)
+    {
+      var meshes = new List<Mesh> { };
+      foreach (SolidElement solid in nativeSolids)
+        meshes.Add(GetMeshFromSolid(solid));
       return meshes;
     }
 
@@ -2481,6 +2698,8 @@ namespace Objects.Converter.Bentley
     /// <param name="vertices">The vertices list to add to</param>
     private void ConvertMeshData(Mesh mesh, List<int> faces, List<double> vertices)
     {
+
+
       int faceIndexOffset = vertices.Count / 3;
 
       //vertices.Capacity += mesh.Vertices.Count * 3;
@@ -2534,6 +2753,43 @@ namespace Objects.Converter.Bentley
 
       public List<Mesh> GetAllValidMeshes() => GetAllMeshes().FindAll(m => m.vertices.Count > 0 && m.faces.Count > 0);
 
+    }
+
+    public void GetNativeProperties(Element nativeElement, Base speckleElement)
+    {
+      if (nativeElement == null)
+        return;
+
+      Dictionary<string, object> properties = new Dictionary<string, object>();
+      using (DgnECInstanceCollection instanceCollection = GetElementProperties(nativeElement))
+      {
+        foreach (IDgnECInstance instance in instanceCollection)
+        {
+          foreach (IECPropertyValue propertyValue in instance)
+          {
+            if (propertyValue != null)
+            {
+              properties = GetValue(properties, propertyValue);
+            }
+          }
+        }
+      };
+
+      Base elementProperties = new Base();
+      foreach (string propertyName in properties.Keys)
+      {
+        Object value = properties[propertyName];
+
+        if (value.GetType().Name == "DPoint3d")
+        {
+          elementProperties[propertyName] = ConvertToSpeckle(value);
+        }
+        else
+        {
+          elementProperties[propertyName] = value;
+        }
+      }
+      speckleElement["properties"] = elementProperties;
     }
 
     public Brep SurfaceOrSolidElementToSpeckle(SurfaceOrSolidElement brep)

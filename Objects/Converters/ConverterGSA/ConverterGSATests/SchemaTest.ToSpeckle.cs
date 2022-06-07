@@ -2165,7 +2165,7 @@ namespace ConverterGSATests
 
       //Results
       var gsaElement1dResults = GsaElement1dResultExamples(1, 5, 1);
-      ((GsaProxyMockForConverterTests)Instance.GsaModel.Proxy).AddResultData(ResultGroup.Element1d, gsaElement1dResults);
+      ((GsaProxyMockForConverterTests)Instance.GsaModel.Proxy).AddResultData(ResultGroup.Elem_1d, gsaElement1dResults);
 
       //Convert
       Instance.GsaModel.StreamLayer = GSALayer.Both;
@@ -2246,7 +2246,7 @@ namespace ConverterGSATests
 
       //Results
       var gsaElement2dResults = GsaElement2dResultExamples(1, 1);
-      ((GsaProxyMockForConverterTests)Instance.GsaModel.Proxy).AddResultData(ResultGroup.Element2d, gsaElement2dResults);
+      ((GsaProxyMockForConverterTests)Instance.GsaModel.Proxy).AddResultData(ResultGroup.Elem_2d, gsaElement2dResults);
 
       //Convert
       Instance.GsaModel.StreamLayer = GSALayer.Both;

@@ -1,6 +1,5 @@
 ﻿using Objects.Geometry;
 using Objects.Primitive;
-using Objects.Other;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -89,6 +88,8 @@ namespace Objects.Converter.Bentley
     {
       throw new NotImplementedException("This converter does not have any settings.");
     }
+
+    public ReceiveMode ReceiveMode { get; set; }
 
     public void SetContextDocument(object session)
     {
@@ -214,6 +215,10 @@ namespace Objects.Converter.Bentley
           @base = SolidElementToSpeckle(o);
           Report.Log($"Converted Type2 as Base");
           break;
+        case ConeElement o:
+          @base = ConeElementToSpeckle(o);
+          Report.Log($"Converted Cone as Base");
+          break;
         //case SurfaceOrSolidElement o:
         //  @base = SurfaceOrSolidElementToSpeckle(o);
         //  Report.Log($"Converted Type2 as Base");
@@ -337,7 +342,7 @@ namespace Objects.Converter.Bentley
 #endif
 #if (OPENROADS || OPENRAIL || OPENBRIDGE)
         case Alignment o:
-        Report.Log($"Created Alignment {o.id}");
+          Report.Log($"Created Alignment {o.id}");
           return AlignmentToNative(o);
 #endif
         default:
@@ -377,6 +382,7 @@ namespace Objects.Converter.Bentley
         case Type2Element _: //Complex header element
         //case BrepCellHeaderElement _:
         case SolidElement _:
+        case ConeElement _:
           return true;
 
 #if (OPENROADS || OPENRAIL || OPENBRIDGE)

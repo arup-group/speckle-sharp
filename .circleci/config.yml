@@ -25,8 +25,7 @@ commands:
           command: |
             $tag = if([string]::IsNullOrEmpty($env:CIRCLE_TAG)) { "a/0.0.$($env:CIRCLE_BUILD_NUM)-beta" } else { $env:CIRCLE_TAG }
             $version = $tag.Split("/")[1]  
-            dotnet pack -c Release /p:Version="$version" -o $HOME/output <<parameters.projectfilepath>> 
-            cd $HOME/output
+            msbuild <<parameters.projectfilepath>> /p:Version="$version" /p:Configuration=Release /p:WarningLevel=0 /p:IsDesktopBuild=false -t:pack
             dotnet nuget push **/*.nupkg -s https://api.nuget.org/v3/index.json -k $env:NUGET_APIKEY -n true
 
 # Parameters of our pipeline. Most of them are booleans that indicate which project to build/test with the pattern 'run_{PROJECT_NAME}'
@@ -157,25 +156,14 @@ jobs: # Each project will have individual jobs for each specific task it has to 
           command: msbuild Objects/Objects.sln /p:Configuration=Release /p:WarningLevel=0 /p:IsDesktopBuild=false
 
   build-desktopui:
-    executor:
+    executor: # Using a win executor since there are post-steps in the nuget workflow that use powershell
       name: win/default
       shell: powershell.exe
     steps:
       - checkout
       - run:
-          name: Restore DesktopUI
-          command: nuget restore DesktopUI/DesktopUI.sln
-      - run:
-          name: Build DesktopUI
-          command: msbuild DesktopUI/DesktopUI.sln /p:Configuration=Release /p:WarningLevel=0 /p:IsDesktopBuild=false
-      - run:
-          name: Publish nuget package
-          command: |
-            $tag = if([string]::IsNullOrEmpty($env:CIRCLE_TAG)) { "a/0.0.$($env:CIRCLE_BUILD_NUM)-beta" } else { $env:CIRCLE_TAG }
-            $version = $tag.Split("/")[1]  
-            nuget pack DesktopUI/DesktopUI/DesktopUI.csproj -OutputDirectory $HOME/output -Version $version -Properties Configuration=Release
-            cd $HOME/output
-            nuget push **/*.nupkg -src https://api.nuget.org/v3/index.json -ApiKey $env:NUGET_APIKEY
+          name: Build DesktopUI2
+          command: dotnet build DesktopUI2/DesktopUI2.sln -c Release -v q
 
   build-connector: # Reusable job for basic connectors
     executor:
@@ -207,7 +195,7 @@ jobs: # Each project will have individual jobs for each specific task it has to 
             $ver = if($semver.Contains('-')) {$semver.Split("-")[0] } else { $semver }
             $channel = if($semver.Contains('-')) {$semver.Split("-")[1] } else { "latest" }
             $version = "$($ver).$($env:CIRCLE_BUILD_NUM)"
-            msbuild << parameters.slnname >>/<< parameters.slnname >>.sln /p:Configuration=Release /p:WarningLevel=0 /p:IsDesktopBuild=false /p:AssemblyVersionNumber=$version /p:AssemblyInformationalVersion=$semver /p:Version=$version  
+            msbuild << parameters.slnname >>/<< parameters.slnname >>.sln /p:Configuration=Release /p:WarningLevel=0 /p:IsDesktopBuild=false /p:AssemblyVersionNumber=$version /p:AssemblyInformationalVersion=$semver /p:Version=$semver  
             if(-Not [string]::IsNullOrEmpty($env:CIRCLE_TAG)) { New-Item -Force "speckle-sharp-ci-tools/Installers/<< parameters.slug >>/$channel.yml" -ItemType File -Value "version: $semver" }
       - run:
           name: Deploy?
@@ -249,6 +237,9 @@ jobs: # Each project will have individual jobs for each specific task it has to 
       installername:
         type: string
         default: ""
+      build-config:
+        type: string
+        default: Release
     steps:
       - checkout
       - attach_workspace:
@@ -264,9 +255,8 @@ jobs: # Each project will have individual jobs for each specific task it has to 
             SEMVER=$(echo "$TAG" | sed -e 's/[a-zA-Z-]*\///')
             VER=$(echo "$SEMVER" | sed -e 's/-beta//')
             VERSION=$(echo $VER.$CIRCLE_BUILD_NUM)
-            msbuild << parameters.slnname >>/<< parameters.slnname >>.sln /r /p:Configuration=Release /p:WarningLevel=0 /p:IsDesktopBuild=false /p:AssemblyVersionNumber=$VERSION /p:AssemblyInformationalVersion=$SEMVER /p:Version=$VERSION
-            CHANNEL="latest"
-            if [[ $CIRCLE_TAG == *-beta ]]; then CHANNEL=beta; fi
+            msbuild << parameters.slnname >>/<< parameters.slnname >>.sln /r /p:Configuration='<< parameters.build-config >>' /p:WarningLevel=0 /p:IsDesktopBuild=false
+            CHANNEL=$(if [[ "$VERSION" == *"-"* ]]; then echo $(cut -d "-" -f2 \<\<\< $VERSION); else echo latest; fi)
             mkdir -p speckle-sharp-ci-tools/Installers/<< parameters.slug >>
             if [ "${CIRCLE_TAG}" ]; then echo "version: $SEMVER" > "speckle-sharp-ci-tools/Installers/<< parameters.slug >>/$CHANNEL.yml"; fi
       - run:
@@ -334,7 +324,7 @@ jobs: # Each project will have individual jobs for each specific task it has to 
   setup-archicad-dev: # get Archicad dev kit
     executor:
       name: win/default
-      shell: powershell.exe
+      shell: bash.exe
     steps:
       - checkout
       - attach_workspace:
@@ -347,15 +337,19 @@ jobs: # Each project will have individual jobs for each specific task it has to 
           name: extract devkit
           command: |
             cd speckle-sharp-ci-tools/Resources
-            Expand-Archive -Path Archicad25DevKit.zip
+            unzip Archicad25DevKit.zip -d Archicad25DevKit
       - run:
-          name: build AddOn
+          name: cmake AddOn
           command: |
             cd ConnectorArchicad/AddOn
             mkdir Build
-            $env:Path +="C:\Program Files\CMake\bin"
-            cmake -B "./Build/" -DAC_API_DEVKIT_DIR="../../speckle-sharp-ci-tools/Resources/Archicad25DevKit"
-            msbuild "Build/Speckle Connector.sln" /p:Configuration=Release
+            export PATH=$PATH:"C:\Program Files\CMake\bin"
+            cmake -B "./Build/" -DAC_API_DEVKIT_DIR="../../speckle-sharp-ci-tools/Resources/Archicad25DevKit" -DAC_MDID_DEV=$GRAPHISOFT_DEV_ID -DAC_MDID_LOC=$GRAPHISOFT_ADDON_ID
+      - run:
+          name: msbuild AddOn
+          command: |
+            cd ConnectorArchicad/AddOn
+            "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/MSBuild/Current/Bin/MSBuild.exe" "Build/Speckle Connector.sln" -property:Configuration=Release
       - persist_to_workspace:
           root: ./
           paths:
@@ -429,6 +423,7 @@ workflows:
           name: build-connector-rhino-mac
           slnname: ConnectorRhino
           projname: ConnectorRhino7
+          build-config: Release Mac
 
   # Dynamo connector - Build/Test
   connector_dynamo:
@@ -506,7 +501,7 @@ workflows:
             branches:
               ignore: /.*/ # For testing only: /ci\/.*/
             tags:
-              only: /^(core|nugets)\/([0-9]+)\.([0-9]+)\.([0-9]+)(?:-\w{1,10})?$/
+              only: /^(nuget-core|nugets)\/([0-9]+)\.([0-9]+)\.([0-9]+)(?:-\w{1,10})?$/
           post-steps:
             - packandpublish:
                 projectfilepath: Core/Core.sln
@@ -516,7 +511,7 @@ workflows:
             branches:
               ignore: /.*/ # For testing only: /ci\/.*/
             tags:
-              only: /^(objects|nugets)\/([0-9]+)\.([0-9]+)\.([0-9]+)(?:-\w{1,10})?$/
+              only: /^(nuget-objects|nugets)\/([0-9]+)\.([0-9]+)\.([0-9]+)(?:-\w{1,10})?$/
           post-steps:
             - packandpublish:
                 projectfilepath: Objects/Objects.sln
@@ -526,7 +521,10 @@ workflows:
             branches:
               ignore: /.*/ # For testing only: /ci\/.*/
             tags:
-              only: /^(desktopui|nugets)\/([0-9]+)\.([0-9]+)\.([0-9]+)(?:-\w{1,10})?$/
+              only: /^(nuget-dui|nugets)\/([0-9]+)\.([0-9]+)\.([0-9]+)(?:-\w{1,10})?$/
+          post-steps:
+            - packandpublish:
+                projectfilepath: DesktopUI2/DesktopUI2/DesktopUI2.csproj
 
   # Archicad Connector - Build/Test
   connector_archicad:
@@ -553,7 +551,7 @@ workflows:
             branches:
               ignore: /.*/ # For testing only: /ci\/.*/
             tags: # runs on any tag in the format "xyz/1.0.0" or "xyz/1.0.0-beta" -- TO UPDATE IDENTICAL LINE AT BOTTOM --
-              only: /^(all|win|mac|dynamo|revit|grasshopper|grasshopper-mac|rhino|rhino-mac|autocadcivil|revitdynamo|rhinogh|csi|etabs|sap2000|csibridge|safe|microstation|openbuildings|openrail|openroads|bentley|teklastructures)\/([0-9]+)\.([0-9]+)\.([0-9]+)(?:-\w+)?$/
+              only: /^(all|win|mac|dynamo|revit|grasshopper|grasshopper-mac|grasshopper-win|rhino|rhino-mac|autocadcivil|revitdynamo|rhinogh|csi|etabs|sap2000|csibridge|safe|microstation|openbuildings|openrail|openroads|bentley|teklastructures|archicad)\/([0-9]+)\.([0-9]+)\.([0-9]+)(?:-\w+)?$/
 
       # DYNAMO Build&Deploy
       - build-connector:
@@ -598,7 +596,7 @@ workflows:
             branches:
               ignore: /.*/ # For testing only! /ci\/.*/
             tags:
-              only: /^(grasshopper|rhinogh|all|win)\/([0-9]+)\.([0-9]+)\.([0-9]+)(?:-\w+)?$/
+              only: /^(grasshopper|rhinogh|all|win|grasshopper-win)\/([0-9]+)\.([0-9]+)\.([0-9]+)(?:-\w+)?$/
 
       - build-connector-mac:
           name: build-deploy-connector-grasshopper-mac
@@ -640,6 +638,7 @@ workflows:
           slnname: ConnectorRhino
           projname: ConnectorRhino7
           installername: SpeckleRhinoInstall
+          build-config: Release Mac
           installer: true
           slug: rhino-mac
           requires:
@@ -831,6 +830,31 @@ workflows:
               ignore: /.*/ # For testing only! /ci\/.*/
             tags:
               only: /^(csibridge|csi|all|win)\/([0-9]+)\.([0-9]+)\.([0-9]+)(?:-\w+)?$/
+
+      # Archicad Build&Deploy
+      - setup-archicad-dev:
+          requires:
+            - get-ci-tools
+          filters:
+            branches:
+              ignore: /.*/ # For testing only! /ci\/.*/
+            tags:
+              only: /^(archicad|all|win)\/([0-9]+)\.([0-9]+)\.([0-9]+)(?:-\w+)?$/
+      - build-connector:
+          name: build-deploy-connector-archicad
+          slnname: ConnectorArchicad
+          dllname: ConnectorArchicad.dll
+          slug: archicad
+          installer: true
+          requires:
+            - get-ci-tools
+            - setup-archicad-dev
+          filters:
+            branches:
+              ignore: /.*/ # For testing only! /ci\/.*/
+            tags:
+              only: /^(archicad|all|win)\/([0-9]+)\.([0-9]+)\.([0-9]+)(?:-\w+)?$/
+
       # DEPLOY ALL CONNECTORS
       - deploy: # Will run if all the triggered workflows succeed
           requires:
@@ -842,6 +866,7 @@ workflows:
             - build-deploy-connector-rhino
             - build-deploy-connector-rhino-mac
             - build-deploy-connector-autocad
+            - build-deploy-connector-archicad
             - build-deploy-connector-civil3d
             - build-deploy-connector-etabs
             - build-deploy-connector-sap2000
@@ -855,4 +880,4 @@ workflows:
 
           filters:
             tags: # runs on any tag in the format "xyz/1.0.0" or "xyz/1.0.0-beta" -- TO UPDATE IDENTICAL LINE AT ~380  --
-              only: /^(all|win|mac|dynamo|revit|grasshopper|grasshopper-mac|rhino|rhino-mac|autocadcivil|revitdynamo|rhinogh|csi|etabs|sap2000|csibridge|safe|microstation|microstation|openbuildings|openrail|openroads|bentley|teklastructures)\/([0-9]+)\.([0-9]+)\.([0-9]+)(?:-\w+)?$/
+              only: /^(all|win|mac|dynamo|revit|grasshopper|grasshopper-mac|grasshopper-win|rhino|rhino-mac|autocadcivil|revitdynamo|rhinogh|csi|etabs|sap2000|csibridge|safe|microstation|microstation|openbuildings|openrail|openroads|bentley|teklastructures|archicad)\/([0-9]+)\.([0-9]+)\.([0-9]+)(?:-\w+)?$/

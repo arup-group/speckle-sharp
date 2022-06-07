@@ -48,6 +48,8 @@ namespace Objects.Converter.CSI
 
     public ResultSetAll AnalysisResults { get; set; }
 
+    public ReceiveMode ReceiveMode { get; set; }
+
     public void SetContextDocument(object doc)
     {
       Model = (cSapModel)doc;

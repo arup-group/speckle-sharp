@@ -1,29 +1,32 @@
-﻿using DesktopUI2.Views.Pages;
+﻿using DesktopUI2.ViewModels.Share;
+using DesktopUI2.Views.Pages;
+using DesktopUI2.Views.Pages.ShareControls;
 using ReactiveUI;
 using Speckle.Core.Logging;
 using Splat;
+using System;
 using System.Reactive;
 
 namespace DesktopUI2.ViewModels
 {
-  public class MainWindowViewModelStandalone : ViewModelBase, IScreen
+  public class MainWindowViewModelStandalone : MainWindowViewModel, IScreen
   {
-    public string TitleFull => "Speckle for " + Bindings.GetHostAppNameVersion();
-    public RoutingState Router { get; private set; }
+    new public string TitleFull => "Speckle for " + Bindings.GetHostAppNameVersion();
+    new public RoutingState Router { get; private set; }
 
-    public ConnectorBindingsStandalone Bindings { get; private set; } = new DummyBindingsStandalone();
+    new public ConnectorBindings Bindings { get; private set; } = new DummyBindingsStandalone();
 
-    public static RoutingState RouterInstance { get; private set; }
+    new public static RoutingState RouterInstance { get; private set; }
 
-    public ReactiveCommand<Unit, Unit> GoBack => Router.NavigateBack;
+    new public ReactiveCommand<Unit, Unit> GoBack => Router.NavigateBack;
 
-
-    public MainWindowViewModelStandalone(ConnectorBindingsStandalone _bindings) : base()
+    public MainWindowViewModelStandalone(ConnectorBindings _bindings) : base()
     {
       Bindings = _bindings;
       Setup.Init(Bindings.GetHostAppNameVersion(), Bindings.GetHostAppName());
       Init();
     }
+
     public MainWindowViewModelStandalone()
     {
       Init();
@@ -33,9 +36,11 @@ namespace DesktopUI2.ViewModels
     {
       Router = new RoutingState();
 
-      Locator.CurrentMutable.Register(() => new StreamEditViewStandalone(), typeof(IViewFor<StreamViewModelStandalone>));
+      Locator.CurrentMutable.Register(() => new StreamEditViewStandalone(), typeof(IViewFor<StreamViewModel>));
       Locator.CurrentMutable.Register(() => new HomeViewStandalone(), typeof(IViewFor<HomeViewModelStandalone>));
-      Locator.CurrentMutable.Register(() => Bindings, typeof(ConnectorBindingsStandalone));
+      //Locator.CurrentMutable.Register(() => new CollaboratorsView(), typeof(IViewFor<CollaboratorsViewModelStandalone>));
+      //Locator.CurrentMutable.Register(() => new SettingsView(), typeof(IViewFor<SettingsPageViewModelStandalone>));
+      Locator.CurrentMutable.Register(() => Bindings, typeof(ConnectorBindings));
 
       RouterInstance = Router; // makes the router available app-wide
       Router.Navigate.Execute(new HomeViewModelStandalone(this));
@@ -49,12 +54,18 @@ namespace DesktopUI2.ViewModels
       //PaletteHelper.SetTheme(theme);
     }
 
+    //https://github.com/AvaloniaUI/Avalonia/issues/5290
+    private void CatchReactiveException(Exception e)
+    {
+      //do nothing
+    }
+
     private void Router_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
       throw new System.NotImplementedException();
     }
 
-    public static void GoHome()
+    new public static void GoHome()
     {
       if (RouterInstance != null && HomeViewModelStandalone.Instance != null)
         RouterInstance.Navigate.Execute(HomeViewModelStandalone.Instance);

@@ -29,8 +29,13 @@ using System.Collections.Concurrent;
 
 namespace ConnectorGSA.UI
 {
-  public partial class ConnectorBindingsGSA : ConnectorBindingsStandalone
+  public partial class ConnectorBindingsGSA : ConnectorBindings, IConnectorBindingsStandalone
   {
+    public override List<ReceiveMode> GetReceiveModes()
+    {
+      return new List<ReceiveMode> { ReceiveMode.Create };
+    }
+
     public override async Task<StreamState> ReceiveStream(StreamState state, ProgressViewModel progress)
     {
       var kit = KitManager.GetDefaultKit();
@@ -64,6 +69,20 @@ namespace ConnectorGSA.UI
             progress.Report.Log($"Using section mapping data from: {mappingKey}");
             setting.Selection = mappingKey;
           }
+        }
+        else if (setting.Slug == "node-coincidence-allowance")
+        {
+          if (double.TryParse(setting.Selection, out var allowance))
+          {
+            Instance.GsaModel.CoincidentNodeAllowance = allowance;
+          }
+        }
+        else if (setting.Slug == "unit")
+        {
+          if (Enum.TryParse(setting.Selection, out Models.GsaUnit units))
+          {
+            Instance.GsaModel.Units = Commands.UnitEnumToString(units);
+          }            
         }
         settings.Add(setting.Slug, setting.Selection);
       }
@@ -143,7 +162,7 @@ namespace ConnectorGSA.UI
         {
           streamId = stream?.id,
           commitId = myCommit?.id,
-          message = myCommit?.message, 
+          message = myCommit?.message,
           sourceApplication = VersionedHostApplications.GSA
         });
       }
@@ -161,7 +180,7 @@ namespace ConnectorGSA.UI
       {
         return null;
       }
-      
+
       duration = DateTime.Now - startTime;
 
       progress.Report.Log("Duration of reception from Speckle and scaling: " + duration.ToString(@"hh\:mm\:ss"));

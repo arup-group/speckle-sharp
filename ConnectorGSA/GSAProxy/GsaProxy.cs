@@ -141,7 +141,7 @@ namespace Speckle.ConnectorGSA.Proxy
     public char GwaDelimiter { get => _GwaDelimiter; }
 
     //Results-related
-    private string resultDir = null;
+    public string resultDir = null;
     private Dictionary<ResultGroup, IResultsProcessor> resultProcessors = new Dictionary<ResultGroup, IResultsProcessor>();
     private List<ResultType> allResultTypes;
 
@@ -349,6 +349,17 @@ namespace Speckle.ConnectorGSA.Proxy
           }
           i++;
         }
+
+        else if (pieces[i].ToLower() == "all")
+        {
+          int[] tempItems = null;
+
+          GSAObject.EntitiesInList("all", (GsaEntity)type, out tempItems);
+
+          if (tempItems != null)
+            items.AddRange(tempItems);
+        }
+
         else
         {
           try
@@ -635,7 +646,10 @@ namespace Speckle.ConnectorGSA.Proxy
       {
         lock (syncLock)
         {
-          gwaLines = ((string)GSAObject.GwaCommand(newCommand)).Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+          if (GSAObject != null)
+            gwaLines = ((string)GSAObject.GwaCommand(newCommand)).Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+          else
+            gwaLines = new string[0];
         }
       }
       catch
@@ -643,27 +657,31 @@ namespace Speckle.ConnectorGSA.Proxy
         gwaLines = new string[0];
       }
 
-      foreach(var gwa in gwaLines)
+      if (gwaLines.Length > 0)
       {
-
-      var ktd = typeInfo[layer][typeInfoIndicesByKeyword[layer][kw]];
-
-        if (ktd != null)
+        foreach (var gwa in gwaLines)
         {
-          var schemaType = ktd.GetSchemaType(kw);
-          var parser = (IGwaParser)Activator.CreateInstance(ktd.GetParserType(schemaType));
-          if (parser.FromGwa(gwa))
+
+          var ktd = typeInfo[layer][typeInfoIndicesByKeyword[layer][kw]];
+
+          if (ktd != null)
           {
-            retRecords.Add((GsaList)parser.Record);
+            var schemaType = ktd.GetSchemaType(kw);
+            var parser = (IGwaParser)Activator.CreateInstance(ktd.GetParserType(schemaType));
+            if (parser.FromGwa(gwa))
+            {
+              retRecords.Add((GsaList)parser.Record);
+            }
           }
         }
       }
 
+
       records = retRecords;
 
       return true;
-    } 
-    
+    }
+
     //Tuple: keyword | index | Application ID | GWA command | Set or Set At
     public bool GetGwaData(GSALayer layer, IProgress<string> loggingProgress, out List<GsaRecord> records, IProgress<int> incrementProgress = null)
     {
@@ -1012,7 +1030,6 @@ namespace Speckle.ConnectorGSA.Proxy
         return false;
       }
 
-      //progress.Max = 0;
       var parseProgressDict = new ConcurrentDictionary<string, int>();
       parseProgressDict["Parsing"] = 0;
 
@@ -1097,6 +1114,7 @@ namespace Speckle.ConnectorGSA.Proxy
                   else
                     progress.Report.Log($"Parsed GWA data for {schemaType.Name}");
                   parseProgressDict["Parsing"]++;
+                  progress.Max = parseProgressDict["Parsing"];
                   progress.Update(parseProgressDict);
                 }
                 else if (progress != null)
@@ -1226,6 +1244,7 @@ namespace Speckle.ConnectorGSA.Proxy
                       else
                         progress.Report.Log($"Parsed GWA data for {schemaType.Name}");
                       parseProgressDict["Parsing"]++;
+                      progress.Max = parseProgressDict["Parsing"];
                       progress.Update(parseProgressDict);
                     }
                     else if (progress != null)
@@ -1249,10 +1268,14 @@ namespace Speckle.ConnectorGSA.Proxy
         for (int i = 0; i < setAtKeywords.Count(); i++)
         {
           int highestIndex = 0;
-          lock (syncLock)
+          try
           {
-            highestIndex = GSAObject.GwaCommand("HIGHEST" + GwaDelimiter + setAtKeywords[i]);
+            lock (syncLock)
+            {
+              highestIndex = GSAObject.GwaCommand("HIGHEST" + GwaDelimiter + setAtKeywords[i]);
+            }
           }
+          catch { }
 
           for (int j = 1; j <= highestIndex; j++)
           {
@@ -1342,6 +1365,7 @@ namespace Speckle.ConnectorGSA.Proxy
                   else
                     progress.Report.Log($"Parsed GWA data for {schemaType.Name}");
                   parseProgressDict["Parsing"]++;
+                  progress.Max = parseProgressDict["Parsing"];
                   progress.Update(parseProgressDict);
                 }
                 else if (progress != null)
@@ -1361,6 +1385,8 @@ namespace Speckle.ConnectorGSA.Proxy
 
       records = retRecords;
       return true;
+
+
     }
 
     private string FormulateParsingErrorContext(GsaRecord gsaRecord, string typeName)
@@ -2218,11 +2244,11 @@ namespace Speckle.ConnectorGSA.Proxy
       {
         resultProcessors.Add(group, new ResultsAssemblyProcessor(Path.Combine(resultDir, @"result_assembly\result_assembly.csv"), unitData, allResultTypes, cases, elemIds));
       }
-      else if (group == ResultGroup.Element1d)
+      else if (group == ResultGroup.Elem_1d)
       {
         resultProcessors.Add(group, new Results1dProcessor(Path.Combine(resultDir, @"result_elem_1d\result_elem_1d.csv"), unitData, allResultTypes, cases, elemIds));
       }
-      else if (group == ResultGroup.Element2d)
+      else if (group == ResultGroup.Elem_2d)
       {
         resultProcessors.Add(group, new Results2dProcessor(Path.Combine(resultDir, @"result_elem_2d\result_elem_2d.csv"), unitData, allResultTypes, cases, elemIds));
       }

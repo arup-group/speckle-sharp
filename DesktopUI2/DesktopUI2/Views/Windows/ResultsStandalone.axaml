@@ -1,0 +1,68 @@
+<Window
+  x:Class="DesktopUI2.Views.Windows.ResultsStandalone"
+  xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:conv="clr-namespace:DesktopUI2.Views.Converters"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:m="clr-namespace:Material.Styles;assembly=Material.Styles"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:vm="clr-namespace:DesktopUI2.ViewModels"
+  Title="Results"
+  Width="515"
+  Height="500"
+  d:DesignHeight="515"
+  d:DesignWidth="500"
+  Icon="avares://DesktopUI2/Assets/icon.ico"
+  mc:Ignorable="d">
+  <Window.Resources>
+    <conv:EmptyFalseValueConverter x:Key="EmptyFalseValueConverter" />
+  </Window.Resources>
+  <Window.Styles>
+    <Style Selector="TextBox.Readonly">
+      <Setter Property="Margin" Value="20,0,20,20" />
+      <Setter Property="FontStyle" Value="Italic" />
+    </Style>
+    <Style Selector="TextBox.Readonly /template/ m|MaterialUnderline#PART_Underline">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+  </Window.Styles>
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="auto"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="auto"/>
+    </Grid.RowDefinitions>
+    <StackPanel Grid.Row="0" Orientation="Vertical" Margin="10">
+      <CheckBox Content="Send results" IsChecked="{Binding ResultSettings.SendResults}" Margin="0 5"/>
+      <CheckBox Content="Send to Speckle Server (ie. use server transport)" IsEnabled="{Binding ResultSettings.SendResults}" IsChecked="{Binding ResultSettings.UseServerTransport}" Margin="25 5"/>
+      <CheckBox Content="Save Speckle results object to local SQLite file (ie. use SQLite transport)" IsEnabled="{Binding ResultSettings.SendResults}" IsChecked="{Binding ResultSettings.UseLocalTransport}" Margin="25 5"/>
+      <CheckBox Content="Save raw GSA results export (CSV files) locally" IsEnabled="{Binding ResultSettings.SendResults}" IsChecked="{Binding ResultSettings.SaveResultsToCsv}" Margin="25 5"/>
+      <DockPanel LastChildFill="True">
+        <TextBlock DockPanel.Dock="Left" VerticalAlignment="Center" Text="Cases: " Margin="0 5 5 5" />
+        <TextBox IsEnabled="{Binding ResultSettings.SendResults}" Text="{Binding ResultSettings.CasesDescription}" />
+      </DockPanel>
+      <CheckBox Content="Results in local axis" IsChecked="{Binding ResultSettings.UseLocalAxis}" IsEnabled="{Binding ResultSettings.SendResults}" Margin="0 5"/>
+      <DockPanel>
+        <TextBlock DockPanel.Dock="Left" Text="Additional Positions for 1D elements:" VerticalAlignment="Center" Margin="0 5 5 5"/>
+        <TextBox IsEnabled="{Binding ResultSettings.SendResults}" Text="{Binding ResultSettings.Additional1DPositions}"/>
+      </DockPanel>
+    </StackPanel>
+    <ListBox Grid.Row="1" IsEnabled="{Binding ResultSettings.SendResults} " Items="{Binding ResultSettings.ResultSettingItems}">
+      <ListBox.ItemTemplate>
+        <DataTemplate>
+          <CheckBox Content="{Binding Name}" IsChecked="{Binding Selected}" IsEnabled="{Binding ResultSettings.SendResults}" />
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
+    <StackPanel Grid.Row="2"
+      Margin="15"
+      HorizontalAlignment="Right"
+      Orientation="Horizontal">
+      <Button
+        Margin="0,0,10,0"
+        Command="{Binding SaveCommand}"      
+        Content="Save"
+        ToolTip.Tip="Save these settings for sending" />
+    </StackPanel>
+  </Grid>
+</Window>

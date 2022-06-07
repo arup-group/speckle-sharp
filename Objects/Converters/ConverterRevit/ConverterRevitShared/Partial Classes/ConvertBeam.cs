@@ -12,7 +12,7 @@ namespace Objects.Converter.Revit
   {
     public List<ApplicationPlaceholderObject> BeamToNative(Beam speckleBeam, StructuralType structuralType = StructuralType.Beam)
     {
-      
+
       if (speckleBeam.baseLine == null)
       {
         throw new Speckle.Core.Logging.SpeckleException("Only line based Beams are currently supported.");
@@ -50,28 +50,27 @@ namespace Objects.Converter.Revit
       //try update existing 
       var docObj = GetExistingElementByApplicationId(speckleBeam.applicationId);
 
+      if (docObj != null && ReceiveMode == Speckle.Core.Kits.ReceiveMode.Ignore)
+        return new List<ApplicationPlaceholderObject>() { new ApplicationPlaceholderObject { applicationId = speckleBeam.applicationId, ApplicationGeneratedId = docObj.UniqueId, NativeObject = docObj } }; ;
+
       if (docObj != null)
       {
         try
         {
-          var analyticalStick = docObj as AnalyticalModelStick;
           var revitType = Doc.GetElement(docObj.GetTypeId()) as ElementType;
 
-          // Gets physical element associated with analytical element
-          var revitElement = Doc.GetElement(analyticalStick.GetElementId()) as DB.FamilyInstance;
-
           // if family changed, tough luck. delete and let us create a new one.
-          if (familySymbol.FamilyName != revitElement.Symbol.FamilyName)
+          if (familySymbol.FamilyName != revitType.FamilyName)
           {
             Doc.Delete(docObj.Id);
           }
           else
           {
-            revitBeam = (DB.FamilyInstance)revitElement;
+            revitBeam = (DB.FamilyInstance)docObj;
             (revitBeam.Location as LocationCurve).Curve = baseLine;
 
             // check for a type change
-            if (!string.IsNullOrEmpty(familySymbol.FamilyName) && familySymbol.FamilyName != revitElement.Name)
+            if (!string.IsNullOrEmpty(familySymbol.FamilyName) && familySymbol.FamilyName != revitType.Name)
             {
               revitBeam.ChangeTypeId(familySymbol.Id);
             }
@@ -123,7 +122,7 @@ namespace Objects.Converter.Revit
         Report.Log($"Beam has no valid baseline, converting as generic element {revitBeam.Id}");
         return RevitElementToSpeckle(revitBeam);
       }
-      var symbol = Doc.GetElement(revitBeam.GetTypeId()) as FamilySymbol;
+      var symbol = revitBeam.Document.GetElement(revitBeam.GetTypeId()) as FamilySymbol;
 
       var speckleBeam = new RevitBeam();
       speckleBeam.family = symbol.FamilyName;

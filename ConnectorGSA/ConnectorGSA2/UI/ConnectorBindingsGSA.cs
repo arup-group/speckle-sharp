@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,12 +16,14 @@ using Speckle.Core.Models;
 using Speckle.Core.Transports;
 using Speckle.Newtonsoft.Json;
 using Speckle.GSA.API;
+using ConnectorGSA.Models;
+using Speckle.ConnectorGSA.Proxy;
 
 namespace ConnectorGSA.UI
 {
-  public partial class ConnectorBindingsGSA : ConnectorBindingsStandalone
+  public partial class ConnectorBindingsGSA : ConnectorBindings, IConnectorBindingsStandalone
   {
-    public GsaModel Model; //{ get => Instance.GsaModel; }
+    public GsaModel Model;
 
     public List<Exception> ConversionErrors { get; set; } = new List<Exception>();
 
@@ -33,52 +36,13 @@ namespace ConnectorGSA.UI
       Model = new GsaModel();
     }
 
-    private string _layer = "Design";
-    public override string Layer
-    {
-      get => _layer;
-      set
-      {
-        _layer = value;
-        var layer = Enum.TryParse(value, out GSALayer streamLayer);
-        if(layer)
-          Instance.GsaModel.StreamLayer = streamLayer;
-      }
-    }
-
-    private string _units = "millimetres";
-    public override string Units
-    {
-      get => _units;
-      set
-      {
-        _units = value;
-        var unit = Enum.TryParse(value, out Models.GsaUnit units);
-        if (unit)
-          Instance.GsaModel.Units = Commands.UnitEnumToString(units); 
-      }
-    }
-
-    private double _coincidentNodeAllowance = 10;
-    public override double CoincidentNodeAllowance
-    {
-      get => _coincidentNodeAllowance;
-      set
-      {
-        _coincidentNodeAllowance = value;
-        Instance.GsaModel.CoincidentNodeAllowance = value;
-      }
-    }
-
+    public ResultSettings ResultSettings { get; set; } = new ResultSettings();
     public override string GetHostAppNameVersion() => VersionedHostApplications.GSA;
     public override string GetHostAppName() => HostApplications.GSA.Slug;
-    public override string GetDocumentId() => "id"; //GetDocHash(CurrentDoc?.Document);
-
-    private string GetDocHash() => ""; // Speckle.Core.Models.Utilities.hashString(doc.PathName + doc.Title, Speckle.Core.Models.Utilities.HashingFuctions.MD5);
-
-    public override string GetDocumentLocation() => ""; // CurrentDoc.Document.PathName;
-
-    public override string GetFileName() => ""; // CurrentDoc.Document.Title;
+    public override string GetDocumentId() => GetDocHash();
+    private string GetDocHash() => Speckle.Core.Models.Utilities.hashString(((GsaProxy)Model?.Proxy).FilePath, Speckle.Core.Models.Utilities.HashingFuctions.MD5);
+    public override string GetDocumentLocation() => Path.GetDirectoryName(((GsaProxy)Model?.Proxy).FilePath);
+    public override string GetFileName() => Path.GetFileName(((GsaProxy)Model?.Proxy).FilePath); 
     public override string GetActiveViewName()
     {
       return "Entire Document"; // Note: gsa does not have views that filter objects.
@@ -105,12 +69,12 @@ namespace ConnectorGSA.UI
       return new List<MenuItem>();
     }
 
-    public override void NewFile()
+    public void NewFile()
     {
       Commands.NewFile();
     }
 
-    public override void OpenFile(string filePath)
+    public void OpenFile(string filePath)
     {
       Commands.OpenFile(filePath, true);
     }

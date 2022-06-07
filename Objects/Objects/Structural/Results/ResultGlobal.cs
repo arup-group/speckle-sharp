@@ -10,6 +10,7 @@ namespace Objects.Structural.Results
   public class ResultSetGlobal : Result
   {
     [DetachProperty]
+    [Chunkable(1000)]
     public List<ResultGlobal> resultsGlobal { get; set; }
     public ResultSetGlobal() { }
 
@@ -24,6 +25,7 @@ namespace Objects.Structural.Results
   {
     [DetachProperty]
     public Model model { get; set; } // this should be a model identifier instead
+    public string modelRef { get; set; }
     public float? loadX { get; set; }
     public float? loadY { get; set; }
     public float? loadZ { get; set; }
@@ -78,6 +80,7 @@ namespace Objects.Structural.Results
       this.effMassXX = effMassXX;
       this.effMassYY = effMassYY;
       this.effMassZZ = effMassZZ;
+      this.modelRef = model.applicationId;
     }
 
     [SchemaInfo("ResultGlobal (load combination)", "Creates a Speckle global result object (for load combination)", "Structural", "Results")]
@@ -108,6 +111,7 @@ namespace Objects.Structural.Results
       this.effMassXX = effMassXX;
       this.effMassYY = effMassYY;
       this.effMassZZ = effMassZZ;
+      this.modelRef = model.applicationId;
     }
   }
 }

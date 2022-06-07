@@ -4,6 +4,7 @@ using DesktopUI2.Models.Settings;
 using DesktopUI2.ViewModels;
 using Speckle.Core.Api;
 using Speckle.Core.Credentials;
+using Speckle.Core.Kits;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace DesktopUI2
 {
-  public class DummyBindingsStandalone : ConnectorBindingsStandalone
+  public class DummyBindingsStandalone : ConnectorBindings, IConnectorBindingsStandalone
   {
     Random rnd = new Random();
 
@@ -87,11 +88,11 @@ namespace DesktopUI2
     {
       return new List<ISelectionFilter>
       {
-        new AllSelectionFilter {Slug="all",  Name = "Everything", Icon = "CubeScan", Description = "Selects all document objects and project information." },
+        new AllSelectionFilterStandalone {Slug="all",  Name = "Everything", Icon = "CubeScan", Description = "Selects all document objects and project information." },
         new ManualSelectionFilter(),
-        new ListSelectionFilter {Slug="view",Name = "View", Icon = "RemoveRedEye", Description = "Hello world. This is a something something filter.", Values = new List<string>() { "Isometric XX", "FloorPlan_xx", "Section 021" } },
-        new ListSelectionFilter {Slug="cat",Name = "Category", Icon = "Category",Description = "Hello world. This is a something something filter.Hello world. This is a something something filter.", Values = new List<string>()  { "Boats", "Rafts", "Barges" }},
-        new PropertySelectionFilter
+        new ListSelectionFilterStandalone {Slug="view",Name = "View", Icon = "RemoveRedEye", Description = "Hello world. This is a something something filter.", Values = new List<string>() { "Isometric XX", "FloorPlan_xx", "Section 021" } },
+        new ListSelectionFilterStandalone {Slug="cat",Name = "Category", Icon = "Category",Description = "Hello world. This is a something something filter.Hello world. This is a something something filter.", Values = new List<string>()  { "Boats", "Rafts", "Barges" }},
+        new PropertySelectionFilterStandalone
         {
           Slug="param",
           Name = "Parameter",
@@ -108,7 +109,10 @@ namespace DesktopUI2
     {
       return new List<ISetting>
       {
-        new ListBoxSetting {Name = "Reference Point", Icon = "mdiCrosshairsGps", Description = "Hello world. This is a setting.", Values = new List<string>() {"Default", "Project Base Point", "Survey Point"} }
+        new ListBoxSetting {Name = "Reference Point", Icon = "mdiCrosshairsGps", Description = "Hello world. This is a setting.", Values = new List<string>() {"Default", "Project Base Point", "Survey Point"} },
+        new CheckBoxSetting {Slug = "linkedmodels-send", Name = "Send Linked Models", Icon ="Link", IsChecked= false, Description = "Include Linked Models in the selection filters when sending"},
+        new CheckBoxSetting {Slug = "linkedmodels-receive", Name = "Receive Linked Models", Icon ="Link", IsChecked= false, Description = "Include Linked Models when receiving"},
+        new TextBoxSetting {Slug = "tolerance", Name = "Tolerance", Icon = "mdiCounter", Description = "Hello world. This is a text box setting." },
       };
     }
 
@@ -347,21 +351,21 @@ namespace DesktopUI2
       //done!
     }
 
-    public override void NewFile()
+    public override List<ReceiveMode> GetReceiveModes()
+    {
+      return new List<ReceiveMode> { ReceiveMode.Update, ReceiveMode.Ignore };
+    }
+
+    public void NewFile()
     {
       throw new NotImplementedException();
     }
 
-    public override void OpenFile(string filePath)
+    public void OpenFile(string filePath)
     {
       throw new NotImplementedException();
     }
 
-    public override string Layer { get; set; }
-
-    public override string Units { get; set; }
-
-    public override double CoincidentNodeAllowance { get; set; }
-
+    public ResultSettings ResultSettings { get; set; } = new ResultSettings();
   }
 }
