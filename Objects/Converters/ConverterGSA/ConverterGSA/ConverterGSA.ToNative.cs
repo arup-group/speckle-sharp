@@ -2168,7 +2168,7 @@ namespace ConverterGSA
           double? alphay = speckleMatAnal.GetDynamicValue<double?>("Alphay", dynamicMembers) * conversionFactors.ThermalExapansionFactorToNative();
           double? alphaz = speckleMatAnal.GetDynamicValue<double?>("Alphaz", dynamicMembers) * conversionFactors.ThermalExapansionFactorToNative();
           double? gxy = speckleMatAnal.GetDynamicValue<double?>("Gxy", dynamicMembers) * conversionFactors.stress;
-          double? gyz= speckleMatAnal.GetDynamicValue<double?>("Gyz", dynamicMembers) * conversionFactors.stress;
+          double? gyz = speckleMatAnal.GetDynamicValue<double?>("Gyz", dynamicMembers) * conversionFactors.stress;
           double? gzx = speckleMatAnal.GetDynamicValue<double?>("Gzx", dynamicMembers) * conversionFactors.stress;
           gsaMatAnal.Ex = ex;
           gsaMatAnal.Ey = ey;
@@ -2544,6 +2544,12 @@ namespace ConverterGSA
       var gsaProp2d = (GsaProp2d)natives.FirstOrDefault(n => n is GsaProp2d);
       if (gsaProp2d != null)
       {
+        if (speckleProperty.type == PropertyType2D.Load)
+        {
+          gsaProp2d.Support = speckleProperty.support.ToNative();
+          gsaProp2d.Edge = speckleProperty.referenceEdge;
+          return retList;
+        }
         //unit conversion scale factors (GSA units are messed up!)
         var thicknessFactor = conversionFactors.displacements;
         var inPlaneFactor = Math.Pow(conversionFactors.displacements, 2) / conversionFactors.length;

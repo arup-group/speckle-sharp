@@ -25,6 +25,10 @@
     public double? InPlane;
     public double? VolumePercentage;
     public double? Volume;
+    //Load panel properties
+    public LoadPanelSupportType Support;
+    public int? Edge;
+
     public string Units = "";
 
     public GsaProp2d() : base()

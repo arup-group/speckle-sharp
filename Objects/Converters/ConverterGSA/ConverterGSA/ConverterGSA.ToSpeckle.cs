@@ -1666,32 +1666,45 @@ namespace ConverterGSA
     private ToSpeckleResult GsaProperty2dToSpeckle(GsaRecord nativeObject, GSALayer layer = GSALayer.Both)
     {
       var gsaProp2d = (GsaProp2d)nativeObject;
+
+      var type = gsaProp2d.Type.ToSpeckle();
       var speckleProperty2d = new GSAProperty2D()
       {
         nativeId = gsaProp2d.Index ?? 0,
         name = gsaProp2d.Name,
         colour = gsaProp2d.Colour.ToString(),
-        thickness = gsaProp2d.Thickness ?? 0,
-        zOffset = gsaProp2d.RefZ,
-        orientationAxis = GetOrientationAxis(gsaProp2d.AxisRefType, gsaProp2d.AxisIndex),
-        refSurface = gsaProp2d.RefPt.ToSpeckle(),
-        type = gsaProp2d.Type.ToSpeckle(),
-        modifierInPlane = AddValueOrPencentage(gsaProp2d.InPlane, gsaProp2d.InPlaneStiffnessPercentage),
-        modifierBending = AddValueOrPencentage(gsaProp2d.Bending, gsaProp2d.BendingStiffnessPercentage),
-        modifierShear = AddValueOrPencentage(gsaProp2d.Shear, gsaProp2d.ShearStiffnessPercentage),
-        modifierVolume = AddValueOrPencentage(gsaProp2d.Volume, gsaProp2d.VolumePercentage),
-        additionalMass = gsaProp2d.Mass,
-        concreteSlabProp = gsaProp2d.Profile,
-        cost = 0, //not part of GSA definition
+        type = type
       };
+
       if (gsaProp2d.Index.IsIndex()) speckleProperty2d.applicationId = Instance.GsaModel.Cache.GetApplicationId<GsaProp2d>(gsaProp2d.Index.Value);
-      if (gsaProp2d.GradeIndex.IsIndex()) speckleProperty2d.designMaterial = GetMaterialFromIndex(gsaProp2d.GradeIndex.Value, gsaProp2d.MatType);
-      if (gsaProp2d.AnalysisMaterialIndex.IsIndex())
+
+      if (type == PropertyType2D.Load)
       {
-        speckleProperty2d.material = null;
-        Report.ConversionErrors.Add(new Exception("GsaProperty2dToSpeckle: Conversion of MAT_ANAL keyword not currently supported"));
+        speckleProperty2d.support = gsaProp2d.Support.ToSpeckle();
+        speckleProperty2d.referenceEdge = gsaProp2d.Edge;
       }
-      if (gsaProp2d.DesignIndex.IsIndex()) Report.ConversionErrors.Add(new Exception("GsaProperty2dToSpeckle: Conversion of PROP_RC2D keyword not currently supported"));
+      else
+      {
+        speckleProperty2d.thickness = gsaProp2d.Thickness ?? 0;
+        speckleProperty2d.zOffset = gsaProp2d.RefZ;
+        speckleProperty2d.orientationAxis = GetOrientationAxis(gsaProp2d.AxisRefType, gsaProp2d.AxisIndex);
+        speckleProperty2d.refSurface = gsaProp2d.RefPt.ToSpeckle();
+        speckleProperty2d.modifierInPlane = AddValueOrPencentage(gsaProp2d.InPlane, gsaProp2d.InPlaneStiffnessPercentage);
+        speckleProperty2d.modifierBending = AddValueOrPencentage(gsaProp2d.Bending, gsaProp2d.BendingStiffnessPercentage);
+        speckleProperty2d.modifierShear = AddValueOrPencentage(gsaProp2d.Shear, gsaProp2d.ShearStiffnessPercentage);
+        speckleProperty2d.modifierVolume = AddValueOrPencentage(gsaProp2d.Volume, gsaProp2d.VolumePercentage);
+        speckleProperty2d.additionalMass = gsaProp2d.Mass;
+        speckleProperty2d.concreteSlabProp = gsaProp2d.Profile;
+        speckleProperty2d.cost = 0; //not part of GSA definition
+
+        if (gsaProp2d.GradeIndex.IsIndex()) speckleProperty2d.designMaterial = GetMaterialFromIndex(gsaProp2d.GradeIndex.Value, gsaProp2d.MatType);
+        if (gsaProp2d.AnalysisMaterialIndex.IsIndex())
+        {
+          speckleProperty2d.material = null;
+          Report.ConversionErrors.Add(new Exception("GsaProperty2dToSpeckle: Conversion of MAT_ANAL keyword not currently supported"));
+        }
+        if (gsaProp2d.DesignIndex.IsIndex()) Report.ConversionErrors.Add(new Exception("GsaProperty2dToSpeckle: Conversion of PROP_RC2D keyword not currently supported"));
+      }
 
       return new ToSpeckleResult(speckleProperty2d);
 

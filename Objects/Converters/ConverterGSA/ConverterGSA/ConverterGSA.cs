@@ -438,7 +438,15 @@ namespace ConverterGSA
         }
       }
 
-      conversionFactors.SetNativeUnits();
+      try
+      {
+        conversionFactors.SetNativeUnits();
+      }
+      catch (Exception e)
+      {
+        Report.ConversionErrors.Add(e);
+        return false;
+      }
 
       var tol = modelSettingsRecords.FirstOrDefault(r => r is GsaTol);
       if (tol != null)
