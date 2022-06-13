@@ -22,6 +22,8 @@ namespace Objects.Structural.Geometry
     public Restraint end2Releases { get; set; }
     public Vector end1Offset { get; set; }
     public Vector end2Offset { get; set; }
+
+    [DetachProperty]
     public Node orientationNode { get; set; }
     public double orientationAngle { get; set; }
     public Plane localAxis { get; set; }

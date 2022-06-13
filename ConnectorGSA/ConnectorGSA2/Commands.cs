@@ -270,7 +270,6 @@ namespace ConnectorGSA
         {
           return null;
         }
-
       }
 
       // Send elements by list selection
@@ -313,6 +312,7 @@ namespace ConnectorGSA
         onErrorAction: (s, e) =>
         {
           progress.Report.LogOperationError(e);
+          if(e.InnerException != null) progress.Report.LogOperationError(e.InnerException);
           progress.CancellationTokenSource.Cancel();
         },
         disposeTransports: false
