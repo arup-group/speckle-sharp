@@ -32,6 +32,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Components]
 Name: gsa; Description: Speckle for Oasys GSA - v{#AppVersion};  Types: full
+Name: gsa2; Description: Speckle for Oasys GSA (New UI) - v{#AppVersion};  Types: full
 Name: kits; Description: Speckle Kit;  Types: full custom; Flags: fixed
 
 [Types]
@@ -46,12 +47,17 @@ Name: "{app}"; Permissions: everyone-full
 Source: "..\ConnectorGSA\ConnectorGSA\bin\Release\*"; DestDir: "{userappdata}\Oasys\SpeckleGSA\"; Flags: ignoreversion recursesubdirs; Components: gsa
 Source: "..\Objects\Converters\ConverterGSA\ConverterGSA\bin\Release\Objects.Converter.GSA.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects"; Flags: ignoreversion recursesubdirs; Components: gsa
 
+;gsa2
+Source: "..\ConnectorGSA\ConnectorGSA2\bin\Release\net48\*"; DestDir: "{userappdata}\Oasys\SpeckleGSA2\"; Flags: ignoreversion recursesubdirs; Components: gsa2
+Source: "..\Objects\Converters\ConverterGSA\ConverterGSA\bin\Release\Objects.Converter.GSA.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects"; Flags: ignoreversion recursesubdirs; Components: gsa2
+
 ;kits
 Source: "..\Objects\Objects\bin\Release\netstandard2.0\Objects.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects"; Flags: ignoreversion recursesubdirs; Components: kits
 
 [InstallDelete]
-Type: filesandordirs; Name: "{userappdata}\Oasys\SpeckleGSA\*"
-Type: files; Name: "{userappdata}\Speckle\Kits\Objects\Objects.Converter.GSA.dll"
+Type: filesandordirs; Name: "{userappdata}\Oasys\SpeckleGSA\*" Components: gsa
+Type: filesandordirs; Name: "{userappdata}\Oasys\SpeckleGSA2\*"; Components: gsa2
+Type: files; Name: "{userappdata}\Speckle\Kits\Objects\Objects.Converter.GSA.dll" Components: gsa gsa2
 
 [Icons]
 Name: "{group}\{cm:UninstallProgram,{#AppName}}"; Filename: "{uninstallexe}"

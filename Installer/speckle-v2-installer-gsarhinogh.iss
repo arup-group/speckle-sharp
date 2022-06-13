@@ -1,14 +1,12 @@
 	;defining variables
 #define AppName      "Speckle@Arup v2 GSA Connector + Rhino/Gh Connectors"
-#define AppVersion  GetFileVersion("..\ConnectorGSA\ConnectorGSA\bin\Release\ConnectorGSA.exe")
-
-#define Rhino6Version  GetFileVersion("..\ConnectorRhino\ConnectorRhino6\bin\Release\ConnectorRhino6.rhp")
-#define Rhino7Version  GetFileVersion("..\ConnectorRhino\ConnectorRhino7\bin\Release\ConnectorRhino7.rhp")
-#define GrasshopperVersion  GetFileVersion("..\ConnectorGrasshopper\ConnectorGrasshopper\bin\net472\SpeckleConnectorGrasshopper.dll")
-
 #define AppPublisher "Speckle@Arup"
 #define AppURL       "https://speckle.arup.com"
 #define SpeckleFolder "{localappdata}\Speckle"
+
+#define GrasshopperVersion  GetFileVersion("..\ConnectorGrasshopper\ConnectorGrasshopper\bin\Release\SpeckleConnectorGrasshopper.dll")
+#define Rhino6Version  GetFileVersion("..\ConnectorRhino\ConnectorRhino6\bin\Release\ConnectorRhino6.rhp")
+#define Rhino7Version  GetFileVersion("..\ConnectorRhino\ConnectorRhino7\bin\Release\ConnectorRhino7.rhp")
 
 [Setup]
 AppId="f1c9752c-a655-4787-b821-573259e9f3bf"
@@ -38,6 +36,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Components]
 Name: gsa; Description: Speckle for Oasys GSA - v{#AppVersion};  Types: full
+Name: gsa2; Description: Speckle for Oasys GSA (New UI) - v{#AppVersion};  Types: full
 Name: rhino6; Description: Speckle for Rhino 6 - v{#Rhino6Version};  Types: full
 Name: rhino7; Description: Speckle for Rhino 7 - v{#Rhino7Version};  Types: full
 Name: gh; Description: Speckle for Grasshopper - v{#GrasshopperVersion};  Types: full
@@ -54,6 +53,10 @@ Name: "{app}"; Permissions: everyone-full
 ;gsa
 Source: "..\ConnectorGSA\ConnectorGSA\bin\Release\*"; DestDir: "{userappdata}\Oasys\SpeckleGSA\"; Flags: ignoreversion recursesubdirs; Components: gsa
 Source: "..\Objects\Converters\ConverterGSA\ConverterGSA\bin\Release\Objects.Converter.GSA.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects"; Flags: ignoreversion recursesubdirs; Components: gsa
+
+;gsa2
+Source: "..\ConnectorGSA\ConnectorGSA2\bin\Release\net48\*"; DestDir: "{userappdata}\Oasys\SpeckleGSA2\"; Flags: ignoreversion recursesubdirs; Components: gsa2
+Source: "..\Objects\Converters\ConverterGSA\ConverterGSA\bin\Release\Objects.Converter.GSA.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects"; Flags: ignoreversion recursesubdirs; Components: gsa2
 
 ;rhino6                                                                                                                                    
 Source: "..\ConnectorRhino\ConnectorRhino6\bin\Release\*"; DestDir: "{userappdata}\McNeel\Rhinoceros\6.0\Plug-ins\SpeckleRhino2 (8dd5f30b-a13d-4a24-abdc-3e05c8c87143)\"; Flags: ignoreversion recursesubdirs; Components: rhino6
@@ -72,7 +75,8 @@ Source: "..\Objects\Converters\ConverterRhinoGh\ConverterGrasshopper7\bin\Releas
 Source: "..\Objects\Objects\bin\Release\netstandard2.0\Objects.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects"; Flags: ignoreversion recursesubdirs; Components: kits
 
 [InstallDelete]
-Type: filesandordirs; Name: "{userappdata}\Oasys\SpeckleGSA\*"
+Type: filesandordirs; Name: "{userappdata}\Oasys\SpeckleGSA\*"; Components: gsa
+Type: filesandordirs; Name: "{userappdata}\Oasys\SpeckleGSA2\*"; Components: gsa2
 Type: files; Name: "{userappdata}\Speckle\Kits\Objects\Objects.Converter.GSA.dll"
 Type: files; Name: "{userappdata}\Speckle\Kits\Objects\Objects.Converter.Rhino6.dll"
 Type: files; Name: "{userappdata}\Speckle\Kits\Objects\Objects.Converter.Rhino7.dll"
