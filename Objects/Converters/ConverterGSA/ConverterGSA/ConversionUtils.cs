@@ -66,7 +66,7 @@ namespace ConverterGSA
       return profileName;
     }
 
-    private Dictionary<string, string> GetMappingFromProfileName(string name, bool isFraming = true, string target = "grs")
+    private Dictionary<string, string> GetMappingFromProfileName(string name, bool isFraming = true, string target = "gsa")
     {
       Dictionary<string, string> mappingData = new Dictionary<string, string>();
 
@@ -95,6 +95,7 @@ namespace ConverterGSA
         mappingData["familyFraming"] = section["familyFraming"] as String;
         mappingData["familyColumn"] = section["familyColumn"] as String;
         mappingData["familyType"] = section["familyType"] as String;
+        mappingData["profileType"] = section["profileType"] as String;
       }
       else
       {
