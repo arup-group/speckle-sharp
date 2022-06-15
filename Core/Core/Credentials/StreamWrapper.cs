@@ -17,6 +17,7 @@ namespace Speckle.Core.Credentials
     public string CommitId { get; set; }
     public string BranchName { get; set; }
     public string ObjectId { get; set; }
+    public string JobNumber { get; set; }
 
     /// <summary>
     /// Determines if the current stream wrapper contains a valid stream.
@@ -93,6 +94,16 @@ namespace Speckle.Core.Credentials
       StreamId = streamId;
 
       OriginalInput = $"{ServerUrl}/streams/{StreamId}{(UserId != null ? "?u=" + UserId : "")}";
+    }
+
+    public StreamWrapper(string streamId, string userId, string serverUrl, string jobNumber)
+    {
+      UserId = userId;
+      ServerUrl = serverUrl;
+      StreamId = streamId;
+
+      OriginalInput = $"{ServerUrl}/streams/{StreamId}{(UserId != null ? "?u=" + UserId : "")}";
+      JobNumber = jobNumber;
     }
 
     private void StreamWrapperFromId(string streamId)

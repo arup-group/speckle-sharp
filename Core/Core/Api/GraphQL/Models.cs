@@ -10,6 +10,7 @@ namespace Speckle.Core.Api
     public string name { get; set; }
     public string description { get; set; }
     public bool isPublic { get; set; } = true;
+    public string jobNumber { get; set; }
   }
 
   public class StreamUpdateInput
@@ -18,6 +19,7 @@ namespace Speckle.Core.Api
     public string name { get; set; }
     public string description { get; set; }
     public bool isPublic { get; set; } = true;
+    public string jobNumber { get; set; }
   }
 
   public class StreamGrantPermissionInput
@@ -109,6 +111,7 @@ namespace Speckle.Core.Api
     public string createdAt { get; set; }
     public string updatedAt { get; set; }
     public string favoritedDate { get; set; }
+    public string jobNumber { get; set; }
 
     public List<Collaborator> collaborators { get; set; }
     public Branches branches { get; set; }
