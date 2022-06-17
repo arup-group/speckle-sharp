@@ -23,6 +23,7 @@ namespace ConnectorGrasshopper.Streams
       var desc = pManager.AddTextParameter("Description", "D", "Description of the stream", GH_ParamAccess.item);
       var isPublic = pManager.AddBooleanParameter("Public", "P", "True if the stream is to be publicly available.",
         GH_ParamAccess.item);
+      var jobNumber = pManager.AddTextParameter("Job Number", "JN", "Job number associated with the stream.", GH_ParamAccess.item);
       Params.Input[name].Optional = true;
       Params.Input[desc].Optional = true;
       Params.Input[isPublic].Optional = true;
@@ -47,11 +48,13 @@ namespace ConnectorGrasshopper.Streams
       string name = null;
       string description = null;
       bool isPublic = false;
+      string jobNumber = null;
 
       if (!DA.GetData(0, ref ghSpeckleStream)) return;
       DA.GetData(1, ref name);
       DA.GetData(2, ref description);
       DA.GetData(3, ref isPublic);
+      DA.GetData(4, ref jobNumber);
 
       var streamWrapper = ghSpeckleStream.Value;
       if (error != null)
@@ -85,6 +88,8 @@ namespace ConnectorGrasshopper.Streams
             input.description = description ?? stream.description;
 
             if (stream.isPublic != isPublic) input.isPublic = isPublic;
+
+            input.jobNumber = jobNumber ?? stream.jobNumber;
 
             await client.StreamUpdate(input);
           }
