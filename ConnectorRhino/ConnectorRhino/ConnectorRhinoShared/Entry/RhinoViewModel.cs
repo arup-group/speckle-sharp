@@ -5,7 +5,7 @@ using Rhino;
 
 namespace SpeckleRhino
 {
-  public class RhinoViewModel: MainWindowViewModel
+  public class RhinoViewModel: MainViewModel
   {
     public RhinoDoc doc { get; set; }
 
