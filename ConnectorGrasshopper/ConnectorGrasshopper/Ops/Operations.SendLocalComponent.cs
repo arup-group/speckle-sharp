@@ -42,7 +42,7 @@ namespace ConnectorGrasshopper.Ops
     protected override void SolveInstance(IGH_DataAccess DA)
     {
       base.SolveInstance(DA);
-      if(DA.Iteration == 0) Tracker.TrackNodeRun();
+      if (DA.Iteration == 0) Tracker.TrackNodeRun();
     }
   }
 

@@ -40,26 +40,29 @@ namespace ConnectorGrasshopper.Objects
 
     protected override void SolveInstance(IGH_DataAccess DA)
     {
-
+      //DA.DisableGapLogic();
       if (InPreSolve)
       {
         IGH_Goo inputObj = null;
-        DA.GetData(0, ref inputObj);
+        if (!DA.GetData(0, ref inputObj))
+        {
+          TaskList.Add(Task.Run(() => new Dictionary<string, object>()));
+          return;
+        }
+
         Base @base;
-        if(inputObj is GH_SpeckleBase speckleBase)
+        if (inputObj is GH_SpeckleBase speckleBase)
         {
           @base = speckleBase.Value.ShallowCopy();
-        } else if(inputObj is IGH_Goo goo)
+        }
+        else if (inputObj is IGH_Goo goo)
         {
           var value = goo.GetType().GetProperty("Value")?.GetValue(goo);
-<<<<<<<< HEAD:ConnectorGrasshopper/ConnectorGrasshopper/Objects/ExpandSpeckleObjectTaskComponent.cs
-          if (value is Base baseObj) {
+          if (value is Base baseObj)
+          {
             @base = baseObj;
           }
-          else if(Converter.CanConvertToSpeckle(value))
-========
-          if(Converter.CanConvertToSpeckle(value))
->>>>>>>> f6ca369c (Grasshopper Misc Improvements (#1251)):ConnectorGrasshopper/ConnectorGrasshopper/Objects/DeconstructSpeckleObjectTaskComponent.cs
+          else if (Converter.CanConvertToSpeckle(value))
           {
             @base = Converter.ConvertToSpeckle(value);
             AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Input object was not a Speckle object, but has been converted to one.");
@@ -79,33 +82,11 @@ namespace ConnectorGrasshopper.Objects
         if (DA.Iteration == 0)
           Tracker.TrackNodeRun("Expand Object");
 
-        inputData = new Dictionary<string, object>();
-        for (int i = 1; i < Params.Input.Count; i++)
-        {
-          Logging.Analytics.TrackEvent(Logging.Analytics.Events.NodeRun, new Dictionary<string, object>() { { "name", "Expand Object" } });
-        }
-
-              inputData[key] = value;
-              break;
-            case GH_ParamAccess.list:
-              var values = new List<object>();
-              DA.GetDataList(i, values);
-              if (!param.Optional)
-              {
-                if (values.Count == 0)
-                {
-                  AddRuntimeMessage(GH_RuntimeMessageLevel.Warning,
-                    $"Non-optional parameter {param.NickName} cannot be null or empty.");
-                  hasErrors = true;
-                }
-              }
 
         var task = Task.Run(() => DoWork(@base));
         TaskList.Add(task);
         return;
       }
-
-      // Report all conversion errors as warnings
       if (Converter != null)
       {
         foreach (var error in Converter.Report.ConversionErrors)
@@ -141,7 +122,6 @@ namespace ConnectorGrasshopper.Objects
                 {
                   var indices = path.Indices.ToList();
                   indices.AddRange(p.Indices);
-                  var newPath = new GH_Path(indices.ToArray());
                   p.Indices = indices.ToArray();
                 });
                 DA.SetDataTree(indexOfOutputParam, structure);
@@ -170,10 +150,7 @@ namespace ConnectorGrasshopper.Objects
         MutableNickName = true,
         Optional = true,
       };
-
       myParam.NickName = myParam.Name;
-      myParam.Optional = false;
-      myParam.ObjectChanged += (sender, e) => { };
       myParam.Attributes = new GenericAccessParamAttributes(myParam, Attributes);
       return myParam;
     }
@@ -280,9 +257,6 @@ namespace ConnectorGrasshopper.Objects
       Params.OnParametersChanged();
       VariableParameterMaintenance();
     }
-          else
-          {
-            // If value is not list, it is a single item.
 
     protected override void BeforeSolveInstance()
     {
@@ -290,27 +264,37 @@ namespace ConnectorGrasshopper.Objects
       {
         Console.WriteLine("No iter has run");
         var x = Params.Input[0].VolatileData;
-        var tree = x as GH_Structure<GH_SpeckleBase>;
+        var tree = x as GH_Structure<IGH_Goo>;
         outputList = GetOutputList(tree);
         AutoCreateOutputs();
       }
       base.BeforeSolveInstance();
     }
 
-    private List<string> GetOutputList(GH_Structure<GH_SpeckleBase> speckleObjects)
+    private List<string> GetOutputList(GH_Structure<IGH_Goo> speckleObjects)
     {
       // Get the full list of output parameters
       var fullProps = new List<string>();
 
       foreach (var ghGoo in speckleObjects.AllData(true))
       {
-        var b = (ghGoo as GH_SpeckleBase)?.Value;
-        b?.GetMemberNames().ToList().ForEach(prop =>
+        object converted;
+        if (ghGoo is GH_SpeckleBase ghBase)
         {
-          if (!fullProps.Contains(prop))
-            fullProps.Add(prop);
-        });
-      }
+          converted = ghBase.Value;
+        }
+        else
+        {
+          converted = Utilities.TryConvertItemToSpeckle(ghGoo, Converter);
+        }
+        if (converted is Base b)
+        {
+          b.GetMemberNames().ToList().ForEach(prop =>
+          {
+            if (!fullProps.Contains(prop))
+              fullProps.Add(prop);
+          });
+        }
       }
 
       fullProps.Sort();
@@ -330,8 +314,6 @@ namespace ConnectorGrasshopper.Objects
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Something went terribly wrong... " + e.Message);
         return null;
       }
-
-      return @base;
     }
 
     private Dictionary<string, object> CreateOutputDictionary(Base @base)
@@ -387,7 +369,15 @@ namespace ConnectorGrasshopper.Objects
 
             break;
           default:
-            outputDict[prop.Key] = Utilities.TryConvertItemToNative(obj[prop.Key], Converter);
+            var temp = obj[prop.Key];
+            if (temp is Base tempB && Utilities.CanConvertToDataTree(tempB))
+            {
+              outputDict[prop.Key] = Utilities.DataTreeToNative(tempB, Converter);
+            }
+            else
+            {
+              outputDict[prop.Key] = Utilities.TryConvertItemToNative(obj[prop.Key], Converter);
+            }
             break;
         }
       }

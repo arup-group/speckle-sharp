@@ -104,7 +104,7 @@ namespace ConnectorGrasshopper.Ops
         return;
       }
       base.SolveInstance(DA);
-      if(DA.Iteration == 0) Tracker.TrackNodeRun();
+      if (DA.Iteration == 0) Tracker.TrackNodeRun();
     }
   }
   public class ReceiveLocalWorker : WorkerInstance

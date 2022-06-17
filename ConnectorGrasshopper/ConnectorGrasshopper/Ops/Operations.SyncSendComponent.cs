@@ -24,19 +24,19 @@ namespace ConnectorGrasshopper.Ops
   {
     public List<StreamWrapper> OutputWrappers { get; private set; } = new List<StreamWrapper>();
     public bool UseDefaultCache { get; set; } = true;
-    
+
     private Base converted;
     public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.obscure;
     public override bool CanDisableConversion => false;
-    
+
     public SyncSendComponent()
       : base("Synchronous Sender", "SS",
           "Send data to a Speckle server Synchronously. This will block GH until all the data are received which can be used to safely trigger other processes downstream",
           ComponentCategories.SECONDARY_RIBBON, ComponentCategories.SEND_RECEIVE)
     {
-      
+
     }
-    
+
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
       pManager.AddGenericParameter("Data", "D", "The data to send.", GH_ParamAccess.tree);
@@ -60,14 +60,14 @@ namespace ConnectorGrasshopper.Ops
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
     {
       base.AppendAdditionalMenuItems(menu);
-      
+
       Menu_AppendSeparator(menu);
       if (OutputWrappers != null && OutputWrappers.Count != 0)
       {
         Menu_AppendSeparator(menu);
         foreach (var ow in OutputWrappers)
           Menu_AppendItem(
-            menu, 
+            menu,
             $"View commit {ow.CommitId} @ {ow.ServerUrl} online ↗",
             (s, e) => System.Diagnostics.Process.Start($"{ow.ServerUrl}/streams/{ow.StreamId}/commits/{ow.CommitId}"));
       }
@@ -96,7 +96,7 @@ namespace ConnectorGrasshopper.Ops
       }
       return base.Read(reader);
     }
-    
+
     protected override void SolveInstance(IGH_DataAccess DA)
     {
       DA.DisableGapLogic();
@@ -116,7 +116,7 @@ namespace ConnectorGrasshopper.Ops
         DA.GetData(1, ref transportInput);
         DA.GetData(2, ref messageInput);
         var transportsInput = new List<IGH_Goo> { transportInput };
-        
+
         var task = Task.Run(async () =>
         {
           if (converted == null)
