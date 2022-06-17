@@ -152,6 +152,7 @@ namespace Speckle.Core.Api
                       stream(id: $id) {{
                         id
                         name
+                        jobNumber
                         description
                         isPublic
                         role
@@ -234,6 +235,7 @@ namespace Speckle.Core.Api
                           items {{
                             id,
                             name,
+                            jobNumber,
                             description,
                             isPublic,
                             role,
@@ -299,6 +301,7 @@ namespace Speckle.Core.Api
                           items {{
                             id,
                             name,
+                            jobNumber,
                             description,
                             isPublic,
                             role,
@@ -360,6 +363,7 @@ namespace Speckle.Core.Api
                         items {
                           id,
                           name,
+                          jobNumber,
                           description,
                           isPublic,
                           role,
