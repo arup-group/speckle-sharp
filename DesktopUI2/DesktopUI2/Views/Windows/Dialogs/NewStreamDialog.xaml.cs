@@ -14,6 +14,7 @@ namespace DesktopUI2.Views.Windows.Dialogs
     public string StreamName { get; set; }
     public string Description { get; set; }
     public bool IsPublic { get; set; }
+    public string JobNumber { get; set; }
     public bool Create = false;
 
     public NewStreamDialog() { }
@@ -42,6 +43,7 @@ namespace DesktopUI2.Views.Windows.Dialogs
       StreamName = this.FindControl<TextBox>("name").Text;
       Description = this.FindControl<TextBox>("description").Text;
       IsPublic = isPublic.HasValue ? isPublic.Value : false;
+      JobNumber = this.FindControl<TextBox>("jobNumber").Text;
       Create = true;
       this.Close();
     }

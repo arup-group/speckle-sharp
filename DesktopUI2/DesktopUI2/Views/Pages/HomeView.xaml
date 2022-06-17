@@ -152,10 +152,10 @@
                 CommandParameter="{Binding Account}"
                 DataContext="{Binding Accounts[0]}" />
               <Separator />
-              <!--<MenuItem
+              <MenuItem
                 Command="{Binding AddAccountCommand}"
                 Header="Add another account"
-                Icon="{icons:MaterialIconExt AccountPlus}" />-->
+                Icon="{icons:MaterialIconExt AccountPlus}" />
               <MenuItem
                 Command="{Binding LaunchManagerCommand}"
                 Header="Manage accounts in Manager"
@@ -200,10 +200,10 @@
 
                 </MenuItem.DataTemplates>
               </MenuItem>
-              <!--<MenuItem
+              <MenuItem
                 Command="{Binding $parent[local:HomeView].DataContext.AddAccountCommand}"
                 Header="Add another account"
-                Icon="{icons:MaterialIconExt AccountPlus}" />-->
+                Icon="{icons:MaterialIconExt AccountPlus}" />
               <MenuItem
                 Command="{Binding $parent[local:HomeView].DataContext.LaunchManagerCommand}"
                 Header="Manage accounts in Manager"
@@ -490,10 +490,10 @@
                         <Grid
                           Grid.Row="1"
                           Margin="0,3,0,0"
-                          ColumnDefinitions="auto,auto, auto, auto,auto,*">
+                          ColumnDefinitions="auto,auto,auto,auto, auto, auto,auto,*">
                           <TextBlock
                             Classes="Overline"
-                            Text="{Binding Stream.id}"
+                            Text="{Binding Stream.jobNumber}"
                             TextTrimming="CharacterEllipsis" />
                           <TextBlock
                             Grid.Column="1"
@@ -502,21 +502,30 @@
                           <TextBlock
                             Grid.Column="2"
                             Classes="Overline"
-                            Text="{Binding Stream.role, Converter={StaticResource RoleValueConverter}}"
+                            Text="{Binding Stream.id}"
                             TextTrimming="CharacterEllipsis" />
                           <TextBlock
                             Grid.Column="3"
                             Classes="Overline"
                             Text=" - " />
-                          <icons:MaterialIcon
+                          <TextBlock
                             Grid.Column="4"
+                            Classes="Overline"
+                            Text="{Binding Stream.role, Converter={StaticResource RoleValueConverter}}"
+                            TextTrimming="CharacterEllipsis" />
+                          <TextBlock
+                            Grid.Column="5"
+                            Classes="Overline"
+                            Text=" - " />
+                          <icons:MaterialIcon
+                            Grid.Column="6"
                             Height="12"
                             VerticalAlignment="Center"
                             Foreground="Gray"
                             Kind="Users"
                             ToolTip.Tip="Collaborators" />
                           <TextBlock
-                            Grid.Column="5"
+                            Grid.Column="7"
                             Classes="Overline"
                             Text="{Binding Stream.collaborators.Count}" />
                         </Grid>

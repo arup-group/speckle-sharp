@@ -2,21 +2,18 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net5.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <WarningLevel>1</WarningLevel>
+    <UseWPF>true</UseWPF>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="0.10.15" />
-    <PackageReference Include="Avalonia.Desktop" Version="0.10.15" />
+    <PackageReference Include="Avalonia.Direct2D1" Version="0.10.15" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.15" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AvaloniaHwndHost\AvaloniaHwndHost.csproj" />
     <ProjectReference Include="..\DesktopUI2\DesktopUI2.csproj" />
   </ItemGroup>
 

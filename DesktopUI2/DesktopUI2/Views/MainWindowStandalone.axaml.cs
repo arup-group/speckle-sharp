@@ -10,7 +10,7 @@ using System.ComponentModel;
 
 namespace DesktopUI2.Views
 {
-  public partial class MainWindowStandalone : ReactiveWindow<MainWindowViewModelStandalone>
+  public partial class MainWindowStandalone : ReactiveWindow<MainViewModelStandalone>
   {
     public MainWindowStandalone()
     {

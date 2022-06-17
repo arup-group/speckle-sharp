@@ -18,8 +18,6 @@ namespace DesktopUI2.Launcher
 {
   class Program
   {
-
-
     public static void Main(string[] args)
     {
       AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(OnAssemblyResolve);
@@ -45,8 +43,18 @@ namespace DesktopUI2.Launcher
 
     public static AppBuilder BuildAvaloniaApp()
     {
+      string path = Path.GetDirectoryName(typeof(App).Assembly.Location);
+
+      string nativeLib = Path.Combine(path, "Native", "libAvalonia.Native.OSX.dylib");
+
       return AppBuilder.Configure<DesktopUI2.App>()
       .UsePlatformDetect()
+      .With(new X11PlatformOptions { UseGpu = false })
+      .With(new MacOSPlatformOptions { ShowInDock = false })
+      .With(new AvaloniaNativePlatformOptions
+      {
+        AvaloniaNativeLibraryPath = nativeLib
+      })
       .With(new SkiaOptions { MaxGpuResourceSizeBytes = 8096000 })
       .With(new Win32PlatformOptions { AllowEglInitialization = true, EnableMultitouch = false })
       .LogToTrace()
@@ -66,7 +74,7 @@ namespace DesktopUI2.Launcher
 
     private static void AppMain(Application app, string[] args)
     {
-      var viewModel = new MainWindowViewModel(Bindings);
+      var viewModel = new MainViewModel(Bindings);
       MainWindow = new MainWindow { DataContext = viewModel };
       MainWindow.Closed += SpeckleWindowClosed;
       MainWindow.Closing += SpeckleWindowClosed;
@@ -75,7 +83,7 @@ namespace DesktopUI2.Launcher
 
     public static void OpenOrFocusSpeckle()
     {
-      Bindings = new DummyBindingsStandalone();
+      Bindings = new DummyBindings();
       CreateOrFocusSpeckle();
     }
 

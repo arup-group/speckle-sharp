@@ -65,27 +65,32 @@
       </ComboBox.ItemTemplate>
     </ComboBox>
 
+    <TextBox
+      Name="jobNumber"
+      Grid.Row="2"
+      Margin="15,5"
+      Watermark="Job Number (required)" />
 
     <TextBox
       Name="name"
-      Grid.Row="2"
+      Grid.Row="3"
       Margin="15,5"
       Watermark="Stream Name (optional)" />
 
     <TextBox
       Name="description"
-      Grid.Row="3"
+      Grid.Row="4"
       Margin="15,5"
       Watermark="Description (optional)" />
 
     <ToggleSwitch
       Name="isPublic"
-      Grid.Row="4"
+      Grid.Row="5"
       Margin="15" />
 
 
     <StackPanel
-      Grid.Row="5"
+      Grid.Row="6"
       Margin="15"
       HorizontalAlignment="Right"
       Orientation="Horizontal">
@@ -97,7 +102,8 @@
       <Button
         Margin="0,0,10,0"
         Click="Create_Click"
-        Content="Create" />
+        Content="Create" 
+        IsEnabled="{Binding #jobNumber.Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
 
     </StackPanel>
   </Grid>

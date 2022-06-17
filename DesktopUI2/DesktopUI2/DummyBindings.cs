@@ -227,7 +227,8 @@ namespace DesktopUI2
           description = "this is a test stream",
           isPublic = true,
           collaborators = collabs.GetRange(0, 2),
-          branches = branches
+          branches = branches,
+          jobNumber = "123456"
         },
         new Stream
         {
@@ -236,7 +237,8 @@ namespace DesktopUI2
           description = "cool and good indeed",
           isPublic = true,
           collaborators = collabs.GetRange(1, 2),
-          branches = branches2
+          branches = branches2,
+          jobNumber = "9999"
         }
       };
 

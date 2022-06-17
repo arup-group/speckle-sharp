@@ -22,7 +22,7 @@ namespace DesktopUI2.ViewModels.Share
 
     #region bindings
 
-    public ReactiveCommand<Unit, Unit> GoBack => MainWindowViewModel.RouterInstance.NavigateBack;
+    public ReactiveCommand<Unit, Unit> GoBack => MainViewModel.RouterInstance.NavigateBack;
 
     public string _searchQuery = "";
 
@@ -250,7 +250,7 @@ namespace DesktopUI2.ViewModels.Share
       {
       }
 
-      MainWindowViewModel.RouterInstance.NavigateBack.Execute();
+      MainViewModel.RouterInstance.NavigateBack.Execute();
     }
 
 

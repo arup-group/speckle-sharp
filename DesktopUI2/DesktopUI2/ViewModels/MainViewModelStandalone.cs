@@ -9,7 +9,7 @@ using System.Reactive;
 
 namespace DesktopUI2.ViewModels
 {
-  public class MainWindowViewModelStandalone : MainWindowViewModel, IScreen
+  public class MainViewModelStandalone : MainViewModel, IScreen
   {
     new public string TitleFull => "Speckle for " + Bindings.GetHostAppNameVersion();
     new public RoutingState Router { get; private set; }
@@ -20,14 +20,14 @@ namespace DesktopUI2.ViewModels
 
     new public ReactiveCommand<Unit, Unit> GoBack => Router.NavigateBack;
 
-    public MainWindowViewModelStandalone(ConnectorBindings _bindings) : base()
+    public MainViewModelStandalone(ConnectorBindings _bindings) : base()
     {
       Bindings = _bindings;
       Setup.Init(Bindings.GetHostAppNameVersion(), Bindings.GetHostAppName());
       Init();
     }
 
-    public MainWindowViewModelStandalone()
+    public MainViewModelStandalone()
     {
       Init();
     }

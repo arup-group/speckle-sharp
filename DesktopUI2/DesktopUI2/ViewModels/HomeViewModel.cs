@@ -187,7 +187,7 @@ namespace DesktopUI2.ViewModels
           try
           {
             value.UpdateVisualParentAndInit(HostScreen);
-            MainWindowViewModel.RouterInstance.Navigate.Execute(value);
+            MainViewModel.RouterInstance.Navigate.Execute(value);
             Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Edit" } });
             _selectedSavedStream = value;
           }
@@ -574,7 +574,7 @@ namespace DesktopUI2.ViewModels
         try
         {
           var client = new Client(dialog.Account);
-          var streamId = await client.StreamCreate(new StreamCreateInput { description = dialog.Description, name = dialog.StreamName, isPublic = dialog.IsPublic });
+          var streamId = await client.StreamCreate(new StreamCreateInput { description = dialog.Description, name = dialog.StreamName, isPublic = dialog.IsPublic, jobNumber = dialog.JobNumber });
           var stream = await client.StreamGet(streamId);
           var streamState = new StreamState(dialog.Account, stream);
 
@@ -678,15 +678,14 @@ namespace DesktopUI2.ViewModels
 
     public virtual void OpenStream(StreamState streamState)
     {
-      MainWindowViewModel.RouterInstance.Navigate.Execute(new StreamViewModel(streamState, HostScreen, RemoveSavedStreamCommand));
+      MainViewModel.RouterInstance.Navigate.Execute(new StreamViewModel(streamState, HostScreen, RemoveSavedStreamCommand));
     }
 
     public void ToggleDarkThemeCommand()
     {
       Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Toggle Theme" } });
-      var paletteHelper = new PaletteHelper();
-      ITheme theme = paletteHelper.GetTheme();
-      var isDark = theme.GetBaseTheme() == BaseThemeMode.Dark;
+      var materialTheme = Application.Current.LocateMaterialTheme<MaterialThemeBase>();
+      var isDark = materialTheme.CurrentTheme.GetBaseTheme() == BaseThemeMode.Dark;
 
       ChangeTheme(isDark);
 
@@ -696,16 +695,19 @@ namespace DesktopUI2.ViewModels
 
     }
 
-    private void ChangeTheme(bool isDark)
+    internal void ChangeTheme(bool isDark)
     {
-      var paletteHelper = new PaletteHelper();
-      var theme = paletteHelper.GetTheme();
+      var materialTheme = Application.Current.LocateMaterialTheme<MaterialThemeBase>();
+      var theme = materialTheme.CurrentTheme;
 
       if (isDark)
-        theme.SetBaseTheme(BaseThemeMode.Light.GetBaseTheme());
+        theme.SetBaseTheme(Theme.Light);
       else
-        theme.SetBaseTheme(BaseThemeMode.Dark.GetBaseTheme());
-      paletteHelper.SetTheme(theme);
+        theme.SetBaseTheme(Theme.Dark);
+
+      materialTheme.CurrentTheme = theme;
+
+
     }
 
 

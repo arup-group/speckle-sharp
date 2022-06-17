@@ -147,7 +147,7 @@ namespace DesktopUI2.ViewModels
 
     public Client Client { get; set; }
 
-    public ReactiveCommand<Unit, Unit> GoBack => MainWindowViewModel.RouterInstance.NavigateBack;
+    public ReactiveCommand<Unit, Unit> GoBack => MainViewModel.RouterInstance.NavigateBack;
 
     //If we don't have access to this stream
     public bool NoAccess { get; set; } = false;
@@ -682,9 +682,9 @@ namespace DesktopUI2.ViewModels
     public virtual void ShareCommand()
     {
       //if(IsStandalone)
-      //  MainWindowViewModelStandalone.RouterInstance.Navigate.Execute(new CollaboratorsViewModel(HostScreen, this));
+      //  MainViewModelStandalone.RouterInstance.Navigate.Execute(new CollaboratorsViewModel(HostScreen, this));
       //else
-      MainWindowViewModel.RouterInstance.Navigate.Execute(new CollaboratorsViewModel(HostScreen, this));
+      MainViewModel.RouterInstance.Navigate.Execute(new CollaboratorsViewModel(HostScreen, this));
     }
 
     public void CloseNotificationCommand()
@@ -714,9 +714,9 @@ namespace DesktopUI2.ViewModels
     public void EditSavedStreamCommand()
     {
       if (IsStandalone)
-        MainWindowViewModelStandalone.RouterInstance.Navigate.Execute(this);
+        MainViewModelStandalone.RouterInstance.Navigate.Execute(this);
       else
-        MainWindowViewModel.RouterInstance.Navigate.Execute(this);
+        MainViewModel.RouterInstance.Navigate.Execute(this);
       Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Edit" } });
     }
 
@@ -908,9 +908,9 @@ namespace DesktopUI2.ViewModels
       {
         UpdateStreamState();
         //if(IsStandalone)
-        //  MainWindowViewModelStandalone.RouterInstance.Navigate.Execute(HomeViewModelStandalone.Instance);
+        //  MainViewModelStandalone.RouterInstance.Navigate.Execute(HomeViewModelStandalone.Instance);
         //else
-        MainWindowViewModel.RouterInstance.Navigate.Execute(HomeViewModel.Instance);
+        MainViewModel.RouterInstance.Navigate.Execute(HomeViewModel.Instance);
         HomeViewModel.Instance.AddSavedStream(this);
 
         if (IsReceiver)
@@ -937,9 +937,9 @@ namespace DesktopUI2.ViewModels
 
         var settingsPageViewModel = new SettingsPageViewModel(HostScreen, Settings.Select(x => new SettingViewModel(x)).ToList(), this);
         //if(IsStandalone)
-        //  MainWindowViewModelStandalone.RouterInstance.Navigate.Execute(settingsPageViewModel);
+        //  MainViewModelStandalone.RouterInstance.Navigate.Execute(settingsPageViewModel);
         //else
-        MainWindowViewModel.RouterInstance.Navigate.Execute(settingsPageViewModel);
+        MainViewModel.RouterInstance.Navigate.Execute(settingsPageViewModel);
         Analytics.TrackEvent(null, Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Settings Open" } });
 
 
