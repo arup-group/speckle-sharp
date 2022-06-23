@@ -71,7 +71,7 @@ namespace ConnectorGrasshopper.Streams
           AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Not a stream wrapper!");
           return;
         }
-        if(DA.Iteration == 0)
+        if (DA.Iteration == 0)
           Tracker.TrackNodeRun();
         Message = "Fetching";
         Task.Run(async () =>
@@ -79,17 +79,14 @@ namespace ConnectorGrasshopper.Streams
           try
           {
             var account = streamWrapper.GetAccount().Result;
-            var client = new Client(account);
-            var input = new StreamUpdateInput();
+            var client = new Client(account);            
             stream = await client.StreamGet(streamWrapper.StreamId);
-            input.id = streamWrapper.StreamId;
 
-            input.name = name ?? stream.name;
-            input.description = description ?? stream.description;
+            var input = new StreamUpdateInput();
+            if (!string.IsNullOrEmpty(jobNumber)) input = new StreamWithJobNumberUpdateInput { id = streamWrapper.StreamId, name = name ?? stream.name, description = description ?? stream.description, jobNumber = jobNumber ?? stream.jobNumber };
+            else input = new StreamUpdateInput { id = streamWrapper.StreamId, name = name ?? stream.name, description = description ?? stream.description };
 
             if (stream.isPublic != isPublic) input.isPublic = isPublic;
-
-            input.jobNumber = jobNumber ?? stream.jobNumber;
 
             await client.StreamUpdate(input);
           }

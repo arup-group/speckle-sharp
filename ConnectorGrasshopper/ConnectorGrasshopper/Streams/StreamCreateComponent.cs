@@ -31,7 +31,7 @@ namespace ConnectorGrasshopper.Streams
       pManager.AddTextParameter("Account", "A", "Account to be used when creating the stream.", GH_ParamAccess.item);
       var jobNumber = pManager.AddTextParameter("Job Number", "JN", "Job number associated with stream.",
         GH_ParamAccess.item);
-      ////Params.Input[jobNumber].Optional = true;
+      Params.Input[jobNumber].Optional = true;
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -114,13 +114,19 @@ namespace ConnectorGrasshopper.Streams
         var client = new Client(account);
         try
         {
-          var streamId = await client.StreamCreate(new StreamCreateInput { isPublic = false, jobNumber = jobNumber });
+          StreamCreateInput createInput;
+          if (!String.IsNullOrEmpty(jobNumber))
+            createInput = new StreamWithJobNumberCreateInput { isPublic = false, jobNumber = jobNumber };          
+          else
+            createInput = new StreamCreateInput { isPublic = false };
+
+          var streamId = await client.StreamCreate(createInput);
           stream = new StreamWrapper(
             streamId,
             account.userInfo.id,
             account.serverInfo.url
           );
-          stream.JobNumber = jobNumber;
+          if(!String.IsNullOrEmpty(jobNumber)) stream.JobNumber = jobNumber;
 
           Rhino.RhinoApp.InvokeOnUiThread((Action)delegate
           {

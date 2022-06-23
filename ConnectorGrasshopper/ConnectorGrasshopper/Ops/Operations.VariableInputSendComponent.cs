@@ -492,7 +492,6 @@ namespace ConnectorGrasshopper.Ops
             ? $"You don't have access to this transport , or it doesn't exist."
             : exception.Message;
           RuntimeMessages.Add((GH_RuntimeMessageLevel.Error, $"{transportName}: {msg}"));
-          Done();
           var asyncParent = (GH_AsyncComponent)Parent;
           asyncParent.CancellationSources.ForEach(source =>
           {
@@ -593,12 +592,10 @@ namespace ConnectorGrasshopper.Ops
       }
       catch (Exception e)
       {
-
         // If we reach this, something happened that we weren't expecting...
         Log.CaptureException(e);
-        RuntimeMessages.Add((GH_RuntimeMessageLevel.Error, "Something went terribly wrong... " + e.Message));
-        //Parent.Message = "Error";
-        //((SendComponent)Parent).CurrentComponentState = "expired";
+        var msg = e.InnerException?.Message ?? e.Message;
+        RuntimeMessages.Add((GH_RuntimeMessageLevel.Error, msg));
         Done();
       }
     }

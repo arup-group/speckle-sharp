@@ -339,7 +339,7 @@ namespace DesktopUI2.ViewModels
       catch (Exception ex)
       {
 
-      } 
+      }
     }
 
     public virtual async Task GetStreams()
@@ -574,7 +574,13 @@ namespace DesktopUI2.ViewModels
         try
         {
           var client = new Client(dialog.Account);
-          var streamId = await client.StreamCreate(new StreamCreateInput { description = dialog.Description, name = dialog.StreamName, isPublic = dialog.IsPublic, jobNumber = dialog.JobNumber });
+          StreamCreateInput createInput;
+          if (!String.IsNullOrEmpty(dialog.JobNumber))
+            createInput = new StreamWithJobNumberCreateInput { description = dialog.Description, name = dialog.StreamName, isPublic = dialog.IsPublic, jobNumber = dialog.JobNumber };
+          else
+            createInput = new StreamCreateInput { description = dialog.Description, name = dialog.StreamName, isPublic = dialog.IsPublic };
+
+          var streamId = await client.StreamCreate(createInput);
           var stream = await client.StreamGet(streamId);
           var streamState = new StreamState(dialog.Account, stream);
 

@@ -9,7 +9,11 @@ namespace Speckle.Core.Api
   {
     public string name { get; set; }
     public string description { get; set; }
-    public bool isPublic { get; set; } = true;
+    public bool isPublic { get; set; } = false;
+  }
+
+  public class StreamWithJobNumberCreateInput : StreamCreateInput
+  {
     public string jobNumber { get; set; }
   }
 
@@ -18,7 +22,11 @@ namespace Speckle.Core.Api
     public string id { get; set; }
     public string name { get; set; }
     public string description { get; set; }
-    public bool isPublic { get; set; } = true;
+    public bool isPublic { get; set; } = false;
+  }
+
+  public class StreamWithJobNumberUpdateInput : StreamUpdateInput
+  {
     public string jobNumber { get; set; }
   }
 

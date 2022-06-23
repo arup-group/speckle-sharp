@@ -730,7 +730,14 @@ namespace Speckle.Core.Api
         var res = await GQLClient.SendMutationAsync<Dictionary<string, object>>(request, cancellationToken).ConfigureAwait(false);
 
         if (res.Errors != null)
-          throw new SpeckleException("Could not create stream", res.Errors);
+        {
+          var missingJobNumberMsg = "A job number is required to create a stream on this server. Please provide one.";
+          var missingJobNumber = res.Errors.Any(e => e.Message == missingJobNumberMsg);
+          if(missingJobNumber)
+            throw new SpeckleException(missingJobNumberMsg, res.Errors);
+          else
+            throw new SpeckleException("Could not create stream", res.Errors);
+        }
 
         return (string)res.Data["streamCreate"];
       }
