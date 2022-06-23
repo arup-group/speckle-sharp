@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GraphQL;
+using GQL = GraphQL;
 using Speckle.Core.Logging;
 
 namespace Speckle.Core.Api
@@ -146,36 +147,116 @@ namespace Speckle.Core.Api
     {
       try
       {
+        GraphQLRequest request;
+        try
+        {
+          var canGetJobNumber = await StreamCanGetJobNumber(cancellationToken, id);
+          if (!canGetJobNumber)
+          {
+            request = new GraphQLRequest
+            {
+              Query = $@"query Stream($id: String!) {{
+                              stream(id: $id) {{
+                                id
+                                name
+                                description
+                                isPublic
+                                role
+                                createdAt
+                                updatedAt
+                                collaborators {{
+                                  id
+                                  name
+                                  role
+                                  avatar
+                                }},
+                                branches (limit: {branchesLimit}){{
+                                  totalCount,
+                                  cursor,
+                                  items {{
+                                    id,
+                                    name,
+                                    description,
+                                    commits {{
+                                      totalCount
+                                    }}
+                                  }}
+                                }}
+                              }}
+                            }}",
+              Variables = new
+              {
+                id
+              }
+            };
+          }
+          else
+          {
+            request = new GraphQLRequest
+            {
+              Query = $@"query Stream($id: String!) {{
+                              stream(id: $id) {{
+                                id
+                                name
+                                jobNumber
+                                description
+                                isPublic
+                                role
+                                createdAt
+                                updatedAt
+                                collaborators {{
+                                  id
+                                  name
+                                  role
+                                  avatar
+                                }},
+                                branches (limit: {branchesLimit}){{
+                                  totalCount,
+                                  cursor,
+                                  items {{
+                                    id,
+                                    name,
+                                    description,
+                                    commits {{
+                                      totalCount
+                                    }}
+                                  }}
+                                }}
+                              }}
+                            }}",
+              Variables = new
+              {
+                id
+              }
+            };
+          }
+          var res = await GQLClient.SendMutationAsync<StreamData>(request, cancellationToken).ConfigureAwait(false);
+
+          if (res.Errors != null)
+            throw new SpeckleException("Could not get stream", res.Errors);
+
+          return res.Data.stream;
+        }
+        catch (Exception e)
+        {
+          throw new SpeckleException(e.Message, e);
+        }
+      }
+      catch (Exception e)
+      {
+        throw new SpeckleException(e.Message, e);
+      }
+    }
+
+    public async Task<Boolean> StreamCanGetJobNumber(CancellationToken cancellationToken, string id)
+    {
+      try
+      {
         var request = new GraphQLRequest
         {
           Query = $@"query Stream($id: String!) {{
                       stream(id: $id) {{
-                        id
-                        name
                         jobNumber
-                        description
-                        isPublic
-                        role
-                        createdAt
-                        updatedAt
-                        collaborators {{
-                          id
-                          name
-                          role
-                          avatar
-                        }},
-                        branches (limit: {branchesLimit}){{
-                          totalCount,
-                          cursor,
-                          items {{
-                            id,
-                            name,
-                            description,
-                            commits {{
-                              totalCount
-                            }}
-                          }}
-                        }}
                       }}
                     }}",
           Variables = new
@@ -187,13 +268,16 @@ namespace Speckle.Core.Api
         var res = await GQLClient.SendMutationAsync<StreamData>(request, cancellationToken).ConfigureAwait(false);
 
         if (res.Errors != null)
-          throw new SpeckleException("Could not get stream", res.Errors);
+          throw new SpeckleException("Could not get stream job number", res.Errors);
 
-        return res.Data.stream;
+        return true;
       }
       catch (Exception e)
       {
-        throw new SpeckleException(e.Message, e);
+        if (StreamMissingJobNumberField(e))
+          return false;
+        else
+          throw new SpeckleException(e.Message, e);
       }
     }
 
@@ -212,13 +296,59 @@ namespace Speckle.Core.Api
     /// </summary>
     /// <param name="limit">Max number of streams to return</param>
     /// <returns></returns>
+    /// 
     public async Task<List<Stream>> StreamsGet(CancellationToken cancellationToken, int limit = 10)
     {
       try
       {
-        var request = new GraphQLRequest
+        GraphQLRequest request;
+        try
         {
-          Query = $@"query User {{
+          var canGetJobNumbers = await StreamsCanGetJobNumber(cancellationToken, limit);
+          if (!canGetJobNumbers)
+          {
+            request = new GraphQLRequest
+            {
+              Query = $@"query User {{
+                      user{{
+                        id,
+                        email,
+                        name,
+                        bio,
+                        company,
+                        avatar,
+                        verified,
+                        profiles,
+                        role,
+                        streams(limit:{limit}) {{
+                          totalCount,
+                          cursor,
+                          items {{
+                            id,
+                            name,
+                            description,
+                            isPublic,
+                            role,
+                            createdAt,
+                            updatedAt,
+                            favoritedDate,
+                            collaborators {{
+                              id,
+                              name,
+                              role,
+                              avatar
+                            }}
+                          }}
+                        }}
+                      }}
+                    }}"
+            };
+          }
+          else
+          {
+            request = new GraphQLRequest
+            {
+              Query = $@"query User {{
                       user{{
                         id,
                         email,
@@ -252,14 +382,19 @@ namespace Speckle.Core.Api
                         }}
                       }}
                     }}"
-        };
+            };
+          }
+          var res = await GQLClient.SendMutationAsync<UserData>(request, cancellationToken).ConfigureAwait(false);
 
-        var res = await GQLClient.SendMutationAsync<UserData>(request, cancellationToken).ConfigureAwait(false);
+          if (res.Errors != null)
+            throw new SpeckleException("Could not get streams", res.Errors);
 
-        if (res.Errors != null)
-          throw new SpeckleException("Could not get streams", res.Errors);
-
-        return res.Data.user.streams.items;
+          return res.Data.user.streams.items;
+        }
+        catch (Exception e)
+        {
+          throw new SpeckleException(e.Message, e);
+        }
       }
       catch (Exception e)
       {
@@ -267,6 +402,48 @@ namespace Speckle.Core.Api
       }
     }
 
+    public async Task<Boolean> StreamsCanGetJobNumber(CancellationToken cancellationToken, int limit = 10)
+    {
+      try
+      {
+        var request = new GraphQLRequest
+        {
+          Query = $@"query User {{
+                      user{{
+                        streams(limit:{limit}) {{
+                          items {{
+                            jobNumber
+                          }}
+                        }}
+                      }}
+                    }}"
+        };
+
+        var res = await GQLClient.SendMutationAsync<UserData>(request, cancellationToken).ConfigureAwait(false);
+
+        if (res.Errors != null)
+          throw new SpeckleException("Could not get stream job numbers", res.Errors);
+
+        return true;
+      }
+      catch (Exception e)
+      {
+        if(StreamMissingJobNumberField(e))
+          return false;
+        else
+          throw new SpeckleException(e.Message, e);
+      }
+    }
+
+    private Boolean StreamMissingJobNumberField(Exception e)
+    {
+      var ex = e as GQL.Client.Http.GraphQLHttpRequestException;
+      var msg = "Cannot query field \\\"jobNumber\\\" on type \\\"Stream\\\"."; //GraphQL validation error message
+      if (ex != null && ex.Content.Contains(msg))
+        return true;
+      else
+        return false;
+    }
 
     public Task<List<Stream>> FavoriteStreamsGet(int limit = 10)
     {
@@ -282,9 +459,54 @@ namespace Speckle.Core.Api
     {
       try
       {
-        var request = new GraphQLRequest
+        GraphQLRequest request;
+        try
         {
-          Query = $@"query User {{
+          var canGetJobNumbers = await FavoriteStreamsCanGetJobNumber(cancellationToken, limit);
+          if (!canGetJobNumbers)
+          {
+            request = new GraphQLRequest
+            {
+              Query = $@"query User {{
+                      user{{
+                        id,
+                        email,
+                        name,
+                        bio,
+                        company,
+                        avatar,
+                        verified,
+                        profiles,
+                        role,
+                        favoriteStreams(limit:{limit}) {{
+                          totalCount,
+                          cursor,
+                          items {{
+                            id,
+                            name,
+                            description,
+                            isPublic,
+                            role,
+                            createdAt,
+                            updatedAt,
+                            favoritedDate,
+                            collaborators {{
+                              id,
+                              name,
+                              role,
+                              avatar
+                            }}
+                          }}
+                        }}
+                      }}
+                    }}"
+            };
+          }
+          else
+          {
+            request = new GraphQLRequest
+            {
+              Query = $@"query User {{
                       user{{
                         id,
                         email,
@@ -318,18 +540,56 @@ namespace Speckle.Core.Api
                         }}
                       }}
                     }}"
+            };
+          }
+          var res = await GQLClient.SendMutationAsync<UserData>(request, cancellationToken).ConfigureAwait(false);
+
+          if (res.Errors != null)
+            throw new SpeckleException("Could not get favorite streams", res.Errors);
+
+          return res.Data.user.favoriteStreams.items;
+        }
+        catch (Exception e)
+        {
+          throw new SpeckleException(e.Message, e);
+        }
+      }
+      catch (Exception e)
+      {
+        throw new SpeckleException(e.Message, e);
+      }
+    }
+
+    public async Task<Boolean> FavoriteStreamsCanGetJobNumber(CancellationToken cancellationToken, int limit = 10)
+    {
+      try
+      {
+        var request = new GraphQLRequest
+        {
+          Query = $@"query User {{
+                      user{{
+                        favoriteStreams(limit:{limit}) {{
+                          items {{
+                            jobNumber,
+                          }}
+                        }}
+                      }}
+                    }}"
         };
 
         var res = await GQLClient.SendMutationAsync<UserData>(request, cancellationToken).ConfigureAwait(false);
 
         if (res.Errors != null)
-          throw new SpeckleException("Could not get favorite streams", res.Errors);
+          throw new SpeckleException("Could not get stream job numbers", res.Errors);
 
-        return res.Data.user.favoriteStreams.items;
+        return true;
       }
       catch (Exception e)
       {
-        throw new SpeckleException(e.Message, e);
+        if (StreamMissingJobNumberField(e))
+          return false;
+        else
+          throw new SpeckleException(e.Message, e);
       }
     }
 
@@ -354,9 +614,46 @@ namespace Speckle.Core.Api
     {
       try
       {
-        var request = new GraphQLRequest
+        GraphQLRequest request;
+        try
         {
-          Query = @"query Streams ($query: String!, $limit: Int!) {
+          var canGetJobNumbers = await StreamsCanGetJobNumber(cancellationToken, limit);
+          if (!canGetJobNumbers)
+          {
+            request = new GraphQLRequest
+            {
+              Query = @"query Streams ($query: String!, $limit: Int!) {
+                      streams(query: $query, limit: $limit) {
+                        totalCount,
+                        cursor,
+                        items {
+                          id,
+                          name,
+                          description,
+                          isPublic,
+                          role,
+                          createdAt,
+                          updatedAt,
+                          collaborators {
+                            id,
+                            name,
+                            role
+                          }
+                        }
+                      }     
+                    }",
+              Variables = new
+              {
+                query,
+                limit
+              }
+            };
+          }
+          else
+          {
+            request = new GraphQLRequest
+            {
+              Query = @"query Streams ($query: String!, $limit: Int!) {
                       streams(query: $query, limit: $limit) {
                         totalCount,
                         cursor,
@@ -377,19 +674,24 @@ namespace Speckle.Core.Api
                         }
                       }     
                     }",
-          Variables = new
-          {
-            query,
-            limit
+              Variables = new
+              {
+                query,
+                limit
+              }
+            };
           }
-        };
+          var res = await GQLClient.SendMutationAsync<StreamsData>(request, cancellationToken).ConfigureAwait(false);
 
-        var res = await GQLClient.SendMutationAsync<StreamsData>(request, cancellationToken).ConfigureAwait(false);
+          if (res.Errors != null)
+            throw new SpeckleException("Could not search streams", res.Errors);
 
-        if (res.Errors != null)
-          throw new SpeckleException("Could not search streams", res.Errors);
-
-        return res.Data.streams.items;
+          return res.Data.streams.items;
+        }
+        catch (Exception e)
+        {
+          throw new SpeckleException(e.Message, e);
+        }
       }
       catch (Exception e)
       {

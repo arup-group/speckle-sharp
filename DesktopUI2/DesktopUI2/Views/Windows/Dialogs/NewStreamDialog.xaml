@@ -18,12 +18,11 @@
       <Setter Property="Content" Value="Public stream" />
     </Style>
 
-    <Style Selector="ToggleSwitch[IsChecked=false]">
-      <Setter Property="Content" Value="Private stream" />
-    </Style>
+        <Style Selector="ToggleSwitch[IsChecked=false]">
+            <Setter Property="Content" Value="Private stream" />
+        </Style>
 
-
-  </Window.Styles>
+    </Window.Styles>
   <Grid RowDefinitions="auto, auto, auto, auto, auto, auto">
     <TextBlock
       Margin="15,15,15,0"
@@ -69,6 +68,7 @@
       Name="jobNumber"
       Grid.Row="2"
       Margin="15,5"
+      Foreground="Red"
       Watermark="Job Number (required)" />
 
     <TextBox

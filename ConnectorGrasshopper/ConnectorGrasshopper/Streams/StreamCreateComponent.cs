@@ -118,9 +118,9 @@ namespace ConnectorGrasshopper.Streams
           stream = new StreamWrapper(
             streamId,
             account.userInfo.id,
-            account.serverInfo.url,
-            jobNumber
+            account.serverInfo.url
           );
+          stream.JobNumber = jobNumber;
 
           Rhino.RhinoApp.InvokeOnUiThread((Action)delegate
           {

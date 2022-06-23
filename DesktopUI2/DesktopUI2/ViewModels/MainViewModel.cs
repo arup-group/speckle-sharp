@@ -100,12 +100,6 @@ namespace DesktopUI2.ViewModels
         Bindings.UpdateSelectedStream = HomeViewModel.Instance.UpdateSelectedStream;
       }
 
-      RouterInstance = Router; // makes the router available app-wide
-      Router.Navigate.Execute(new HomeViewModel(this));
-
-      Bindings.UpdateSavedStreams = HomeViewModel.Instance.UpdateSavedStreams;
-      Bindings.UpdateSelectedStream = HomeViewModel.Instance.UpdateSelectedStream;
-
       Router.PropertyChanged += Router_PropertyChanged;
     }
 

@@ -70,43 +70,49 @@
           <Grid
             Grid.Row="1"
             Margin="0,3,0,0"
-            ColumnDefinitions="auto,auto,auto,auto,auto,auto,auto,*">
+            ColumnDefinitions="auto,auto,auto,auto,auto,auto,auto,auto,*">
             <TextBlock
-              Grid.Column="0"
               Classes="Overline"
-              Text="{Binding Stream.jobNumber}"
-              TextTrimming="CharacterEllipsis" />
+              IsVisible="{Binding Stream.jobNumber, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+              Text="JN:" />
             <TextBlock
               Grid.Column="1"
               Classes="Overline"
-              Text=" - " />
+              IsVisible="{Binding Stream.jobNumber, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+              Text="{Binding Stream.jobNumber}"
+              TextTrimming="CharacterEllipsis" />
             <TextBlock
               Grid.Column="2"
+              Classes="Overline"
+              IsVisible="{Binding Stream.jobNumber, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+              Text=" - " />
+            <TextBlock
+              Grid.Column="3"
               Classes="Overline"
               Text="{Binding Stream.id}"
               TextTrimming="CharacterEllipsis" />
             <TextBlock
-              Grid.Column="3"
+              Grid.Column="4"
               Classes="Overline"
               Text=" - " />
             <TextBlock
-              Grid.Column="4"
+              Grid.Column="5"
               Classes="Overline"
               Text="{Binding Stream.role, Converter={StaticResource RoleValueConverter}}"
               TextTrimming="CharacterEllipsis" />
             <TextBlock
-              Grid.Column="5"
+              Grid.Column="6"
               Classes="Overline"
               Text=" - " />
             <icons:MaterialIcon
-              Grid.Column="6"
+              Grid.Column="7"
               Height="12"
               VerticalAlignment="Center"
               Foreground="Gray"
               Kind="Users"
               ToolTip.Tip="Collaborators" />
             <TextBlock
-              Grid.Column="7"
+              Grid.Column="8"
               Classes="Overline"
               Text="{Binding Stream.collaborators.Count}" />
           </Grid>

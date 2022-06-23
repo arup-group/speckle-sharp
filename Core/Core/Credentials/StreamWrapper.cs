@@ -50,6 +50,19 @@ namespace Speckle.Core.Credentials
       }
     }
 
+    public bool HasJobNumber
+    {
+      get
+      {
+        if (!string.IsNullOrEmpty(JobNumber))
+        {
+          return true;
+        }
+
+        return false;
+      }
+    }
+
     public StreamWrapper()
     {
     }
@@ -94,16 +107,6 @@ namespace Speckle.Core.Credentials
       StreamId = streamId;
 
       OriginalInput = $"{ServerUrl}/streams/{StreamId}{(UserId != null ? "?u=" + UserId : "")}";
-    }
-
-    public StreamWrapper(string streamId, string userId, string serverUrl, string jobNumber)
-    {
-      UserId = userId;
-      ServerUrl = serverUrl;
-      StreamId = streamId;
-
-      OriginalInput = $"{ServerUrl}/streams/{StreamId}{(UserId != null ? "?u=" + UserId : "")}";
-      JobNumber = jobNumber;
     }
 
     private void StreamWrapperFromId(string streamId)
@@ -220,6 +223,7 @@ namespace Speckle.Core.Credentials
           try
           {
             await ValidateWithAccount(acc);
+            //await ValidateWithJobNumber(acc);
             _Account = acc;
             return acc;
           }
@@ -236,6 +240,7 @@ namespace Speckle.Core.Credentials
       try
       {
         await ValidateWithAccount(defAcc);
+        //await ValidateWithJobNumber(defAcc);
         _Account = defAcc;
         return defAcc;
       }
@@ -256,6 +261,7 @@ namespace Speckle.Core.Credentials
         try
         {
           await ValidateWithAccount(acc);
+          //await ValidateWithJobNumber(acc);
           _Account = acc;
           return acc;
         }
@@ -302,6 +308,18 @@ namespace Speckle.Core.Credentials
       if (Type == StreamWrapperType.Branch && await client.BranchGet(StreamId, BranchName, 1) == null)
         throw new SpeckleException(
           $"The branch with name '{BranchName}' doesn't exist in stream {StreamId} on server {ServerUrl}");
+    }
+
+    private async Task ValidateWithJobNumber(Account acc)
+    {
+      var client = new Client(acc);
+      var stream = await client.StreamGet(StreamId);
+
+      if(String.IsNullOrEmpty(stream.jobNumber)) 
+        throw new SpeckleException(
+         $"Stream {StreamId} on server {ServerUrl} does not contain a job number.");
+
+      //add check for valid job number here?
     }
 
     public override string ToString()

@@ -17,7 +17,7 @@
   mc:Ignorable="d">
 
   <Design.DataContext>
-    <vm:MainWindowViewModelStandalone />
+    <vm:MainViewModelStandalone />
   </Design.DataContext>
 
   <reactiveUi:RoutedViewHost Grid.Row="1" Router="{Binding Router}">
