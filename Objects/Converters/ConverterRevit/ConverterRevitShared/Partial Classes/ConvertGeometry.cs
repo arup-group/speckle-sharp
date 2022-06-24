@@ -196,6 +196,13 @@ namespace Objects.Converter.Revit
         endAngle = (double)arc.endAngle;
       }
       var plane = PlaneToNative(arc.plane);
+
+      if (Point.Distance(arc.startPoint, arc.endPoint) < 1E-6)
+      {
+        // Endpoints coincide, it's a circle.
+        return DB.Arc.Create(plane, ScaleToNative(arc.radius ?? 0, arc.units), startAngle, endAngle);
+      }
+      
       return DB.Arc.Create(PointToNative(arc.startPoint), PointToNative(arc.endPoint), PointToNative(arc.midPoint));
       //return Arc.Create( plane.Origin, (double) arc.Radius * Scale, startAngle, endAngle, plane.XVec, plane.YVec );
     }
@@ -227,7 +234,7 @@ namespace Objects.Converter.Revit
       return a;
     }
 
-    public DB.Ellipse EllipseToNative(Ellipse ellipse)
+    public DB.Curve EllipseToNative(Ellipse ellipse)
     {
       //TODO: support ellipse arcs
       using (DB.Plane basePlane = PlaneToNative(ellipse.plane))
@@ -238,10 +245,9 @@ namespace Objects.Converter.Revit
           ScaleToNative((double)ellipse.secondRadius, ellipse.units),
           basePlane.XVec.Normalize(),
           basePlane.YVec.Normalize(),
-          ellipse.domain.start ?? 0,
-          ellipse.domain.end ?? 2 * Math.PI
-        ) as DB.Ellipse;
-
+          0,
+          2 * Math.PI
+        );
         e.MakeBound(ellipse.trimDomain?.start ?? 0, ellipse.trimDomain?.end ?? 2 * Math.PI);
         return e;
       }
@@ -353,7 +359,7 @@ namespace Objects.Converter.Revit
     /// </summary>
     /// <param name="crv">A speckle curve.</param>
     /// <returns></returns>
-    public CurveArray CurveToNative(ICurve crv)
+    public CurveArray CurveToNative(ICurve crv, bool splitIfClosed = false)
     {
       CurveArray curveArray = new CurveArray();
       switch (crv)
@@ -378,7 +384,17 @@ namespace Objects.Converter.Revit
           return PolylineToNative(spiral.displayValue);
 
         case Curve nurbs:
-          curveArray.Append(CurveToNative(nurbs));
+          var n = CurveToNative(nurbs);
+          if(IsCurveClosed(n) && splitIfClosed)
+          {
+            var split = SplitCurveInTwoHalves(n);
+            curveArray.Append(split.Item1);
+            curveArray.Append(split.Item2);
+          }
+          else
+          {
+            curveArray.Append(n);
+          }
           return curveArray;
 
         case Polyline poly:
@@ -397,14 +413,14 @@ namespace Objects.Converter.Revit
           throw new Speckle.Core.Logging.SpeckleException("The provided geometry is not a valid curve");
       }
     }
-
+    
     //thanks Revit
     public CurveLoop CurveArrayToCurveLoop(CurveArray array)
     {
       var loop = new CurveLoop();
+      UnboundCurveIfSingle(array);
       foreach (var item in array.Cast<DB.Curve>())
         loop.Append(item);
-
       return loop;
     }
 
@@ -545,7 +561,7 @@ namespace Objects.Converter.Revit
       var u = units ?? ModelUnits;
       var speckleMesh = new Mesh(vertices, faces, units: u)
       {
-        ["renderMaterial"] = RenderMaterialToSpeckle(d.GetElement(mesh.MaterialElementId) as Material)
+        ["renderMaterial"] = RenderMaterialToSpeckle(d.GetElement(mesh.MaterialElementId) as DB.Material)
       };
 
       return speckleMesh;
@@ -553,7 +569,7 @@ namespace Objects.Converter.Revit
 
     // Insipred by
     // https://github.com/DynamoDS/DynamoRevit/blob/master/src/Libraries/RevitNodes/GeometryConversion/ProtoToRevitMesh.cs
-    public IList<GeometryObject> MeshToNative(Mesh mesh, TessellatedShapeBuilderTarget target = TessellatedShapeBuilderTarget.Mesh, TessellatedShapeBuilderFallback fallback = TessellatedShapeBuilderFallback.Salvage)
+    public IList<GeometryObject> MeshToNative(Mesh mesh, TessellatedShapeBuilderTarget target = TessellatedShapeBuilderTarget.Mesh, TessellatedShapeBuilderFallback fallback = TessellatedShapeBuilderFallback.Salvage, RenderMaterial parentMaterial = null)
     {
       var tsb = new TessellatedShapeBuilder() { Fallback = fallback, Target = target, GraphicsStyleId = ElementId.InvalidElementId };
 
@@ -562,8 +578,8 @@ namespace Objects.Converter.Revit
 
       var vertices = ArrayToPoints(mesh.vertices, mesh.units);
 
-      ElementId materialId = RenderMaterialToNative(mesh["renderMaterial"] as RenderMaterial);
-
+      ElementId materialId = RenderMaterialToNative(parentMaterial ?? (mesh["renderMaterial"] as RenderMaterial));
+      
       int i = 0;
       while (i < mesh.faces.Count)
       {
@@ -738,26 +754,19 @@ namespace Objects.Converter.Revit
         if (!nativeCurve.IsBound)
           nativeCurve.MakeBound(0, nativeCurve.Period);
 
-        var endPoint = nativeCurve.GetEndPoint(0);
-        var source = nativeCurve.GetEndPoint(1);
-        var distanceTo = endPoint.DistanceTo(source);
-        var closed = distanceTo < 1E-6;
-        if (closed)
+        if (IsCurveClosed(nativeCurve))
         {
-          // Revit does not like single curve loop edges, so we split them in two.
-          var start = nativeCurve.GetEndParameter(0);
-          var end = nativeCurve.GetEndParameter(1);
-          var mid = (end - start) / 2;
-
-          var a = nativeCurve.Clone();
-          a.MakeBound(start, mid);
-
-          var b = nativeCurve.Clone();
-          b.MakeBound(mid, end);
-
-          var halfEdgeA = BRepBuilderEdgeGeometry.Create(a);
-          var halfEdgeB = BRepBuilderEdgeGeometry.Create(b);
-          return new List<BRepBuilderEdgeGeometry> { halfEdgeA, halfEdgeB };
+          var (first, second) = SplitCurveInTwoHalves(nativeCurve);
+          if (edge.ProxyCurveIsReversed)
+          {
+            first = first.CreateReversed();
+            second = second.CreateReversed();
+          }
+          var halfEdgeA = BRepBuilderEdgeGeometry.Create(first);
+          var halfEdgeB = BRepBuilderEdgeGeometry.Create(second);
+          return edge.ProxyCurveIsReversed 
+            ? new List<BRepBuilderEdgeGeometry> { halfEdgeA, halfEdgeB }
+            : new List<BRepBuilderEdgeGeometry> { halfEdgeB, halfEdgeA };
         }
 
         // TODO: Remove short segments if smaller than 'Revit.ShortCurveTolerance'.
@@ -868,6 +877,7 @@ namespace Objects.Converter.Revit
           break;
       }
 
+      var materialId = RenderMaterialToNative(brep["renderMaterial"] as RenderMaterial);
       using var builder = new BRepBuilder(bRepType);
 
       builder.SetAllowShortEdges();
@@ -877,7 +887,8 @@ namespace Objects.Converter.Revit
       foreach (var face in brep.Faces)
       {
         var faceId = builder.AddFace(SurfaceToNative(face.Surface), face.OrientationReversed);
-
+        builder.SetFaceMaterialId(faceId, materialId);
+        
         foreach (var loop in face.Loops)
         {
           var loopId = builder.AddLoop(faceId);

@@ -73,7 +73,7 @@ namespace DesktopUI2.ViewModels
       }
       catch (Exception e)
       {
-        Dialogs.ShowDialog(MainWindow.Instance, "Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
+        Dialogs.ShowDialog("Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
       }
     }
 
@@ -99,7 +99,7 @@ namespace DesktopUI2.ViewModels
           }
           catch (Exception e)
           {
-            Dialogs.ShowDialog(MainWindow.Instance, "Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
+            Dialogs.ShowDialog("Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
           }
         }
       }

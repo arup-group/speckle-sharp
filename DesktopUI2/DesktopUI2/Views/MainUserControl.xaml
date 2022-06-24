@@ -22,8 +22,8 @@
       <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}" />
       <Setter Property="TextBox.Foreground" Value="{DynamicResource MaterialDesignBody}" />
       <Setter Property="TextBox.FontWeight" Value="Medium" />
-			<Setter Property="TextBox.FontSize" Value="14" />
-		 </Style>
+      <Setter Property="TextBox.FontSize" Value="14" />
+    </Style>
   </UserControl.Styles>
   <ContentControl x:Name="MainUserControl">
     <Grid>
@@ -34,19 +34,19 @@
           <CrossFade Duration="0.15" />
         </reactiveUi:RoutedViewHost.PageTransition>
       </reactiveUi:RoutedViewHost>
-			<Grid Opacity="{Binding DialogOpacity}" IsVisible="{Binding DialogVisible}">
-				<Grid.Transitions>
-					<Transitions>
-						<DoubleTransition Property="Opacity" Duration="0:0:0.3"/>
-					</Transitions>
-				</Grid.Transitions>
-				<Border Background="{DynamicResource MaterialDesignCardBackground}"  Opacity="0.8"/>
-				<styles:Card assists:ShadowAssist.ShadowDepth="10"  Margin="40" MinHeight="100" Padding="0" VerticalAlignment="Center">
-					<ContentControl Content="{Binding DialogBody}" />
-				</styles:Card>
-		</Grid>
-			
+      <Grid Opacity="{Binding DialogOpacity}" IsVisible="{Binding DialogVisible}">
+        <Grid.Transitions>
+          <Transitions>
+            <DoubleTransition Property="Opacity" Duration="0:0:0.3"/>
+          </Transitions>
+        </Grid.Transitions>
+        <Border Background="{DynamicResource MaterialDesignCardBackground}"  Opacity="0.8"/>
+        <styles:Card assists:ShadowAssist.ShadowDepth="10"  Margin="40" MinHeight="100" Padding="0" VerticalAlignment="Center">
+          <ContentControl Content="{Binding DialogBody}" />
+        </styles:Card>
+      </Grid>
+
     </Grid>
-	
+
   </ContentControl>
 </UserControl>

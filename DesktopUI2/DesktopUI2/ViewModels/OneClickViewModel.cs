@@ -130,7 +130,6 @@ namespace DesktopUI2.ViewModels
         dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
         dialog.Show();
 
-        await Task.Run(() => Bindings.SendStream(FileStream, progress));
         progress.IsProgressing = false;
         dialog.Close();
         if (!progress.CancellationTokenSource.IsCancellationRequested)

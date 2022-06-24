@@ -47,7 +47,7 @@ namespace DesktopUI2.Launcher
 
       string nativeLib = Path.Combine(path, "Native", "libAvalonia.Native.OSX.dylib");
 
-      return AppBuilder.Configure<DesktopUI2.App>()
+      return AppBuilder.Configure<App>()
       .UsePlatformDetect()
       .With(new X11PlatformOptions { UseGpu = false })
       .With(new MacOSPlatformOptions { ShowInDock = false })
@@ -83,7 +83,7 @@ namespace DesktopUI2.Launcher
 
     public static void OpenOrFocusSpeckle()
     {
-      Bindings = new DummyBindings();
+      Bindings = new DummyBindingsStandalone();
       CreateOrFocusSpeckle();
     }
 

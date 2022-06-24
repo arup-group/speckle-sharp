@@ -137,6 +137,8 @@ namespace Speckle.ConnectorRevit.Entry
       AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(OnAssemblyResolve);
 
 
+
+
 #if REVIT2019
       //DUI1 - Set up bindings now as they subscribe to some document events and it's better to do it now
       SpeckleRevitCommand.Bindings = new ConnectorBindingsRevit(AppInstance);
@@ -152,7 +154,19 @@ namespace Speckle.ConnectorRevit.Entry
       SchedulerCommand.Bindings = bindings;
       OneClickSendCommand.Bindings = bindings;
       QuickShareCommand.Bindings = bindings;
-#endif
+
+      if (SpeckleRevitCommand2.UseDockablePanel)
+      {
+        //Register dockable panel
+        var viewModel = new MainViewModel(bindings);
+        Panel = new Panel
+        {
+          DataContext = viewModel
+        };
+        AppInstance.RegisterDockablePane(SpeckleRevitCommand2.PanelId, "Speckle", Panel);
+      }
+
+
 
     }
 

@@ -27,6 +27,7 @@ namespace ConnectorGrasshopper.Streams
       Params.Input[name].Optional = true;
       Params.Input[desc].Optional = true;
       Params.Input[isPublic].Optional = true;
+      Params.Input[jobNumber].Optional = true;
     }
 
     protected override Bitmap Icon => Properties.Resources.StreamUpdate;
