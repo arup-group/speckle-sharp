@@ -31,6 +31,11 @@ namespace Speckle.ConnectorRevit.Entry
 
     internal static UIApplication uiapp;
 
+
+
+    internal static DockablePaneId PanelId = new DockablePaneId(new Guid("{0A866FB8-8FD5-4DE8-B24B-56F4FA5B0836}"));
+
+
     public static void InitAvalonia()
     {
       BuildAvaloniaApp().SetupWithoutStarting();
@@ -42,6 +47,8 @@ namespace Speckle.ConnectorRevit.Entry
       .With(new Win32PlatformOptions { AllowEglInitialization = true, EnableMultitouch = false })
       .LogToTrace()
       .UseReactiveUI();
+
+
 
     public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
     {

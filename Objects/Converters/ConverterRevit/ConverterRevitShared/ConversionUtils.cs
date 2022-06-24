@@ -19,7 +19,9 @@ using DB = Autodesk.Revit.DB;
 using ElementType = Autodesk.Revit.DB.ElementType;
 using Floor = Objects.BuiltElements.Floor;
 using Level = Objects.BuiltElements.Level;
+using Line = Objects.Geometry.Line;
 using Parameter = Objects.BuiltElements.Revit.Parameter;
+using Point = Objects.Geometry.Point;
 
 namespace Objects.Converter.Revit
 {
