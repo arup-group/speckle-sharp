@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Speckle.Core.Logging;
+using System.Text.RegularExpressions;
 
 namespace Speckle.ConnectorDynamo.Functions
 {
