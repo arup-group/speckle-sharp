@@ -38,20 +38,17 @@
     <PackageReference Include="RhinoWindows">
       <Version>7.4.21078.1001</Version>
     </PackageReference>
-    <PackageReference Include="Stub.System.Data.SQLite.Core.NetFramework">
-      <Version>1.0.115</Version>
-    </PackageReference>
-    <PackageReference Include="System.Data.SQLite.Core">
-      <Version>1.0.115</Version>
-    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Core\Core.csproj" />
+    <ProjectReference Include="..\..\DesktopUI2\AvaloniaHwndHost\AvaloniaHwndHost.csproj" />	
     <ProjectReference Include="..\..\DesktopUI2\DesktopUI2\DesktopUI2.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Properties" />
-  </ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System.Xaml" />
+  </ItemGroup>    
   <ItemGroup Condition="'$([MSBuild]::IsOSPlatform(OSX))' == 'true'">
     <None Include="$(HOME)/.nuget/packages/avalonia.native/0.10.13/runtimes/osx/native/libAvaloniaNative.dylib" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
@@ -82,4 +79,12 @@
     <DefineConstants>TRACE;RHINO7;MAC</DefineConstants>
   </PropertyGroup>
   <Import Project="..\ConnectorRhino\ConnectorRhinoShared\ConnectorRhinoShared.projitems" Label="Shared" Condition="Exists('..\ConnectorRhino\ConnectorRhinoShared\ConnectorRhinoShared.projitems')" />
+  <ItemGroup>
+    <Compile Update="C:\Code\SpeckleNext\speckle-sharp\ConnectorRhino\ConnectorRhino\ConnectorRhinoShared\Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Update="C:\Code\SpeckleNext\speckle-sharp\ConnectorRhino\ConnectorRhino\ConnectorRhinoShared\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+    </Compile>
+  </ItemGroup>  
 </Project>

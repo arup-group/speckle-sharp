@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using DesktopUI2.ViewModels;
 using Rhino;
 using Rhino.PlugIns;
+using System.Drawing;
 
 namespace SpeckleRhino
 {
@@ -15,6 +17,9 @@ namespace SpeckleRhino
     private List<string> ExistingStreams = new List<string>(); // property for tracking stream data during copy and import operations
 
     private static string SpeckleKey = "speckle2";
+
+    public ConnectorBindingsRhino Bindings { get; private set; }
+    public MainViewModel ViewModel { get; private set; }
 
     public SpeckleRhinoConnectorPlugin()
     {
@@ -78,7 +83,7 @@ namespace SpeckleRhino
       // by running the MyOpenPanel command and hidden by running the MyClosePanel command.
       // You can also include the custom panel in any existing panel group by simply right
       // clicking one a panel tab and checking or un-checking the "MyPane" option.
-      Rhino.UI.Panels.RegisterPanel(this, panelType, "Speckle", Resources.icon);
+      Rhino.UI.Panels.RegisterPanel(this, panelType, "Speckle", ConnectorRhino.ConnectorRhinoShared.Resources.icon);
 #endif
       // Get the version number of our plugin, that was last used, from our settings file.
       var plugin_version = Settings.GetString("PlugInVersion", null);

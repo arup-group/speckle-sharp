@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.1.32210.238
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32407.337
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Local Dependencies", "Local Dependencies", "{1E404CB8-22F1-439D-B58E-C23B14A45158}"
 	ProjectSection(SolutionItems) = preProject
@@ -34,6 +34,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DesktopUI2", "..\DesktopUI2\DesktopUI2\DesktopUI2.csproj", "{F7D586E0-5452-428D-B704-3FF142DE248B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConnectorRhino6", "ConnectorRhino6\ConnectorRhino6.csproj", "{D648BB69-B992-4D34-906E-7A547374B86C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AvaloniaHwndHost", "..\DesktopUI2\AvaloniaHwndHost\AvaloniaHwndHost.csproj", "{ADE56E70-77BA-4668-B264-E279C7493252}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -167,6 +169,22 @@ Global
 		{D648BB69-B992-4D34-906E-7A547374B86C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D648BB69-B992-4D34-906E-7A547374B86C}.Release|x64.ActiveCfg = Release|Any CPU
 		{D648BB69-B992-4D34-906E-7A547374B86C}.Release|x64.Build.0 = Release|Any CPU
+		{ADE56E70-77BA-4668-B264-E279C7493252}.Debug Mac|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADE56E70-77BA-4668-B264-E279C7493252}.Debug Mac|Any CPU.Build.0 = Debug|Any CPU
+		{ADE56E70-77BA-4668-B264-E279C7493252}.Debug Mac|x64.ActiveCfg = Debug|Any CPU
+		{ADE56E70-77BA-4668-B264-E279C7493252}.Debug Mac|x64.Build.0 = Debug|Any CPU
+		{ADE56E70-77BA-4668-B264-E279C7493252}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADE56E70-77BA-4668-B264-E279C7493252}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADE56E70-77BA-4668-B264-E279C7493252}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{ADE56E70-77BA-4668-B264-E279C7493252}.Debug|x64.Build.0 = Debug|Any CPU
+		{ADE56E70-77BA-4668-B264-E279C7493252}.Release Mac|Any CPU.ActiveCfg = Release|Any CPU
+		{ADE56E70-77BA-4668-B264-E279C7493252}.Release Mac|Any CPU.Build.0 = Release|Any CPU
+		{ADE56E70-77BA-4668-B264-E279C7493252}.Release Mac|x64.ActiveCfg = Release|Any CPU
+		{ADE56E70-77BA-4668-B264-E279C7493252}.Release Mac|x64.Build.0 = Release|Any CPU
+		{ADE56E70-77BA-4668-B264-E279C7493252}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADE56E70-77BA-4668-B264-E279C7493252}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ADE56E70-77BA-4668-B264-E279C7493252}.Release|x64.ActiveCfg = Release|Any CPU
+		{ADE56E70-77BA-4668-B264-E279C7493252}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -181,6 +199,7 @@ Global
 		{A64ACBF9-DB82-4839-AF99-57ED2E7989F4} = {E591AEAC-C9ED-4DB3-9188-0B74FFAF7F39}
 		{F7D586E0-5452-428D-B704-3FF142DE248B} = {1E404CB8-22F1-439D-B58E-C23B14A45158}
 		{D648BB69-B992-4D34-906E-7A547374B86C} = {E591AEAC-C9ED-4DB3-9188-0B74FFAF7F39}
+		{ADE56E70-77BA-4668-B264-E279C7493252} = {1E404CB8-22F1-439D-B58E-C23B14A45158}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1BFED19F-741B-4E11-95C0-753E2058B3D2}

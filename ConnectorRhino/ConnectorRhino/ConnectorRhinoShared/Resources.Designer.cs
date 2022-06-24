@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ConnectorRhino7....ConnectorRhino.ConnectorRhinoShared {
+namespace ConnectorRhino.ConnectorRhinoShared {
     using System;
     
     
