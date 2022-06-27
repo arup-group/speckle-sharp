@@ -62,8 +62,7 @@
       Name="jobNumber"
       Grid.Row="2"
       Margin="15,5"
-      Foreground="Red"
-      Watermark="Job Number (required)" />
+      Watermark="Job Number (required for v2.speckle.arup.com)" />
 
     <TextBox
       Name="name"
