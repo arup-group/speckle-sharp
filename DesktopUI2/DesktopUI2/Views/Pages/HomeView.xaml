@@ -212,7 +212,7 @@
           </Menu>
 
           <!--  UPDATE NOTIFICATION  -->
-          <Menu
+          <!--<Menu
             VerticalAlignment="Center"
             IsVisible="{Binding HasUpdate}"
             ToolTip.Tip="Update available">
@@ -226,7 +226,7 @@
                 Header="An update for this connector is available, install it now!"
                 Icon="{icons:MaterialIconExt ExternalLink}" />
             </MenuItem>
-          </Menu>
+          </Menu>-->
 
         </StackPanel>
       </Grid>
