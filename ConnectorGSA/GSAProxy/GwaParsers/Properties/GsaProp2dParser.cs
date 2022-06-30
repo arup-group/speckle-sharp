@@ -20,20 +20,31 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
         return false;
       }
       var items = remainingItems;
-      FromGwaByFuncs(items, out remainingItems, AddName);
+      FromGwaByFuncs(items, out remainingItems, AddName, (v) => AddColour(v, out record.Colour), (v) => Enum.TryParse(v, true, out record.Type));
 
-      //PROP_2D.7 | num | name | colour | type | axis | mat | mat_type | grade | design | profile | ref_pt | ref_z | mass | flex | shear | inplane | weight |
-      if (!FromGwaByFuncs(items, out remainingItems, AddName, (v) => AddColour(v, out record.Colour), (v) => Enum.TryParse(v, true, out record.Type), 
-        AddAxis, (v) => AddNullableIndex(v, out record.AnalysisMaterialIndex), 
-        (v) => Enum.TryParse(v, true, out record.MatType), (v) => AddNullableIndex(v, out record.GradeIndex), (v) => AddNullableIndex(v, out record.DesignIndex), 
-        AddThickness, (v) => v.TryParseStringValue(out record.RefPt), (v) => double.TryParse(v, out record.RefZ),
-        (v) => double.TryParse(v, out record.Mass),
-        (v) => AddPercentageOrValue(v, out record.BendingStiffnessPercentage, out record.Bending),
-        (v) => AddPercentageOrValue(v, out record.ShearStiffnessPercentage, out record.Shear),
-        (v) => AddPercentageOrValue(v, out record.InPlaneStiffnessPercentage, out record.InPlane),
-        (v) => AddPercentageOrValue(v, out record.VolumePercentage, out record.Volume)))
+      items = remainingItems;
+      if (record.Type == Property2dType.Load)
       {
-        return false;
+        //PROP_2D.8 | num | name | colour | LOAD | support | edge
+        if (!FromGwaByFuncs(items, out remainingItems, (v) => Enum.TryParse(v, true, out record.Support), (v) => AddNullableIndex(v, out record.Edge)))
+        {
+          return false;
+        }
+      }
+      else
+      {
+        //PROP_2D.8 | num | name | colour | type | axis | mat | mat_type | grade | design | profile | ref_pt | ref_z | mass | flex | shear | inplane | weight |
+        if (!FromGwaByFuncs(items, out remainingItems, AddAxis, (v) => AddNullableIndex(v, out record.AnalysisMaterialIndex),
+          (v) => Enum.TryParse(v, true, out record.MatType), (v) => AddNullableIndex(v, out record.GradeIndex), (v) => AddNullableIndex(v, out record.DesignIndex),
+          AddThickness, (v) => v.TryParseStringValue(out record.RefPt), (v) => double.TryParse(v, out record.RefZ),
+          (v) => double.TryParse(v, out record.Mass),
+          (v) => AddPercentageOrValue(v, out record.BendingStiffnessPercentage, out record.Bending),
+          (v) => AddPercentageOrValue(v, out record.ShearStiffnessPercentage, out record.Shear),
+          (v) => AddPercentageOrValue(v, out record.InPlaneStiffnessPercentage, out record.InPlane),
+          (v) => AddPercentageOrValue(v, out record.VolumePercentage, out record.Volume)))
+        {
+          return false;
+        }
       }
 
       return true;
@@ -47,11 +58,18 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
         return false;
       }
 
-      //PROP_2D.8 | num | name | colour | type | axis | mat | mat_type | grade | design | profile | ref_pt | ref_z | mass | flex | shear | inplane | weight |
-      AddItems(ref items, record.Name, "NO_RGB", record.Type.ToString().ToUpper(), AddAxis(), record.AnalysisMaterialIndex ?? 0, record.MatType.ToString().ToUpper(),
-        record.GradeIndex ?? 0, record.DesignIndex ?? 0, AddThickness(), record.RefPt.GetStringValue(), record.RefZ, record.Mass,
-        AddPercentageOrValue(record.BendingStiffnessPercentage, record.Bending), AddPercentageOrValue(record.ShearStiffnessPercentage, record.Shear),
-        AddPercentageOrValue(record.InPlaneStiffnessPercentage, record.InPlane), AddPercentageOrValue(record.VolumePercentage, record.Volume));
+      if (record.Type == Property2dType.Load)
+      {
+        AddItems(ref items, record.Name, "NO_RGB", record.Type.ToString().ToUpper(), record.Support.ToString().ToUpper(), record.Edge ?? 1);
+      }
+      else
+      {
+        //PROP_2D.8 | num | name | colour | type | axis | mat | mat_type | grade | design | profile | ref_pt | ref_z | mass | flex | shear | inplane | weight |
+        AddItems(ref items, record.Name, "NO_RGB", record.Type.ToString().ToUpper(), AddAxis(), record.AnalysisMaterialIndex ?? 0, record.MatType.ToString().ToUpper(),
+          record.GradeIndex ?? 0, record.DesignIndex ?? 0, AddThickness(), record.RefPt.GetStringValue(), record.RefZ, record.Mass,
+          AddPercentageOrValue(record.BendingStiffnessPercentage, record.Bending), AddPercentageOrValue(record.ShearStiffnessPercentage, record.Shear),
+          AddPercentageOrValue(record.InPlaneStiffnessPercentage, record.InPlane), AddPercentageOrValue(record.VolumePercentage, record.Volume));
+      }
 
       gwa = (Join(items, out var gwaLine)) ? new List<string>() { gwaLine } : new List<string>();
       return gwa.Count() > 0;
@@ -60,10 +78,11 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
     #region to_gwa_fns
     private string AddPercentageOrValue(double? percentage, double? value)
     {
-      if(percentage == null && value == null)
+      if (percentage == null && value == null)
       {
-        return "100%"; 
-      } else
+        return "100%";
+      }
+      else
       {
         if (percentage.HasValue)
         {

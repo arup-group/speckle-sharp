@@ -20,12 +20,12 @@ namespace Objects.Structural.GSA.Properties
     public double additionalMass { get; set; }
     public string concreteSlabProp { get; set; }
     public string colour { get; set; }
-    
-    //public PropertyType2D type { get; set; }
+    public SupportType support { get; set; }
+    public int? referenceEdge { get; set; }
     public GSAProperty2D() { }
 
     [SchemaInfo("GSAProperty2D", "Creates a Speckle structural 2D element property for GSA", "GSA", "Properties")]
-    public GSAProperty2D(string name, Material material, double thickness, PropertyType2D type, ReferenceSurface referenceSurface = ReferenceSurface.Middle, int ? nativeId = null)
+    public GSAProperty2D(string name, Material material, double thickness, PropertyType2D type, ReferenceSurface referenceSurface = ReferenceSurface.Middle, int? nativeId = null)
     {
       this.nativeId = nativeId;
       this.name = name;
@@ -57,8 +57,8 @@ namespace Objects.Structural.GSA.Properties
 
       this.modifierInPlane = modifierTypeInPlane == ModifierType.ToAbsoluteValue ? modifierValueInPlane : -modifierValueInPlane;
       this.modifierBending = modifierTypeBending == ModifierType.ToAbsoluteValue ? modifierValueBending : -modifierValueBending;
-      this.modifierShear = modifierTypeShear == ModifierType.ToAbsoluteValue ? modifierValueShear : -modifierValueShear; 
-      this.modifierVolume = modifierTypeVolume == ModifierType.ToAbsoluteValue ? modifierValueVolume : -modifierValueVolume; 
+      this.modifierShear = modifierTypeShear == ModifierType.ToAbsoluteValue ? modifierValueShear : -modifierValueShear;
+      this.modifierVolume = modifierTypeVolume == ModifierType.ToAbsoluteValue ? modifierValueVolume : -modifierValueVolume;
     }
   }
 
@@ -66,5 +66,16 @@ namespace Objects.Structural.GSA.Properties
   {
     ToAbsoluteValue,
     ByPercentage
+  }
+
+  public enum SupportType
+  {
+    Auto,
+    AllSides,
+    ThreeSides,
+    TwoSides,
+    TwoAdjacentSides,
+    OneSide,
+    Cantilever //cantilever
   }
 }

@@ -14,10 +14,10 @@ namespace ConnectorGrasshopper.Extras
     public QueryDownloadedStream():
       base("Query", "Q", "Query a downloaded stream. This is essentially doing some filtering to keep your canvas a " +
                          "cleaner. It works well for very nested data structures, where you can avoid using the " +
-                         "expand component multiple times", 
+                         "deconstruct component multiple times", 
         ComponentCategories.SECONDARY_RIBBON, 
         ComponentCategories.OBJECTS){}
-
+    protected override System.Drawing.Bitmap Icon => Properties.Resources.SpeckleObjectKeysLogo;
     public override Guid ComponentGuid => new Guid("34F7F1BD-2F24-4257-8857-FDC06D517464");
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {

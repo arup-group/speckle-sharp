@@ -73,7 +73,7 @@ namespace DesktopUI2.ViewModels
       }
       catch (Exception e)
       {
-        Dialogs.ShowDialog(MainWindow.Instance, "Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
+        Dialogs.ShowDialog("Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
       }
     }
 
@@ -99,7 +99,7 @@ namespace DesktopUI2.ViewModels
           }
           catch (Exception e)
           {
-            Dialogs.ShowDialog(MainWindow.Instance, "Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
+            Dialogs.ShowDialog("Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
           }
         }
       }
@@ -130,18 +130,6 @@ namespace DesktopUI2.ViewModels
         return new Tuple<bool, string>(false, "Name is too short.");
 
       return new Tuple<bool, string>(true, "");
-    }
-
-    private void ChangeTheme(bool isDark)
-    {
-      var paletteHelper = new PaletteHelper();
-      var theme = paletteHelper.GetTheme();
-
-      if (isDark)
-        theme.SetBaseTheme(BaseThemeMode.Light.GetBaseTheme());
-      else
-        theme.SetBaseTheme(BaseThemeMode.Dark.GetBaseTheme());
-      paletteHelper.SetTheme(theme);
     }
 
   }

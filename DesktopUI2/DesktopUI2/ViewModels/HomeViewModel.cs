@@ -1,9 +1,7 @@
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Metadata;
 using DesktopUI2.Models;
-using DesktopUI2.Views;
 using DesktopUI2.Views.Windows.Dialogs;
 using Material.Styles.Themes;
 using Material.Styles.Themes.Base;
@@ -31,7 +29,6 @@ namespace DesktopUI2.ViewModels
     public static HomeViewModel Instance { get; internal set; }
     public IScreen HostScreen { get; }
     public string UrlPathSegment { get; } = "home";
-    //public ConnectorBindings Bindings;
 
     private ConnectorBindings _Bindings;
     public virtual ConnectorBindings Bindings
@@ -187,7 +184,7 @@ namespace DesktopUI2.ViewModels
           try
           {
             value.UpdateVisualParentAndInit(HostScreen);
-            MainWindowViewModel.RouterInstance.Navigate.Execute(value);
+            MainViewModel.RouterInstance.Navigate.Execute(value);
             Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Edit" } });
             _selectedSavedStream = value;
           }
@@ -339,7 +336,7 @@ namespace DesktopUI2.ViewModels
       catch (Exception ex)
       {
 
-      } 
+      }
     }
 
     public virtual async Task GetStreams()
@@ -380,7 +377,7 @@ namespace DesktopUI2.ViewModels
           }
           catch (Exception e)
           {
-            Dialogs.ShowDialog($"Could not get streams for {account.Account.userInfo.email} on {account.Account.serverInfo.url}.", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
+            Dialogs.ShowDialog($"Could not get streams", $"With account {account.Account.userInfo.email} on server {account.Account.serverInfo.url}\n\n" + e.Message, Material.Dialog.Icons.DialogIconKind.Error);
           }
         }
         Streams = Streams.OrderByDescending(x => DateTime.Parse(x.Stream.updatedAt)).ToList();
@@ -502,13 +499,12 @@ namespace DesktopUI2.ViewModels
 
 
         var dialog = new AddAccountDialog(AccountManager.GetDefaultServerUrl());
-        dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-        await dialog.ShowDialog(MainWindow.Instance);
+        var result = await dialog.ShowDialog<string>();
 
-        if (dialog.Add)
+        if (result != null)
         {
           Uri u;
-          if (!Uri.TryCreate(dialog.Url, UriKind.Absolute, out u))
+          if (!Uri.TryCreate(result, UriKind.Absolute, out u))
             Dialogs.ShowDialog("Error", "Invalid URL", Material.Dialog.Icons.DialogIconKind.Error);
           else
           {
@@ -516,7 +512,7 @@ namespace DesktopUI2.ViewModels
             {
               Analytics.TrackEvent(null, Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Account Add" } });
 
-              await AccountManager.AddAccount(dialog.Url);
+              await AccountManager.AddAccount(result);
               await Task.Delay(1000);
               Init();
             }
@@ -564,17 +560,22 @@ namespace DesktopUI2.ViewModels
     {
 
       var dialog = new NewStreamDialog(Accounts);
-      dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-      await dialog.ShowDialog(MainWindow.Instance);
+      var result = await dialog.ShowDialog<bool>();
 
 
 
-      if (dialog.Create)
+      if (result)
       {
         try
         {
           var client = new Client(dialog.Account);
-          var streamId = await client.StreamCreate(new StreamCreateInput { description = dialog.Description, name = dialog.StreamName, isPublic = dialog.IsPublic });
+          StreamCreateInput createInput;
+          if (!String.IsNullOrEmpty(dialog.JobNumber))
+            createInput = new StreamWithJobNumberCreateInput { description = dialog.Description, name = dialog.StreamName, isPublic = dialog.IsPublic, jobNumber = dialog.JobNumber };
+          else
+            createInput = new StreamCreateInput { description = dialog.Description, name = dialog.StreamName, isPublic = dialog.IsPublic };
+
+          var streamId = await client.StreamCreate(createInput);
           var stream = await client.StreamGet(streamId);
           var streamState = new StreamState(dialog.Account, stream);
 
@@ -607,15 +608,15 @@ namespace DesktopUI2.ViewModels
         defaultText = clipboard;
 
       var dialog = new AddFromUrlDialog(defaultText);
-      dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-      await dialog.ShowDialog(MainWindow.Instance);
+
+      var result = await dialog.ShowDialog<string>();
 
 
-      if (dialog.Add)
+      if (result != null)
       {
         try
         {
-          var sw = new StreamWrapper(dialog.Url);
+          var sw = new StreamWrapper(result);
           var account = await sw.GetAccount();
           var client = new Client(account);
           var stream = await client.StreamGet(sw.StreamId);
@@ -678,15 +679,14 @@ namespace DesktopUI2.ViewModels
 
     public virtual void OpenStream(StreamState streamState)
     {
-      MainWindowViewModel.RouterInstance.Navigate.Execute(new StreamViewModel(streamState, HostScreen, RemoveSavedStreamCommand));
+      MainViewModel.RouterInstance.Navigate.Execute(new StreamViewModel(streamState, HostScreen, RemoveSavedStreamCommand));
     }
 
     public void ToggleDarkThemeCommand()
     {
       Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Toggle Theme" } });
-      var paletteHelper = new PaletteHelper();
-      ITheme theme = paletteHelper.GetTheme();
-      var isDark = theme.GetBaseTheme() == BaseThemeMode.Dark;
+      var materialTheme = Application.Current.LocateMaterialTheme<MaterialThemeBase>();
+      var isDark = materialTheme.CurrentTheme.GetBaseTheme() == BaseThemeMode.Dark;
 
       ChangeTheme(isDark);
 
@@ -696,22 +696,26 @@ namespace DesktopUI2.ViewModels
 
     }
 
-    private void ChangeTheme(bool isDark)
+    internal void ChangeTheme(bool isDark)
     {
-      var paletteHelper = new PaletteHelper();
-      var theme = paletteHelper.GetTheme();
+      var materialTheme = Application.Current.LocateMaterialTheme<MaterialThemeBase>();
+      var theme = materialTheme.CurrentTheme;
 
       if (isDark)
-        theme.SetBaseTheme(BaseThemeMode.Light.GetBaseTheme());
+        theme.SetBaseTheme(Theme.Light);
       else
-        theme.SetBaseTheme(BaseThemeMode.Dark.GetBaseTheme());
-      paletteHelper.SetTheme(theme);
+        theme.SetBaseTheme(Theme.Dark);
+
+      materialTheme.CurrentTheme = theme;
+
+
     }
 
 
     public void RefreshCommand()
     {
       Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Refresh" } });
+      ApiUtils.ClearCache();
       Init();
     }
 

@@ -12,8 +12,10 @@ namespace Objects.Structural.Geometry
     public string name { get; set; }
     public Point basePoint { get; set; }
 
+    [DetachProperty]
     public Axis constraintAxis { get; set; } = new Axis(); // can be detachable? ex. a user-specified axis
 
+    [DetachProperty]
     public Restraint restraint { get; set; } // can be detachable? ex. reuse pinned support condition
 
     [DetachProperty]

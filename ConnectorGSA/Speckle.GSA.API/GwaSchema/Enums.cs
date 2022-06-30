@@ -228,6 +228,18 @@
     Fabric
   }
 
+  public enum LoadPanelSupportType
+  {
+    NotSet = 0,
+    Auto,
+    All,
+    Three,
+    Two,
+    Two_Adj,
+    One,
+    One_Mom //cantilever
+  }
+
   public enum AxisDirection3
   {
     NotSet = 0,

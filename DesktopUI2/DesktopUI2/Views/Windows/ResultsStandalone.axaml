@@ -1,4 +1,4 @@
-<Window
+<UserControl
   x:Class="DesktopUI2.Views.Windows.ResultsStandalone"
   xmlns="https://github.com/avaloniaui"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -6,18 +6,13 @@
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:m="clr-namespace:Material.Styles;assembly=Material.Styles"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-  xmlns:vm="clr-namespace:DesktopUI2.ViewModels"
-  Title="Results"
-  Width="515"
-  Height="500"
   d:DesignHeight="515"
   d:DesignWidth="500"
-  Icon="avares://DesktopUI2/Assets/icon.ico"
   mc:Ignorable="d">
-  <Window.Resources>
+  <UserControl.Resources>
     <conv:EmptyFalseValueConverter x:Key="EmptyFalseValueConverter" />
-  </Window.Resources>
-  <Window.Styles>
+  </UserControl.Resources>
+  <UserControl.Styles>
     <Style Selector="TextBox.Readonly">
       <Setter Property="Margin" Value="20,0,20,20" />
       <Setter Property="FontStyle" Value="Italic" />
@@ -25,7 +20,7 @@
     <Style Selector="TextBox.Readonly /template/ m|MaterialUnderline#PART_Underline">
       <Setter Property="IsVisible" Value="False" />
     </Style>
-  </Window.Styles>
+  </UserControl.Styles>
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="auto"/>
@@ -65,4 +60,4 @@
         ToolTip.Tip="Save these settings for sending" />
     </StackPanel>
   </Grid>
-</Window>
+</UserControl>

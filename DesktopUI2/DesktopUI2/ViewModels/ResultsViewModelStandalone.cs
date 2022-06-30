@@ -30,7 +30,7 @@ namespace DesktopUI2.ViewModels
       try
       {
         _streamViewModel.ResultSettings = ResultSettings;
-        ResultsStandalone.Instance.Close();
+        ResultsStandalone.Instance.Close(null);
       }
       catch (Exception ex)
       {

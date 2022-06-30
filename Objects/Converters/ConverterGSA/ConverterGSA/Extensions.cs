@@ -321,6 +321,36 @@ namespace ConverterGSA
       }
     }
 
+    public static SupportType ToSpeckle(this LoadPanelSupportType gsaType)
+    {
+      switch (gsaType)
+      {
+        case LoadPanelSupportType.Auto: return SupportType.Auto;
+        case LoadPanelSupportType.All: return SupportType.AllSides;
+        case LoadPanelSupportType.Three: return SupportType.ThreeSides;
+        case LoadPanelSupportType.Two: return SupportType.TwoSides;
+        case LoadPanelSupportType.Two_Adj: return SupportType.TwoAdjacentSides;
+        case LoadPanelSupportType.One: return SupportType.OneSide;
+        case LoadPanelSupportType.One_Mom: return SupportType.Cantilever;
+        default: throw new Exception(gsaType.ToString() + " can not be converted to a valid speckle 2D load panel support type.");
+      }
+    }
+
+    public static LoadPanelSupportType ToNative(this SupportType supportType)
+    {
+      switch (supportType)
+      {
+        case SupportType.Auto: return LoadPanelSupportType.Auto;
+        case SupportType.AllSides: return LoadPanelSupportType.All;
+        case SupportType.ThreeSides: return LoadPanelSupportType.Three;
+        case SupportType.TwoSides: return LoadPanelSupportType.Two;
+        case SupportType.TwoAdjacentSides: return LoadPanelSupportType.Two_Adj;
+        case SupportType.OneSide: return LoadPanelSupportType.One;
+        case SupportType.Cantilever: return LoadPanelSupportType.One_Mom;
+        default: throw new Exception(supportType.ToString() + " can not be converted to a valid native 2D load panel support type.");
+      }
+    }
+
     public static MaterialType ToSpeckle(this Section1dMaterialType speckleType)
     {
       switch (speckleType)

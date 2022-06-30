@@ -9,7 +9,7 @@ using Logging = Speckle.Core.Logging;
 
 namespace ConnectorGrasshopper.Streams
 {
-  public class StreamUpdateComponent : GH_Component
+  public class StreamUpdateComponent : GH_SpeckleComponent
   {
     public StreamUpdateComponent() : base("Stream Update", "sUp", "Updates a stream with new details", ComponentCategories.PRIMARY_RIBBON,
       ComponentCategories.STREAMS)
@@ -23,9 +23,11 @@ namespace ConnectorGrasshopper.Streams
       var desc = pManager.AddTextParameter("Description", "D", "Description of the stream", GH_ParamAccess.item);
       var isPublic = pManager.AddBooleanParameter("Public", "P", "True if the stream is to be publicly available.",
         GH_ParamAccess.item);
+      var jobNumber = pManager.AddTextParameter("Job Number", "JN", "Job number associated with the stream.", GH_ParamAccess.item);
       Params.Input[name].Optional = true;
       Params.Input[desc].Optional = true;
       Params.Input[isPublic].Optional = true;
+      Params.Input[jobNumber].Optional = true;
     }
 
     protected override Bitmap Icon => Properties.Resources.StreamUpdate;
@@ -47,11 +49,13 @@ namespace ConnectorGrasshopper.Streams
       string name = null;
       string description = null;
       bool isPublic = false;
+      string jobNumber = null;
 
       if (!DA.GetData(0, ref ghSpeckleStream)) return;
       DA.GetData(1, ref name);
       DA.GetData(2, ref description);
       DA.GetData(3, ref isPublic);
+      DA.GetData(4, ref jobNumber);
 
       var streamWrapper = ghSpeckleStream.Value;
       if (error != null)
@@ -68,25 +72,24 @@ namespace ConnectorGrasshopper.Streams
           AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Not a stream wrapper!");
           return;
         }
+        if (DA.Iteration == 0)
+          Tracker.TrackNodeRun();
         Message = "Fetching";
         Task.Run(async () =>
         {
           try
           {
             var account = streamWrapper.GetAccount().Result;
-            var client = new Client(account);
-            var input = new StreamUpdateInput();
+            var client = new Client(account);            
             stream = await client.StreamGet(streamWrapper.StreamId);
-            input.id = streamWrapper.StreamId;
 
-            input.name = name ?? stream.name;
-            input.description = description ?? stream.description;
+            var input = new StreamUpdateInput();
+            if (!string.IsNullOrEmpty(jobNumber)) input = new StreamWithJobNumberUpdateInput { id = streamWrapper.StreamId, name = name ?? stream.name, description = description ?? stream.description, jobNumber = jobNumber ?? stream.jobNumber };
+            else input = new StreamUpdateInput { id = streamWrapper.StreamId, name = name ?? stream.name, description = description ?? stream.description };
 
             if (stream.isPublic != isPublic) input.isPublic = isPublic;
 
             await client.StreamUpdate(input);
-
-            Logging.Analytics.TrackEvent(account, Logging.Analytics.Events.NodeRun, new Dictionary<string, object>() { { "name", "Stream Update" } });
           }
           catch (Exception e)
           {

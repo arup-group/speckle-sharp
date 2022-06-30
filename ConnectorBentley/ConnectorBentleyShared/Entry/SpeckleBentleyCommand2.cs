@@ -49,7 +49,7 @@ namespace Speckle.ConnectorBentley.Entry
     {
       if (MainWindow == null)
       {
-        var viewModel = new MainWindowViewModel(Bindings);
+        var viewModel = new MainViewModel(Bindings);
         MainWindow = new MainWindow
         {
           DataContext = viewModel

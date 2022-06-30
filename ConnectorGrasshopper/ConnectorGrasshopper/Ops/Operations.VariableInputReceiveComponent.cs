@@ -117,16 +117,16 @@ namespace ConnectorGrasshopper.Ops
       CurrentComponentState = "expired";
       AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"There is a newer commit available for this {InputType}");
       RhinoApp.InvokeOnUiThread((Action)delegate
-     {
-       if (AutoReceive)
-       {
-         ExpireSolution(true);
-       }
-       else
-       {
-         OnDisplayExpired(true);
-       }
-     });
+      {
+        if (AutoReceive)
+        {
+          ExpireSolution(true);
+        }
+        else
+        {
+          OnDisplayExpired(true);
+        }
+      });
     }
 
     public override bool Write(GH_IWriter writer)
@@ -741,16 +741,26 @@ namespace ConnectorGrasshopper.Ops
       GetOutputList(ReceivedObject).ForEach(name =>
       {
         var prop = ReceivedObject[name];
-        var treeBuilder = new TreeBuilder(converter) { ConvertToNative = converter != null };
-        var data = treeBuilder.Build(prop);
         var param = Parent.Params.Output.FindIndex(p => p.Name == name || p.Name == name.Substring(1));
         var ighP = Parent.Params.Output[param];
         if (ighP is SendReceiveDataParam srParam)
         {
           srParam.Detachable = name.StartsWith("@");
         }
-        DA.SetDataTree(param, data);
-        parent.PrevReceivedData.Add(name, data);
+
+        GH_Structure<IGH_Goo> dataTree;
+        if (prop is Base b && Utilities.CanConvertToDataTree(b))
+        {
+          dataTree = Utilities.DataTreeToNative(b, converter);
+        }
+        else
+        {
+          var treeBuilder = new TreeBuilder(converter) { ConvertToNative = converter != null };
+          dataTree = treeBuilder.Build(prop);
+        }
+
+        DA.SetDataTree(param, dataTree);
+        parent.PrevReceivedData.Add(name, dataTree);
       });
     }
 

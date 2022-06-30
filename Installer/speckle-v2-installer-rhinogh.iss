@@ -1,7 +1,7 @@
 ;defining variables
 #define AppName      "Speckle@Arup-ConnectorRhinoGh"
 
-#define GrasshopperVersion  GetFileVersion("..\ConnectorGrasshopper\ConnectorGrasshopper\bin\net472\SpeckleConnectorGrasshopper.dll")
+#define GrasshopperVersion  GetFileVersion("..\ConnectorGrasshopper\ConnectorGrasshopper\bin\Release\SpeckleConnectorGrasshopper.dll")
 #define Rhino6Version  GetFileVersion("..\ConnectorRhino\ConnectorRhino6\bin\Release\ConnectorRhino6.rhp")
 #define Rhino7Version  GetFileVersion("..\ConnectorRhino\ConnectorRhino7\bin\Release\ConnectorRhino7.rhp")
 

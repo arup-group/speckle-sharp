@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Speckle.Core.Logging;
+using System.Text.RegularExpressions;
 
 namespace Speckle.ConnectorDynamo.Functions
 {
@@ -134,6 +135,54 @@ namespace Speckle.ConnectorDynamo.Functions
       return result;
     }
 
+    private static Regex dataTreePathRegex => new Regex(@"^(@(\(\d+\))?)?(?<path>\{\d+(;\d+)*\})$");
+    
+    public static bool IsDataTree(Base @base)
+    {
+      var regex = dataTreePathRegex;
+      var members = @base.GetDynamicMembers().ToList();
+      if (members.Count == 0) return false;
+      var isDataTree = members.All(el => regex.Match(el).Success);
+      return members.Count > 0 && isDataTree;
+    }
+
+    public object ConvertDataTreeToNative(Base @base)
+    {
+      var names = @base.GetDynamicMembers();
+      var list = new List<object>();
+      foreach (var name in names)
+      {
+        if (!dataTreePathRegex.Match(name).Success) continue; // Ignore non matching elements, done for extra safety.
+        
+        var parts =
+          name.Split('{')[1] // Get everything after open curly brace
+            .Split('}')[0] // Get everything before close curly brace
+            .Split(';') // Split by ;
+            .Select(text =>
+            {
+              int.TryParse(text, out var num);
+              return num;
+            }).ToList(); 
+
+        var currentList = list;
+        foreach (var p in parts)
+        {
+          while (currentList.Count < p + 1)
+          {
+            var newList = new List<object>();
+            currentList.Add(newList);
+          }
+
+          currentList = currentList[p] as List<object>;
+        }
+
+        var value = @base[name];
+        var converted = RecurseTreeToNative(value) as List<object>;
+        currentList.AddRange(converted);
+        Console.WriteLine(parts);
+      }
+      return list;
+    }
 
     /// <summary>
     /// Helper method to convert a tree-like structure (nested lists) to Native

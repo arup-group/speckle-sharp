@@ -10,31 +10,31 @@ namespace Objects.Structural.Analysis
     public ModelInfo specs { get; set; } //container for model and project specifications
 
     [DetachProperty]
-    [Chunkable(250)]
+    [Chunkable(50)]
     public List<Base> nodes { get; set; } //nodes list
 
     [DetachProperty]
-    [Chunkable(250)]
+    [Chunkable(50)]
     public List<Base> elements { get; set; } //element (or member) list
 
     [DetachProperty]
-    [Chunkable(250)]
+    [Chunkable(50)]
     public List<Base> loads { get; set; } //loads list
 
     [DetachProperty]
-    [Chunkable(1000)]
+    [Chunkable(500)]
     public List<Base> restraints { get; set; } //supports list
 
     [DetachProperty]
-    [Chunkable(1000)]
+    [Chunkable(500)]
     public List<Base> properties { get; set; } //properties list
 
     [DetachProperty]
-    [Chunkable(1000)]
+    [Chunkable(500)]
     public List<Base> materials { get; set; } //materials list
 
     [DetachProperty]
-    [Chunkable(250)]
+    [Chunkable(50)]
     public List<Base> generalData { get; set; }
 
     // add "other" - ex. assemblies, grid lines, grid planes, storeys etc? alignment/paths?

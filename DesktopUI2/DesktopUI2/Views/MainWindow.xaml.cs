@@ -10,7 +10,7 @@ using System.ComponentModel;
 
 namespace DesktopUI2.Views
 {
-  public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
+  public partial class MainWindow : ReactiveWindow<MainViewModel>
   {
     public MainWindow()
     {
@@ -18,7 +18,6 @@ namespace DesktopUI2.Views
       this.WhenActivated(disposables => { });
       AvaloniaXamlLoader.Load(this);
       Instance = this;
-
       Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Launched" } });
 
 
@@ -27,7 +26,7 @@ namespace DesktopUI2.Views
 #endif
     }
 
-    public static MainWindow Instance { get; private set; }
+   public static MainWindow Instance { get; private set; }
 
 
     protected override void OnClosing(CancelEventArgs e)
