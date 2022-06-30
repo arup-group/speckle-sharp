@@ -29,7 +29,7 @@ namespace ConnectorGrasshopper.Streams
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
       pManager.AddTextParameter("Account", "A", "Account to be used when creating the stream.", GH_ParamAccess.item);
-      var jobNumber = pManager.AddTextParameter("Job Number", "JN", "Job number associated with stream.",
+      var jobNumber = pManager.AddTextParameter("Job Number", "JN", "8-digit job number associated with stream required by v2.speckle.arup.com in the format XXXXXXXX.",
         GH_ParamAccess.item);
       Params.Input[jobNumber].Optional = true;
     }
