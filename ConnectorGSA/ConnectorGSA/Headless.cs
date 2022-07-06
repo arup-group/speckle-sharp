@@ -234,6 +234,8 @@ namespace ConnectorGSA
         return false;
       }
 
+      var jobNumber = argPairs["jobNumber"];
+
       var streamStates = new List<StreamStateOld>();
       bool cliResult = false;
       if (sendReceive == SendReceive.Receive)
@@ -344,7 +346,7 @@ namespace ConnectorGSA
             commitObj['@' + name] = obj;
           }
 
-          var stream = NewStream(client, "GSA data", "GSA data").Result;
+          var stream = NewStream(client, "GSA data", "GSA data", jobNumber).Result;
           var streamState = new StreamStateOld() { Client = client, Stream = stream, IsSending = true };
           streamStates.Add(streamState);
 
@@ -379,17 +381,18 @@ namespace ConnectorGSA
       return cliResult;
     }
 
-    private async Task<Speckle.Core.Api.Stream> NewStream(Client client, string streamName, string streamDesc)
+    private async Task<Speckle.Core.Api.Stream> NewStream(Client client, string streamName, string streamDesc, string jobNumber)
     {
       string streamId = "";
 
       try
       {
-        streamId = await client.StreamCreate(new StreamCreateInput()
+        streamId = await client.StreamCreate(new StreamWithJobNumberCreateInput()
         {
           name = streamName,
           description = streamDesc,
-          isPublic = false
+          isPublic = false,
+          jobNumber = jobNumber
         });
 
         return await client.StreamGet(streamId);
