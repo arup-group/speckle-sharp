@@ -5,25 +5,21 @@ using Avalonia.Markup.Xaml;
 using DesktopUI2.ViewModels;
 using Speckle.Core.Credentials;
 using System.Collections.Generic;
+using System;
+using System.Reactive;
+using ReactiveUI;
+using Avalonia.ReactiveUI;
+using DesktopUI2.ViewModels;
 
 namespace DesktopUI2.Views.Windows.Dialogs
 {
   public partial class NewStreamDialog : DialogUserControl
   {
-    public Account Account { get; set; }
-    public string StreamName { get; set; }
-    public string Description { get; set; }
-    public bool IsPublic { get; set; }
-    public string JobNumber { get; set; }
-
-    public NewStreamDialog() { }
-
-    public NewStreamDialog(List<AccountViewModel> accounts)
+    public static NewStreamDialog Instance { get; private set; }
+    public NewStreamDialog()
     {
       InitializeComponent();
-      var combo = this.FindControl<ComboBox>("accounts");
-      combo.Items = accounts;
-      combo.SelectedIndex = 0;
+      Instance = this;
     }
 
     private void InitializeComponent()
@@ -31,21 +27,9 @@ namespace DesktopUI2.Views.Windows.Dialogs
       AvaloniaXamlLoader.Load(this);
     }
 
-    public void Create_Click(object sender, RoutedEventArgs e)
-    {
-      var isPublic = this.FindControl<ToggleSwitch>("isPublic").IsChecked;
-      //too lazy to create a view model for this or properly style the Dialogs
-      Account = (this.FindControl<ComboBox>("accounts").SelectedItem as AccountViewModel).Account;
-      StreamName = this.FindControl<TextBox>("name").Text;
-      Description = this.FindControl<TextBox>("description").Text;
-      IsPublic = isPublic.HasValue ? isPublic.Value : false;
-      JobNumber = this.FindControl<TextBox>("jobNumber").Text;
-      this.Close(true);
-    }
-
     public void Close_Click(object sender, RoutedEventArgs e)
     {
-      this.Close(false);
+      Instance.Close(false);
     }
   }
 }
