@@ -1,4 +1,5 @@
-﻿using Autodesk.Revit.DB;
+﻿using System;
+using Autodesk.Revit.DB;
 using Speckle.Core.Kits;
 using Speckle.Core.Models;
 using System.Collections.Generic;
@@ -8,6 +9,8 @@ using BER = Objects.BuiltElements.Revit;
 using BERC = Objects.BuiltElements.Revit.Curve;
 using DB = Autodesk.Revit.DB;
 using STR = Objects.Structural;
+using GE = Objects.Geometry;
+using System;
 
 namespace Objects.Converter.Revit
 {
@@ -101,6 +104,9 @@ namespace Objects.Converter.Revit
       Base returnObject = null;
       switch (@object)
       {
+        case DB.Document o:
+          returnObject = ModelToSpeckle(o);
+          break;
         case DB.DetailCurve o:
           returnObject = DetailCurveToSpeckle(o);
           break;
@@ -267,8 +273,15 @@ namespace Objects.Converter.Revit
           && returnObject["renderMaterial"] == null
           && returnObject["displayValue"] == null)
       {
-        var material = GetElementRenderMaterial(@object as DB.Element);
-        returnObject["renderMaterial"] = material;
+        try
+        {
+          var material = GetElementRenderMaterial(@object as DB.Element);
+          returnObject["renderMaterial"] = material;
+        }
+        catch ( Exception e )
+        {
+          // passing for stuff without a material (eg converting the current document to get the `Model` and `Info` objects)
+        }
       }
 
       //NOTE: adds the quantities of all materials to an element
@@ -305,9 +318,66 @@ namespace Objects.Converter.Revit
 
       return "";
     }
+    private BuiltInCategory GetObjectCategory(Base @object)
+    {
+      switch(@object)
+      {
+        case BE.Beam _:
+        case BE.Brace _:
+        case BE.TeklaStructures.TeklaContourPlate _:
+          return BuiltInCategory.OST_StructuralFraming;
+        case BE.TeklaStructures.Bolts _:
+          return BuiltInCategory.OST_StructConnectionBolts;
+        case BE.TeklaStructures.Welds _:
+          return BuiltInCategory.OST_StructConnectionWelds;
+        case BE.Floor _:
+          return BuiltInCategory.OST_Floors;
+        case BE.Ceiling _:
+          return BuiltInCategory.OST_Ceilings;
+        case BE.Column _:
+          return BuiltInCategory.OST_Columns;
+        case BE.Pipe _:
+          return BuiltInCategory.OST_PipeSegments;
+        case BE.Rebar _:
+          return BuiltInCategory.OST_Rebar;
+        case BE.Topography _: 
+          return BuiltInCategory.OST_Topography;
+        case BE.Wall _:
+          return BuiltInCategory.OST_Walls;
+        case BE.Roof _:
+          return BuiltInCategory.OST_Roofs;
+        case BE.Duct _:
+          return BuiltInCategory.OST_FabricationDuctwork;
+        case BE.CableTray _:
+          return BuiltInCategory.OST_CableTray;
+        default:
+          return BuiltInCategory.OST_GenericModel;        
+      }
+    }
 
     public object ConvertToNative(Base @object)
     {
+      // Get settings for receive direct meshes , assumes objects aren't nested like in Tekla Structures 
+      Settings.TryGetValue("recieve-objects-mesh", out string recieveModelMesh);
+      if (bool.Parse(recieveModelMesh) == true)
+      {
+        try
+        {
+          List<GE.Mesh> displayValues = new List<GE.Mesh> { };
+          var meshes = @object.GetType().GetProperty("displayValue").GetValue(@object) as List<GE.Mesh>;
+          //dynamic property = propInfo;
+          //List<GE.Mesh> meshes = (List<GE.Mesh>)property;
+          var cat = GetObjectCategory(@object);
+          return DirectShapeToNative(meshes, cat);
+        }
+        catch 
+        {
+
+        }
+
+        
+
+      }
       //Family Document
       if (Doc.IsFamilyDocument)
       {
@@ -347,10 +417,17 @@ namespace Objects.Converter.Revit
 
         case Geometry.Brep o:
           return DirectShapeToNative(o);
-
-        case Geometry.Mesh o:
-          return DirectShapeToNative(o);
-
+        case Geometry.Mesh mesh:
+          switch (ToNativeMeshSetting)
+          {
+            case ToNativeMeshSettingEnum.DxfImport:
+              return MeshToDxfImport(mesh, Doc);
+            case ToNativeMeshSettingEnum.DxfImportInFamily:
+              return MeshToDxfImportFamily(mesh, Doc);
+            case ToNativeMeshSettingEnum.Default:
+            default:
+              return DirectShapeToNative(new[] { mesh }, BuiltInCategory.OST_GenericModel, mesh.applicationId ?? mesh.id);
+          }
         // non revit built elems
         case BE.Alignment o:
           if (o.curves is null) // TODO: remove after a few releases, this is for backwards compatibility
@@ -360,13 +437,13 @@ namespace Objects.Converter.Revit
           return AlignmentToNative(o);
 
         case BE.Structure o:
-          return DirectShapeToNative(o.displayValue);
+          return DirectShapeToNative(o.displayValue, applicationId: o.applicationId);
         //built elems
         case BER.AdaptiveComponent o:
           return AdaptiveComponentToNative(o);
 
-        case BE.TeklaStructures.TeklaBeam o:
-          return TeklaBeamToNative(o);
+        //case BE.TeklaStructures.TeklaBeam o:
+        //  return TeklaBeamToNative(o);
 
         case BE.Beam o:
           return BeamToNative(o);
@@ -386,7 +463,26 @@ namespace Objects.Converter.Revit
           return DetailCurveToNative(o);
 
         case BER.DirectShape o:
-          return DirectShapeToNative(o);
+          try
+          {
+            // Try to convert to direct shape, taking into account the current mesh settings
+            return DirectShapeToNative(o, ToNativeMeshSetting);
+          }
+          catch (FallbackToDxfException e)
+          {
+            // FallbackToDxf exception means we should attempt a DXF import instead.
+            switch (ToNativeMeshSetting)
+            {
+              case ToNativeMeshSettingEnum.DxfImport:
+                return DirectShapeToDxfImport(o); // DirectShape -> DXF
+              case ToNativeMeshSettingEnum.DxfImportInFamily:
+                return DirectShapeToDxfImportFamily(o); // DirectShape -> Family (DXF inside)
+              case ToNativeMeshSettingEnum.Default:
+              default:
+                // For anything else, try again with the default fallback (ugly meshes).
+                return DirectShapeToNative(o, ToNativeMeshSettingEnum.Default);
+            }
+          }
 
         case BER.FreeformElement o:
           return FreeformElementToNative(o);

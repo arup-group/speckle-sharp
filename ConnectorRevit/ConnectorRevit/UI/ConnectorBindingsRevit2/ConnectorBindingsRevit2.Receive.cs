@@ -26,7 +26,6 @@ namespace Speckle.ConnectorRevit.UI
     /// <returns></returns>
     public override async Task<StreamState> ReceiveStream(StreamState state, ProgressViewModel progress)
     {
-
       var kit = KitManager.GetDefaultKit();
       var converter = kit.LoadConverter(ConnectorRevitUtils.RevitAppName);
       converter.SetContextDocument(CurrentDoc.Document);
@@ -183,7 +182,6 @@ namespace Speckle.ConnectorRevit.UI
       // Get setting to skip linked model elements if necessary
       var receiveLinkedModelsSetting = (CurrentSettings.FirstOrDefault(x => x.Slug == "linkedmodels-receive") as CheckBoxSetting);
       var receiveLinkedModels = receiveLinkedModelsSetting != null ? receiveLinkedModelsSetting.IsChecked : false;
-
 
       foreach (var @base in objects)
       {

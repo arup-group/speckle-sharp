@@ -103,6 +103,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConverterOpenRail", "Conver
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConverterOpenRoads", "Converters\ConverterBentley\ConverterOpenRoads\ConverterOpenRoads.csproj", "{C6CE0486-2DC8-4009-81A3-ED5AC6C7B2EE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConverterDxf", "Converters\ConverterDxf\ConverterDxf\ConverterDxf.csproj", "{C6E9DE1F-2CFF-44AC-9B9A-E71783DF6633}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Converters\ConverterBentley\ConverterBentleyShared\ConverterBentleyShared.projitems*{0839ec0e-49d4-424f-80bc-f228b7cbb74a}*SharedItemsImports = 5
@@ -271,6 +273,10 @@ Global
 		{C6CE0486-2DC8-4009-81A3-ED5AC6C7B2EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6CE0486-2DC8-4009-81A3-ED5AC6C7B2EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6CE0486-2DC8-4009-81A3-ED5AC6C7B2EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6E9DE1F-2CFF-44AC-9B9A-E71783DF6633}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6E9DE1F-2CFF-44AC-9B9A-E71783DF6633}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6E9DE1F-2CFF-44AC-9B9A-E71783DF6633}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6E9DE1F-2CFF-44AC-9B9A-E71783DF6633}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -322,6 +328,7 @@ Global
 		{8307C9B9-50DD-4AC0-BD1B-0EF1B36BB64D} = {B539797D-13E9-4932-A2CF-05C5485F3AA4}
 		{E2E0281A-6CBB-469E-A307-FF492CB16A3E} = {B539797D-13E9-4932-A2CF-05C5485F3AA4}
 		{C6CE0486-2DC8-4009-81A3-ED5AC6C7B2EE} = {B539797D-13E9-4932-A2CF-05C5485F3AA4}
+		{C6E9DE1F-2CFF-44AC-9B9A-E71783DF6633} = {CCC09288-CE76-4FDB-B0C9-220112F88CD9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA57EC2E-0A9E-4F59-B1F7-A65F76A74B74}
