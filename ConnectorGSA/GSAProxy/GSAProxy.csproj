@@ -142,10 +142,6 @@
       <Project>{00b71764-00b1-4b24-abaf-a22864540d76}</Project>
       <Name>DesktopUI2</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Speckle.GSA.API\Speckle.GSA.API.csproj">
-      <Project>{b17705b9-0d8f-41c8-a868-d46ef3e45e40}</Project>
-      <Name>Speckle.GSA.API</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
@@ -154,6 +150,9 @@
     </PackageReference>
     <PackageReference Include="CsvHelper">
       <Version>27.2.1</Version>
+    </PackageReference>
+    <PackageReference Include="ReactiveUI">
+      <Version>18.3.1</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

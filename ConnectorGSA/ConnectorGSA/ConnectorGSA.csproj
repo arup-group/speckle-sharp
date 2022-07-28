@@ -152,10 +152,6 @@
       <Project>{11db7d37-a6ed-4c8a-b354-d9fb3c82386c}</Project>
       <Name>GSAProxy</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Speckle.GSA.API\Speckle.GSA.API.csproj">
-      <Project>{b17705b9-0d8f-41c8-a868-d46ef3e45e40}</Project>
-      <Name>Speckle.GSA.API</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="icon.ico" />
