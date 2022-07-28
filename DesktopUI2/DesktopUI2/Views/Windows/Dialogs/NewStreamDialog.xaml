@@ -148,6 +148,7 @@
 
         <TextBox
       Name="name"
+	  Text="{Binding StreamName}"
       Grid.Row="5"
       Margin="15,5"
       Watermark="Stream Name (optional)" />
