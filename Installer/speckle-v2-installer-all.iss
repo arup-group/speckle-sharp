@@ -6,7 +6,7 @@
 #define Civil2022Version  GetFileVersion("..\ConnectorAutocadCivil\ConnectorCivil2022\bin\Release\SpeckleConnectorCivil.dll")
 
 #define DynamoVersion  GetFileVersion("..\ConnectorDynamo\ConnectorDynamo\bin\Release\SpeckleConnectorDynamo.dll")
-#define DynamoExtensionVersion  GetFileVersionRepapPat("..\ConnectorDynamo\ConnectorDynamoExtension\bin\Release\SpeckleConnectorDynamoExtension.dll")
+#define DynamoExtensionVersion  GetFileVersion("..\ConnectorDynamo\ConnectorDynamoExtension\bin\Release\SpeckleConnectorDynamoExtension.dll")
 #define DynamoFunctionsVersion  GetFileVersion("..\ConnectorDynamo\ConnectorDynamoFunctions\bin\Release\SpeckleConnectorDynamoFunctions.dll")
 
 #define Revit2019Version  GetFileVersion("..\ConnectorRevit\ConnectorRevit2019\bin\Release\SpeckleConnectorRevit.dll")
