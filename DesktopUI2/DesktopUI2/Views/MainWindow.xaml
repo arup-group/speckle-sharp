@@ -6,7 +6,7 @@
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   xmlns:p="clr-namespace:DesktopUI2.Views"
   Title="{Binding TitleFull}"
-  Width="500"
+  Width="725"
   Height="750"
   Icon="/Assets/icon.ico"
   mc:Ignorable="d">

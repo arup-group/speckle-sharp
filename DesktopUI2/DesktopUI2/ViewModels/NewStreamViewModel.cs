@@ -147,7 +147,7 @@ namespace DesktopUI2.ViewModels
       }
     }
 
-    private string _defaultJobNumberWatermark = "Search job numbers or names...";
+    private string _defaultJobNumberWatermark = "Search job number or name";
     private string _jobNumberWatermark;
     public string JobNumberWatermark
     {
