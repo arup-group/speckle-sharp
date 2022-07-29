@@ -95,7 +95,7 @@
             Padding="0"
             Classes="Solo Small"
             Text="{Binding SearchQuery}"
-            Watermark="Search job numbers or names...">
+            Watermark="{Binding JobNumberWatermark}">
                     <TextBox.InnerRightContent>
                         <Button
                     Width="{Binding $self.Bounds.Height}"
@@ -139,12 +139,11 @@
             IsVisible="{Binding ShowProgress, FallbackValue=True}" />
         </Grid>
 
-        <TextBox
+        <TextBlock
       Name="jobNumber"
       Text="{Binding SelectedJob.JobDisplayName}"
       Grid.Row="4"
-      Margin="15,5"
-      Watermark="{Binding JobNumberWatermark}" />
+      Margin="15,5"/>
 
         <TextBox
       Name="name"

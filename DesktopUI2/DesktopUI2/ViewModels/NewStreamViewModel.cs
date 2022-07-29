@@ -147,7 +147,8 @@ namespace DesktopUI2.ViewModels
       }
     }
 
-    private string _jobNumberWatermark = "Job Number";
+    private string _defaultJobNumberWatermark = "Search job numbers or names...";
+    private string _jobNumberWatermark;
     public string JobNumberWatermark
     {
       get => _jobNumberWatermark;
@@ -207,8 +208,9 @@ namespace DesktopUI2.ViewModels
         if (response.Errors == null)
         {
           JobNumberRequired = response.Data.serverInfo.requireJobNumberToCreateStreams;
-          if(JobNumberRequired) JobNumberWatermark = "Job Number (required)";
-          else JobNumberWatermark = "Job Number (optional)";
+
+          if (JobNumberRequired) JobNumberWatermark = _defaultJobNumberWatermark + " (required)";
+          else JobNumberWatermark = _defaultJobNumberWatermark + " (optional)";
 
           return true;
         }
@@ -218,7 +220,7 @@ namespace DesktopUI2.ViewModels
       catch
       {
         JobNumberRequired = false;
-        JobNumberWatermark = "Job Number (optional)";
+        JobNumberWatermark = _defaultJobNumberWatermark + " (optional)";
         return false;
       }
     }
