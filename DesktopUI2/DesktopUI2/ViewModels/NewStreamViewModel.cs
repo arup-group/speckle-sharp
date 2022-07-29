@@ -275,6 +275,7 @@ namespace DesktopUI2.ViewModels
 
           Jobs = searchOptions.jobs;
 
+          ErrorMessage = null;
           ShowProgress = false;
           DropDownOpen = true;
         }
