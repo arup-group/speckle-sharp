@@ -42,6 +42,7 @@ namespace DesktopUI2.ViewModels
       {
         // Some logic here
         _account = value;
+        ClearSearchCommand();
         IsJobNumberRequiredToCreateStreams();
       }
     }
@@ -87,6 +88,11 @@ namespace DesktopUI2.ViewModels
       {
         this.RaiseAndSetIfChanged(ref _jobs, value);
       }
+
+
+
+
+
     }
 
     private JobModel _selectedJobs;
