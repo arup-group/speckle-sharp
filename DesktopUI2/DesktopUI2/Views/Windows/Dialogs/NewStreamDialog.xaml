@@ -84,7 +84,7 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <Grid>
+            <Grid IsVisible="{Binding JobNumberRequired}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" MinWidth="300"/>
                     <ColumnDefinition Width="auto"/>
