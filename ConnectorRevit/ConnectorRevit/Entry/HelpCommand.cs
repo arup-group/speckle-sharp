@@ -40,7 +40,7 @@ namespace Speckle.ConnectorRevit.Entry
   {
     public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
     {
-      Process.Start(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "speckle-manager", "SpeckleManager.exe"));
+      Process.Start(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "speckle-connection-manager-ui", "SpeckleConnectionManagerUI.exe"));
       return Result.Succeeded;
     }
   }
