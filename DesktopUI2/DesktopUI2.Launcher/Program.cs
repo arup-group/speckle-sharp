@@ -35,7 +35,7 @@ namespace DesktopUI2.Launcher
 
       return;
     }
-
+      
 
     public static Window MainWindow { get; private set; }
 
