@@ -74,6 +74,7 @@ namespace Objects.Converter.Revit
         {
           var revitType = Doc.GetElement(docObj.GetTypeId()) as ElementType;
 
+#if !REVIT2023
           // If null, element must be analytical
           if (revitType == null)
           {
@@ -81,7 +82,7 @@ namespace Objects.Converter.Revit
             docObj = Doc.GetElement(analyticalStick.GetElementId()) as DB.FamilyInstance;
             revitType = Doc.GetElement(docObj.GetTypeId()) as ElementType;
           }
-
+#endif
           // if family changed, tough luck. delete and let us create a new one.
           if (familySymbol.FamilyName != revitType.FamilyName)
           {
