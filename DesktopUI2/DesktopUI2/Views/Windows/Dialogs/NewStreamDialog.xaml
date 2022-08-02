@@ -86,7 +86,7 @@
             </ComboBox>
             <Grid IsVisible="{Binding JobNumberRequired}">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" MinWidth="300"/>
+                    <ColumnDefinition Width="*" MinWidth="100"/>
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
 
