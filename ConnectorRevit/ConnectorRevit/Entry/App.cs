@@ -78,18 +78,18 @@ namespace Speckle.ConnectorRevit.Entry
         schedulerButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://speckle.systems"));
       }
 
-      // one click send
-      var speckleButtonSend = specklePanel.AddItem(new PushButtonData("Send", "Send to Speckle", typeof(App).Assembly.Location, typeof(OneClickSendCommand).FullName)) as PushButton;
+      //// one click send
+      //var speckleButtonSend = specklePanel.AddItem(new PushButtonData("Send", "Send to Speckle", typeof(App).Assembly.Location, typeof(OneClickSendCommand).FullName)) as PushButton;
 
-      if (speckleButtonSend != null)
-      {
-        speckleButtonSend.Image = LoadPngImgSource("Speckle.ConnectorRevit.Assets.oneclick16.png", path);
-        speckleButtonSend.LargeImage = LoadPngImgSource("Speckle.ConnectorRevit.Assets.oneclick32.png", path);
-        speckleButtonSend.ToolTipImage = LoadPngImgSource("Speckle.ConnectorRevit.Assets.oneclick32.png", path);
-        speckleButtonSend.ToolTip = "Sends your selected file objects to Speckle, or the entire model if nothing is selected.";
-        speckleButtonSend.AvailabilityClassName = typeof(CmdAvailabilityViews).FullName;
-        speckleButtonSend.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://speckle.systems"));
-      }
+      //if (speckleButtonSend != null)
+      //{
+      //  speckleButtonSend.Image = LoadPngImgSource("Speckle.ConnectorRevit.Assets.oneclick16.png", path);
+      //  speckleButtonSend.LargeImage = LoadPngImgSource("Speckle.ConnectorRevit.Assets.oneclick32.png", path);
+      //  speckleButtonSend.ToolTipImage = LoadPngImgSource("Speckle.ConnectorRevit.Assets.oneclick32.png", path);
+      //  speckleButtonSend.ToolTip = "Sends your selected file objects to Speckle, or the entire model if nothing is selected.";
+      //  speckleButtonSend.AvailabilityClassName = typeof(CmdAvailabilityViews).FullName;
+      //  speckleButtonSend.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://speckle.systems"));
+      //}
 
 
       // quick share
