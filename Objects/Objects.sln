@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30011.22
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Objects", "Objects\Objects.csproj", "{95C2153A-642E-4779-90C0-BFF56FC561A9}"
 EndProject
@@ -103,42 +103,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConverterOpenRail", "Conver
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConverterOpenRoads", "Converters\ConverterBentley\ConverterOpenRoads\ConverterOpenRoads.csproj", "{C6CE0486-2DC8-4009-81A3-ED5AC6C7B2EE}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConverterDxf", "Converters\ConverterDxf\ConverterDxf\ConverterDxf.csproj", "{C6E9DE1F-2CFF-44AC-9B9A-E71783DF6633}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Speckle.GSA.API", "..\ConnectorGSA\Speckle.GSA.API\Speckle.GSA.API.csproj", "{B17705B9-0D8F-41C8-A868-D46EF3E45E40}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GSAProxy", "..\ConnectorGSA\GSAProxy\GSAProxy.csproj", "{11DB7D37-A6ED-4C8A-B354-D9FB3C82386C}"
+EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		Converters\ConverterBentley\ConverterBentleyShared\ConverterBentleyShared.projitems*{0839ec0e-49d4-424f-80bc-f228b7cbb74a}*SharedItemsImports = 5
-		Converters\ConverterTeklaStructures\ConverterTeklaStructuresShared\ConverterTeklaStructuresShared.projitems*{08ee146e-9f7a-4c82-b790-688fe4532ca7}*SharedItemsImports = 5
-		Converters\ConverterRevit\ConverterRevitShared\ConverterRevitShared.projitems*{0bcb32cf-a3cf-4a6a-a9f8-dfe5d85d608c}*SharedItemsImports = 5
-		Converters\ConverterAutocadCivil\ConverterAutocadCivilShared\ConverterAutocadCivilShared.projitems*{13f93c20-793c-4f2d-b836-68d7744063df}*SharedItemsImports = 5
-		Converters\ConverterAutocadCivil\ConverterAutocadCivilShared\ConverterAutocadCivilShared.projitems*{156ff86c-8531-46d0-aa23-97db326bc591}*SharedItemsImports = 5
-		Converters\ConverterRhinoGh\ConverterRhinoGhShared\ConverterRhinoGhShared.projitems*{1dc0a8f4-1f14-47e8-8456-9d8e9c0e6cff}*SharedItemsImports = 5
-		Converters\ConverterBentley\ConverterBentleyShared\ConverterBentleyShared.projitems*{208b25e4-2d0e-4534-b197-4c5c96cc53ce}*SharedItemsImports = 13
-		Converters\ConverterAutocadCivil\ConverterAutocadCivilShared\ConverterAutocadCivilShared.projitems*{2c68e80f-38f4-41d0-9b38-473031d1b541}*SharedItemsImports = 5
-		Converters\ConverterAutocadCivil\ConverterAutocadCivilShared\ConverterAutocadCivilShared.projitems*{2d0f9f8a-2e89-4780-978a-cd92d6d7b843}*SharedItemsImports = 13
-		Converters\ConverterRevit\ConverterRevitShared\ConverterRevitShared.projitems*{2dcd648d-dca5-4d2a-8b14-ad2cb85d24b0}*SharedItemsImports = 13
-		Converters\ConverterDynamo\ConverterDynamoShared\ConverterDynamoShared.projitems*{4f16a993-7d11-4565-a2a5-910899919e00}*SharedItemsImports = 5
-		Converters\ConverterRevit\ConverterRevitShared\ConverterRevitShared.projitems*{4f16a993-7d11-4565-a2a5-910899919e00}*SharedItemsImports = 5
-		Converters\ConverterRhinoGh\ConverterRhinoGhShared\ConverterRhinoGhShared.projitems*{5a7671d6-57a1-4422-9ebb-79f3c724c0ba}*SharedItemsImports = 5
-		Converters\ConverterDynamo\ConverterDynamoShared\ConverterDynamoShared.projitems*{5bab09dc-b0fc-4004-9fd5-6496a9634071}*SharedItemsImports = 13
-		Converters\ConverterCSI\ConverterCSIShared\ConverterCSIShared.projitems*{5bbde14e-50f8-4d6e-8e35-747667ad4a09}*SharedItemsImports = 13
-		Converters\ConverterCSI\ConverterCSIShared\ConverterCSIShared.projitems*{62e992b6-2e65-4714-ad37-42f34f9bd5da}*SharedItemsImports = 5
-		Converters\ConverterRhinoGh\ConverterRhinoGhShared\ConverterRhinoGhShared.projitems*{63b3f901-7c14-4530-8a6f-ccad68586664}*SharedItemsImports = 5
-		Converters\ConverterCSI\ConverterCSIShared\ConverterCSIShared.projitems*{79aa475d-7cde-4501-90ce-9a0d9d0db023}*SharedItemsImports = 5
-		Converters\ConverterTeklaStructures\ConverterTeklaStructuresShared\ConverterTeklaStructuresShared.projitems*{7ffdab72-145d-4490-9892-fac5f1d72b17}*SharedItemsImports = 13
-		Converters\ConverterBentley\ConverterBentleyShared\ConverterBentleyShared.projitems*{8307c9b9-50dd-4ac0-bd1b-0ef1b36bb64d}*SharedItemsImports = 5
-		Converters\ConverterRevit\ConverterRevitShared\ConverterRevitShared.projitems*{90362309-466a-482b-814a-adb1ce227607}*SharedItemsImports = 5
-		Converters\ConverterTeklaStructures\ConverterTeklaStructuresShared\ConverterTeklaStructuresShared.projitems*{adc53dc0-0592-4f13-b456-65adcb2164a1}*SharedItemsImports = 5
-		Converters\ConverterBentley\ConverterBentleyShared\ConverterBentleyShared.projitems*{b60beffc-82ec-4540-86d8-eb246677ddde}*SharedItemsImports = 5
-		Converters\ConverterRhinoGh\ConverterRhinoGhShared\ConverterRhinoGhShared.projitems*{b74cb8c1-187b-46a6-b20b-92b8c129f3ee}*SharedItemsImports = 13
-		Converters\ConverterRhinoGh\ConverterRhinoGhShared\ConverterRhinoGhShared.projitems*{b9649e07-f7b4-4fcc-9e44-076993621d0a}*SharedItemsImports = 5
-		Converters\ConverterDynamo\ConverterDynamoShared\ConverterDynamoShared.projitems*{bc110327-3c61-4c15-ae4c-daae7ca82a7b}*SharedItemsImports = 5
-		Converters\ConverterRevit\ConverterRevitShared\ConverterRevitShared.projitems*{bf5515b4-c97c-4fb9-9f93-1740d2b615b3}*SharedItemsImports = 5
-		Converters\ConverterBentley\ConverterBentleyShared\ConverterBentleyShared.projitems*{c6ce0486-2dc8-4009-81a3-ed5ac6c7b2ee}*SharedItemsImports = 5
-		Converters\ConverterAutocadCivil\ConverterAutocadCivilShared\ConverterAutocadCivilShared.projitems*{dd4add16-65f9-46e0-a610-2b7908a966b3}*SharedItemsImports = 5
-		Converters\ConverterCSI\ConverterCSIShared\ConverterCSIShared.projitems*{df4d24c3-2be8-476c-8d40-33892be07b1d}*SharedItemsImports = 5
-		Converters\ConverterBentley\ConverterBentleyShared\ConverterBentleyShared.projitems*{e2e0281a-6cbb-469e-a307-ff492cb16a3e}*SharedItemsImports = 5
-		Converters\ConverterRevit\ConverterRevitShared\ConverterRevitShared.projitems*{e4006179-462f-4133-9481-219279138b93}*SharedItemsImports = 5
-		Converters\ConverterCSI\ConverterCSIShared\ConverterCSIShared.projitems*{f00b2895-b912-432d-a504-99a82e07d9d4}*SharedItemsImports = 5
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -271,6 +242,18 @@ Global
 		{C6CE0486-2DC8-4009-81A3-ED5AC6C7B2EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6CE0486-2DC8-4009-81A3-ED5AC6C7B2EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6CE0486-2DC8-4009-81A3-ED5AC6C7B2EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6E9DE1F-2CFF-44AC-9B9A-E71783DF6633}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6E9DE1F-2CFF-44AC-9B9A-E71783DF6633}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6E9DE1F-2CFF-44AC-9B9A-E71783DF6633}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6E9DE1F-2CFF-44AC-9B9A-E71783DF6633}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B17705B9-0D8F-41C8-A868-D46EF3E45E40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B17705B9-0D8F-41C8-A868-D46EF3E45E40}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B17705B9-0D8F-41C8-A868-D46EF3E45E40}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B17705B9-0D8F-41C8-A868-D46EF3E45E40}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11DB7D37-A6ED-4C8A-B354-D9FB3C82386C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11DB7D37-A6ED-4C8A-B354-D9FB3C82386C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11DB7D37-A6ED-4C8A-B354-D9FB3C82386C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11DB7D37-A6ED-4C8A-B354-D9FB3C82386C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -322,8 +305,46 @@ Global
 		{8307C9B9-50DD-4AC0-BD1B-0EF1B36BB64D} = {B539797D-13E9-4932-A2CF-05C5485F3AA4}
 		{E2E0281A-6CBB-469E-A307-FF492CB16A3E} = {B539797D-13E9-4932-A2CF-05C5485F3AA4}
 		{C6CE0486-2DC8-4009-81A3-ED5AC6C7B2EE} = {B539797D-13E9-4932-A2CF-05C5485F3AA4}
+		{C6E9DE1F-2CFF-44AC-9B9A-E71783DF6633} = {CCC09288-CE76-4FDB-B0C9-220112F88CD9}
+		{B17705B9-0D8F-41C8-A868-D46EF3E45E40} = {986B7226-6A4C-4881-8481-ADAFD0EC70B0}
+		{11DB7D37-A6ED-4C8A-B354-D9FB3C82386C} = {986B7226-6A4C-4881-8481-ADAFD0EC70B0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA57EC2E-0A9E-4F59-B1F7-A65F76A74B74}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Converters\ConverterBentley\ConverterBentleyShared\ConverterBentleyShared.projitems*{0839ec0e-49d4-424f-80bc-f228b7cbb74a}*SharedItemsImports = 5
+		Converters\ConverterTeklaStructures\ConverterTeklaStructuresShared\ConverterTeklaStructuresShared.projitems*{08ee146e-9f7a-4c82-b790-688fe4532ca7}*SharedItemsImports = 5
+		Converters\ConverterRevit\ConverterRevitShared\ConverterRevitShared.projitems*{0bcb32cf-a3cf-4a6a-a9f8-dfe5d85d608c}*SharedItemsImports = 5
+		Converters\ConverterAutocadCivil\ConverterAutocadCivilShared\ConverterAutocadCivilShared.projitems*{13f93c20-793c-4f2d-b836-68d7744063df}*SharedItemsImports = 5
+		Converters\ConverterAutocadCivil\ConverterAutocadCivilShared\ConverterAutocadCivilShared.projitems*{156ff86c-8531-46d0-aa23-97db326bc591}*SharedItemsImports = 5
+		Converters\ConverterRhinoGh\ConverterRhinoGhShared\ConverterRhinoGhShared.projitems*{1dc0a8f4-1f14-47e8-8456-9d8e9c0e6cff}*SharedItemsImports = 5
+		Converters\ConverterBentley\ConverterBentleyShared\ConverterBentleyShared.projitems*{208b25e4-2d0e-4534-b197-4c5c96cc53ce}*SharedItemsImports = 13
+		Converters\ConverterAutocadCivil\ConverterAutocadCivilShared\ConverterAutocadCivilShared.projitems*{2c68e80f-38f4-41d0-9b38-473031d1b541}*SharedItemsImports = 5
+		Converters\ConverterAutocadCivil\ConverterAutocadCivilShared\ConverterAutocadCivilShared.projitems*{2d0f9f8a-2e89-4780-978a-cd92d6d7b843}*SharedItemsImports = 13
+		Converters\ConverterRevit\ConverterRevitShared\ConverterRevitShared.projitems*{2dcd648d-dca5-4d2a-8b14-ad2cb85d24b0}*SharedItemsImports = 13
+		Converters\ConverterDynamo\ConverterDynamoShared\ConverterDynamoShared.projitems*{4f16a993-7d11-4565-a2a5-910899919e00}*SharedItemsImports = 5
+		Converters\ConverterRevit\ConverterRevitShared\ConverterRevitShared.projitems*{4f16a993-7d11-4565-a2a5-910899919e00}*SharedItemsImports = 5
+		Converters\ConverterRhinoGh\ConverterRhinoGhShared\ConverterRhinoGhShared.projitems*{5a7671d6-57a1-4422-9ebb-79f3c724c0ba}*SharedItemsImports = 5
+		Converters\ConverterDynamo\ConverterDynamoShared\ConverterDynamoShared.projitems*{5bab09dc-b0fc-4004-9fd5-6496a9634071}*SharedItemsImports = 13
+		Converters\ConverterCSI\ConverterCSIShared\ConverterCSIShared.projitems*{5bbde14e-50f8-4d6e-8e35-747667ad4a09}*SharedItemsImports = 13
+		Converters\ConverterCSI\ConverterCSIShared\ConverterCSIShared.projitems*{62e992b6-2e65-4714-ad37-42f34f9bd5da}*SharedItemsImports = 5
+		Converters\ConverterRhinoGh\ConverterRhinoGhShared\ConverterRhinoGhShared.projitems*{63b3f901-7c14-4530-8a6f-ccad68586664}*SharedItemsImports = 5
+		Converters\ConverterCSI\ConverterCSIShared\ConverterCSIShared.projitems*{79aa475d-7cde-4501-90ce-9a0d9d0db023}*SharedItemsImports = 5
+		Converters\ConverterTeklaStructures\ConverterTeklaStructuresShared\ConverterTeklaStructuresShared.projitems*{7ffdab72-145d-4490-9892-fac5f1d72b17}*SharedItemsImports = 13
+		Converters\ConverterBentley\ConverterBentleyShared\ConverterBentleyShared.projitems*{8307c9b9-50dd-4ac0-bd1b-0ef1b36bb64d}*SharedItemsImports = 5
+		Converters\ConverterRevit\ConverterRevitShared\ConverterRevitShared.projitems*{90362309-466a-482b-814a-adb1ce227607}*SharedItemsImports = 5
+		Converters\ConverterTeklaStructures\ConverterTeklaStructuresShared\ConverterTeklaStructuresShared.projitems*{adc53dc0-0592-4f13-b456-65adcb2164a1}*SharedItemsImports = 5
+		Converters\ConverterBentley\ConverterBentleyShared\ConverterBentleyShared.projitems*{b60beffc-82ec-4540-86d8-eb246677ddde}*SharedItemsImports = 5
+		Converters\ConverterRhinoGh\ConverterRhinoGhShared\ConverterRhinoGhShared.projitems*{b74cb8c1-187b-46a6-b20b-92b8c129f3ee}*SharedItemsImports = 13
+		Converters\ConverterRhinoGh\ConverterRhinoGhShared\ConverterRhinoGhShared.projitems*{b9649e07-f7b4-4fcc-9e44-076993621d0a}*SharedItemsImports = 5
+		Converters\ConverterDynamo\ConverterDynamoShared\ConverterDynamoShared.projitems*{bc110327-3c61-4c15-ae4c-daae7ca82a7b}*SharedItemsImports = 5
+		Converters\ConverterRevit\ConverterRevitShared\ConverterRevitShared.projitems*{bf5515b4-c97c-4fb9-9f93-1740d2b615b3}*SharedItemsImports = 5
+		Converters\ConverterBentley\ConverterBentleyShared\ConverterBentleyShared.projitems*{c6ce0486-2dc8-4009-81a3-ed5ac6c7b2ee}*SharedItemsImports = 5
+		Converters\ConverterAutocadCivil\ConverterAutocadCivilShared\ConverterAutocadCivilShared.projitems*{dd4add16-65f9-46e0-a610-2b7908a966b3}*SharedItemsImports = 5
+		Converters\ConverterCSI\ConverterCSIShared\ConverterCSIShared.projitems*{df4d24c3-2be8-476c-8d40-33892be07b1d}*SharedItemsImports = 5
+		Converters\ConverterBentley\ConverterBentleyShared\ConverterBentleyShared.projitems*{e2e0281a-6cbb-469e-a307-ff492cb16a3e}*SharedItemsImports = 5
+		Converters\ConverterRevit\ConverterRevitShared\ConverterRevitShared.projitems*{e4006179-462f-4133-9481-219279138b93}*SharedItemsImports = 5
+		Converters\ConverterCSI\ConverterCSIShared\ConverterCSIShared.projitems*{f00b2895-b912-432d-a504-99a82e07d9d4}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal

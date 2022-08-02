@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
 using Avalonia;
@@ -92,5 +85,23 @@ namespace Speckle.ConnectorTeklaStructures
             MainWindow.Activate();
         }
 
+                    //required to gracefully quit avalonia and the skia processes
+                    //https://github.com/AvaloniaUI/Avalonia/wiki/Application-lifetimes
+                    if (Lifetime == null)
+                    {
+                        Lifetime = new CancellationTokenSource();
+                        System.Threading.Tasks.Task.Run(() => AvaloniaApp.Run(Lifetime.Token));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+    private void MainForm_Load(object sender, EventArgs e)
+    {
+
     }
+  }
 }

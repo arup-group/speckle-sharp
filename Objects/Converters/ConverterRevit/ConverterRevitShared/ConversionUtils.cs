@@ -15,6 +15,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Speckle.Core.Kits;
 using DB = Autodesk.Revit.DB;
 using ElementType = Autodesk.Revit.DB.ElementType;
 using Floor = Objects.BuiltElements.Floor;
@@ -1326,6 +1327,35 @@ namespace Objects.Converter.Revit
 
       return (a, b);
 
+    }
+
+    public class FallbackToDxfException : Exception
+    {
+      public FallbackToDxfException(string message) : base(message)
+      {
+      }
+
+      public FallbackToDxfException(string message, Exception innerException) : base(message, innerException)
+      {
+      }
+    }
+    
+    public ApplicationPlaceholderObject CheckForExistingObject(Base @base)
+    {
+      @base.applicationId ??= @base.id;
+      var docObj = GetExistingElementByApplicationId(@base.applicationId);
+
+      if (docObj != null && ReceiveMode == ReceiveMode.Ignore)
+        return new ApplicationPlaceholderObject
+          { applicationId = @base.applicationId, ApplicationGeneratedId = docObj.UniqueId, NativeObject = docObj };
+
+      //just create new one 
+      if (docObj != null)
+      {
+        Doc.Delete(docObj.Id);
+      }
+
+      return null;
     }
   }
 }

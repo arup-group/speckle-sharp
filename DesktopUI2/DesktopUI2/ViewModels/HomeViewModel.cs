@@ -19,6 +19,7 @@ using System.Linq;
 using System.Reactive;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using DesktopUI2.Views;
 
 namespace DesktopUI2.ViewModels
 {
@@ -558,37 +559,15 @@ namespace DesktopUI2.ViewModels
 
     public virtual async void NewStreamCommand()
     {
+      var dialog = new NewStreamDialog
+      {
+        DataContext = new NewStreamViewModel(HostScreen, Accounts),
+      };
 
-      var dialog = new NewStreamDialog(Accounts);
       var result = await dialog.ShowDialog<bool>();
-
-
-
       if (result)
       {
-        try
-        {
-          var client = new Client(dialog.Account);
-          StreamCreateInput createInput;
-          if (!String.IsNullOrEmpty(dialog.JobNumber))
-            createInput = new StreamWithJobNumberCreateInput { description = dialog.Description, name = dialog.StreamName, isPublic = dialog.IsPublic, jobNumber = dialog.JobNumber };
-          else
-            createInput = new StreamCreateInput { description = dialog.Description, name = dialog.StreamName, isPublic = dialog.IsPublic };
-
-          var streamId = await client.StreamCreate(createInput);
-          var stream = await client.StreamGet(streamId);
-          var streamState = new StreamState(dialog.Account, stream);
-
-          OpenStream(streamState);
-
-          Analytics.TrackEvent(dialog.Account, Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Create" } });
-
-          GetStreams().ConfigureAwait(false); //update streams
-        }
-        catch (Exception e)
-        {
-          Dialogs.ShowDialog("Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
-        }
+        GetStreams().ConfigureAwait(false); //update streams
       }
     }
 
@@ -677,9 +656,9 @@ namespace DesktopUI2.ViewModels
       return !InProgress;
     }
 
-    public virtual void OpenStream(StreamState streamState)
+    public static void OpenStream(StreamState streamState)
     {
-      MainViewModel.RouterInstance.Navigate.Execute(new StreamViewModel(streamState, HostScreen, RemoveSavedStreamCommand));
+      MainViewModel.RouterInstance.Navigate.Execute(new StreamViewModel(streamState, Instance.HostScreen, Instance.RemoveSavedStreamCommand));
     }
 
     public void ToggleDarkThemeCommand()
@@ -698,6 +677,10 @@ namespace DesktopUI2.ViewModels
 
     internal void ChangeTheme(bool isDark)
     {
+
+      if (Application.Current == null)
+        return;
+
       var materialTheme = Application.Current.LocateMaterialTheme<MaterialThemeBase>();
       var theme = materialTheme.CurrentTheme;
 

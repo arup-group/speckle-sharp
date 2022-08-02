@@ -364,6 +364,9 @@ ConnectorDynamo/ConnectorDynamo/dist/
 
 speckle-sharp-ci-tools
 
+.circleci/continuation-config.yml
+.circleci/contiuation-config.yml
+
 # GSA files
 GPUCache/
 GSAExport/
