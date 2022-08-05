@@ -592,7 +592,7 @@ namespace ConverterGSA
       if (gsaMemb.NodeIndices.Count >= 3)
       {
         var topology = gsaMemb.NodeIndices.Select(i => GetNodeFromIndex(i)).ToList();
-        //speckleMember2d.topology = topology;
+        speckleMember2d.topology = topology;
 
         var nodeAddIds = topology.Select(n => n.applicationId).ToList();
         speckleMember2d.topologyRefs = nodeAddIds;
