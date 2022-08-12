@@ -307,6 +307,7 @@ namespace ConverterGSA
         colour = gsaEl.Colour.ToString(),
         isDummy = gsaEl.Dummy,
         action = "NORMAL", //TODO: update if interim schema is updated
+        parentApplicationId = Instance.GsaModel.Cache.GetApplicationId<GsaMemb>(gsaEl.ParentIndex.Value)
       };
 
       if (gsaEl.Index.IsIndex())
@@ -1926,7 +1927,7 @@ namespace ConverterGSA
       //  string description
     }
 
-    public bool GsaElement1dResultToSpeckle(int gsaElementIndex, Element1D speckleElement, out List<Result1D> speckleResults)
+    public bool GsaElement1dResultToSpeckle(int gsaElementIndex, GSAElement1D speckleElement, out List<Result1D> speckleResults)
     {
       speckleResults = null;
       if (Instance.GsaModel.Proxy.GetResultRecords(ResultGroup.Elem_1d, gsaElementIndex, out var csvRecord))
@@ -1940,7 +1941,7 @@ namespace ConverterGSA
             description = "",
             permutation = "",
             //element = speckleElement,
-            elementRef = speckleElement.applicationId,
+            elementRef = speckleElement.parentApplicationId,
             position = float.Parse(gsaResult.PosR),
           };
 

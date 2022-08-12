@@ -15,6 +15,7 @@ namespace Objects.Structural.GSA.Geometry
     public string colour { get; set; }
     public string action { get; set; }
     public bool isDummy { get; set; }
+    public string parentApplicationId { get; set; }
     //public ElementType1D type { get; set; }
     public GSAElement1D() { }
 
