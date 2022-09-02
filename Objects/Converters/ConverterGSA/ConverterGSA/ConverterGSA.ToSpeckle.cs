@@ -307,8 +307,12 @@ namespace ConverterGSA
         colour = gsaEl.Colour.ToString(),
         isDummy = gsaEl.Dummy,
         action = "NORMAL", //TODO: update if interim schema is updated
-        parentApplicationId = Instance.GsaModel.Cache.GetApplicationId<GsaMemb>(gsaEl.ParentIndex.Value)
       };
+
+      if (gsaEl.ParentIndex.IsIndex())
+      {
+        speckleElement1d.parentApplicationId = Instance.GsaModel.Cache.GetApplicationId<GsaMemb>(gsaEl.ParentIndex.Value);
+      }
 
       if (gsaEl.Index.IsIndex())
       {
