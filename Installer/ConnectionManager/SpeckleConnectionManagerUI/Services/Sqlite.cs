@@ -25,6 +25,8 @@ namespace SpeckleConnectionManagerUI.Services
                 ";
                 createTableCommand.ExecuteNonQuery();
 
+                RemoveDuplicateAccounts(db);
+
                 SqliteCommand selectCommand = new SqliteCommand
                     ("SELECT content from objects", db);
 
@@ -40,6 +42,22 @@ namespace SpeckleConnectionManagerUI.Services
             }
 
             return entries;
+        }
+
+        private static void RemoveDuplicateAccounts(SqliteConnection db)
+        {
+          var command = new SqliteCommand
+            ("CREATE TABLE objects_new AS SELECT hash, content FROM objects GROUP BY hash, content", db);
+          command.ExecuteNonQuery();
+
+          command.CommandText = "DROP TABLE objects";
+          command.ExecuteNonQuery();
+
+          command.CommandText = "ALTER TABLE objects_new RENAME TO objects";
+          command.ExecuteNonQuery();
+
+          command.CommandText = "CREATE UNIQUE INDEX IF NOT EXISTS index_objects_hash ON objects(hash)";
+          command.ExecuteNonQuery();
         }
 
         public static void DeleteAuthData()
