@@ -16,7 +16,7 @@ namespace Objects.Structural.GSA.Properties
     public MemberType memberType { get; set; }
 
     [DetachProperty]
-    public Material designMaterial { get; set; }
+    public StructuralMaterial designMaterial { get; set; }
     public double additionalMass { get; set; }
     public double? cost { get; set; }
     public int? poolRef { get; set; }
@@ -24,7 +24,7 @@ namespace Objects.Structural.GSA.Properties
     public GSAProperty1D() { }
 
     [SchemaInfo("GSAProperty1D", "Creates a Speckle structural 1D element property for GSA", "GSA", "Properties")]
-    public GSAProperty1D(string name, Material material, SectionProfile profile, double cost = 0, double additionalMass = 0, int? nativeId = null)
+    public GSAProperty1D(string name, StructuralMaterial material, SectionProfile profile, double cost = 0, double additionalMass = 0, int? nativeId = null)
     {
       this.nativeId = nativeId;
       this.name = name;

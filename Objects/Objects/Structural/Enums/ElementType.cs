@@ -18,8 +18,8 @@ namespace Objects.Structural.Geometry
     Strut,
     Link,
     Damper,
-    Cable,
-    Spacer,
+    //Cable,
+    //Spacer,
     Other,
     Null
   }

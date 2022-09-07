@@ -187,8 +187,9 @@ namespace Speckle.ConnectorAutocadCivil.UI
           onProgressAction: dict => progress.Update(dict),
           onErrorAction: (s, e) =>
           {
-            progress.Report.LogOperationError(e);
-            progress.CancellationTokenSource.Cancel();
+            progress.Report.LogOperationError(new SpeckleException(e.Message, true, Sentry.SentryLevel.Error));
+            Analytics.TrackEvent(state.Client.Account, Speckle.Core.Logging.Analytics.Events.Receive, new Dictionary<string, object>() { { "commit_receive_failed", e.Message } });
+            progress.CancellationTokenSource.Cancel();                       
           },
           onTotalChildrenCountKnown: count => { progress.Max = count; },
           disposeTransports: true

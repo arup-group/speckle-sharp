@@ -15,7 +15,7 @@ namespace Objects.Structural.GSA.Properties
     public double? modifierVolume { get; set; } // negative number is a percentage, positive number is a value
 
     [DetachProperty]
-    public Material designMaterial { get; set; }
+    public StructuralMaterial designMaterial { get; set; }
     public double cost { get; set; }
     public double additionalMass { get; set; }
     public string concreteSlabProp { get; set; }
@@ -25,7 +25,7 @@ namespace Objects.Structural.GSA.Properties
     public GSAProperty2D() { }
 
     [SchemaInfo("GSAProperty2D", "Creates a Speckle structural 2D element property for GSA", "GSA", "Properties")]
-    public GSAProperty2D(string name, Material material, double thickness, PropertyType2D type, ReferenceSurface referenceSurface = ReferenceSurface.Middle, int? nativeId = null)
+    public GSAProperty2D(string name, StructuralMaterial material, double thickness, PropertyType2D type, ReferenceSurface referenceSurface = ReferenceSurface.Middle, int? nativeId = null)
     {
       this.nativeId = nativeId;
       this.name = name;
@@ -36,7 +36,7 @@ namespace Objects.Structural.GSA.Properties
     }
 
     [SchemaInfo("GSAProperty2D (with modifiers)", "Creates a Speckle structural 2D element property for GSA", "GSA", "Properties")]
-    public GSAProperty2D(string name, Material material, PropertyType2D type, double thickness,
+    public GSAProperty2D(string name, StructuralMaterial material, PropertyType2D type, double thickness,
       [SchemaParamInfo("Either an absolute value to use in place of the calculated stiffness or a percentage modifier to apply to the calculated stiffness (specify which using the modifierTypeInPlane parameter); ex. for percentage modifier, an input of 0.5 corresponds to a 50% modifier")] double? modifierValueInPlane = null,
       [SchemaParamInfo("Whether the in-plane stiffness modifier is an absolute value modifier (to replace the calculated value) or a perecent modifier (stiffness is modified to a percentage of the calculated value)")] ModifierType modifierTypeInPlane = ModifierType.ByPercentage,
       [SchemaParamInfo("Either an absolute value to use in place of the calculated stiffness or a percentage modifier to apply to the calculated stiffness (specify which using the modifierTypeBending parameter); ex. for percentage modifier, an input of 0.5 corresponds to a 50% modifier")] double? modifierValueBending = null,

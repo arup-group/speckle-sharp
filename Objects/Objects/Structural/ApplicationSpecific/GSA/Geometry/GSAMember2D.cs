@@ -27,7 +27,7 @@ namespace Objects.Structural.GSA.Geometry
     public GSAMember2D([SchemaParamInfo("An ordered list of nodes which represents the perimeter of a member (ie. order of points should based on valid polyline)")] List<Node> perimeter,
         Property2D property, MemberType2D memberType = MemberType2D.Generic2D, AnalysisType2D analysisType = AnalysisType2D.Linear,
         [SchemaParamInfo("A list of ordered lists of nodes representing the voids within a member (ie. order of points should be based on valid polyline)")] List<List<Node>> voids = null,
-        double offset = 0, double orientationAngle = 0, string name = null, int? nativeId = null, bool isDummy = false)
+        double offset = 0, double orientationAngle = 0, string name = null, int group = 1, string colour = "NO_RGB", bool isDummy = false, int? nativeId = null)
     {
       this.nativeId = nativeId;
       this.name = name;
@@ -38,6 +38,8 @@ namespace Objects.Structural.GSA.Geometry
       this.voids = voids; //needs to be ordered properly (ie. matching the point order of a valid polyline)
       this.offset = offset;
       this.orientationAngle = orientationAngle;
+      this.group = group;
+      this.colour = colour;
       this.isDummy = isDummy;
 
       var outline = new List<ICurve> { };
@@ -64,7 +66,7 @@ namespace Objects.Structural.GSA.Geometry
     public GSAMember2D([SchemaParamInfo("A polyline which represents the perimeter of a member")] Polyline perimeter,
         Property2D property, MemberType2D memberType = MemberType2D.Generic2D, AnalysisType2D analysisType = AnalysisType2D.Linear,
         [SchemaParamInfo("A list of polylines which represent the voids within a member")] List<Polyline> voids = null,
-        double offset = 0, double orientationAngle = 0, string name = null, int? nativeId = null, bool isDummy = false)
+        double offset = 0, double orientationAngle = 0, string name = null, int group = 1, string colour = "NO_RGB", bool isDummy = false, int ? nativeId = null)
     {
       this.nativeId = nativeId;
       this.name = name;     
@@ -87,6 +89,8 @@ namespace Objects.Structural.GSA.Geometry
 
       this.offset = offset;
       this.orientationAngle = orientationAngle;
+      this.group = group;
+      this.colour = colour;
       this.isDummy = isDummy;
       this.outline = outlineLoops;
 

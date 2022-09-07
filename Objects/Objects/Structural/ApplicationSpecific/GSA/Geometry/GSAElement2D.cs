@@ -20,7 +20,7 @@ namespace Objects.Structural.GSA.Geometry
     public GSAElement2D() { }
 
     [SchemaInfo("GSAElement2D", "Creates a Speckle structural 2D element for GSA", "GSA", "Geometry")]
-    public GSAElement2D(List<Node> nodes, Property2D property, ElementType2D type = ElementType2D.Quad4, string name = null, double offset = 0, double orientationAngle = 0, int group = 0, string colour = "NO_RGB", bool isDummy = false, int? nativeId = null)
+    public GSAElement2D(List<Node> nodes, Property2D property, ElementType2D type = ElementType2D.Quad4, string name = null, double offset = 0, double orientationAngle = 0, int group = 1, string colour = "NO_RGB", bool isDummy = false, int? nativeId = null)
     {
       switch (type)
       {

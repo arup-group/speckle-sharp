@@ -64,12 +64,17 @@ namespace Objects.Structural.Geometry
     /// <param name="end2Offset"></param>
     /// <param name="localAxis"></param>
     [SchemaInfo("Element1D (from local axis)", "Creates a Speckle structural 1D element (from local axis)", "Structural", "Geometry")]
-    public Element1D(Line baseLine, Property1D property, ElementType1D type = ElementType1D.Beam, string name = null,
+    public Element1D(Line baseLine, Property property, ElementType1D type = ElementType1D.Beam, string name = null,
         [SchemaParamInfo("If null, restraint condition defaults to unreleased (fully fixed translations and rotations)")] Restraint end1Releases = null,
         [SchemaParamInfo("If null, restraint condition defaults to unreleased (fully fixed translations and rotations)")] Restraint end2Releases = null,
         [SchemaParamInfo("If null, defaults to no offsets")] Vector end1Offset = null,
         [SchemaParamInfo("If null, defaults to no offsets")] Vector end2Offset = null, Plane localAxis = null)
-    {
+    {      
+      if (type == ElementType1D.Link &&  property.GetType() != typeof(PropertyLink))
+        throw new Exception("Link property must be provided if element is of type link");
+      else if (property.GetType() != typeof(Property1D))
+        throw new Exception("1d property must be provided");
+
       this.baseLine = baseLine;
       this.property = property;
       this.type = type;
@@ -95,13 +100,23 @@ namespace Objects.Structural.Geometry
     /// <param name="orientationNode"></param>
     /// <param name="orientationAngle"></param>
     [SchemaInfo("Element1D (from orientation node and angle)", "Creates a Speckle structural 1D element (from orientation node and angle)", "Structural", "Geometry")]
-    public Element1D(Line baseLine, Property1D property, ElementType1D type = ElementType1D.Beam, string name = null,
+    public Element1D(Line baseLine, Property property, ElementType1D type = ElementType1D.Beam, string name = null,
          [SchemaParamInfo("If null, restraint condition defaults to unreleased (fully fixed translations and rotations)")] Restraint end1Releases = null,
          [SchemaParamInfo("If null, restraint condition defaults to unreleased (fully fixed translations and rotations)")] Restraint end2Releases = null,
          [SchemaParamInfo("If null, defaults to no offsets")] Vector end1Offset = null,
          [SchemaParamInfo("If null, defaults to no offsets")] Vector end2Offset = null,
          Node orientationNode = null, double orientationAngle = 0)
     {
+      if (type == ElementType1D.Link)
+      {
+        if (!(property.GetType() == typeof(PropertyLink)) && !(property.GetType().IsSubclassOf(typeof(PropertyLink))))
+          throw new Exception("Link property must be provided if element is of type link");
+      } else
+      {
+        if (!(property.GetType() == typeof(Property1D)) && !(property.GetType().IsSubclassOf(typeof(Property1D))))
+          throw new Exception("1d property must be provided (mismatch between provided property and element type");
+      }
+
       this.baseLine = baseLine;
       this.property = property;
       this.type = type;
@@ -115,12 +130,23 @@ namespace Objects.Structural.Geometry
     }
 
     [SchemaInfo("Element1D (from nodes)", "Creates a Speckle structural 1D element (from nodes)", "Structural", "Geometry")]
-    public Element1D(Node node1, Node node2, Property1D property, ElementType1D type = ElementType1D.Beam, string name = null,
+    public Element1D(Node node1, Node node2, Property property, ElementType1D type = ElementType1D.Beam, string name = null,
         [SchemaParamInfo("If null, restraint condition defaults to unreleased (fully fixed translations and rotations)")] Restraint end1Releases = null,
         [SchemaParamInfo("If null, restraint condition defaults to unreleased (fully fixed translations and rotations)")] Restraint end2Releases = null,
         [SchemaParamInfo("If null, defaults to no offsets")] Vector end1Offset = null,
         [SchemaParamInfo("If null, defaults to no offsets")] Vector end2Offset = null, Plane localAxis = null)
     {
+      if (type == ElementType1D.Link)
+      {
+        if (!(property.GetType() == typeof(PropertyLink)) && !(property.GetType().IsSubclassOf(typeof(PropertyLink))))
+          throw new Exception("Link property must be provided if element is of type link");
+      }
+      else
+      {
+        if (!(property.GetType() == typeof(Property1D)) && !(property.GetType().IsSubclassOf(typeof(Property1D))))
+          throw new Exception("1d property must be provided (mismatch between provided property and element type");
+      }
+
       this.baseLine = new Line(node1.basePoint, node2.basePoint);
       this.property = property;
       this.type = type;

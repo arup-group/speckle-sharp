@@ -24,12 +24,12 @@ namespace Objects.Structural.AdSec.Geometry
         public List<AdSecReinforcementGroup> reinforcement { get; set; } = new List<AdSecReinforcementGroup>();
 
         [DetachProperty]
-        public Material material { get; set; }
+        public StructuralMaterial material { get; set; }
 
         public AdSecSection() { }
 
         [SchemaInfo("AdSecSection", "Creates a Speckle section for AdSec", "AdSec", "Geometry")]
-        public AdSecSection(string name, Material material, SectionProfile profile, AdSecSectionProperties properties, List<AdSecReinforcementGroup> reinforcement = null)
+        public AdSecSection(string name, StructuralMaterial material, SectionProfile profile, AdSecSectionProperties properties, List<AdSecReinforcementGroup> reinforcement = null)
         {
             this.name = name;
             this.material = material;
