@@ -1,9 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
+using Speckle.Core.Credentials;
 using SpeckleConnectionManagerUI.Models;
+using static SpeckleConnectionManagerUI.Services.RefreshTokenAction;
 
 namespace SpeckleConnectionManagerUI.Services
 {
@@ -54,43 +60,185 @@ namespace SpeckleConnectionManagerUI.Services
         /// <returns></returns>
         private static bool ContainsDuplicateAccounts(SqliteConnection db)
         {
+            // Returns count of accounts with duplicated hash
             var selectCmd = new SqliteCommand
-              ("SELECT hash from objects", db);
+              ("SELECT COUNT(*) FROM (SELECT hash FROM objects GROUP BY hash HAVING COUNT(*) > 1)", db);
 
-            var existingHashes = new List<string>();
+            var count = 0;
 
             using (var query = selectCmd.ExecuteReader())
             {
               while (query.Read())
               {
-                var hash = query.GetString(0);
-
-                if (existingHashes.Contains(hash))
-                  return true;
-
-                else
-                  existingHashes.Add(hash);
+                count = query.GetInt16(0);
               }
             }
 
-            return false;
+            return count > 0;
         }
 
         private static void RemoveDuplicateAccounts(SqliteConnection db)
         {
-          var command = new SqliteCommand
-            ("CREATE TABLE objects_new AS SELECT hash, content FROM objects GROUP BY hash, content", db);
-          command.ExecuteNonQuery();
+            var command = new SqliteCommand
+              ("SELECT hash FROM objects GROUP BY hash, content", db);
 
-          command.CommandText = "DROP TABLE objects";
-          command.ExecuteNonQuery();
+            var hashes = new List<string>();
 
-          command.CommandText = "ALTER TABLE objects_new RENAME TO objects";
-          command.ExecuteNonQuery();
+            using (var query = command.ExecuteReader())
+            {
+                while (query.Read())
+                {
+                  hashes.Add(query.GetString(0));
+                }
+            }
 
-          command.CommandText = "CREATE UNIQUE INDEX IF NOT EXISTS index_objects_hash ON objects(hash)";
-          command.ExecuteNonQuery();
-        }
+            // Hashes are duplicated but content is not
+            if (hashes.Count() != hashes.Distinct().Count())
+            {
+                // Creates blank table with schema of objects table
+                command.CommandText = "CREATE TABLE objects_new AS SELECT * FROM objects WHERE 0";
+                command.ExecuteNonQuery();
+
+                var updatedAccounts = GetUpdatedAccounts(db);
+
+                foreach (var acc in updatedAccounts)
+                {
+                    string jsonString = JsonSerializer.Serialize(acc);
+
+                    command.CommandText =
+                    @"
+                            INSERT INTO objects_new(hash, content)
+                            VALUES (@hash, @content)
+                          ";
+
+                    command.Parameters.AddWithValue("@hash", acc.id);
+                    command.Parameters.AddWithValue("@content", jsonString);
+                    command.ExecuteNonQuery();
+                }
+            }
+
+            // Both hashes and content are duplicated, remove duplicate entries from database
+            else
+            {
+                command.CommandText = "CREATE TABLE objects_new AS SELECT hash, content FROM objects GROUP BY hash, content";
+                command.ExecuteNonQuery();
+            }
+
+            command.CommandText = "DROP TABLE objects";
+            command.ExecuteNonQuery();
+
+            command.CommandText = "ALTER TABLE objects_new RENAME TO objects";
+            command.ExecuteNonQuery();
+
+            command.CommandText = "CREATE UNIQUE INDEX IF NOT EXISTS index_objects_hash ON objects(hash)";
+            command.ExecuteNonQuery();
+    }
+
+        public static List<Account> GetUpdatedAccounts(SqliteConnection connection)
+        {
+            HttpClient client = new();
+            SqliteCommand selectCommand = new SqliteCommand
+                    ("SELECT * FROM objects GROUP BY hash", connection);
+
+            SqliteDataReader query = selectCommand.ExecuteReader();
+
+            var entries = new List<Row>();
+
+            while (query.Read())
+            {
+              object[] objs = new object[3];
+              var row = query.GetValues(objs);
+
+              entries.Add(new Row
+              {
+                hash = objs[0].ToString(),
+                content = JsonSerializer.Deserialize<Speckle.Core.Credentials.Account>(objs[1].ToString())
+              });
+            }
+
+            var updatedAccounts = new List<Account>();
+
+
+            foreach (var entry in entries)
+            {
+              var content = entry.content;
+              var isDefault = entry.content.isDefault;
+              var url = content.serverInfo.url;
+              Console.WriteLine($"Auth token: {content.token}");
+              client.DefaultRequestHeaders.Add("Authorization", $"Bearer {content.token}");
+
+              HttpResponseMessage response;
+              try
+              {
+                response = client.PostAsJsonAsync($"{url}/auth/token", new
+                {
+                  appId = "sdm",
+                  appSecret = "sdm",
+                  refreshToken = content.refreshToken,
+                }).Result;
+              }
+              catch
+              {
+                client.DefaultRequestHeaders.Remove("Authorization");
+                continue;
+              }
+              Console.WriteLine(response.StatusCode);
+              if (response.StatusCode != HttpStatusCode.OK)
+              {
+                continue;
+              }
+              var tokens = response.Content.ReadFromJsonAsync<Tokens>().Result;
+              content.token = tokens.token;
+              content.refreshToken = tokens.refreshToken;
+
+              Console.WriteLine(tokens.token);
+
+              HttpResponseMessage info;
+              try
+              {
+                info = client.PostAsJsonAsync($"{url}/graphql", new
+                {
+                  query = "{\n  user {\n    id\n    name\n    email\n    company\n    avatar\n} serverInfo {\n name \n company \n canonicalUrl \n }\n}\n"
+                }).Result;
+              }
+              catch
+              {
+                client.DefaultRequestHeaders.Remove("Authorization");
+                continue;
+              }
+
+              client.DefaultRequestHeaders.Remove("Authorization");
+              Console.WriteLine(response.StatusCode);
+              if (response.StatusCode != HttpStatusCode.OK)
+              {
+                continue;
+              }
+
+              var infoContent = info.Content.ReadFromJsonAsync<InfoData>().Result;
+
+              if (infoContent == null) return null;
+
+              var serverInfo = infoContent.data.serverInfo;
+              serverInfo.url = url;
+
+              var userInfo = infoContent.data.user;
+
+              var updateContent = new Speckle.Core.Credentials.Account()
+              {
+                token = tokens.token,
+                refreshToken = tokens.refreshToken,
+                isDefault = isDefault,
+                serverInfo = serverInfo,
+                userInfo = userInfo
+              };
+
+              updatedAccounts.Add(updateContent);
+
+              
+            };
+
+            return updatedAccounts;
+          }
 
         public static void DeleteAuthData()
         {
