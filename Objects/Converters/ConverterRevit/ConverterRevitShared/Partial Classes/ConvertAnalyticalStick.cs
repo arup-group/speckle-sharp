@@ -393,7 +393,7 @@ namespace Objects.Converter.Revit
           speckleMaterial = timberMaterial;
           break;
         default:
-          var defaultMaterial = new Objects.Structural.Materials.Material
+          var defaultMaterial = new Objects.Structural.Materials.StructuralMaterial
           {
             name = structMat.Name
           };
@@ -716,7 +716,7 @@ namespace Objects.Converter.Revit
           speckleMaterial = timberMaterial;
           break;
         default:
-          var defaultMaterial = new Objects.Structural.Materials.Material
+          var defaultMaterial = new Objects.Structural.Materials.StructuralMaterial
           {
             name = stickFamily.Document.GetElement(revitStick.MaterialId).Name,
           };
