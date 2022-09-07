@@ -78,7 +78,8 @@ namespace Speckle.ConnectorRevit.UI
           onProgressAction: dict => progress.Update(dict),
           onErrorAction: (s, e) =>
           {
-            progress.Report.LogOperationError(e);
+            progress.Report.LogOperationError(new Speckle.Core.Logging.SpeckleException(e.Message, true, Sentry.SentryLevel.Error));
+            Core.Logging.Analytics.TrackEvent(state.Client.Account, Core.Logging.Analytics.Events.Receive, new Dictionary<string, object>() { { "commit_receive_failed", e.Message } });
             progress.CancellationTokenSource.Cancel();
           },
           onTotalChildrenCountKnown: count => { progress.Max = count; },

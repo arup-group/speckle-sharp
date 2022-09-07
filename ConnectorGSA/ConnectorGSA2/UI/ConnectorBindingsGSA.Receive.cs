@@ -149,7 +149,8 @@ namespace ConnectorGSA.UI
           onProgressAction: dict => progress.Update(dict),
           onErrorAction: (s, e) =>
           {
-            progress.Report.LogOperationError(e);
+            progress.Report.LogOperationError(new SpeckleException(e.Message, true, Sentry.SentryLevel.Error));
+            Analytics.TrackEvent(account, Analytics.Events.Receive, new Dictionary<string, object>() { { "commit_receive_failed", e.Message } });
             progress.CancellationTokenSource.Cancel();
           },
           onTotalChildrenCountKnown: count => { progress.Max = count; },
@@ -184,7 +185,7 @@ namespace ConnectorGSA.UI
       duration = DateTime.Now - startTime;
 
       progress.Report.Log("Duration of reception from Speckle and scaling: " + duration.ToString(@"hh\:mm\:ss"));
-      Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "timeToReceive", duration.ToString(@"hh\:mm\:ss") } });
+      Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "commit_receive_time", duration.ToString(@"hh\:mm\:ss") } });
 
       startTime = DateTime.Now;
 
@@ -229,7 +230,7 @@ namespace ConnectorGSA.UI
       if (duration.Seconds > 0)
       {
         progress.Report.Log("Duration of conversion from Speckle: " + duration.ToString(@"hh\:mm\:ss"));
-        Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "timeToConvert", duration.ToString(@"hh\:mm\:ss") } });
+        Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "commit_convert_time", duration.ToString(@"hh\:mm\:ss") } });
       }
       startTime = DateTime.Now;
 
@@ -246,7 +247,7 @@ namespace ConnectorGSA.UI
       if (duration.Seconds > 0)
       {
         progress.Report.Log("Duration of writing converted objects to GSA: " + duration.ToString(@"hh\:mm\:ss"));
-        Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "timeToWrite", duration.ToString(@"hh\:mm\:ss") } });
+        Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "commit_write_time", duration.ToString(@"hh\:mm\:ss") } });
       }
 
       Console.WriteLine("Receiving complete");

@@ -131,6 +131,7 @@ namespace ConnectorGrasshopper.Ops
         catch (Exception e)
         {
           RuntimeMessages.Add((GH_RuntimeMessageLevel.Warning, "Failed to receive local data."));
+          Logging.Analytics.TrackEvent(Logging.Analytics.Events.Receive, new Dictionary<string, object>() { { "commit_receive_failed", e.Message } });
           Done();
           return;
         }

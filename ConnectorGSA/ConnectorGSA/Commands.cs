@@ -464,6 +464,7 @@ namespace ConnectorGSA
               }
               else
               {
+                Speckle.Core.Logging.Analytics.TrackEvent(account, Speckle.Core.Logging.Analytics.Events.Receive, new Dictionary<string, object>() { { "commit_receive_failed", streamState.Errors.Last().Message } });
                 loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, "Failed to receive data from " + streamId + " stream"));
                 loggingProgress.Report(new MessageEventArgs(MessageIntent.TechnicalLog, MessageLevel.Error, "Failed to receive data from " + streamId + " stream"));
                 percentageProgress.Report(0);

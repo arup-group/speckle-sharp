@@ -19,7 +19,7 @@ namespace Speckle.Core.Logging
       if (_initialized)
         return;
 
-      var dsn = "https://f29ec716d14d4121bb2a71c4f3ef7786@o436188.ingest.sentry.io/5396846";
+      var dsn = "https://77622965196240e6b5c7e607c1397a68@o141124.ingest.sentry.io/5567027";
 
       var env = "production";
       var debug = false;

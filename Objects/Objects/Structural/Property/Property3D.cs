@@ -10,7 +10,7 @@ namespace Objects.Structural.Properties
   public class Property3D : Property
   {
     public PropertyType3D type { get; set; }
-    public Material material { get; set; }
+    public StructuralMaterial material { get; set; }
     public Axis orientationAxis { get; set; }
 
     public Property3D() { }
@@ -22,7 +22,7 @@ namespace Objects.Structural.Properties
     }
 
     [SchemaInfo("Property3D", "Creates a Speckle structural 3D element property", "Structural", "Properties")]
-    public Property3D(string name, PropertyType3D type, Material material)
+    public Property3D(string name, PropertyType3D type, StructuralMaterial material)
     {
       this.name = name;
       this.type = type;

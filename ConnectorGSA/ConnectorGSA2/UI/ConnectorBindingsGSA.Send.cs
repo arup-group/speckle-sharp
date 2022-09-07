@@ -148,7 +148,7 @@ namespace ConnectorGSA.UI
       if (duration.Seconds > 0)
       {
         progress.Report.Log("Duration of reading GSA model into cache: " + duration.ToString(@"hh\:mm\:ss"));
-        Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "timeToHydrateCache", duration.ToString(@"hh\:mm\:ss") } });
+        Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "cache_hydration_time", duration.ToString(@"hh\:mm\:ss") } });
       }
       startTime = DateTime.Now;
       
@@ -206,7 +206,7 @@ namespace ConnectorGSA.UI
 
       }
 
-      Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "numConverted", numConverted } });
+      Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "num_objs", numConverted } });
 
       progress.Report.Merge(converter.Report);
 
@@ -230,7 +230,7 @@ namespace ConnectorGSA.UI
       if (duration.Seconds > 0)
       {
         progress.Report.Log("Duration of conversion to Speckle: " + duration.ToString(@"hh\:mm\:ss"));
-        Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "timeToConvertToSpeckle", duration.ToString(@"hh\:mm\:ss") } });
+        Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "commit_convert_time", duration.ToString(@"hh\:mm\:ss") } });
       }
       startTime = DateTime.Now;
 
@@ -281,13 +281,13 @@ namespace ConnectorGSA.UI
       {
         progress.Report.Log("Successfully sent data to stream");
         Commands.UpsertSavedReceptionStreamInfo(true, null, state);
-        Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "totalChildrenCountSentObject", commitObj.GetTotalChildrenCount() } });
+        Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "commit_create_total_children_count", commitObj.GetTotalChildrenCount() } });
 
         duration = DateTime.Now - startTime;
         if (duration.Seconds > 0)
         {
           progress.Report.Log("Duration of sending to Speckle server: " + duration.ToString(@"hh\:mm\:ss"));
-          Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "timeToSend", duration.ToString(@"hh\:mm\:ss") } });
+          Analytics.TrackEvent(account, Analytics.Events.GSA, new Dictionary<string, object>() { { "commit_create_time", duration.ToString(@"hh\:mm\:ss") } });
         }
         startTime = DateTime.Now;
       }

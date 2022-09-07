@@ -21,7 +21,7 @@ namespace Objects.Structural.GSA.Geometry //GSA.Geometry?
     public GSAMember1D() { }
 
     [SchemaInfo("GSAMember1D (from local axis)", "Creates a Speckle structural 1D member for GSA (from local axis)", "GSA", "Geometry")]
-    public GSAMember1D(ICurve baseLine, Property1D property, MemberType memberType, ElementType1D analysisType, string name = null, Restraint end1Releases = null, Restraint end2Releases = null, Vector end1Offset = null, Vector end2Offset = null, Plane localAxis = null, int? nativeId = null, bool isDummy = false)
+    public GSAMember1D(ICurve baseLine, Property1D property, MemberType memberType, ElementType1D analysisType, string name = null, Restraint end1Releases = null, Restraint end2Releases = null, Vector end1Offset = null, Vector end2Offset = null, Plane localAxis = null, int group = 1, string colour = "NO_RGB", bool isDummy = false, int? nativeId = null)
     {
       this.name = name;
       this.nativeId = nativeId;
@@ -34,11 +34,13 @@ namespace Objects.Structural.GSA.Geometry //GSA.Geometry?
       this.end1Offset = end1Offset == null ? new Vector(0, 0, 0) : end1Offset;
       this.end2Offset = end2Offset == null ? new Vector(0, 0, 0) : end2Offset;
       this.localAxis = localAxis;
+      this.group = group;
+      this.colour = colour;
       this.isDummy = isDummy;
     }
 
     [SchemaInfo("GSAMember1D (from orientation node and angle)", "Creates a Speckle structural 1D member for GSA (from orientation node and angle)", "GSA", "Geometry")]
-    public GSAMember1D(ICurve baseLine, Property1D property, MemberType memberType, ElementType1D analysisType, string name = null, Restraint end1Releases = null, Restraint end2Releases = null, Vector end1Offset = null, Vector end2Offset = null, GSANode orientationNode = null, double orientationAngle = 0, int? nativeId = null, bool isDummy = false)
+    public GSAMember1D(ICurve baseLine, Property1D property, MemberType memberType, ElementType1D analysisType, string name = null, Restraint end1Releases = null, Restraint end2Releases = null, Vector end1Offset = null, Vector end2Offset = null, GSANode orientationNode = null, double orientationAngle = 0, int group = 1, string colour = "NO_RGB", bool isDummy = false, int? nativeId = null)
     {
       this.name = name;
       this.nativeId = nativeId;
@@ -52,11 +54,13 @@ namespace Objects.Structural.GSA.Geometry //GSA.Geometry?
       this.end2Offset = end2Offset == null ? new Vector(0, 0, 0) : end2Offset;
       this.orientationNode = orientationNode;
       this.orientationAngle = orientationAngle;
+      this.group = group;
+      this.colour = colour;
       this.isDummy = isDummy;
     }
 
     [SchemaInfo("GSAMember1D (from local axis and topology)", "Creates a Speckle structural 1D member for GSA (from local axis and topology)", "GSA", "Geometry")]
-    public GSAMember1D(List<Node> topology, Property1D property, MemberType memberType, ElementType1D analysisType, string name = null, Restraint end1Releases = null, Restraint end2Releases = null, Vector end1Offset = null, Vector end2Offset = null, Plane localAxis = null, int? nativeId = null, bool isDummy = false)
+    public GSAMember1D(List<Node> topology, Property1D property, MemberType memberType, ElementType1D analysisType, string name = null, Restraint end1Releases = null, Restraint end2Releases = null, Vector end1Offset = null, Vector end2Offset = null, Plane localAxis = null, int group = 1, string colour = "NO_RGB", bool isDummy = false, int ? nativeId = null)
     {
       this.name = name;
       this.nativeId = nativeId;
@@ -69,6 +73,8 @@ namespace Objects.Structural.GSA.Geometry //GSA.Geometry?
       this.end1Offset = end1Offset == null ? new Vector(0, 0, 0) : end1Offset;
       this.end2Offset = end2Offset == null ? new Vector(0, 0, 0) : end2Offset;
       this.localAxis = localAxis;
+      this.group = group;
+      this.colour = colour;
       this.isDummy = isDummy;
 
       this.topologyRefs = topology.Select(n => n.applicationId).ToList();

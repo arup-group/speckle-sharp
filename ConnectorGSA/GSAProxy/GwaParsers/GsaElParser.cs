@@ -92,7 +92,7 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
       }
 
       // EL.4 | num | name | colour | type | prop | group | topo() | orient_node | orient_angle | is_rls { | rls { | k } } off_x1 | off_x2 | off_y | off_z | dummy | parent
-      AddItems(ref items, record.Name, Colour.NO_RGB.ToString(), record.Type.GetStringValue(), AddProp(), (record.Group ?? 0));
+      AddItems(ref items, record.Name, Colour.NO_RGB.ToString(), record.Type.GetStringValue(), AddProp(), (record.Group ?? 1));
 
       //Again uses the integer value of the Type - this time to determine how many node index items to add
       var numNodes = NumNodes();

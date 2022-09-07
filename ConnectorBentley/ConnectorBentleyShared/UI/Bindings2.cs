@@ -238,7 +238,8 @@ namespace Speckle.ConnectorBentley.UI
           onTotalChildrenCountKnown: num => Execute.PostToUIThread(() => progress.Max = num),
           onErrorAction: (message, exception) =>
           {
-            progress.Report.LogOperationError(exception);
+            progress.Report.LogOperationError(new SpeckleException(exception.Message, true, Sentry.SentryLevel.Error));
+            Analytics.TrackEvent(state.Client.Account, Analytics.Events.Receive, new Dictionary<string, object>() { { "commit_receive_failed", exception.Message } });
             progress.CancellationTokenSource.Cancel();
           },
           disposeTransports: true

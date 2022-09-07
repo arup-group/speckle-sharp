@@ -66,49 +66,23 @@ namespace Objects.Structural.GSA.Geometry
     public GSAConstraintCondition() { }
 
     [SchemaInfo("GSAConstraintCondition", "Creates a custom link description for a rigid constraint (ie. to be used with rigid contraints with custom linkage type)", "GSA", "Geometry")]
-    public GSAConstraintCondition([SchemaParamInfo("A list of directions the X direction is coupled with (should be x, yy and/or zz)")] List<string> X = null,
-      [SchemaParamInfo("A list of directions the Y direction is coupled with (should be y, xx and/or zz)")] List<string> Y = null,
-      [SchemaParamInfo("A list of directions the Z direction is coupled with (should be z, xx and/or yy)")] List<string> Z = null,
-      [SchemaParamInfo("A list of directions the XX direction is coupled with (should be xx)")] List<string> XX = null,
-      [SchemaParamInfo("A list of directions the YY direction is coupled with (should be yy)")] List<string> YY = null,
-      [SchemaParamInfo("A list of directions the ZZ direction is coupled with (should be zz)")] List<string> ZZ = null)
+    public GSAConstraintCondition([SchemaParamInfo("A comma-separated string denoting the coupled degrees of freedom for X (can be x, yy and/or zz degrees of freedom, ex. 'x,yy' for x and yy degrees of freedom)")] string X = null,
+      [SchemaParamInfo("A comma-separated string denoting the coupled degrees of freedom for Y (should be y, xx and/or zz degrees of freedom, ex. 'xx' for the xx degree of freedom)")] string Y = null,
+      [SchemaParamInfo("A comma-separated string denoting the coupled degrees of freedom for Z (should be z, xx and/or yy degrees of freedom, ex. 'z, xx, yy' for the z, xx and yy degrees of freedom)")] string Z = null,
+      [SchemaParamInfo("Whether the XX degrees of freedom are coupled")] bool XX = false,
+      [SchemaParamInfo("Whether the YY degrees of freedom are couple")] bool YY = false,
+      [SchemaParamInfo("Whether the YY degrees of freedom are couple")] bool ZZ = false)
     {
-      this.X = X;
-      this.Y = Y;
-      this.Z = Z;
-      this.XX = XX;
-      this.YY = YY;
-      this.ZZ = ZZ;
+      if (X != null) this.X = X.Split(',').Select(s => s.Trim()).ToList();
+      if (Y != null) this.Y = Y.Split(',').Select(s => s.Trim()).ToList();
+      if (Z != null) this.Z = Z.Split(',').Select(s => s.Trim()).ToList();
+      if (XX) this.XX = new List<string> { "XX" };
+      if (YY) this.YY = new List<string> { "YY" };
+      if (ZZ) this.ZZ = new List<string> { "ZZ" };
+
     }
   }
 
-
-  //public class GSAConstraintCondition : Base
-  //{
-  //  public List<AxisDirection6> X { get; set; }
-  //  public List<AxisDirection6> Y { get; set; }
-  //  public List<AxisDirection6> Z { get; set; }
-  //  public List<AxisDirection6> XX { get; set; }
-  //  public List<AxisDirection6> YY { get; set; }
-  //  public List<AxisDirection6> ZZ { get; set; }
-  //  public GSAConstraintCondition() { }
-
-  //  [SchemaInfo("GSAConstraintCondition", "Creates a custom link description for a rigid constraint (ie. to be used with rigid contraints with custom linkage type)", "GSA", "Geometry")]
-  //  public GSAConstraintCondition([SchemaParamInfo("A list of directions the X direction is coupled with (should be x, yy and/or zz)")] List<AxisDirection6> X = null,
-  //    [SchemaParamInfo("A list of directions the Y direction is coupled with (should be y, xx and/or zz)")] List<AxisDirection6> Y = null,
-  //    [SchemaParamInfo("A list of directions the Z direction is coupled with (should be z, xx and/or yy)")] List<AxisDirection6> Z = null,
-  //    [SchemaParamInfo("A list of directions the XX direction is coupled with (should be xx)")] List<AxisDirection6> XX = null,
-  //    [SchemaParamInfo("A list of directions the YY direction is coupled with (should be yy)")] List<AxisDirection6> YY = null,
-  //    [SchemaParamInfo("A list of directions the ZZ direction is coupled with (should be zz)")] List<AxisDirection6> ZZ = null)
-  //  {
-  //    this.X = X;
-  //    this.Y = Y;
-  //    this.Z = Z;
-  //    this.XX = XX;
-  //    this.YY = YY;
-  //    this.ZZ = ZZ;
-  //  }
-  //}
 
   public enum AxisDirection6
   {

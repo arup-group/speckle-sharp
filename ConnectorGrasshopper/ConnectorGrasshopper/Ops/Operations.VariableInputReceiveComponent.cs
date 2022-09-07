@@ -521,6 +521,7 @@ namespace ConnectorGrasshopper.Ops
 
         ErrorAction = (transportName, exception) =>
         {
+          Speckle.Core.Logging.Analytics.TrackEvent(Speckle.Core.Logging.Analytics.Events.Receive, new Dictionary<string, object>() { { "commit_receive_failed", exception.Message } });
           // TODO: This message condition should be removed once the `link sharing` issue is resolved server-side.
           var msg = exception.Message.Contains("401")
             ? "You don't have access to this stream/transport , or it doesn't exist."

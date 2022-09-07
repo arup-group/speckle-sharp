@@ -10,7 +10,7 @@ namespace Objects.Structural.Properties
   public class Property1D : Property
   {
     [DetachProperty]
-    public Material material { get; set; }
+    public StructuralMaterial material { get; set; }
 
     [DetachProperty]
     public SectionProfile profile { get; set; } //section description
@@ -28,7 +28,7 @@ namespace Objects.Structural.Properties
     }
 
     [SchemaInfo("Property1D", "Creates a Speckle structural 1D element property", "Structural", "Properties")]
-    public Property1D(string name, Material material, SectionProfile profile)
+    public Property1D(string name, StructuralMaterial material, SectionProfile profile)
     {
       this.name = name;
       this.material = material;

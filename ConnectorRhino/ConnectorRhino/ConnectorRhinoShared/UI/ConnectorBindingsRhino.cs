@@ -183,6 +183,8 @@ namespace SpeckleRhino
 
       converter.SetContextDocument(Doc);
 
+      var startTime = DateTime.Now;
+
       var transport = new ServerTransport(state.Client.Account, state.StreamId);
 
       if (progress.CancellationTokenSource.Token.IsCancellationRequested)
@@ -215,8 +217,9 @@ namespace SpeckleRhino
           onProgressAction: dict => progress.Update(dict),
           onErrorAction: (s, e) =>
           {
-            progress.Report.LogOperationError(e);
+            progress.Report.LogOperationError(new SpeckleException(e.Message, true, Sentry.SentryLevel.Error));
             progress.CancellationTokenSource.Cancel();
+            Speckle.Core.Logging.Analytics.TrackEvent(state.Client.Account, Speckle.Core.Logging.Analytics.Events.Receive, new Dictionary<string, object>() { { "commit_receive_failed", e.Message } });
           },
           onTotalChildrenCountKnown: (c) => progress.Max = c,
           disposeTransports: true
@@ -227,6 +230,9 @@ namespace SpeckleRhino
 
       if (progress.CancellationTokenSource.Token.IsCancellationRequested)
         return null;
+
+      var duration = DateTime.Now - startTime;
+      Speckle.Core.Logging.Analytics.TrackEvent(state.Client.Account, Speckle.Core.Logging.Analytics.Events.Receive, new Dictionary<string, object>() { { "commit_receive_time", duration.ToString(@"hh\:mm\:ss") } });
 
       var undoRecord = Doc.BeginUndoRecord($"Speckle bake operation for {state.CachedStream.name}");
 

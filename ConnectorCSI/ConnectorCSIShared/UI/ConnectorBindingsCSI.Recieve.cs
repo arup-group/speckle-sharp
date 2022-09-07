@@ -68,7 +68,8 @@ namespace Speckle.ConnectorCSI.UI
                 onProgressAction: dict => progress.Update(dict),
                 onErrorAction: (Action<string, Exception>)((s, e) =>
                 {
-                  progress.Report.LogOperationError(e);
+                  progress.Report.LogOperationError(new Core.Logging.SpeckleException(e.Message, true, Sentry.SentryLevel.Error));
+                  Core.Logging.Analytics.TrackEvent(state.Client.Account, Core.Logging.Analytics.Events.Receive, new Dictionary<string, object>() { { "commit_receive_failed", e.Message } });
                   progress.CancellationTokenSource.Cancel();
                 }),
                 //onTotalChildrenCountKnown: count => Execute.PostToUIThread(() => state.Progress.Maximum = count),
