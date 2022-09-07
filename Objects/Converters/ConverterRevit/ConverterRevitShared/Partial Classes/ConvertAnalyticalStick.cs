@@ -322,7 +322,7 @@ namespace Objects.Converter.Revit
       var materialAsset = structAsset != null ? structAsset.GetStructuralAsset() : null;
       //materialAsset = ((PropertySetElement)Doc.GetElement(structMat.StructuralAssetId)).GetStructuralAsset();
 
-      Structural.Materials.Material speckleMaterial = null;
+      Structural.Materials.StructuralMaterial speckleMaterial = null;
       switch (materialType)
       {
         case StructuralMaterialType.Concrete:
@@ -393,7 +393,7 @@ namespace Objects.Converter.Revit
           speckleMaterial = timberMaterial;
           break;
         default:
-          var defaultMaterial = new Objects.Structural.Materials.Material
+          var defaultMaterial = new Objects.Structural.Materials.StructuralMaterial
           {
             name = structMat.Name
           };
@@ -644,7 +644,7 @@ namespace Objects.Converter.Revit
         structMat = (DB.Material)stickFamily.Document.GetElement(stickFamily.get_Parameter(BuiltInParameter.STRUCTURAL_MATERIAL_PARAM).AsElementId());
       var materialAsset = ((PropertySetElement)structMat.Document.GetElement(structMat.StructuralAssetId)).GetStructuralAsset();
 
-      Structural.Materials.Material speckleMaterial = null;
+      Structural.Materials.StructuralMaterial speckleMaterial = null;
 
       switch (materialType)
       {
@@ -716,7 +716,7 @@ namespace Objects.Converter.Revit
           speckleMaterial = timberMaterial;
           break;
         default:
-          var defaultMaterial = new Objects.Structural.Materials.Material
+          var defaultMaterial = new Objects.Structural.Materials.StructuralMaterial
           {
             name = stickFamily.Document.GetElement(revitStick.MaterialId).Name,
           };

@@ -148,11 +148,11 @@ namespace ConverterGSA
       switch (gsaType)
       {
         case ElementType.Bar: return ElementType1D.Bar;
-        case ElementType.Cable: return ElementType1D.Cable;
+        //case ElementType.Cable: return ElementType1D.Cable;
         case ElementType.Damper: return ElementType1D.Damper;
         case ElementType.Link: return ElementType1D.Link;
         case ElementType.Rod: return ElementType1D.Rod;
-        case ElementType.Spacer: return ElementType1D.Spacer;
+        //case ElementType.Spacer: return ElementType1D.Spacer;
         case ElementType.Spring: return ElementType1D.Spring;
         case ElementType.Strut: return ElementType1D.Strut;
         case ElementType.Tie: return ElementType1D.Tie;
@@ -176,11 +176,11 @@ namespace ConverterGSA
       switch (gsaType)
       {
         case AnalysisType.BAR: return ElementType1D.Bar;
-        case AnalysisType.CABLE: return ElementType1D.Cable;
+        //case AnalysisType.CABLE: return ElementType1D.Cable;
         case AnalysisType.DAMPER: return ElementType1D.Damper;
         case AnalysisType.LINK: return ElementType1D.Link;
         case AnalysisType.ROD: return ElementType1D.Rod;
-        case AnalysisType.SPACER: return ElementType1D.Spacer;
+        //case AnalysisType.SPACER: return ElementType1D.Spacer;
         case AnalysisType.SPRING: return ElementType1D.Spring;
         case AnalysisType.STRUT: return ElementType1D.Strut;
         case AnalysisType.TIE: return ElementType1D.Tie;
@@ -846,11 +846,11 @@ namespace ConverterGSA
         case ElementType1D.Beam: return ElementType.Beam;
         case ElementType1D.Column: return ElementType.Beam;
         case ElementType1D.Bar: return ElementType.Bar;
-        case ElementType1D.Cable: return ElementType.Cable;
+        //case ElementType1D.Cable: return ElementType.Cable;
         case ElementType1D.Damper: return ElementType.Damper;
         case ElementType1D.Link: return ElementType.Link;
         case ElementType1D.Rod: return ElementType.Rod;
-        case ElementType1D.Spacer: return ElementType.Spacer;
+        //case ElementType1D.Spacer: return ElementType.Spacer;
         case ElementType1D.Spring: return ElementType.Spring;
         case ElementType1D.Strut: return ElementType.Strut;
         case ElementType1D.Tie: return ElementType.Tie;
@@ -865,11 +865,11 @@ namespace ConverterGSA
         case ElementType1D.Beam:
         case ElementType1D.Column:
         case ElementType1D.Bar:
-        case ElementType1D.Cable:
+        //case ElementType1D.Cable:
         case ElementType1D.Damper:
         case ElementType1D.Link:
         case ElementType1D.Rod:
-        case ElementType1D.Spacer:
+        //case ElementType1D.Spacer:
         case ElementType1D.Spring:
         case ElementType1D.Strut:
         case ElementType1D.Tie:

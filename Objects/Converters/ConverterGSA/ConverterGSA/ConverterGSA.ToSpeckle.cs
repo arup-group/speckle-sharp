@@ -303,11 +303,16 @@ namespace ConverterGSA
 
         //-- GSA specific --
         nativeId = gsaEl.Index ?? 0,
-        group = gsaEl.Group ?? 0,
+        group = gsaEl.Group ?? 1,
         colour = gsaEl.Colour.ToString(),
         isDummy = gsaEl.Dummy,
         action = "NORMAL", //TODO: update if interim schema is updated
       };
+
+      if (gsaEl.ParentIndex.IsIndex())
+      {
+        speckleElement1d.parentApplicationId = Instance.GsaModel.Cache.GetApplicationId<GsaMemb>(gsaEl.ParentIndex.Value);
+      }
 
       if (gsaEl.Index.IsIndex())
       {
@@ -374,7 +379,7 @@ namespace ConverterGSA
 
         //-- GSA specific --
         nativeId = gsaEl.Index ?? 0,
-        group = gsaEl.Group ?? 0,
+        group = gsaEl.Group ?? 1,
         colour = gsaEl.Colour.ToString(),
         isDummy = gsaEl.Dummy,
       };
@@ -458,7 +463,7 @@ namespace ConverterGSA
 
         //-- GSA specific --
         nativeId = gsaMemb.Index ?? 0,
-        group = gsaMemb.Group ?? 0,
+        group = gsaMemb.Group ?? 1,
         targetMeshSize = gsaMemb.MeshSize ?? 0,
         colour = gsaMemb.Colour.ToString(),
         isDummy = gsaMemb.Dummy,
@@ -579,7 +584,7 @@ namespace ConverterGSA
 
         //-- GSA specific --
         nativeId = gsaMemb.Index ?? 0,
-        group = gsaMemb.Group ?? 0,
+        group = gsaMemb.Group ?? 1,
         targetMeshSize = gsaMemb.MeshSize ?? 0,
         colour = gsaMemb.Colour.ToString(),
         isDummy = gsaMemb.Dummy,
@@ -592,7 +597,7 @@ namespace ConverterGSA
       if (gsaMemb.NodeIndices.Count >= 3)
       {
         var topology = gsaMemb.NodeIndices.Select(i => GetNodeFromIndex(i)).ToList();
-        //speckleMember2d.topology = topology;
+        speckleMember2d.topology = topology;
 
         var nodeAddIds = topology.Select(n => n.applicationId).ToList();
         speckleMember2d.topologyRefs = nodeAddIds;
@@ -1926,7 +1931,7 @@ namespace ConverterGSA
       //  string description
     }
 
-    public bool GsaElement1dResultToSpeckle(int gsaElementIndex, Element1D speckleElement, out List<Result1D> speckleResults)
+    public bool GsaElement1dResultToSpeckle(int gsaElementIndex, GSAElement1D speckleElement, out List<Result1D> speckleResults)
     {
       speckleResults = null;
       if (Instance.GsaModel.Proxy.GetResultRecords(ResultGroup.Elem_1d, gsaElementIndex, out var csvRecord))
@@ -1940,7 +1945,7 @@ namespace ConverterGSA
             description = "",
             permutation = "",
             //element = speckleElement,
-            elementRef = speckleElement.applicationId,
+            elementRef = speckleElement.parentApplicationId,
             position = float.Parse(gsaResult.PosR),
           };
 
@@ -2587,7 +2592,7 @@ namespace ConverterGSA
         nativeId = gsaPath.Index ?? 0,
         name = gsaPath.Name,
         type = gsaPath.Type.ToSpeckle(),
-        group = gsaPath.Group ?? 0,
+        group = gsaPath.Group ?? 1,
         left = gsaPath.Left ?? 0,
         right = gsaPath.Right ?? 0,
         factor = gsaPath.Factor ?? 0,
@@ -2604,7 +2609,7 @@ namespace ConverterGSA
           nativeId = gsaPath.Index ?? 0,
           name = gsaPath.Name,
           type = gsaPath.Type.ToSpeckle(),
-          group = gsaPath.Group ?? 0,
+          group = gsaPath.Group ?? 1,
           left = gsaPath.Left ?? 0,
           right = gsaPath.Right ?? 0,
           factor = gsaPath.Factor ?? 0,
@@ -3733,11 +3738,11 @@ namespace ConverterGSA
     /// <param name="index">GSA material index</param>
     /// <param name="type">GSA material type</param>
     /// <returns></returns>
-    private Material GetMaterialFromIndex(int index, Property2dMaterialType type)
+    private StructuralMaterial GetMaterialFromIndex(int index, Property2dMaterialType type)
     {
       //Initialise
       GsaRecord gsaMat;
-      Material speckleMaterial = null;
+      StructuralMaterial speckleMaterial = null;
 
       //Get material based on type and gsa index
       //Convert gsa material to speckle material
@@ -3765,11 +3770,11 @@ namespace ConverterGSA
     /// <param name="index">GSA material index</param>
     /// <param name="type">GSA material type</param>
     /// <returns></returns>
-    private Material GetMaterialFromIndex(int index, Section1dMaterialType type)
+    private StructuralMaterial GetMaterialFromIndex(int index, Section1dMaterialType type)
     {
       //Initialise
       GsaRecord gsaMat;
-      Material speckleMaterial = null;
+      StructuralMaterial speckleMaterial = null;
 
       //Get material based on type and gsa index
       //Convert gsa material to speckle material
@@ -3791,9 +3796,9 @@ namespace ConverterGSA
       return speckleMaterial;
     }
 
-    private Material GetAnalysisMaterialFromIndex(int index)
+    private StructuralMaterial GetAnalysisMaterialFromIndex(int index)
     {
-      return (Instance.GsaModel.Cache.GetSpeckleObjects<GsaMatAnal, Material>(index, out var speckleObjects) && speckleObjects != null && speckleObjects.Count > 0)
+      return (Instance.GsaModel.Cache.GetSpeckleObjects<GsaMatAnal, StructuralMaterial>(index, out var speckleObjects) && speckleObjects != null && speckleObjects.Count > 0)
       ? speckleObjects.First() : null;
     }
 

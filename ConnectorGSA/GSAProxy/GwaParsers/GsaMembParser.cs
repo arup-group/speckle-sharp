@@ -116,7 +116,7 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
       //MEMB.8 | num | name | colour | type(1D) | exposure | prop | group | topology | node | angle | mesh_size | is_intersector | analysis_type | fire | limiting_temperature | time[4] | dummy | rls_1 { | k_1 } rls_2 { | k_2 } | restraint_end_1 | restraint_end_2 | EFF_LEN | lyy | lzz | llt | load_height | load_ref | is_off { | auto_off_x1 | auto_off_x2 | off_x1 | off_x2 | off_y | off_z }
       //MEMB.8 | num | name | colour | type(1D) | exposure | prop | group | topology | node | angle | mesh_size | is_intersector | analysis_type | fire | limiting_temperature | time[4] | dummy | rls_1 { | k_1 } rls_2 { | k_2 } | restraint_end_1 | restraint_end_2 | EXPLICIT | num_pt | { pt | rest | } | num_span | { span | rest | } load_height | load_ref | is_off { | auto_off_x1 | auto_off_x2 | off_x1 | off_x2 | off_y | off_z }
       AddItems(ref items, record.Name, Colour.NO_RGB.ToString(), record.Type.GetStringValue(), record.Exposure.ToString(), record.PropertyIndex ?? 0, 
-        record.Group ?? 0, AddTopology(), record.OrientationNodeIndex ?? 0, record.Angle, record.MeshSize ?? 0, 
+        record.Group ?? 1, AddTopology(), record.OrientationNodeIndex ?? 0, record.Angle, record.MeshSize ?? 0, 
         record.IsIntersector ? "YES" : "NO", AddAnalysisType(), (int)record.Fire, record.LimitingTemperature ?? 0, record.CreationFromStartDays, 
         record.StartOfDryingDays, record.AgeAtLoadingDays, record.RemovedAtDays, record.Dummy ? "DUMMY" : "ACTIVE");
 

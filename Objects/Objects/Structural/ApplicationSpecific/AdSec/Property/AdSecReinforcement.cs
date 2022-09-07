@@ -13,11 +13,11 @@ namespace Objects.Structural.AdSec.Properties.Reinforcement
         public string name { get; set; }
         public int countPerBundle { get; set; }
         public double diameter { get; set; }
-        public Material material { get; set; }
+        public StructuralMaterial material { get; set; }
         public AdSecBarBundle() { }
 
         [SchemaInfo("AdSecBarBundle", "Creates a Speckle bar bundle object for AdSec", "AdSec", "Reinforcement")]
-        public AdSecBarBundle(string name, int countPerBundle, double diameter, Material material)
+        public AdSecBarBundle(string name, int countPerBundle, double diameter, StructuralMaterial material)
         {
             this.name = name;
             this.countPerBundle = countPerBundle;
