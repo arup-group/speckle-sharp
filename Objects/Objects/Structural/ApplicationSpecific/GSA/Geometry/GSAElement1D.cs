@@ -16,7 +16,7 @@ namespace Objects.Structural.GSA.Geometry
     public string colour { get; set; }
     public string action { get; set; }
     public bool isDummy { get; set; }
-
+    public string parentApplicationId { get; set; }
     public GSAElement1D() { }
 
     [SchemaInfo("GSAElement1D (from local axis)", "Creates a Speckle structural 1D element for GSA (from local axis)", "GSA", "Geometry")]
