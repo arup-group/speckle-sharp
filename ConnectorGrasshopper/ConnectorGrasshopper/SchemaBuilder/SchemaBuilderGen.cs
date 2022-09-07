@@ -515,7 +515,7 @@ public class CSIDiaphragmSchemaComponent: CreateSchemaObjectBase {
 // This is generated code:
 public class CSIElement1DSchemaComponent: CreateSchemaObjectBase {
      
-    public CSIElement1DSchemaComponent(): base("Element1D (from local axis)", "Element1D (from local axis)", "Creates a Speckle CSI 1D element (from local axis)", "Speckle 2 CSI", "Geometry") { }
+    public CSIElement1DSchemaComponent(): base("CSIElement1D (from local axis)", "CSIElement1D (from local axis)", "Creates a Speckle CSI 1D element (from local axis)", "Speckle 2 CSI", "Geometry") { }
     
     public override Guid ComponentGuid => new Guid("b19522f8-4264-ce56-3cc7-ec2132ece2e1");
     
@@ -528,7 +528,7 @@ public class CSIElement1DSchemaComponent: CreateSchemaObjectBase {
 // This is generated code:
 public class CSIElement1D1SchemaComponent: CreateSchemaObjectBase {
      
-    public CSIElement1D1SchemaComponent(): base("Element1D (from orientation node and angle)", "Element1D (from orientation node and angle)", "Creates a Speckle CSI 1D element (from orientation node and angle)", "Speckle 2 CSI", "Geometry") { }
+    public CSIElement1D1SchemaComponent(): base("CSIElement1D (from orientation node and angle)", "CSIElement1D (from orientation node and angle)", "Creates a Speckle CSI 1D element (from orientation node and angle)", "Speckle 2 CSI", "Geometry") { }
     
     public override Guid ComponentGuid => new Guid("95254c64-1e71-0902-06a1-206b2f17b844");
     
@@ -541,7 +541,7 @@ public class CSIElement1D1SchemaComponent: CreateSchemaObjectBase {
 // This is generated code:
 public class CSIElement2DSchemaComponent: CreateSchemaObjectBase {
      
-    public CSIElement2DSchemaComponent(): base("Element2D", "Element2D", "Creates a Speckle CSI 2D element (based on a list of edge ie. external, geometry defining nodes)", "Speckle 2 CSI", "Geometry") { }
+    public CSIElement2DSchemaComponent(): base("CSIElement2D", "CSIElement2D", "Creates a Speckle CSI 2D element (based on a list of edge ie. external, geometry defining nodes)", "Speckle 2 CSI", "Geometry") { }
     
     public override Guid ComponentGuid => new Guid("33c58e3c-d8cb-86ca-b494-ee5c69ec7b14");
     
