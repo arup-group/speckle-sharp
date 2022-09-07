@@ -25,7 +25,10 @@ namespace SpeckleConnectionManagerUI.Services
                 ";
                 createTableCommand.ExecuteNonQuery();
 
-                RemoveDuplicateAccounts(db);
+                if (ContainsDuplicateAccounts(db))
+                {
+                    RemoveDuplicateAccounts(db);
+                }
 
                 SqliteCommand selectCommand = new SqliteCommand
                     ("SELECT content from objects", db);
@@ -42,6 +45,35 @@ namespace SpeckleConnectionManagerUI.Services
             }
 
             return entries;
+        }
+
+        /// <summary>
+        /// Checks accounts database for multiple accounts with the same hash. It does not check equality of account content.
+        /// </summary>
+        /// <param name="db"></param>
+        /// <returns></returns>
+        private static bool ContainsDuplicateAccounts(SqliteConnection db)
+        {
+            var selectCmd = new SqliteCommand
+              ("SELECT hash from objects", db);
+
+            var existingHashes = new List<string>();
+
+            using (var query = selectCmd.ExecuteReader())
+            {
+              while (query.Read())
+              {
+                var hash = query.GetString(0);
+
+                if (existingHashes.Contains(hash))
+                  return true;
+
+                else
+                  existingHashes.Add(hash);
+              }
+            }
+
+            return false;
         }
 
         private static void RemoveDuplicateAccounts(SqliteConnection db)
