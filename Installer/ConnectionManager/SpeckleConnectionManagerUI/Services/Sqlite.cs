@@ -79,21 +79,10 @@ namespace SpeckleConnectionManagerUI.Services
 
         private static void RemoveDuplicateAccounts(SqliteConnection db)
         {
-            var command = new SqliteCommand
-              ("SELECT hash FROM objects GROUP BY hash, content", db);
-
-            var hashes = new List<string>();
-
-            using (var query = command.ExecuteReader())
-            {
-                while (query.Read())
-                {
-                  hashes.Add(query.GetString(0));
-                }
-            }
+            var command = new SqliteCommand("", db);
 
             // Hashes are duplicated but content is not
-            if (hashes.Count() != hashes.Distinct().Count())
+            if (ContentUnique(db))
             {
                 // Creates blank table with schema of objects table
                 command.CommandText = "CREATE TABLE objects_new AS SELECT * FROM objects WHERE 0";
@@ -133,6 +122,25 @@ namespace SpeckleConnectionManagerUI.Services
             command.CommandText = "CREATE UNIQUE INDEX IF NOT EXISTS index_objects_hash ON objects(hash)";
             command.ExecuteNonQuery();
     }
+
+        private static bool ContentUnique(SqliteConnection db)
+        {
+            // Returns true if duplicate hashes exist with different (unique) content, else false
+            var command = new SqliteCommand
+                  ("SELECT ((SELECT COUNT(*) FROM (SELECT * FROM objects GROUP BY hash, content)) > (SELECT COUNT(*) FROM (SELECT * FROM objects GROUP BY hash)))", db);
+
+            bool isUniqueContent = true;
+
+            using (var query = command.ExecuteReader())
+            {
+              while (query.Read())
+              {
+                isUniqueContent = query.GetBoolean(0);
+              }
+            }
+
+            return isUniqueContent;
+        }
 
         public static List<Account> GetUpdatedAccounts(SqliteConnection connection)
         {
