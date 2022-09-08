@@ -84,11 +84,14 @@ namespace SpeckleConnectionManagerUI.Services
             // Hashes are duplicated but content is not
             if (ContentUnique(db))
             {
-                // Creates blank table with schema of objects table
-                command.CommandText = "CREATE TABLE objects_new AS SELECT * FROM objects WHERE 0";
-                command.ExecuteNonQuery();
-
                 var updatedAccounts = GetUpdatedAccounts(db);
+
+                if (updatedAccounts.Count() == 0)
+                  throw new Exception("No updated accounts fetched from server");
+                
+                // Clear db table
+                command.CommandText = "DELETE FROM objects";
+                command.ExecuteNonQuery();
 
                 foreach (var acc in updatedAccounts)
                 {
@@ -96,7 +99,7 @@ namespace SpeckleConnectionManagerUI.Services
 
                     command.CommandText =
                     @"
-                            INSERT INTO objects_new(hash, content)
+                            INSERT INTO objects(hash, content)
                             VALUES (@hash, @content)
                           ";
 
@@ -111,18 +114,23 @@ namespace SpeckleConnectionManagerUI.Services
             {
                 command.CommandText = "CREATE TABLE objects_new AS SELECT hash, content FROM objects GROUP BY hash, content";
                 command.ExecuteNonQuery();
+
+                command.CommandText = "DROP TABLE objects";
+                command.ExecuteNonQuery();
+
+                command.CommandText = "ALTER TABLE objects_new RENAME TO objects";
+                command.ExecuteNonQuery();
             }
-
-            command.CommandText = "DROP TABLE objects";
-            command.ExecuteNonQuery();
-
-            command.CommandText = "ALTER TABLE objects_new RENAME TO objects";
-            command.ExecuteNonQuery();
 
             command.CommandText = "CREATE UNIQUE INDEX IF NOT EXISTS index_objects_hash ON objects(hash)";
             command.ExecuteNonQuery();
     }
 
+        /// <summary>
+        /// Checks if account database content is unique.
+        /// </summary>
+        /// <param name="db"></param>
+        /// <returns></returns>
         private static bool ContentUnique(SqliteConnection db)
         {
             // Returns true if duplicate hashes exist with different (unique) content, else false
