@@ -106,18 +106,20 @@ namespace Objects.Converter.Revit
 
     private void SetAnalyticalPros(Element element, Element1D element1d, XYZ offset1, XYZ offset2)
     {
+      Func<char, bool> releaseConvert = rel => rel == 'R';
+
 #if !REVIT2023
       var analyticalModel = (AnalyticalModelStick)element.GetAnalyticalModel();
-      analyticalModel.SetReleases(true, Convert.ToBoolean(element1d.end1Releases.stiffnessX), Convert.ToBoolean(element1d.end1Releases.stiffnessY), Convert.ToBoolean(element1d.end1Releases.stiffnessZ), Convert.ToBoolean(element1d.end1Releases.stiffnessXX), Convert.ToBoolean(element1d.end1Releases.stiffnessYY), Convert.ToBoolean(element1d.end1Releases.stiffnessZZ));
-      analyticalModel.SetReleases(false, Convert.ToBoolean(element1d.end2Releases.stiffnessX), Convert.ToBoolean(element1d.end2Releases.stiffnessY), Convert.ToBoolean(element1d.end2Releases.stiffnessZ), Convert.ToBoolean(element1d.end2Releases.stiffnessXX), Convert.ToBoolean(element1d.end2Releases.stiffnessYY), Convert.ToBoolean(element1d.end2Releases.stiffnessZZ));
+      analyticalModel.SetReleases(true, releaseConvert(element1d.end1Releases.code[0]), releaseConvert(element1d.end1Releases.code[1]), releaseConvert(element1d.end1Releases.code[2]), releaseConvert(element1d.end1Releases.code[3]), releaseConvert(element1d.end1Releases.code[4]), releaseConvert(element1d.end1Releases.code[5]));
+      analyticalModel.SetReleases(false, releaseConvert(element1d.end2Releases.code[0]), releaseConvert(element1d.end2Releases.code[1]), releaseConvert(element1d.end2Releases.code[2]), releaseConvert(element1d.end2Releases.code[3]), releaseConvert(element1d.end2Releases.code[4]), releaseConvert(element1d.end2Releases.code[5]));
       analyticalModel.SetOffset(AnalyticalElementSelector.StartOrBase, offset1);
       analyticalModel.SetOffset(AnalyticalElementSelector.EndOrTop, offset2);
 #else
       //var analyticalModel = Doc.GetElement(AnalyticalToPhysicalAssociationManager.GetAnalyticalToPhysicalAssociationManager(Doc).GetAssociatedElementId(element.Id)) as AnalyticalMember;
       //var analyticalModel = AnalyticalToPhysical
       var analyticalModel = (AnalyticalMember)element;
-      analyticalModel.SetReleaseConditions(new ReleaseConditions(true, Convert.ToBoolean(element1d.end1Releases.stiffnessX), Convert.ToBoolean(element1d.end1Releases.stiffnessY), Convert.ToBoolean(element1d.end1Releases.stiffnessZ), Convert.ToBoolean(element1d.end1Releases.stiffnessXX), Convert.ToBoolean(element1d.end1Releases.stiffnessYY), Convert.ToBoolean(element1d.end1Releases.stiffnessZZ)));
-      analyticalModel.SetReleaseConditions(new ReleaseConditions(false, Convert.ToBoolean(element1d.end2Releases.stiffnessX), Convert.ToBoolean(element1d.end2Releases.stiffnessY), Convert.ToBoolean(element1d.end2Releases.stiffnessZ), Convert.ToBoolean(element1d.end2Releases.stiffnessXX), Convert.ToBoolean(element1d.end2Releases.stiffnessYY), Convert.ToBoolean(element1d.end2Releases.stiffnessZZ)));      
+      analyticalModel.SetReleaseConditions(new ReleaseConditions(true,  releaseConvert(element1d.end1Releases.code[0]), releaseConvert(element1d.end1Releases.code[1]), releaseConvert(element1d.end1Releases.code[2]), releaseConvert(element1d.end1Releases.code[3]), releaseConvert(element1d.end1Releases.code[4]), releaseConvert(element1d.end1Releases.code[5])));
+      analyticalModel.SetReleaseConditions(new ReleaseConditions(false, releaseConvert(element1d.end2Releases.code[0]), releaseConvert(element1d.end2Releases.code[1]), releaseConvert(element1d.end2Releases.code[2]), releaseConvert(element1d.end2Releases.code[3]), releaseConvert(element1d.end2Releases.code[4]), releaseConvert(element1d.end2Releases.code[5])));      
       //TODO set offsets?
 #endif
     }
