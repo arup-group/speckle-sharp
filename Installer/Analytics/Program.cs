@@ -224,7 +224,11 @@ namespace analytics
           @"
             CREATE UNIQUE INDEX IF NOT EXISTS index_objects_hash ON objects (hash)
         ";
-        createIndexCommand.ExecuteNonQuery();
+        try
+        {
+          createIndexCommand.ExecuteNonQuery();
+        }
+        catch { }        
       }
 
       connection.Close();
