@@ -69,7 +69,7 @@ namespace SpeckleConnectionManagerUI.Services
         var isDefault = entry.content.isDefault;
         var url = content.serverInfo.url;
         Console.WriteLine($"Auth token: {content.token}");
-        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {content.token}");
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", content.token);
 
         HttpResponseMessage response;
         try {
@@ -81,7 +81,6 @@ namespace SpeckleConnectionManagerUI.Services
           });
         }
         catch {
-          client.DefaultRequestHeaders.Remove("Authorization");
           continue;
         }
         Console.WriteLine(response.StatusCode);
@@ -104,11 +103,9 @@ namespace SpeckleConnectionManagerUI.Services
           });
         }
         catch {
-          client.DefaultRequestHeaders.Remove("Authorization");
           continue;
         }
-
-        client.DefaultRequestHeaders.Remove("Authorization");
+;
         Console.WriteLine(response.StatusCode);
         if (response.StatusCode != HttpStatusCode.OK)
         {
