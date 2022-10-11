@@ -110,8 +110,8 @@ namespace Objects.Converter.Revit
                 }
             }
 
-            speckleElement2D.topology = edgeNodes;
-            speckleElement2D["displayValue"] = displayLine;
+      speckleElement2D.topology = edgeNodes;
+      speckleElement2D.displayValue = GetElementDisplayMesh(revitSurface, new Options() { DetailLevel = ViewDetailLevel.Fine, ComputeReferences = false });
 
             var outline = new List<ICurve> { };
             outline.Add(displayLine);
