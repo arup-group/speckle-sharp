@@ -120,7 +120,15 @@ namespace Speckle.Core.Models
     }
     private static bool IsMeaningfulProp(PropertyInfo propInfo, object o, out object value)
     {
-      value = propInfo.GetValue(o);
+      try
+      {
+        value = propInfo.GetValue(o);
+      }
+      catch (Exception)
+      {
+        value = null;
+      }
+
       if (propInfo.GetSetMethod() != null && value != null)
       {
         if (propInfo.PropertyType.IsPrimitive || propInfo.PropertyType == typeof(decimal)) return true;
