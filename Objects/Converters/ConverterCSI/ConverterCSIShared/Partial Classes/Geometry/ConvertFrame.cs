@@ -44,7 +44,7 @@ namespace Objects.Converter.CSI
       }
       string units = ModelUnits();
       string newFrame = "";
-      Line baseline = element1D.baseLine;
+      Line baseline = (Objects.Geometry.Line)element1D.baseLine;
       string[] properties = new string[] { };
       int number = 0;
       Model.PropFrame.GetNameList(ref number, ref properties);

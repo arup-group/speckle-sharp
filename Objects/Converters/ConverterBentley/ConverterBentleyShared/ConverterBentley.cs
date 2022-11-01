@@ -70,9 +70,9 @@ namespace Objects.Converter.Bentley
 #elif OPENRAIL
     public static string BentleyAppName = HostApplications.OpenRail.Name;
 #elif OPENBUILDINGS
-    public static string BentleyAppName = HostApplications.OpenBuildings;
+    public static string BentleyAppName = HostApplications.OpenBuildings.Name;
 #elif OPENBRIDGE
-    public static string BentleyAppName = HostApplications.OpenBridge;
+    public static string BentleyAppName = HostApplications.OpenBridge.Name;
 #endif
     public string Description => "Default Speckle Kit for MicroStation, OpenRoads, OpenRail, OpenBridge and OpenBuildings";
     public string Name => nameof(ConverterBentley);
