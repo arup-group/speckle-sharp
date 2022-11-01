@@ -195,7 +195,7 @@ namespace SpeckleConnectionManager
   public class Info
   {
     public Speckle.Core.Credentials.UserInfo user { get; set; }
-    public Speckle.Core.Credentials.ServerInfo serverInfo { get; set; }
+    public Speckle.Core.Api.ServerInfo serverInfo { get; set; }
   }
 
   public class ServerInfo
