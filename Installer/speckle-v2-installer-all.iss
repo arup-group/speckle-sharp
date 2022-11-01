@@ -249,7 +249,7 @@ Source: "ConnectionManager\SpeckleConnectionManager\bin\Release\net5.0\win10-x64
 Source: "ConnectionManager\SpeckleConnectionManagerUI\bin\Release\net5.0\win10-x64\*"; DestDir: "{userappdata}\speckle-connection-manager-ui\"; Flags: ignoreversion recursesubdirs; Components: connectionmanager
 
 ;analytics
-Source: "Analytics\bin\Release\net461\*"; DestDir: "{#AnalyticsFolder}"; Flags: ignoreversion recursesubdirs;
+Source: "Analytics\bin\Release\net48\*"; DestDir: "{#AnalyticsFolder}"; Flags: ignoreversion recursesubdirs;
 
 ;updater
 Source: "Updater\bin\Release\*"; DestDir: "{#SpeckleFolder}"; Flags: ignoreversion recursesubdirs;
