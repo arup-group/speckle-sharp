@@ -151,11 +151,11 @@ Source: "..\Objects\Converters\ConverterAutocadCivil\ConverterAutocad2022\bin\Re
 
 ;civil21
 Source: "..\ConnectorAutocadCivil\ConnectorCivil2021\bin\Release\*"; DestDir: "{userappdata}\Autodesk\ApplicationPlugins\Speckle2Civil3D2021\"; Flags: ignoreversion recursesubdirs; Components: civil21
-Source: "..\Objects\Converters\ConverterAutocadCivil\ConverterCivil2021\bin\Release\netstandard2.0\Objects.Converter.Civil2021.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects\"; Flags: ignoreversion recursesubdirs; Components: civil21
+Source: "..\Objects\Converters\ConverterAutocadCivil\ConverterCivil2021\bin\Release\netstandard2.0\Objects.Converter.Civil3D2021.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects\"; Flags: ignoreversion recursesubdirs; Components: civil21
 
 ;civil22
 Source: "..\ConnectorAutocadCivil\ConnectorCivil2022\bin\Release\*"; DestDir: "{userappdata}\Autodesk\ApplicationPlugins\Speckle2Civil3D2022\"; Flags: ignoreversion recursesubdirs; Components: civil22
-Source: "..\Objects\Converters\ConverterAutocadCivil\ConverterCivil2022\bin\Release\netstandard2.0\Objects.Converter.Civil2022.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects\"; Flags: ignoreversion recursesubdirs; Components: civil22
+Source: "..\Objects\Converters\ConverterAutocadCivil\ConverterCivil2022\bin\Release\netstandard2.0\Objects.Converter.Civil3D2022.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects\"; Flags: ignoreversion recursesubdirs; Components: civil22
 
 ;dynamo
 Source: "..\ConnectorDynamo\ConnectorDynamo\bin\Release\*"; DestDir: "{userappdata}\Dynamo\Dynamo Core\2.11\packages\SpeckleDynamo2\bin\"; Flags: ignoreversion recursesubdirs; Components: dynamo
