@@ -1,4 +1,5 @@
-﻿using DesktopUI2.ViewModels.Share;
+﻿using Avalonia.Controls;
+using DesktopUI2.ViewModels.Share;
 using DesktopUI2.Views.Pages;
 using DesktopUI2.Views.Pages.ShareControls;
 using DesktopUI2.Views.Windows.Dialogs;
@@ -27,7 +28,7 @@ namespace DesktopUI2.ViewModels
 
     public bool DialogVisible
     {
-      get => _dialogBody!=null;
+      get => _dialogBody != null;
     }
 
     public double DialogOpacity
@@ -35,11 +36,12 @@ namespace DesktopUI2.ViewModels
       get => _dialogBody != null ? 1 : 0;
     }
 
-    private DialogUserControl _dialogBody;
-    public DialogUserControl DialogBody
+    private UserControl _dialogBody;
+    public UserControl DialogBody
     {
       get => _dialogBody;
-      set  {
+      set
+      {
 
         this.RaiseAndSetIfChanged(ref _dialogBody, value);
         this.RaisePropertyChanged("DialogVisible");
@@ -56,12 +58,13 @@ namespace DesktopUI2.ViewModels
     }
     public MainViewModel()
     {
-     
+
       Init();
     }
 
     private void Init()
     {
+
       Instance = this;
       Setup.Init(Bindings.GetHostAppNameVersion(), Bindings.GetHostAppName());
 
@@ -100,19 +103,15 @@ namespace DesktopUI2.ViewModels
         Bindings.UpdateSelectedStream = HomeViewModel.Instance.UpdateSelectedStream;
       }
 
-      Router.PropertyChanged += Router_PropertyChanged;
+
     }
 
     //https://github.com/AvaloniaUI/Avalonia/issues/5290
     private void CatchReactiveException(Exception e)
     {
-      //do nothing
+      Log.CaptureException(e, Sentry.SentryLevel.Error);
     }
 
-    private void Router_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-    {
-      throw new System.NotImplementedException();
-    }
 
     public static void GoHome()
     {
@@ -120,5 +119,9 @@ namespace DesktopUI2.ViewModels
         RouterInstance.Navigate.Execute(HomeViewModel.Instance);
     }
 
+    public static void CloseDialog()
+    {
+      Instance.DialogBody = null;
+    }
   }
 }

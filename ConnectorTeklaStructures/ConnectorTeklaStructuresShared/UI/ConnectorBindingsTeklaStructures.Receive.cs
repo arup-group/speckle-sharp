@@ -20,6 +20,12 @@ namespace Speckle.ConnectorTeklaStructures.UI
 
   {
     #region receiving
+    public override bool CanPreviewReceive => false;
+    public override async Task<StreamState> PreviewReceive(StreamState state, ProgressViewModel progress)
+    {
+      return null;
+    }
+
     public override async Task<StreamState> ReceiveStream(StreamState state, ProgressViewModel progress)
     {
       Exceptions.Clear();
@@ -67,6 +73,8 @@ namespace Speckle.ConnectorTeklaStructures.UI
       }
       string referencedObject = commit.referencedObject;
 
+      state.LastSourceApp = commit.sourceApplication;
+
       var commitObject = await Operations.Receive(
                 referencedObject,
                 progress.CancellationTokenSource.Token,
@@ -78,7 +86,7 @@ namespace Speckle.ConnectorTeklaStructures.UI
                   Core.Logging.Analytics.TrackEvent(state.Client.Account, Core.Logging.Analytics.Events.Receive, new Dictionary<string, object>() { { "commit_receive_failed", e.Message } });
                   progress.CancellationTokenSource.Cancel();
                 }),
-                //onTotalChildrenCountKnown: count => Execute.PostToUIThread(() => state.Progress.Maximum = count),
+               onTotalChildrenCountKnown: count => { progress.Max = count; },
                 disposeTransports: true
                 );
 
@@ -114,7 +122,7 @@ namespace Speckle.ConnectorTeklaStructures.UI
       }
 
       var conversionProgressDict = new ConcurrentDictionary<string, int>();
-      conversionProgressDict["Conversion"] = 0;
+      conversionProgressDict["Conversion"] = 1;
       //Execute.PostToUIThread(() => state.Progress.Maximum = state.SelectedObjectIds.Count());
 
       Action updateProgressAction = () =>
@@ -183,6 +191,7 @@ namespace Speckle.ConnectorTeklaStructures.UI
     private List<Base> FlattenCommitObject(object obj, ISpeckleConverter converter)
     {
       List<Base> objects = new List<Base>();
+
 
       if (obj is Base @base)
       {

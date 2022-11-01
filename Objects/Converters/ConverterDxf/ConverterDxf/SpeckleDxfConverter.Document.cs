@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Speckle.Core.Models;
 using Speckle.netDxf;
@@ -16,6 +17,11 @@ namespace Objects.Converters.DxfConverter
                 case string str: // Load up an existing document
                     Doc = DxfDocument.Load(str);
                     break;
+                case DxfDocument d:
+                    Doc = d;
+                    break;
+                default:
+                    throw new Exception("Provided doc is not a string or a DXF doc");
             }
         }
 
@@ -24,12 +30,12 @@ namespace Objects.Converters.DxfConverter
             Doc?.Save(path);
         }
 
-        public void SetContextObjects(List<ApplicationPlaceholderObject> objects)
+        public void SetContextObjects(List<ApplicationObject> objects)
         {
             // No context tracking
         }
 
-        public void SetPreviousContextObjects(List<ApplicationPlaceholderObject> objects)
+        public void SetPreviousContextObjects(List<ApplicationObject> objects)
         {
             // No context tracking
         }

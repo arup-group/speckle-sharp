@@ -14,6 +14,7 @@ using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Special;
 using Speckle.Core.Kits;
 using Speckle.Core.Models;
+using Speckle.Core.Models.Extensions;
 using Logging = Speckle.Core.Logging;
 using Utilities = ConnectorGrasshopper.Extras.Utilities;
 
@@ -355,7 +356,7 @@ namespace ConnectorGrasshopper
         Tracker.TrackNodeRun("Create Schema Object", Name);
 
 
-      var units = Units.GetUnitsFromString(Rhino.RhinoDoc.ActiveDoc.GetUnitSystemName(true, false, false, false));
+      var units = Units.GetUnitsFromString(Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem.ToString());
 
       List<object> cParamsValues = new List<object>();
       var cParams = SelectedConstructor.GetParameters();
@@ -382,7 +383,7 @@ namespace ConnectorGrasshopper
           }
           catch (Exception e)
           {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.InnerException?.Message ?? e.Message);
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.ToFormattedString());
             return;
           }
         }
@@ -485,7 +486,7 @@ namespace ConnectorGrasshopper
       catch (Exception e)
       {
 
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.InnerException?.Message ?? e.Message);
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.ToFormattedString());
         return;
       }
 
@@ -510,7 +511,7 @@ namespace ConnectorGrasshopper
         }
         catch (Exception e)
         {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, e.Message);
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, e.ToFormattedString());
         }
       }
 
