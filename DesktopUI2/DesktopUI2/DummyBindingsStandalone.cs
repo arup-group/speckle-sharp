@@ -10,6 +10,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using static DesktopUI2.ViewModels.MappingViewModel;
 
 namespace DesktopUI2
 {
@@ -51,6 +52,11 @@ namespace DesktopUI2
     public override string GetDocumentLocation()
     {
       return "C:/Wow/Some/Document/Here";
+    }
+
+    public override void ResetDocument()
+    {
+      return;
     }
 
     public override string GetFileName()
@@ -250,9 +256,9 @@ namespace DesktopUI2
       return collection;
     }
 
-    public override void SelectClientObjects(string args)
+    public override void SelectClientObjects(List<string> objs, bool deselect = false)
     {
-      throw new NotImplementedException();
+      // TODO!
     }
 
     public override async Task<StreamState> ReceiveStream(StreamState state, ProgressViewModel progress)
@@ -302,6 +308,52 @@ namespace DesktopUI2
       return state;
     }
 
+    public override bool CanPreviewSend => true;
+    public override async void PreviewSend(StreamState state, ProgressViewModel progress)
+    {
+      // Let's fake some progress barsssss
+      //progress.Report.Log("Starting fake sending");
+      var pd = new ConcurrentDictionary<string, int>();
+      pd["A1"] = 1;
+      pd["A2"] = 1;
+
+      progress.Max = 100;
+      progress.Update(pd);
+
+      for (int i = 1; i < 100; i += 10)
+      {
+        if (progress.CancellationTokenSource.Token.IsCancellationRequested)
+        {
+          //progress.Report.Log("Fake sending was cancelled");
+          return;
+        }
+
+        progress.Report.Log("Done fake task " + i);
+        await Task.Delay(TimeSpan.FromMilliseconds(rnd.Next(200, 1000)));
+        pd["A1"] = i;
+        pd["A2"] = i + 2;
+
+        progress.Update(pd);
+      }
+
+      // Mock "some" errors
+      for (int i = 0; i < 10; i++)
+      {
+        try
+        {
+          throw new Exception($"Number {i} failed");
+        }
+        catch (Exception e)
+        {
+          progress.Report.LogOperationError(e);
+          //TODO
+          //state.Errors.Add(e);
+        }
+      }
+      return;
+    }
+
+
     public override async Task<string> SendStream(StreamState state, ProgressViewModel progress)
     {
       // Let's fake some progress barsssss
@@ -346,6 +398,13 @@ namespace DesktopUI2
       return "";
     }
 
+    public override bool CanPreviewReceive => true;
+
+    public override async Task<StreamState> PreviewReceive(StreamState state, ProgressViewModel progress)
+    {
+      throw new NotImplementedException();
+    }
+
     public override void WriteStreamsToFile(List<StreamState> streams)
     {
       //done!
@@ -354,6 +413,11 @@ namespace DesktopUI2
     public override List<ReceiveMode> GetReceiveModes()
     {
       return new List<ReceiveMode> { ReceiveMode.Update, ReceiveMode.Ignore };
+    }
+
+    public override async Task<Dictionary<string, List<MappingValue>>> ImportFamilyCommand(Dictionary<string, List<MappingValue>> Mapping)
+    {
+      throw new NotImplementedException();
     }
 
     public void NewFile()

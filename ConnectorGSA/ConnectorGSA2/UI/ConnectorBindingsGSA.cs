@@ -37,7 +37,7 @@ namespace ConnectorGSA.UI
     }
 
     public ResultSettings ResultSettings { get; set; } = new ResultSettings();
-    public override string GetHostAppNameVersion() => VersionedHostApplications.GSA;
+    public override string GetHostAppNameVersion() => HostApplications.GSA.GetVersion(HostAppVersion.v);
     public override string GetHostAppName() => HostApplications.GSA.Slug;
     public override string GetDocumentId() => GetDocHash();
     private string GetDocHash() => Speckle.Core.Models.Utilities.hashString(((GsaProxy)Model?.Proxy).FilePath, Speckle.Core.Models.Utilities.HashingFuctions.MD5);
@@ -48,6 +48,10 @@ namespace ConnectorGSA.UI
       return "Entire Document"; // Note: gsa does not have views that filter objects.
     }
 
+    public override void ResetDocument()
+    {
+      return;
+    }
 
     public override List<StreamState> GetStreamsInFile()
     {

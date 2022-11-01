@@ -32,10 +32,12 @@ namespace ConnectorGSA.UI
 {
   public partial class ConnectorBindingsGSA : ConnectorBindings, IConnectorBindingsStandalone
   {
+    public override bool CanPreviewSend => false;
+    public override async void PreviewSend(StreamState state, ProgressViewModel progress) {}
     public override async Task<string> SendStream(StreamState state, ProgressViewModel progress)
     {
       var kit = KitManager.GetDefaultKit();
-      var converter = kit.LoadConverter(VersionedHostApplications.GSA);
+      var converter = kit.LoadConverter(HostApplications.GSA.Name);
       if (converter == null)
         throw new Exception("Could not find any Kit!");
 

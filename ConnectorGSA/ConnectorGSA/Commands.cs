@@ -298,7 +298,7 @@ namespace ConnectorGSA
           objectId = commitObjId,
           branchName = "main",
           message = "Pushed data from GSA",
-          sourceApplication = VersionedHostApplications.GSA
+          sourceApplication = HostApplications.GSA.Name
         };
 
         if (!string.IsNullOrEmpty(parent))
@@ -325,7 +325,7 @@ namespace ConnectorGSA
     internal static async Task<bool> Receive(TabCoordinator coordinator, IProgress<MessageEventArgs> loggingProgress, IProgress<string> statusProgress, IProgress<double> percentageProgress)
     {
       var kit = KitManager.GetDefaultKit();
-      var converter = kit.LoadConverter(VersionedHostApplications.GSA);
+      var converter = kit.LoadConverter(HostApplications.GSA.Name);
       if (converter == null)
         throw new Exception("Could not find any Kit!");
 
@@ -869,7 +869,7 @@ namespace ConnectorGSA
     private static async Task<bool> Send(TabCoordinator coordinator, StreamStateOld ss, IProgress<MessageEventArgs> loggingProgress, IProgress<string> statusProgress, IProgress<double> percentageProgress)
     {
       var kit = KitManager.GetDefaultKit();
-      var converter = kit.LoadConverter(VersionedHostApplications.GSA);
+      var converter = kit.LoadConverter(HostApplications.GSA.Name);
       if (converter == null)
         throw new Exception("Could not find any Kit!");
       var account = ((GsaModel)Instance.GsaModel).Account;
@@ -1171,7 +1171,7 @@ namespace ConnectorGSA
       }
     }
 
-    private static Version getRunningVersion()
+    private static System.Version getRunningVersion()
     {
       try
       {

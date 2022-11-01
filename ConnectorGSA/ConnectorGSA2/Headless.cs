@@ -220,7 +220,7 @@ namespace ConnectorGSA
       }
 
       var kit = KitManager.GetDefaultKit();
-      var converter = kit.LoadConverter(VersionedHostApplications.GSA);
+      var converter = kit.LoadConverter(HostApplications.GSA.Name);
       if (converter == null)
       {
         Console.WriteLine($"Could not find any Kit!");
@@ -528,7 +528,7 @@ namespace ConnectorGSA
     }
     #endregion
 
-    private Version getRunningVersion()
+    private System.Version getRunningVersion()
     {
       try
       {
