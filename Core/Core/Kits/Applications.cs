@@ -71,6 +71,7 @@ namespace Speckle.Core.Kits
     public static HostApplication OpenRoads = new HostApplication("OpenRoads", "openroads");
     public static HostApplication OpenRail = new HostApplication("OpenRail", "openrail");
     public static HostApplication OpenBuildings = new HostApplication("OpenBuildings", "openbuildings");
+    public static HostApplication OpenBridge = new HostApplication("OpenBridge", "openbridge");
     public static HostApplication ETABS = new HostApplication("ETABS", "etabs");
     public static HostApplication SAP2000 = new HostApplication("SAP2000", "sap2000");
     public static HostApplication CSIBridge = new HostApplication("CSIBridge", "csibridge");
@@ -111,6 +112,7 @@ namespace Speckle.Core.Kits
       if (appname.Contains("openroads")) return OpenRoads;
       if (appname.Contains("openrail")) return OpenRail;
       if (appname.Contains("openbuildings")) return OpenBuildings;
+      if (appname.Contains("openbridge")) return OpenBridge;
       if (appname.Contains("etabs")) return ETABS;
       if (appname.Contains("sap")) return SAP2000;
       if (appname.Contains("csibridge")) return CSIBridge;
