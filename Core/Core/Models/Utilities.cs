@@ -118,7 +118,7 @@ namespace Speckle.Core.Models
           }
         }
       }
-      catch(Exception e)
+      catch (Exception e)
       {
 
       }
@@ -127,16 +127,24 @@ namespace Speckle.Core.Models
     }
     private static bool IsMeaningfulProp(PropertyInfo propInfo, object o, out object value)
     {
-      value = propInfo.GetValue(o);
-      if (propInfo.GetSetMethod() != null && value != null)
+      try
       {
-        if (propInfo.PropertyType.IsPrimitive || propInfo.PropertyType == typeof(decimal)) return true;
-        if (propInfo.PropertyType == typeof(string) && !string.IsNullOrEmpty((string)value)) return true;
-        if (propInfo.PropertyType.BaseType.Name == "Enum") // for some reason "IsEnum" prop returns false
+        value = propInfo.GetValue(o);
+        if (propInfo.GetSetMethod() != null && value != null)
         {
-          value = value.ToString();
-          return true;
+          if (propInfo.PropertyType.IsPrimitive || propInfo.PropertyType == typeof(decimal)) return true;
+          if (propInfo.PropertyType == typeof(string) && !string.IsNullOrEmpty((string)value)) return true;
+          if (propInfo.PropertyType.BaseType.Name == "Enum") // for some reason "IsEnum" prop returns false
+          {
+            value = value.ToString();
+            return true;
+          }
         }
+      }
+      catch (Exception e)
+      {
+        value = null;
+        return false;
       }
       return false;
     }
