@@ -687,7 +687,7 @@ namespace DesktopUI2.ViewModels
     }
 
 
-    private void OpenSavedStreamCommand(object streamViewModel)
+    internal void OpenSavedStreamCommand(object streamViewModel)
     {
       if (streamViewModel != null && streamViewModel is StreamViewModel svm && !svm.NoAccess)
       {
@@ -705,7 +705,7 @@ namespace DesktopUI2.ViewModels
       }
     }
 
-    public static void OpenStream(StreamState streamState)
+    internal static void OpenStream(StreamState streamState)
     {
       MainViewModel.RouterInstance.Navigate.Execute(new StreamViewModel(streamState, Instance.HostScreen, Instance.RemoveSavedStreamCommand));
     }
