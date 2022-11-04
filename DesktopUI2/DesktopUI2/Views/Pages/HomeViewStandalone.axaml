@@ -399,7 +399,7 @@
                                         <Button
                                           Padding="5,7"
                                           Classes="Invisible"
-                                          Command="{Binding $parent[local:HomeView].DataContext.OpenStreamCommand}"
+                                          Command="{Binding $parent[local:HomeViewStandalone].DataContext.OpenStreamCommand}"
                                           CommandParameter="{Binding}">
                                             <Grid
                                               Margin="4,0"
@@ -440,7 +440,7 @@
                                                       Grid.Row="2"
                                                       Margin="0,3,0,0"
                                                       ColumnDefinitions="auto,auto,*"
-                                                      IsVisible="{Binding $parent[local:HomeView].DataContext.HasOneAccount, Converter={x:Static BoolConverters.Not}}">
+                                                      IsVisible="{Binding $parent[local:HomeViewStandalone].DataContext.HasOneAccount, Converter={x:Static BoolConverters.Not}}">
                                                         <Grid.Styles>
                                                             <Style Selector="TextBlock">
                                                                 <Setter Property="Foreground" Value="LightGray" />
@@ -477,7 +477,7 @@
                                                       assists:ShadowAssist.ShadowDepth="0"
                                                       Background="Transparent"
                                                       Classes="Mini"
-                                                      Command="{Binding $parent[local:HomeView].DataContext.ViewOnlineCommand}"
+                                                      Command="{Binding $parent[local:HomeViewStandalone].DataContext.ViewOnlineCommand}"
                                                       CommandParameter="{Binding}"
                                                       ToolTip.Tip="View online">
                                                         <Button.Content>
