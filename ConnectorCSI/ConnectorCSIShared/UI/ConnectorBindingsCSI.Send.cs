@@ -26,9 +26,14 @@ namespace Speckle.ConnectorCSI.UI
     public override async Task<string> SendStream(StreamState state, ProgressViewModel progress)
     {
       var kit = KitManager.GetDefaultKit();
-      //var converter = new ConverterCSI();
       var appName = GetHostAppVersion(Model);
       var converter = kit.LoadConverter(appName);
+      if (converter == null)
+      {
+        progress.Report.LogOperationError(new SpeckleException("Could not find any Kit!"));
+        return null;
+      }
+
       converter.SetContextDocument(Model);
       Exceptions.Clear();
 
@@ -110,8 +115,8 @@ namespace Speckle.ConnectorCSI.UI
       if (commitObj["@Model"] == null)
         commitObj["@Model"] = converter.ConvertToSpeckle(("Model", "CSI"));
       
-      if (commitObj["AnalysisResults"] == null)
-        commitObj["AnalysisResults"] = converter.ConvertToSpeckle(("AnalysisResults", "CSI"));
+      if (commitObj["@AnalysisResults"] == null)
+        commitObj["@AnalysisResults"] = converter.ConvertToSpeckle(("AnalysisResults", "CSI"));
 
       progress.Report.Merge(converter.Report);
 

@@ -11,6 +11,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Speckle.Core.Logging;
 
 namespace Speckle.ConnectorCSI.UI
 {
@@ -27,20 +28,17 @@ namespace Speckle.ConnectorCSI.UI
       Exceptions.Clear();
 
       var kit = KitManager.GetDefaultKit();
-      //var converter = new ConverterCSI();
       var appName = GetHostAppVersion(Model);
       var converter = kit.LoadConverter(appName);
-      converter.SetContextDocument(Model);
-      Exceptions.Clear();
-      //var previouslyRecieveObjects = state.ReceivedObjects;
-
       if (converter == null)
       {
-        throw new Exception("Could not find any Kit!");
-        //RaiseNotification($"Could not find any Kit!");
-        progress.CancellationTokenSource.Cancel();
-        //return null;
+        progress.Report.LogOperationError(new SpeckleException("Could not find any Kit!"));
+        return null;
       }
+
+      converter.SetContextDocument(Model);
+      converter.ReceiveMode = state.ReceiveMode;
+      Exceptions.Clear();
 
       var stream = await state.Client.StreamGet(state.StreamId);
 
@@ -76,7 +74,7 @@ namespace Speckle.ConnectorCSI.UI
                   Core.Logging.Analytics.TrackEvent(state.Client.Account, Core.Logging.Analytics.Events.Receive, new Dictionary<string, object>() { { "commit_receive_failed", e.Message } });
                   progress.CancellationTokenSource.Cancel();
                 }),
-                 onTotalChildrenCountKnown: count => { progress.Max = count; },
+                onTotalChildrenCountKnown: count => { progress.Max = count + 1; },
                 disposeTransports: true
                 );
 
@@ -98,29 +96,39 @@ namespace Speckle.ConnectorCSI.UI
         // Do nothing!
       }
 
+      //progress.Report = new ProgressReport();
+      //var conversionProgressDict = new ConcurrentDictionary<string, int>();
+      //conversionProgressDict["Conversion"] = 0;
 
-      if (progress.Report.OperationErrorsCount != 0)
-        return state;
 
-      if (progress.CancellationTokenSource.Token.IsCancellationRequested)
-        return null;
 
-      var conversionProgressDict = new ConcurrentDictionary<string, int>();
-      conversionProgressDict["Conversion"] = 1;
-      //Execute.PostToUIThread(() => state.Progress.Maximum = state.SelectedObjectIds.Count());
-
-      Action updateProgressAction = () =>
-      {
-        conversionProgressDict["Conversion"]++;
-        progress.Update(conversionProgressDict);
-      };
 
       var commitObjs = FlattenCommitObject(commitObject, converter);
+      //progress.Max = commitObjs.Count();
+
       foreach (var commitObj in commitObjs)
       {
-        BakeObject(commitObj, state, converter);
-        updateProgressAction?.Invoke();
+        try
+        {
+          BakeObject(commitObj, converter);
+          //Execute.PostToUIThread(() =>
+          //{
+            //conversionProgressDict["Conversion"]++;
+            //progress.Update(conversionProgressDict);
+          //});
+        }
+        catch (Exception e)
+        {
+          progress.Report.LogOperationError(e);
+        }
       }
+
+      progress.Report.Merge(converter.Report);
+      //var c = converter as Objects.Converter.CSI.ConverterCSI;
+      //c.Model.View.RefreshView();
+
+      if (progress.Report.OperationErrorsCount != 0)
+        return null;
 
       try
       {
@@ -129,12 +137,10 @@ namespace Speckle.ConnectorCSI.UI
       }
       catch (Exception e)
       {
-        progress.Report.LogOperationError(e);
         WriteStateToFile();
-        //state.Errors.Add(e);
-        //Globals.Notify($"Receiving done, but failed to update stream from server.\n{e.Message}");
+        progress.Report.LogOperationError(e);
       }
-      progress.Report.Merge(converter.Report);
+
       return state;
     }
 
@@ -144,17 +150,16 @@ namespace Speckle.ConnectorCSI.UI
     /// <param name="obj"></param>
     /// <param name="state"></param>
     /// <param name="converter"></param>
-    private void BakeObject(Base obj, StreamState state, ISpeckleConverter converter)
+    private void BakeObject(Base obj, ISpeckleConverter converter)
     {
       try
       {
-        converter.ReceiveMode = state.ReceiveMode;
         converter.ConvertToNative(obj);
       }
       catch (Exception e)
       {
-        var exception = new Exception($"Failed to convert object {obj.id} of type {obj.speckle_type}\n with error\n{e}");
-        converter.Report.LogOperationError(exception);
+        //var exception = new Exception($"Failed to convert object {obj.id} of type {obj.speckle_type}\n with error\n{e}");
+        converter.Report.LogConversionError(e);
         return;
       }
     }

@@ -326,8 +326,6 @@ namespace Objects.Converter.Revit
 
       if (revitStick is AnalyticalModelColumn)
       {
-        speckleElement1D.memberType = MemberType.Column;
-        speckleElement1D.type = ElementType1D.Column;
         var locationMark = GetParamValue<string>(structuralElement, BuiltInParameter.COLUMN_LOCATION_MARK);
         if (locationMark == null)
           speckleElement1D.name = mark;

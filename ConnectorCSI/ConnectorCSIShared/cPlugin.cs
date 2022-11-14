@@ -31,13 +31,26 @@ namespace SpeckleConnectorCSI
 
     public static ConnectorBindingsCSI Bindings { get; set; }
 
-    public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<DesktopUI2.App>()
+
+    public static AppBuilder BuildAvaloniaApp()
+    {
+      string path = Path.GetDirectoryName(typeof(App).Assembly.Location);
+
+      string nativeLib = Path.Combine(path, "Native", "libAvalonia.Native.OSX.dylib");
+
+      return AppBuilder.Configure<App>()
       .UsePlatformDetect()
+      .With(new X11PlatformOptions { UseGpu = false })
+      .With(new MacOSPlatformOptions { ShowInDock = false })
+      .With(new AvaloniaNativePlatformOptions
+      {
+        AvaloniaNativeLibraryPath = nativeLib
+      })
       .With(new SkiaOptions { MaxGpuResourceSizeBytes = 8096000 })
       .With(new Win32PlatformOptions { AllowEglInitialization = true, EnableMultitouch = false })
       .LogToTrace()
       .UseReactiveUI();
-
+    }
 
     public static void CreateOrFocusSpeckle()
     {

@@ -1019,6 +1019,7 @@ namespace DesktopUI2.ViewModels
         {
           dialog = new QuickOpsDialog();
           dialog.DataContext = Progress;
+          dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
           dialog.Show();
         }
 
@@ -1117,9 +1118,11 @@ namespace DesktopUI2.ViewModels
         {
           dialog = new QuickOpsDialog();
           dialog.DataContext = Progress;
+          dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
           dialog.Show();
         }
         var state = await Task.Run(() => Bindings.ReceiveStream(StreamState, Progress));
+
         Progress.IsProgressing = false;
         var view = MainViewModel.RouterInstance.NavigationStack.Last() is StreamViewModel ? "Stream" : "Home";
 
@@ -1140,14 +1143,18 @@ namespace DesktopUI2.ViewModels
               { "savedStreams", HomeViewModel.Instance.SavedStreams?.Count }
 
             });
-        } else
-        {
-            if (IsStandalone)
-            {
-                dialog.Close();
-            }
-        }
 
+          Notification = $"Received successfully";
+        }
+        else
+        {
+          Notification = "Nothing received!";
+
+          if (IsStandalone)
+          {
+            dialog.Close();
+          }
+        }
 
         GetActivity();
         GetReport();

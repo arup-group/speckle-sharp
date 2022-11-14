@@ -86,32 +86,42 @@ namespace Objects.Converter.CSI
 
     public object ConvertToNative(Base @object)
     {
+      object nativeObj = null;
       switch (@object)
       {
-        case Objects.Organization.Model o:
-          return BuiltElementModelToNative(o);
-          Report.Log($"Created Model { o.id}");
-        //case osg.node o:
-        //    return pointtonative(o);
-        case OSG.Node o:
-          return PointToNative((CSINode)o);
-          Report.Log($"Created Node {o.id}");
-        case Geometry.Line o:
-          return LineToNative(o);
-          Report.Log($"Created Line {o.id}");
-        case OSG.Element1D o:
-          return FrameToNative(o);
-          Report.Log($"Created Element1D {o.id}");
-        case OSG.Element2D o:
-          return AreaToNative(o);
-          Report.Log($"Created Element2D {o.id}");
-        case Model o:
-          return ModelToNative(o);
+        case Objects.Organization.Model o:                  
+          nativeObj = BuiltElementModelToNative(o);
           Report.Log($"Created Model {o.id}");
+          break;
+        case OSG.Node o:
+          nativeObj = PointToNative((CSINode)o);
+          Report.Log($"Created Node {o.id}");
+          break;
+        case Geometry.Line o:
+          nativeObj = LineToNative(o);
+          Report.Log($"Created Line {o.id}");
+          break;
+        case OSG.Element1D o:
+          nativeObj = FrameToNative(o);
+          Report.Log($"Created Element1D {o.id}");
+          break;
+        case OSG.Element2D o:
+          nativeObj = AreaToNative(o);
+          Report.Log($"Created Element2D {o.id}");
+          break;
+        case Model o:
+          nativeObj = ModelToNative(o);
+          Report.Log($"Created Model {o.id}");
+          break;
         default:
-          Report.Log($"Skipped not supported type: {@object.GetType()} {@object.id}");
-          throw new NotSupportedException();
+          if (@object != null)
+          {
+            Report.Log($"Skipped not supported type: {@object.GetType()} {@object.id}");
+          }
+          break;
       }
+
+      return nativeObj;
     }
 
     public List<object> ConvertToNative(List<Base> objects)
