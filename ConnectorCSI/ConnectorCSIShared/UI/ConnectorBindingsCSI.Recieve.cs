@@ -96,26 +96,29 @@ namespace Speckle.ConnectorCSI.UI
         // Do nothing!
       }
 
-      //progress.Report = new ProgressReport();
-      //var conversionProgressDict = new ConcurrentDictionary<string, int>();
-      //conversionProgressDict["Conversion"] = 0;
-
-
-
+      progress.Report = new ProgressReport();
+      var conversionProgressDict = new ConcurrentDictionary<string, int>();
+      conversionProgressDict["Conversion"] = 0;
 
       var commitObjs = FlattenCommitObject(commitObject, converter);
-      //progress.Max = commitObjs.Count();
+      progress.Max = commitObjs.Count();
+
+      Action updateProgressAction = () =>
+      {
+        conversionProgressDict["Conversion"]++;
+        progress.Update(conversionProgressDict);
+      };
 
       foreach (var commitObj in commitObjs)
       {
+        // handle user cancellation
+        if (progress.CancellationTokenSource.Token.IsCancellationRequested)
+          return null;
+
         try
         {
           BakeObject(commitObj, converter);
-          //Execute.PostToUIThread(() =>
-          //{
-            //conversionProgressDict["Conversion"]++;
-            //progress.Update(conversionProgressDict);
-          //});
+          updateProgressAction?.Invoke();
         }
         catch (Exception e)
         {
@@ -124,22 +127,20 @@ namespace Speckle.ConnectorCSI.UI
       }
 
       progress.Report.Merge(converter.Report);
-      //var c = converter as Objects.Converter.CSI.ConverterCSI;
-      //c.Model.View.RefreshView();
 
       if (progress.Report.OperationErrorsCount != 0)
         return null;
 
-      try
-      {
-        //await state.RefreshStream();
-        WriteStateToFile();
-      }
-      catch (Exception e)
-      {
-        WriteStateToFile();
-        progress.Report.LogOperationError(e);
-      }
+      //try
+      //{
+      //  //await state.RefreshStream();
+      //  WriteStateToFile();
+      //}
+      //catch (Exception e)
+      //{
+      //  WriteStateToFile();
+      //  //progress.Report.LogOperationError(e);
+      //}
 
       return state;
     }
