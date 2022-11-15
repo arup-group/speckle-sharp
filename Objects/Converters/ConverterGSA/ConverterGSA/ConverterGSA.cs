@@ -30,7 +30,7 @@ namespace ConverterGSA
   public partial class ConverterGSA : ISpeckleConverter
   {
     #region ISpeckleConverter props
-    public static string AppName = VersionedHostApplications.GSA;
+    public static string AppName = HostApplications.GSA.Name;
     public string Description => "Default Speckle Kit for GSA";
 
     public string Name => nameof(ConverterGSA);
@@ -802,12 +802,12 @@ namespace ConverterGSA
       throw new NotImplementedException();
     }
 
-    public void SetContextObjects(List<ApplicationPlaceholderObject> objects)
+    public void SetContextObjects(List<ApplicationObject> objects)
     {
       throw new NotImplementedException();
     }
 
-    public void SetPreviousContextObjects(List<ApplicationPlaceholderObject> objects)
+    public void SetPreviousContextObjects(List<ApplicationObject> objects)
     {
       throw new NotImplementedException();
     }

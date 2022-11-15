@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Metadata;
 using DesktopUI2.Models;
-using DesktopUI2.Views;
 using DesktopUI2.Views.Windows.Dialogs;
 using Material.Styles.Themes;
 using Material.Styles.Themes.Base;
@@ -20,7 +19,10 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
+using Stream = Speckle.Core.Api.Stream;
+using DesktopUI2.Views;
 
 namespace DesktopUI2.ViewModels
 {
@@ -53,6 +55,7 @@ namespace DesktopUI2.ViewModels
 
       Bindings = Locator.Current.GetService<ConnectorBindings>();
       this.RaisePropertyChanged("SavedStreams");
+
       //Init();
 
       var config = ConfigManager.Load();

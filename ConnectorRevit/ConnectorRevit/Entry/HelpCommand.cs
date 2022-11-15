@@ -40,7 +40,12 @@ namespace Speckle.ConnectorRevit.Entry
   {
     public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
     {
-      Process.Start(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "speckle-connection-manager-ui", "SpeckleConnectionManagerUI.exe"));
+      var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "speckle-connection-manager-ui", "SpeckleConnectionManagerUI.exe");
+      if (File.Exists(path))
+        Process.Start(path);
+
+      else
+        TaskDialog.Show("No Manager found", "Seems like Account Manager is not installed on this pc.");
       return Result.Succeeded;
     }
   }

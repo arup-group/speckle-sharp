@@ -1,4 +1,3 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
@@ -21,6 +20,7 @@ namespace DesktopUI2.Views.Windows.Dialogs
       InitializeComponent();
       Instance = this;
     }
+
 
     private void InitializeComponent()
     {

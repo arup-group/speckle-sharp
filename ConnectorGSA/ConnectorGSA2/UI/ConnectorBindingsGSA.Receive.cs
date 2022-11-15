@@ -36,10 +36,16 @@ namespace ConnectorGSA.UI
       return new List<ReceiveMode> { ReceiveMode.Create };
     }
 
+    public override bool CanPreviewReceive => false;
+    public override async Task<StreamState> PreviewReceive(StreamState state, ProgressViewModel progress)
+    {
+      return null;
+    }
+
     public override async Task<StreamState> ReceiveStream(StreamState state, ProgressViewModel progress)
     {
       var kit = KitManager.GetDefaultKit();
-      var converter = kit.LoadConverter(VersionedHostApplications.GSA);
+      var converter = kit.LoadConverter(HostApplications.GSA.Name);
       if (converter == null)
         throw new Exception("Could not find any Kit!");
 
@@ -164,7 +170,7 @@ namespace ConnectorGSA.UI
           streamId = stream?.id,
           commitId = myCommit?.id,
           message = myCommit?.message,
-          sourceApplication = VersionedHostApplications.GSA
+          sourceApplication = HostApplications.GSA.Name
         });
       }
       catch

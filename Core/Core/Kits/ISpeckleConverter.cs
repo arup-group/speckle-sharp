@@ -3,7 +3,6 @@ using Speckle.Core.Models;
 
 namespace Speckle.Core.Kits
 {
-
   public interface ISpeckleConverter
   {
     string Description { get; }
@@ -80,13 +79,13 @@ namespace Speckle.Core.Kits
     /// Some converters need to know which other objects are being converted, in order to sort relationships between them (ie, Revit). Use this method to set them.
     /// </summary>
     /// <param name="objects"></param>
-    public void SetContextObjects(List<ApplicationPlaceholderObject> objects);
+    public void SetContextObjects(List<ApplicationObject> objects);
 
     /// <summary>
     /// Some converters need to know which objects have been converted before in order to update them (ie, Revit). Use this method to set them.
     /// </summary>
     /// <param name="objects"></param>
-    public void SetPreviousContextObjects(List<ApplicationPlaceholderObject> objects);
+    public void SetPreviousContextObjects(List<ApplicationObject> objects);
 
     /// <summary>
     /// Some converters need to be able to receive some settings to modify their internal behaviour (i.e. Rhino's Brep Meshing options). Use this method to set them.
@@ -96,11 +95,23 @@ namespace Speckle.Core.Kits
 
   }
 
-
+  // NOTE: Do not change the order of the existing ones
+  /// <summary>
+  /// Receive modes indicate what to do and not do when receiving objects
+  /// </summary>
   public enum ReceiveMode
   {
+    /// <summary>
+    /// Attemts updating previously received objects by ID, deletes previously received objects that do not exist anymore and creates new ones
+    /// </summary>
     Update,
+    /// <summary>
+    /// Always creates new objects
+    /// </summary>
     Create,
+    /// <summary>
+    /// Ignores updating previously received objects and does not attempt updating or deleting them, creates new objects
+    /// </summary>
     Ignore
   }
 }

@@ -1,30 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Speckle.Core.Kits;
-
-using Rhino;
-using Rhino.DocObjects;
-using System.Text.RegularExpressions;
 using System.Diagnostics;
+using System.Drawing;
+using System.Linq;
+using System.Text.RegularExpressions;
+using DesktopUI2.ViewModels;
+using Rhino;
+using Rhino.Display;
+using Rhino.DocObjects;
+using Rhino.Geometry;
+using Speckle.Core.Kits;
+using Speckle.Core.Models;
 
 namespace SpeckleRhino
 {
   public static class Utils
   {
 #if RHINO6
-    public static string RhinoAppName = VersionedHostApplications.Rhino6;
+    public static string RhinoAppName = HostApplications.Rhino.GetVersion(HostAppVersion.v6);
     public static string AppName = "Rhino";
 #elif RHINO7
-    public static string RhinoAppName = VersionedHostApplications.Rhino7;
+    public static string RhinoAppName = HostApplications.Rhino.GetVersion(HostAppVersion.v7);
     public static string AppName = "Rhino";
 #else
-    public static string RhinoAppName = Applications.Rhino7;
+    public static string RhinoAppName = HostApplications.Rhino.Name;
     public static string AppName = "Rhino";
 #endif
+
+    public static string invalidRhinoChars = @"{}()";
+
+    /// <summary>
+    /// Removes invalid characters for Rhino layer and block names
+    /// </summary>
+    /// <param name="str"></param>
+    /// <returns></returns>
+    public static string RemoveInvalidRhinoChars(string str)
+    {
+      // using this to handle grasshopper branch syntax
+      string cleanStr = str.Replace("{", "").Replace("}","");
+      return cleanStr;
+    }
     #region extension methods
     /// <summary>
     /// Finds a layer from its full path
@@ -35,11 +50,12 @@ namespace SpeckleRhino
     /// <returns>Null on failure</returns>
     public static Layer GetLayer(this RhinoDoc doc, string path, bool MakeIfNull = false)
     {
-      int index = doc.Layers.FindByFullPath(path, RhinoMath.UnsetIntIndex);
+      var cleanPath = RemoveInvalidRhinoChars(path);
+      int index = doc.Layers.FindByFullPath(cleanPath, RhinoMath.UnsetIntIndex);
       Layer layer = doc.Layers.FindIndex(index);
       if (layer == null && MakeIfNull)
       {
-        var layerNames = path.Split(new string[] { Layer.PathSeparator }, StringSplitOptions.RemoveEmptyEntries);
+        var layerNames = cleanPath.Split(new string[] { Layer.PathSeparator }, StringSplitOptions.RemoveEmptyEntries);
 
         Layer parent = null;
         string currentLayerPath = string.Empty;
@@ -57,27 +73,152 @@ namespace SpeckleRhino
         layer = currentLayer;
       }
       return layer;
-    } 
+    }
     #endregion
 
     #region internal methods
     private static Layer MakeLayer(RhinoDoc doc, string name, Layer parentLayer = null)
     {
-      Layer newLayer = new Layer() { Color = System.Drawing.Color.AliceBlue, Name = name };
-      if (parentLayer != null)
-        newLayer.ParentLayerId = parentLayer.Id;
-      int newIndex = doc.Layers.Add(newLayer);
-      if ( newIndex < 0)
+      try
+      {
+        Layer newLayer = new Layer() { Color = System.Drawing.Color.AliceBlue, Name = name };
+        if (parentLayer != null)
+          newLayer.ParentLayerId = parentLayer.Id;
+        int newIndex = doc.Layers.Add(newLayer);
+        if (newIndex < 0)
+          return null;
+        else
+          return doc.Layers.FindIndex(newIndex);
+      }
+      catch (Exception e)
+      {
         return null;
-      else
-        return doc.Layers.FindIndex(newIndex);
+      }
     }
     #endregion
   }
 
-  
+  #region Preview
+  public class PreviewConduit : DisplayConduit
+  {
+    private Dictionary<string, List<object>> Preview { get; set; } = new Dictionary<string, List<object>>();
+    private List<string> Selected = new List<string>();
+    public BoundingBox bbox;
+    private Color color = Color.FromArgb(200, 59, 130, 246);
+    private Color selectedColor = Color.FromArgb(200, 255, 255, 0);
+    private DisplayMaterial material;
+
+    public PreviewConduit(List<ApplicationObject> preview)
+    {
+      material = new DisplayMaterial();
+      material.Transparency = 0.8;
+      material.Diffuse = color;
+      bbox = new BoundingBox();
+
+      foreach (var previewObj in preview)
+      {
+        var converted = new List<object>();
+        var toBeConverted = previewObj.Convertible ? previewObj.Converted : previewObj.Fallback.SelectMany(o => o.Converted).ToList();
+        foreach (var obj in toBeConverted)
+        {
+          switch (obj)
+          {
+            case GeometryBase o:
+              bbox.Union(o.GetBoundingBox(false));
+              break;
+            case Text3d o:
+              bbox.Union(o.BoundingBox);
+              break;
+            case InstanceObject o:
+              // todo: this needs to be handled, including how block defs are created during preview
+              //obj.Rollback = true;
+              break;
+            default:
+              break;
+          }
+          converted.Add(obj);
+        }
+
+        if (!Preview.ContainsKey(previewObj.OriginalId))
+          Preview.Add(previewObj.OriginalId, converted);
+      }
+    }
+
+    public void SelectPreviewObject(string id, bool unselect = false)
+    {
+      if (Preview.ContainsKey(id))
+      {
+        if (unselect)
+          Selected.Remove(id);
+        else
+          if (!Selected.Contains(id)) Selected.Add(id);
+      }
+    }
+
+    // reference: https://developer.rhino3d.com/api/RhinoCommon/html/M_Rhino_Display_DisplayConduit_CalculateBoundingBox.htm
+    protected override void CalculateBoundingBox(CalculateBoundingBoxEventArgs e)
+    {
+      base.CalculateBoundingBox(e);
+      e.IncludeBoundingBox(bbox);
+    }
+
+    protected override void CalculateBoundingBoxZoomExtents(CalculateBoundingBoxEventArgs e)
+    {
+      this.CalculateBoundingBox(e);
+    }
+
+    protected override void PreDrawObjects(Rhino.Display.DrawEventArgs e)
+    {
+      // draw preview objects
+      var display = e.Display;
+
+      foreach (var previewobj in Preview)
+      {
+        var drawColor = Selected.Contains(previewobj.Key) ? selectedColor : color;
+        var drawMaterial = material;
+        drawMaterial.Diffuse = drawColor;
+        foreach (var obj in previewobj.Value)
+        {
+          switch (obj)
+          {
+            case Brep o:
+              display.DrawBrepShaded(o, drawMaterial);
+              break;
+            case Mesh o:
+              display.DrawMeshShaded(o, drawMaterial);
+              break;
+            case Curve o:
+              display.DrawCurve(o, drawColor);
+              break;
+            case Rhino.Geometry.Point o:
+              display.DrawPoint(o.Location, drawColor);
+              break;
+            case Point3d o:
+              display.DrawPoint(o, drawColor);
+              break;
+            case PointCloud o:
+              display.DrawPointCloud(o, 5, drawColor);
+              break;
+            default:
+              break;
+          }
+        }
+      }
+    }
+
+  }
+
+  #endregion
+
   public static class Formatting
   {
+    public static string ObjectDescriptor(RhinoObject obj)
+    {
+      if (obj == null) return String.Empty;
+      var simpleType = obj.ObjectType.ToString();
+      return obj.HasName ? $"{simpleType}" : $"{simpleType} {obj.Name}";
+    }
+
     public static string TimeAgo(string timestamp)
     {
       TimeSpan timeAgo;

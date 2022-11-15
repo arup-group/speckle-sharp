@@ -10,44 +10,53 @@ using System.Linq;
 
 namespace Objects.Structural.Geometry
 {
-  public class Element2D : Base, IDisplayValue<List<Mesh>>
-  {
-    public string name { get; set; }
-
-    public List<ICurve> outline { get; set; }
-
-    [DetachProperty]
-    public Property2D property { get; set; }
-
-    public MemberType memberType { get; set; } // <<<<<< ex. slab, wall, generic, opening
-
-    public double offset { get; set; } //z direction (normal)
-    public double orientationAngle { get; set; } //
-
-    //[DetachProperty]
-    public Base parent { get; set; } //parent element
-
-    //[DetachProperty]
-    public List<Node> topology { get; set; }
-    public List<string> topologyRefs { get; set; }
-
-    //[DetachProperty]
-    public List<List<Node>> voids { get; set; }
-    public List<List<string>> voidRefs { get; set; }
-
-    [DetachProperty]
-    public List<Mesh> displayValue { get; set; }
-
-    public string units { get; set; }
-
-    public Element2D() { }
-
-    public Element2D(List<Node> nodes)
+    public class Element2D : Base, IDisplayValue<List<Mesh>>
     {
-      this.topology = nodes;
-      this.outline = new List<ICurve>() { GetPolylineFromNodes(nodes) };
-      this.topologyRefs = nodes.Select(n => n.applicationId).ToList();
-    }
+        public string name { get; set; }
+
+        public List<ICurve> outline { get; set; }
+
+        [DetachProperty]
+        public Property2D property { get; set; }
+
+        public MemberType memberType { get; set; } // <<<<<< ex. slab, wall, generic, opening
+
+        public double offset { get; set; } //z direction (normal)
+        public double orientationAngle { get; set; } //
+
+        //[DetachProperty]
+        public Base parent { get; set; } //parent element
+
+        //[DetachProperty]
+        public List<Node> topology { get; set; }
+        public List<string> topologyRefs { get; set; }
+
+        //[DetachProperty]
+        public List<List<Node>> voids { get; set; }
+        public List<List<string>> voidRefs { get; set; }
+
+        [DetachProperty]
+        public List<Mesh> displayValue { get; set; }
+
+        public string units { get; set; }
+
+        public Element2D() { }
+
+        public Element2D(List<Node> nodes)
+        {
+            this.topology = nodes;
+            this.outline = new List<ICurve>() { GetPolylineFromNodes(nodes) };
+            this.topologyRefs = nodes.Select(n => n.applicationId).ToList();
+        }
+
+        [SchemaInfo("Element2D", "Creates a Speckle structural 2D element (based on a list of edge ie. external, geometry defining nodes)", "Structural", "Geometry")]
+        public Element2D(List<Node> nodes, Property2D property, double offset = 0, double orientationAngle = 0)
+        {
+            this.topology = nodes;
+            this.property = property;
+            this.offset = offset;
+            this.orientationAngle = orientationAngle;
+        }
 
     [SchemaInfo("Element2D", "Creates a Speckle structural 2D element (based on a list of edge ie. external, geometry defining nodes)", "Structural", "Geometry")]
     public Element2D(List<Node> nodes, Property2D property, MemberType memberType = MemberType.NotSet, List<List<Node>> voids = null, double offset = 0, double orientationAngle = 0)

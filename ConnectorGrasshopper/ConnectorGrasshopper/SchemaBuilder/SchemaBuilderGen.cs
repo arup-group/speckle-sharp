@@ -318,6 +318,19 @@ public class AngleSchemaComponent: CreateSchemaObjectBase {
 }
 
 // This is generated code:
+public class ArchicadBeamSchemaComponent: CreateSchemaObjectBase {
+     
+    public ArchicadBeamSchemaComponent(): base("ArchicadBeam", "ArchicadBeam", "Creates an Archicad Structures beam by curve.", "Speckle 2 Archicad", "Structure") { }
+    
+    public override Guid ComponentGuid => new Guid("73860182-c94b-d570-f568-1ab73eec8bfd");
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.BuiltElements.Archicad.ArchicadBeam.ctor(Objects.Geometry.Point,Objects.Geometry.Point)","Objects.BuiltElements.Archicad.ArchicadBeam");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
 public class AreaSchemaComponent: CreateSchemaObjectBase {
      
     public AreaSchemaComponent(): base("Area", "Area", "Creates a Speckle area", "Speckle 2 BIM", "Other") { }
@@ -769,7 +782,7 @@ public class Element2DSchemaComponent: CreateSchemaObjectBase {
     public override Guid ComponentGuid => new Guid("0927879c-d28c-1c35-0d3f-4ba8e324ec39");
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Geometry.Element2D.ctor(System.Collections.Generic.List`1[Objects.Structural.Geometry.Node],Objects.Structural.Properties.Property2D,Objects.Structural.Geometry.MemberType,System.Collections.Generic.List`1[System.Collections.Generic.List`1[Objects.Structural.Geometry.Node]],System.Double,System.Double)","Objects.Structural.Geometry.Element2D");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Geometry.Element2D.ctor(System.Collections.Generic.List`1[Objects.Structural.Geometry.Node],Objects.Structural.Properties.Property2D,System.Double,System.Double)","Objects.Structural.Geometry.Element2D");
         base.AddedToDocument(document);
     }
 }
@@ -777,9 +790,22 @@ public class Element2DSchemaComponent: CreateSchemaObjectBase {
 // This is generated code:
 public class Element2D1SchemaComponent: CreateSchemaObjectBase {
      
-    public Element2D1SchemaComponent(): base("Element2D (from polyline)", "Element2D (from polyline)", "Creates a Speckle structural 2D element (based on a list of edge ie. external, geometry defining nodes)", "Speckle 2 Structural", "Geometry") { }
+    public Element2D1SchemaComponent(): base("Element2D", "Element2D", "Creates a Speckle structural 2D element (based on a list of edge ie. external, geometry defining nodes)", "Speckle 2 Structural", "Geometry") { }
     
     public override Guid ComponentGuid => new Guid("e56d73d9-2e14-2114-0de4-cbcc4d6cef3e");
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Geometry.Element2D.ctor(System.Collections.Generic.List`1[Objects.Structural.Geometry.Node],Objects.Structural.Properties.Property2D,Objects.Structural.Geometry.MemberType,System.Collections.Generic.List`1[System.Collections.Generic.List`1[Objects.Structural.Geometry.Node]],System.Double,System.Double)","Objects.Structural.Geometry.Element2D");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class Element2D2SchemaComponent: CreateSchemaObjectBase {
+     
+    public Element2D2SchemaComponent(): base("Element2D (from polyline)", "Element2D (from polyline)", "Creates a Speckle structural 2D element (based on a list of edge ie. external, geometry defining nodes)", "Speckle 2 Structural", "Geometry") { }
+    
+    public override Guid ComponentGuid => new Guid("f98f3b2a-bdc2-9135-28f3-3671439f53cb");
     
     public override void AddedToDocument(GH_Document document){
         SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Geometry.Element2D.ctor(Objects.Geometry.Polyline,Objects.Structural.Properties.Property2D,Objects.Structural.Geometry.MemberType,System.Collections.Generic.List`1[Objects.Geometry.Polyline],System.Double,System.Double)","Objects.Structural.Geometry.Element2D");
@@ -2711,7 +2737,7 @@ public class RevitLevel1SchemaComponent: CreateSchemaObjectBase {
 // This is generated code:
 public class RevitMaterialSchemaComponent: CreateSchemaObjectBase {
      
-    public RevitMaterialSchemaComponent(): base("RevitMaterial", "RevitMaterial", "Creates a Speckle material", "Speckle 2 BIM", "Architecture") { }
+    public RevitMaterialSchemaComponent(): base("RevitMaterial", "RevitMaterial", "Creates a Speckle material", "Speckle 2 Revit", "Architecture") { }
     
     public override Guid ComponentGuid => new Guid("c291d027-7a6a-8950-a2aa-77e134675750");
     
@@ -2830,7 +2856,7 @@ public class RevitWallOpeningSchemaComponent: CreateSchemaObjectBase {
 // This is generated code:
 public class RevitWallOpening1SchemaComponent: CreateSchemaObjectBase {
      
-    public RevitWallOpening1SchemaComponent(): base("Revit Wall Opening", "Revit Wall Opening", "Creates a Speckle Wall opening for revit", "Speckle 2 BIM", "Architecture") { }
+    public RevitWallOpening1SchemaComponent(): base("Revit Wall Opening", "Revit Wall Opening", "Creates a Speckle Wall opening for revit", "Speckle 2 Revit", "Architecture") { }
     
     public override Guid ComponentGuid => new Guid("541bfed0-738d-e1bd-1130-de05ec4bbf9e");
     

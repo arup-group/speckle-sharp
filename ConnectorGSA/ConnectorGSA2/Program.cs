@@ -36,7 +36,6 @@ namespace ConnectorGSA.Launcher
       {
          OpenOrFocusSpeckle();
       }
-
       catch (Exception e)
       {
         throw e;

@@ -13,6 +13,7 @@ using Speckle.Core.Transports;
 using DesktopUI2;
 using DesktopUI2.Models;
 using DesktopUI2.ViewModels;
+using static DesktopUI2.ViewModels.MappingViewModel;
 using DesktopUI2.Models.Filters;
 using DesktopUI2.Models.Settings;
 
@@ -188,13 +189,25 @@ namespace Speckle.ConnectorBentley.UI
       return new List<MenuItem>();
     }
 
-    public override void SelectClientObjects(string args)
+    public override void SelectClientObjects(List<string> args, bool deselect = false)
     {
-      throw new NotImplementedException();
+      // TODO!
+    }
+
+    public override async Task<Dictionary<string, List<MappingValue>>> ImportFamilyCommand(Dictionary<string, List<MappingValue>> Mapping)
+    {
+      await Task.Delay(TimeSpan.FromMilliseconds(500));
+      return new Dictionary<string, List<MappingValue>>();
     }
     #endregion
 
     #region receiving
+    public override bool CanPreviewReceive => false;
+    public override Task<StreamState> PreviewReceive(StreamState state, ProgressViewModel progress)
+    {
+      return null;
+    }
+
     public override async Task<StreamState> ReceiveStream(StreamState state, ProgressViewModel progress)
     {
       var kit = KitManager.GetDefaultKit();
@@ -214,6 +227,14 @@ namespace Speckle.ConnectorBentley.UI
       if (progress.CancellationTokenSource.Token.IsCancellationRequested)
         return null;
 
+      /*
+      if (Doc == null)
+      {
+        progress.Report.LogOperationError(new Exception($"No Document is open."));
+        progress.CancellationTokenSource.Cancel();
+      }
+      */
+
       //if "latest", always make sure we get the latest commit when the user clicks "receive"
       Commit commit = null;
       if (state.CommitId == "latest")
@@ -226,24 +247,25 @@ namespace Speckle.ConnectorBentley.UI
         commit = await state.Client.CommitGet(progress.CancellationTokenSource.Token, state.StreamId, state.CommitId);
       }
 
-      string referencedObject = commit.referencedObject;
-      Base commitObject = null;
+      state.LastSourceApp = commit.sourceApplication;
+
+      var commitObject = await Operations.Receive(
+        commit.referencedObject,
+        progress.CancellationTokenSource.Token,
+        transport,
+        onProgressAction: dict => progress.Update(dict),
+        onTotalChildrenCountKnown: num => Execute.PostToUIThread(() => progress.Max = num),
+        onErrorAction: (message, exception) =>
+        {
+          progress.Report.LogOperationError(exception);
+          Analytics.TrackEvent(state.Client.Account, Analytics.Events.Receive, new Dictionary<string, object>() { { "commit_receive_failed", exception.Message } });
+          progress.CancellationTokenSource.Cancel();
+        },
+        disposeTransports: true
+        );
+
       try
       {
-        commitObject = await Operations.Receive(
-          referencedObject,
-          progress.CancellationTokenSource.Token,
-          transport,
-          onProgressAction: dict => progress.Update(dict),
-          onTotalChildrenCountKnown: num => Execute.PostToUIThread(() => progress.Max = num),
-          onErrorAction: (message, exception) =>
-          {
-            progress.Report.LogOperationError(new SpeckleException(exception.Message, true, Sentry.SentryLevel.Error));
-            Analytics.TrackEvent(state.Client.Account, Analytics.Events.Receive, new Dictionary<string, object>() { { "commit_receive_failed", exception.Message } });
-            progress.CancellationTokenSource.Cancel();
-          },
-          disposeTransports: true
-          );
         await state.Client.CommitReceived(new CommitReceivedInput
         {
           streamId = stream?.id,
@@ -266,15 +288,15 @@ namespace Speckle.ConnectorBentley.UI
       // invoke conversions on the main thread via control
       int count = 0;
       var flattenedObjects = FlattenCommitObject(commitObject, converter, ref count);
-      List<ApplicationPlaceholderObject> newPlaceholderObjects;
+      List<ApplicationObject> newPlaceholderObjects;
       if (Control.InvokeRequired)
-        newPlaceholderObjects = (List<ApplicationPlaceholderObject>)Control.Invoke(new NativeConversionAndBakeDelegate(ConvertAndBakeReceivedObjects), new object[] { flattenedObjects, converter, state, progress });
+        newPlaceholderObjects = (List<ApplicationObject>)Control.Invoke(new NativeConversionAndBakeDelegate(ConvertAndBakeReceivedObjects), new object[] { flattenedObjects, converter, state, progress });
       else
         newPlaceholderObjects = ConvertAndBakeReceivedObjects(flattenedObjects, converter, state, progress);
 
       if (newPlaceholderObjects == null)
       {
-        converter.Report.LogConversionError(new Exception("fatal error: receive cancelled by user"));
+        converter.Report.ConversionErrors.Add(new Exception("fatal error: receive cancelled by user"));
         return null;
       }
 
@@ -328,10 +350,10 @@ namespace Speckle.ConnectorBentley.UI
       return null;
     }
 
-    delegate List<ApplicationPlaceholderObject> NativeConversionAndBakeDelegate(List<Base> objects, ISpeckleConverter converter, StreamState state, ProgressViewModel progress);
-    private List<ApplicationPlaceholderObject> ConvertAndBakeReceivedObjects(List<Base> objects, ISpeckleConverter converter, StreamState state, ProgressViewModel progress)
+    delegate List<ApplicationObject> NativeConversionAndBakeDelegate(List<Base> objects, ISpeckleConverter converter, StreamState state, ProgressViewModel progress);
+    private List<ApplicationObject> ConvertAndBakeReceivedObjects(List<Base> objects, ISpeckleConverter converter, StreamState state, ProgressViewModel progress)
     {
-      var placeholders = new List<ApplicationPlaceholderObject>();
+      var placeholders = new List<ApplicationObject>();
       var conversionProgressDict = new ConcurrentDictionary<string, int>();
       conversionProgressDict["Conversion"] = 0;
       Execute.PostToUIThread(() => progress.Max = state.SelectedObjectIds.Count());
@@ -353,9 +375,9 @@ namespace Speckle.ConnectorBentley.UI
         {
           var convRes = converter.ConvertToNative(@base);
 
-          if (convRes is ApplicationPlaceholderObject placeholder)
+          if (convRes is ApplicationObject placeholder)
             placeholders.Add(placeholder);
-          else if (convRes is List<ApplicationPlaceholderObject> placeholderList)
+          else if (convRes is List<ApplicationObject> placeholderList)
             placeholders.AddRange(placeholderList);
 
           var libraryName = "Speckle";
@@ -490,8 +512,6 @@ namespace Speckle.ConnectorBentley.UI
           List<string> props = @base.GetDynamicMembers().ToList();
           if (@base.GetMembers().ContainsKey("displayValue"))
             props.Add("displayValue");
-          else if (@base.GetMembers().ContainsKey("displayMesh")) // add display mesh to member list if it exists. this will be deprecated soon
-            props.Add("displayMesh");
           if (@base.GetMembers().ContainsKey("elements")) // this is for builtelements like roofs, walls, and floors.
             props.Add("elements");
           int totalMembers = props.Count;
@@ -505,7 +525,7 @@ namespace Speckle.ConnectorBentley.UI
             {
               objects.AddRange(nestedObjects);
               foundConvertibleMember = true;
-          }
+            }
           }
 
           if (!foundConvertibleMember && count == totalMembers) // this was an unsupported geo
@@ -535,7 +555,7 @@ namespace Speckle.ConnectorBentley.UI
     }
 
     //delete previously sent object that are no longer in this stream
-    private void DeleteObjects(List<ApplicationPlaceholderObject> previouslyReceiveObjects, List<ApplicationPlaceholderObject> newPlaceholderObjects)
+    private void DeleteObjects(List<ApplicationObject> previouslyReceiveObjects, List<ApplicationObject> newPlaceholderObjects)
     {
       foreach (var obj in previouslyReceiveObjects)
       {
@@ -543,17 +563,21 @@ namespace Speckle.ConnectorBentley.UI
           continue;
 
         // get the model object from id               
-        ulong id = Convert.ToUInt64(obj.ApplicationGeneratedId);
+        ulong id = Convert.ToUInt64(obj.CreatedIds.FirstOrDefault());
         var element = Model.FindElementById((ElementId)id);
         if (element != null)
-        {
           element.DeleteFromModel();
-        }
       }
     }
     #endregion
 
     #region sending
+    public override bool CanPreviewSend => false;
+    public override void PreviewSend(StreamState state, ProgressViewModel progress)
+    {
+      return;
+    }
+
     public override async Task<string> SendStream(StreamState state, ProgressViewModel progress)
     {
       var kit = KitManager.GetDefaultKit();
@@ -962,6 +986,11 @@ namespace Speckle.ConnectorBentley.UI
         Control.Invoke(new WriteStateDelegate(StreamStateManager2.WriteStreamStateList), new object[] { File, DocumentStreams });
       else
         StreamStateManager2.WriteStreamStateList(File, DocumentStreams);
+    }
+
+    public override void ResetDocument()
+    {
+      // TODO!
     }
     #endregion
   }

@@ -1,22 +1,22 @@
-﻿using Grasshopper.Kernel.Types;
-using Speckle.Core.Kits;
-using Speckle.Core.Models;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Grasshopper;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
-using Rhino.Geometry;
-using System.Threading;
-using Rhino;
+using Grasshopper.Kernel.Types;
 using Microsoft.CSharp.RuntimeBinder;
+using Rhino;
 using Rhino.Display;
+using Rhino.Geometry;
+using Speckle.Core.Kits;
+using Speckle.Core.Models;
 
 namespace ConnectorGrasshopper.Extras
 {
@@ -29,9 +29,9 @@ namespace ConnectorGrasshopper.Extras
     /// <returns><see cref="VersionedHostApplications.Grasshopper7"/> when Rhino 7 is running, <see cref="VersionedHostApplications.Grasshopper6"/> otherwise.</returns>
     public static string GetVersionedAppName()
     {
-      var version = VersionedHostApplications.Grasshopper6;
+      var version = HostApplications.Grasshopper.GetVersion(HostAppVersion.v6);
       if (RhinoApp.Version.Major >= 7)
-        version = VersionedHostApplications.Grasshopper7;
+        version = HostApplications.Grasshopper.GetVersion(HostAppVersion.v7);
       return version;
     }
     public static ISpeckleConverter GetDefaultConverter()
@@ -105,7 +105,7 @@ namespace ConnectorGrasshopper.Extras
     }
 
     private static string dataTreePathPattern = @"^(@(\(\d+\))?)?(?<path>\{\d+(;\d+)*\})$";
-    
+
     /// <summary>
     ///   Converts a <see cref="Base"/> object into a Grasshopper <see cref="DataTree{T}"/>.
     /// </summary>

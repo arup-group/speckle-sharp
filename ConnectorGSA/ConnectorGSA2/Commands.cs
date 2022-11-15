@@ -336,8 +336,8 @@ namespace ConnectorGSA
             streamId = state.StreamId,
             objectId = objId,
             branchName = state.BranchName,
-            message = state.CommitMessage != null ? state.CommitMessage : $"Sent data from from {VersionedHostApplications.GSA}.",
-            sourceApplication = VersionedHostApplications.GSA
+            message = state.CommitMessage != null ? state.CommitMessage : $"Sent data from from {HostApplications.GSA.Name}.",
+            sourceApplication = HostApplications.GSA.Name
           };
 
           if (!string.IsNullOrEmpty(parent))
@@ -1207,7 +1207,7 @@ namespace ConnectorGSA
       }
     }
 
-    private static Version getRunningVersion()
+    private static System.Version getRunningVersion()
     {
       try
       {

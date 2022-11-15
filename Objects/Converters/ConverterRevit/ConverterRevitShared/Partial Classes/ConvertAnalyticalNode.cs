@@ -15,10 +15,9 @@ namespace Objects.Converter.Revit
 {
   public partial class ConverterRevit
   {
-    public List<ApplicationPlaceholderObject> AnalyticalNodeToNative(Node speckleNode)
+    public ApplicationObject AnalyticalNodeToNative(Node speckleNode)
     {
-      List<ApplicationPlaceholderObject> placeholderObjects = new List<ApplicationPlaceholderObject> { };
-      return placeholderObjects;
+      return new ApplicationObject(speckleNode.id, speckleNode.speckle_type) { applicationId = speckleNode.applicationId};
     }
 
     private Node AnalyticalNodeToSpeckle(ReferencePoint revitNode)
@@ -59,12 +58,9 @@ namespace Objects.Converter.Revit
         case BoundaryConditionsType.Area:
           var loops = revitBoundary.GetLoops();
           foreach (var loop in loops)
-          {
             foreach (var areaCurve in loop)
-            {
               points.Add(areaCurve.GetEndPoint(1));
-            }
-          }
+
           points = points.Distinct().ToList();
           state = GetParamValue<int>(revitBoundary, BuiltInParameter.BOUNDARY_PARAM_PRESET_AREA);
           break;
@@ -91,7 +87,6 @@ namespace Objects.Converter.Revit
 
       return speckleBoundaryCondition;
     }
-
 
     private Restraint GetRestraintCode(DB.Element elem, BoundaryConditionsType type, int presetState)
     {
@@ -203,8 +198,5 @@ namespace Objects.Converter.Revit
 
       return restraint;
     }
-
   }
-
-
 }

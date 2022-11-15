@@ -29,23 +29,91 @@
     <conv:RoleValueConverter x:Key="RoleValueConverter" />
     <conv:StringOpacityValueConverter x:Key="StringOpacityValueConverter" />
   </UserControl.Resources>
-  <Grid RowDefinitions="auto,*, auto">
-    <Border
-      Margin="0,0,0,7"
-      Padding="0"
-      assists:ShadowAssist.ShadowDepth="Depth2"
-      Background="{DynamicResource MaterialDesignCardBackground}">
-      <Grid Margin="15" ColumnDefinitions="auto,*,auto">
-        <m:FloatingButton
-          VerticalAlignment="Center"
-          assists:ShadowAssist.ShadowDepth="0"
-          Background="Transparent"
-          Classes=""
-          Command="{Binding GoBack}"
-          ToolTip.Tip="Back">
-          <Button.Content>
+  <Grid RowDefinitions="auto,*, 3, auto">
+      <Border
+        x:Name="header"
+        Margin="0,0,0,7"
+        Padding="0"
+        assists:ShadowAssist.ShadowDepth="Depth2"
+        Background="{DynamicResource PrimaryHueMidBrush}">
+          <Grid Margin="15" ColumnDefinitions="auto,*,auto, auto">
+              <m:FloatingButton
+                VerticalAlignment="Center"
+                assists:ShadowAssist.ShadowDepth="0"
+                Background="Transparent"
+                Classes=""
+                Command="{Binding GoBack}"
+                ToolTip.Tip="Back">
+                  <Button.Content>
+                      <Viewbox
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Stretch="Fill">
+                          <icons:MaterialIcon
+                            Width="24"
+                            Height="24"
+                            Foreground="White"
+                            Kind="ChevronLeft" />
+                      </Viewbox>
+                  </Button.Content>
 
-            <Viewbox
+              </m:FloatingButton>
+              <Grid
+                Grid.Column="1"
+                Margin="15,0,0,0"
+                RowDefinitions="auto,auto">
+                  <TextBlock
+                    Classes="Medium SpeckleFont"
+                    FontSize="20"
+                    Foreground="White"
+                    Text="{Binding Stream.name}"
+                    TextTrimming="CharacterEllipsis" />
+                  <sc:StreamDetails Grid.Row="1">
+                      <sc:StreamDetails.Styles>
+                          <Style Selector="TextBlock">
+                              <Setter Property="Foreground" Value="White" />
+                          </Style>
+                          <Style Selector="icons|MaterialIcon.StreamCard">
+                              <Setter Property="Foreground" Value="White" />
+                          </Style>
+
+                      </sc:StreamDetails.Styles>
+                  </sc:StreamDetails>
+              </Grid>
+              <!--  SHARE STREAM  -->
+              <m:FloatingButton
+                Grid.Column="2"
+                VerticalAlignment="Center"
+                assists:ShadowAssist.ShadowDepth="Depth0"
+                Background="Transparent"
+                Classes="Mini"
+                Command="{Binding ShareCommand}"
+                ToolTip.Tip="Share">
+                  <Button.Content>
+                      <icons:MaterialIcon
+                        Width="15"
+                        Height="15"
+                        assists:ShadowAssist.ShadowDepth="0"
+                        Foreground="White"
+                        Kind="UsersAdd" />
+                  </Button.Content>
+              </m:FloatingButton>
+              <Menu Grid.Column="3" Items="{Binding MenuItems}">
+                  <Menu.Styles>
+                      <Style Selector="MenuItem">
+                          <Setter Property="Header" Value="{Binding Header}" />
+                          <Setter Property="Icon" Value="{Binding Icon}" />
+                          <Setter Property="MinWidth" Value="28" />
+                          <Setter Property="Items" Value="{Binding Items}" />
+                          <Setter Property="Command" Value="{Binding Command}" />
+                          <Setter Property="CommandParameter" Value="{Binding CommandParameter}" />
+                      </Style>
+                  </Menu.Styles>
+              </Menu>
+          </Grid>
+      </Border>
+      
+            <!--<Viewbox
               HorizontalAlignment="Stretch"
               VerticalAlignment="Stretch"
               Stretch="Fill">
@@ -78,14 +146,14 @@
           Classes="Mini"
           Command="{Binding ShareCommand}"
           ToolTip.Tip="Share">
-          <!--<Button.Content>
+          --><!--<Button.Content>
             <icons:MaterialIcon
               Width="15"
               Height="15"
               assists:ShadowAssist.ShadowDepth="0"
               Foreground="{DynamicResource MaterialDesignBody}"
               Kind="UsersAdd" />
-          </Button.Content>-->
+          </Button.Content>--><!--
         </m:FloatingButton>
         <Menu Grid.Column="3" Items="{Binding MenuItems}">
           <Menu.Styles>
@@ -103,7 +171,7 @@
 
 
       </Grid>
-    </Border>
+    </Border>-->
     
     <Grid
       Grid.Row="1"
@@ -151,6 +219,115 @@
           </TabItem.Header>
           <uc:Comments />
         </TabItem>
+
+          <!--  REPORT  -->
+          <TabItem>
+              <TabItem.Header>
+                  <StackPanel Orientation="Horizontal">
+                      <icons:MaterialIcon
+                        Width="20"
+                        Height="20"
+                        VerticalAlignment="Center"
+                        Kind="Information"
+                        ToolTip.Tip="Send and Receive report" />
+                      <TextBlock
+                        Margin="10,0,0,0"
+                        VerticalAlignment="Center"
+                        Text="Report" />
+                  </StackPanel>
+              </TabItem.Header>
+
+              <Grid ColumnDefinitions="*,auto" RowDefinitions="auto,auto,auto,*">
+
+                  <!--  SUMMARY AND OPERATION ERRORS  -->
+                  <TextBlock
+                    Grid.Row="0"
+                    Margin="10,0,0,0"
+                    VerticalAlignment="Center"
+                    Text="{Binding Log}"
+                    TextWrapping="Wrap" />
+
+                  <!--  SEARCH AND FILTER  -->
+                  <m:Card
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="5,10,5,10"
+                    Padding="0"
+                    HorizontalAlignment="Stretch"
+                    CornerRadius="25"
+                    IsVisible="{Binding HasReportItems}">
+                      <TextBox
+                        Margin="0"
+                        Padding="0"
+                        Classes="Solo Small"
+                        Text="{Binding SearchQuery}"
+                        Watermark="Search items">
+                          <TextBox.InnerRightContent>
+                              <m:FloatingButton
+                                VerticalAlignment="Center"
+                                assists:ShadowAssist.ShadowDepth="Depth0"
+                                Background="Transparent"
+                                Classes="Mini"
+                                Command="{Binding ClearSearchCommand}"
+                                IsVisible="{Binding SearchQuery, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                ToolTip.Tip="Clear">
+                                  <Button.Content>
+                                      <icons:MaterialIcon
+                                        Width="15"
+                                        Height="15"
+                                        assists:ShadowAssist.ShadowDepth="0"
+                                        Foreground="{DynamicResource MaterialDesignBody}"
+                                        Kind="CloseCircle" />
+                                  </Button.Content>
+                              </m:FloatingButton>
+                          </TextBox.InnerRightContent>
+                          <TextBox.InnerLeftContent>
+                              <icons:MaterialIcon
+                                Width="15"
+                                Height="15"
+                                Margin="10,0,0,0"
+                                Kind="Search" />
+                          </TextBox.InnerLeftContent>
+                      </TextBox>
+                  </m:Card>
+                  <m:FloatingButton
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    assists:ShadowAssist.ShadowDepth="Depth0"
+                    Background="Transparent"
+                    Command="{Binding CopyReportCommand}"
+                    IsVisible="{Binding HasReportItems}"
+                    ToolTip.Tip="Copy report items to clipboard">
+                      <Button.Content>
+                          <icons:MaterialIcon
+                            Width="20"
+                            Height="20"
+                            assists:ShadowAssist.ShadowDepth="0"
+                            Foreground="Gray"
+                            Kind="ContentCopy" />
+                      </Button.Content>
+                  </m:FloatingButton>
+
+                  <ListBox
+                    Grid.Row="2"
+                    Margin="0,0,0,8"
+                    Classes="Chip"
+                    IsVisible="{Binding HasReportItems}"
+                    Items="{Binding ReportFilterItems}"
+                    Selection="{Binding ReportSelectionModel}"
+                    SelectionMode="Multiple, Toggle" />
+
+                  <!--  APP OBJS  -->
+                  <uc:Report
+                    Grid.Row="3"
+                    Grid.ColumnSpan="2"
+                    IsVisible="{Binding HasReportItems}" />
+              </Grid>
+
+          </TabItem>
+
 
       </TabControl>
             
@@ -203,8 +380,43 @@
                 </m:FloatingButton>
               </Grid>
             </m:ColorZone>
+        
+        <!--  SHARE PROMPT  -->
+        <m:ColorZone
+          Grid.Row="2"
+          Margin="0,0,0,10"
+          assists:ShadowAssist.ShadowDepth="Depth0"
+          CornerRadius="25"
+          IsVisible="{Binding ShowSharePrompt}"
+          Mode="PrimaryLight">
+            <Grid ColumnDefinitions="*, auto">
+                <Button
+                  Margin="0,0,3,0"
+                  VerticalAlignment="Center"
+                  Classes="Flat"
+                  Command="{Binding ShareCommand}"
+                  CornerRadius="25,0,0,25"
+                  ToolTip.Tip="Share stream">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock
+                          VerticalAlignment="Center"
+                          Classes="Overline"
+                          FontWeight="Medium"
+                          Foreground="White"
+                          Text="Enable multiplayer mode!"
+                          TextWrapping="Wrap" />
+                        <icons:MaterialIcon
+                          Margin="5,0"
+                          VerticalAlignment="Center"
+                          Foreground="White"
+                          Kind="UsersAdd" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </m:ColorZone>        
+        
             <!--  REPORT  -->
-            <m:ColorZone
+            <!--<m:ColorZone
               Grid.Row="3"
               Margin="0,0,0,10"
               assists:ShadowAssist.ShadowDepth="Depth0"
@@ -253,7 +465,7 @@
                   </Button.Content>
                 </m:FloatingButton>
               </Grid>
-            </m:ColorZone>
+            </m:ColorZone>-->
           </Grid>
 
 
