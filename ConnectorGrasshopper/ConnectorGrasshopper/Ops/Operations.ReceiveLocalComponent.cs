@@ -14,6 +14,8 @@ using Speckle.Core.Models;
 using Speckle.Core.Models.Extensions;
 using Logging = Speckle.Core.Logging;
 using Utilities = ConnectorGrasshopper.Extras.Utilities;
+using Serilog;
+
 
 namespace ConnectorGrasshopper.Ops
 {
@@ -59,8 +61,15 @@ namespace ConnectorGrasshopper.Ops
 
     public override void AddedToDocument(GH_Document document)
     {
-      SetDefaultKitAndConverter();
-      base.AddedToDocument(document);
+      try {
+        SetDefaultKitAndConverter();
+        base.AddedToDocument(document);
+
+        Log.Information("Added to document");
+      }
+      catch(Exception e) {
+        Log.Error(e.Message);
+      }
     }
 
     public void SetConverterFromKit(string kitName)

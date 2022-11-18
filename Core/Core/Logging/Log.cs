@@ -4,6 +4,10 @@ using System.Linq;
 using System.Reflection;
 using Sentry;
 using Speckle.Core.Credentials;
+using Serilog;
+using Serilog.Sinks.File;
+using Serilog.Context;
+using Serilog.Events;
 
 namespace Speckle.Core.Logging
 {
@@ -52,6 +56,17 @@ namespace Speckle.Core.Logging
           scope.User = new User { Id = id, };
           scope.SetTag("hostApplication", Setup.HostApplication);
         });
+
+
+
+        // SeriLog
+        var logPath = System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        logPath = System.IO.Path.Combine(logPath, "Arup", "Speckle", "Logs", "Grasshopper", "log-.txt");
+
+        Serilog.Log.Logger = new LoggerConfiguration()
+          .WriteTo.File(logPath, rollingInterval: RollingInterval.Day)
+          .CreateLogger();
+
 
         _initialized = true;
       }

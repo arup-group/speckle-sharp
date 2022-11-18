@@ -13,6 +13,10 @@ using System.Threading.Tasks;
 using System.Web;
 using Speckle.Core.Credentials;
 using Speckle.Newtonsoft.Json;
+using Serilog;
+using Serilog.Sinks.File;
+using Serilog.Context;
+using Serilog.Events;
 
 namespace Speckle.Core.Logging
 {
@@ -177,7 +181,7 @@ namespace Speckle.Core.Logging
             properties.Add("type", "action");
 
           if (customProperties != null)
-            properties = properties.Concat(customProperties).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            properties = properties.Concat(customProperties).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);          
 
           var httpWebRequest = (HttpWebRequest)WebRequest.Create(PosthogServer + "/capture");
           httpWebRequest.ContentType = "application/x-www-form-urlencoded";
@@ -185,15 +189,17 @@ namespace Speckle.Core.Logging
           httpWebRequest.Method = "POST";
           ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
+          string json = JsonConvert.SerializeObject(new
+          {
+
+            @event = eventName.ToString(),
+            properties
+          });
+
+          Serilog.Log.Information(json);
+
           using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
           {
-            string json = JsonConvert.SerializeObject(new
-            {
-
-              @event = eventName.ToString(),
-              properties
-            });
-
             streamWriter.Write("data=" + HttpUtility.UrlEncode(json));
             streamWriter.Flush();
             streamWriter.Close();

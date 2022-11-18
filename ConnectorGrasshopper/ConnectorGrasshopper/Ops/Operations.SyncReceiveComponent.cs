@@ -165,6 +165,8 @@ namespace ConnectorGrasshopper.Ops
 
     protected override void SolveInstance(IGH_DataAccess DA)
     {
+      Serilog.Log.Information("SolveInstance started");
+
       if (RunCount == 1)
       {
         ParseInput(DA);
@@ -173,6 +175,7 @@ namespace ConnectorGrasshopper.Ops
 
       if (InPreSolve)
       {
+        Serilog.Log.Information("InPreSolve");
 
         var task = Task.Run(async () =>
         {
