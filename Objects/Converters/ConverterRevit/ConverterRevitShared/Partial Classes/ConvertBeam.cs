@@ -43,7 +43,7 @@ namespace Objects.Converter.Revit
       var speckleRevitBeam = speckleBeam as RevitBeam;
 
       // If family name or type not present in Revit model, add speckle section info as instance parameters
-      if (familySymbol.FamilyName != speckleRevitBeam.family || familySymbol.Name != speckleRevitBeam.type)
+      if (speckleRevitBeam != null && (familySymbol.FamilyName != speckleRevitBeam.family || familySymbol.Name != speckleRevitBeam.type))
       {
         var paramNames = new List<string> { "Section Family", "Section Type" };
         var paramValues = new List<object> { speckleRevitBeam.family, speckleRevitBeam.type };
