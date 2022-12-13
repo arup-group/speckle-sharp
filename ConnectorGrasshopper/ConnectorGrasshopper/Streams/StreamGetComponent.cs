@@ -60,8 +60,8 @@ namespace ConnectorGrasshopper.Streams
       DA.GetData(1, ref userId);
       var idWrapper = ghIdWrapper.Value;
       var account = string.IsNullOrEmpty(userId)
-        ? AccountManager.GetAccounts().FirstOrDefault(a => a.serverInfo.url == idWrapper.ServerUrl) // If no user is passed in, get the first account for this server
-        : AccountManager.GetAccounts().FirstOrDefault(a => a.userInfo.id == userId); // If user is passed in, get matching user in the db
+        ? AccountManager.GetAccounts(true).FirstOrDefault(a => a.serverInfo.url == idWrapper.ServerUrl) // If no user is passed in, get the first account for this server
+        : AccountManager.GetAccounts(true).FirstOrDefault(a => a.userInfo.id == userId); // If user is passed in, get matching user in the db
       
       if (account == null || account.serverInfo.url != idWrapper.ServerUrl)
       {

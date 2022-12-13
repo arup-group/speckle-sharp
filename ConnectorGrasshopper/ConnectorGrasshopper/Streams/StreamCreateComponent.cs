@@ -88,7 +88,7 @@ namespace ConnectorGrasshopper.Streams
       }
       else
       {
-        account = AccountManager.GetAccounts().FirstOrDefault(a => a.userInfo.id == userId);
+        account = AccountManager.GetAccounts(true).FirstOrDefault(a => a.userInfo.id == userId);
         if (account == null)
         {
           // Really last ditch effort - in case people delete accounts from the manager, and the selection dropdown is still using an outdated list.

@@ -66,8 +66,8 @@ namespace ConnectorGrasshopper.Streams
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Max number of streams retrieved is 50.");
         }
 
-        var account = string.IsNullOrEmpty(userId) ? AccountManager.GetDefaultAccount() :
-          AccountManager.GetAccounts().FirstOrDefault(a => a.userInfo.id == userId);
+        var account = string.IsNullOrEmpty(userId) ? AccountManager.GetDefaultAccount(true) :
+          AccountManager.GetAccounts(true).FirstOrDefault(a => a.userInfo.id == userId);
 
         if (userId == null)
         {

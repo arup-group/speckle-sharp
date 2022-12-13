@@ -48,8 +48,8 @@ namespace ConnectorGrasshopper.Accounts
     {
       ListItems.Clear();
       ListItems.Add(new GH_ValueListItem("No account selected", ""));
-      var accounts = AccountManager.GetAccounts().ToList();
-      var defaultAccount = AccountManager.GetDefaultAccount();
+      var accounts = AccountManager.GetAccounts(true).ToList();
+      var defaultAccount = AccountManager.GetDefaultAccount(true);
       int index = 0, defaultAccountIndex = 0;
 
       if (accounts.Count == 0)
@@ -134,7 +134,7 @@ namespace ConnectorGrasshopper.Accounts
       try
       {
         var selectedUserId = FirstSelectedItem.Expression?.Trim(new char[] { '"' });
-        var selectedAccount = AccountManager.GetAccounts().FirstOrDefault(a => a.userInfo.id == selectedUserId);
+        var selectedAccount = AccountManager.GetAccounts(true).FirstOrDefault(a => a.userInfo.id == selectedUserId);
         if (selectedAccount != null)
         {
           writer.SetString("selectedId", selectedUserId);

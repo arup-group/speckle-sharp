@@ -24,7 +24,7 @@ namespace Speckle.Core.Credentials
   /// <summary>
   /// Manage accounts locally for desktop applications.
   /// </summary>
-  public static class AccountManager
+  public static partial class AccountManager
   {
 
     private static SQLiteTransport AccountStorage = new SQLiteTransport(scope: "Accounts");
@@ -406,21 +406,32 @@ namespace Speckle.Core.Credentials
 
       var tokenResponse = (await GetToken(accessCode, challenge, server));
 
-      var userResponse = await GetUserServerInfo(tokenResponse.token, server);
+      var account = await CreateAccount(tokenResponse.token, tokenResponse.refreshToken, server);
+
+      //if the account already exists it will not be added again
+      AccountStorage.SaveObject(account.id, JsonConvert.SerializeObject(account));
+    }
+
+    private static async Task<Account> CreateAccount(string token, string refreshToken, string server)
+    {
+      server = server.TrimEnd(new[] { '/' });
+
+      if (string.IsNullOrEmpty(server))
+        server = GetDefaultServerUrl();
+
+      var userResponse = await GetUserServerInfo(token, server);
 
       var account = new Account()
       {
-        token = tokenResponse.token,
-        refreshToken = tokenResponse.refreshToken,
+        token = token,
+        refreshToken = refreshToken,
         isDefault = GetAccounts().Count() == 0,
         serverInfo = userResponse.serverInfo,
         userInfo = userResponse.user
       };
 
       account.serverInfo.url = server;
-
-      //if the account already exists it will not be added again
-      AccountStorage.SaveObject(account.id, JsonConvert.SerializeObject(account));
+      return account;
     }
 
     private static async Task<TokenExchangeResponse> GetToken(string accessCode, string challenge, string server)
