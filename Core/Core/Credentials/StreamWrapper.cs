@@ -217,7 +217,7 @@ namespace Speckle.Core.Credentials
       if (OriginalInput != null && OriginalInput.Contains("?u="))
       {
         var userId = OriginalInput.Split(new string[] { "?u=" }, StringSplitOptions.None)[1];
-        var acc = AccountManager.GetAccounts().FirstOrDefault(acc => acc.userInfo.id == userId);
+        var acc = AccountManager.GetAccounts(true).FirstOrDefault(acc => acc.userInfo.id == userId);
         if (acc != null)
         {
           try
@@ -236,7 +236,7 @@ namespace Speckle.Core.Credentials
       }
 
       // Step 2: check the default
-      var defAcc = AccountManager.GetDefaultAccount();
+      var defAcc = AccountManager.GetDefaultAccount(true);
       try
       {
         await ValidateWithAccount(defAcc);
