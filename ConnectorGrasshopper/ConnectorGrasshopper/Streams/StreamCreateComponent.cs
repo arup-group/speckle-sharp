@@ -109,15 +109,28 @@ namespace ConnectorGrasshopper.Streams
       }
 
       Tracker.TrackNodeRun("Stream Create");
-      
-      Task.Run(async () =>
+
+      if (AccountManager.AccountFromToken == null)
+      {
+        Task.Run(CreateStreamTask(account, jobNumber));
+      }
+      else
+      {
+        // just wait for task to finish
+        var temp = Task.Run(CreateStreamTask(account, jobNumber)).Result;
+      }
+    }
+
+    private Func<Task<StreamWrapper>> CreateStreamTask(Account account, string jobNumber)
+    {
+      return async () =>
       {
         var client = new Client(account);
         try
         {
           StreamCreateInput createInput;
           if (!String.IsNullOrEmpty(jobNumber))
-            createInput = new StreamWithJobNumberCreateInput { isPublic = false, jobNumber = jobNumber };          
+            createInput = new StreamWithJobNumberCreateInput { isPublic = false, jobNumber = jobNumber };
           else
             createInput = new StreamCreateInput { isPublic = false };
 
@@ -127,7 +140,7 @@ namespace ConnectorGrasshopper.Streams
             account.userInfo.id,
             account.serverInfo.url
           );
-          if(!String.IsNullOrEmpty(jobNumber)) stream.JobNumber = jobNumber;
+          if (!String.IsNullOrEmpty(jobNumber)) stream.JobNumber = jobNumber;
 
           Rhino.RhinoApp.InvokeOnUiThread((Action)delegate
           {
@@ -142,7 +155,8 @@ namespace ConnectorGrasshopper.Streams
             AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Could not create stream at {account.serverInfo.url}:\n{e.ToFormattedString()}");
           });
         }
-      });
+        return stream;
+      };
     }
   }
 }

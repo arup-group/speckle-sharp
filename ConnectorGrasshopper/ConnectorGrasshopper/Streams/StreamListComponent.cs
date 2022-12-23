@@ -83,52 +83,72 @@ namespace ConnectorGrasshopper.Streams
         Params.Input[0].AddVolatileData(new GH_Path(0), 0, account.userInfo.id);
 
         Tracker.TrackNodeRun();
-        
-        Task.Run(async () =>
+
+        if (AccountManager.AccountFromToken == null)
         {
-          if (!await Helpers.UserHasInternet())
-          {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "You are not connected to the internet");
-            Message = "Error";
-            return;
-          }
-          try
-          {
-            var client = new Client(account);
-            // Save the result
-            var result = await client.StreamsGet(limit);
-            streams = result
-              .Select(stream => new StreamWrapper(stream.id, account.userInfo.id, account.serverInfo.url))
-              .ToList();
-          }
-          catch (Exception e)
-          {
-            error = e;
-          }
-          finally
-          {
-            Rhino.RhinoApp.InvokeOnUiThread((Action)delegate { ExpireSolution(true); });
-          }
-        });
+          Task.Run(StreamListTask(limit, account));
+        }
+        else
+        {
+          // just wait for task to finish
+          var temp = Task.Run(StreamListTask(limit, account)).Result;
+          if (temp != null) SetData(DA);
+        }
       }
       else
       {
-        Message = "Done";
-        int limit = 10;
-        DA.GetData(1, ref limit); // Has default value so will never be empty.
-
-        if (limit > 50)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Max number of streams retrieved is 50.");
-        }
-        
-        if (streams != null)
-        {
-          DA.SetDataList(0, streams.Select(item => new GH_SpeckleStream(item)));
-        }
-
-        streams = null;
+        SetData(DA);
       }
+    }
+
+    private void SetData(IGH_DataAccess DA)
+    {
+      Message = "Done";
+      int limit = 10;
+      DA.GetData(1, ref limit); // Has default value so will never be empty.
+
+      if (limit > 50)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Max number of streams retrieved is 50.");
+      }
+
+      if (streams != null)
+      {
+        DA.SetDataList(0, streams.Select(item => new GH_SpeckleStream(item)));
+      }
+
+      streams = null;
+    }
+
+    private Func<Task<List<StreamWrapper>>> StreamListTask(int limit, Account account)
+    {
+      return async () =>
+      {
+        if (AccountManager.AccountFromToken == null ? !await Helpers.UserHasInternet() : !(Helpers.UserHasInternet()).Result)
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "You are not connected to the internet");
+          Message = "Error";
+          return null;
+        }
+        try
+        {
+          var client = new Client(account);
+          // Save the result
+          var result = await client.StreamsGet(limit);
+          streams = result
+            .Select(stream => new StreamWrapper(stream.id, account.userInfo.id, account.serverInfo.url))
+            .ToList();
+        }
+        catch (Exception e)
+        {
+          error = e;
+        }
+        finally
+        {
+          Rhino.RhinoApp.InvokeOnUiThread((Action)delegate { ExpireSolution(true); });
+        }
+        return streams;
+      };
     }
   }
 }

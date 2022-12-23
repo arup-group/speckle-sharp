@@ -66,24 +66,27 @@ namespace ConnectorGrasshopper.Accounts
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Server Url not specified");
           Message = null;
           return;
-        }        
+        }
 
-        Task.Run(async () =>
+        account = Task.Run(async () =>
         {
+          Account theAccount = null;
           try
           {
-            account = null;
-            account = await AccountManager.CreateAccountFromToken(token, null, server);
+            theAccount = await AccountManager.CreateAccountFromToken(token, null, server);
+            return theAccount;
           }
           catch (Exception e)
           {
             error = e;
+            return null;
           }
-          finally
-          {
-            Rhino.RhinoApp.InvokeOnUiThread((Action)delegate { ExpireSolution(true); });
-          }
-        });
+        }).Result;
+        if (account != null)
+        {
+          DA.SetData(0, account.userInfo.id);
+          Rhino.RhinoApp.InvokeOnUiThread((Action)delegate { ExpireSolution(true); });
+        }
       }
       else
       {
