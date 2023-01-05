@@ -43,7 +43,7 @@ Name: connectionmanager; Description: Speckle@Arup ConnectionManager - v{#AppVer
 Name: "full"; Description: "Full installation"
 
 [Tasks]
-Name: updates; Description: "Auto update, make sure I always have the best Speckle!";
+Name: updates; Description: "Notify me when a new version of Speckle is available!";
 
 [Dirs]
 Name: "{app}"; Permissions: everyone-full
