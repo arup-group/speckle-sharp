@@ -65,7 +65,7 @@ namespace ConnectorGSA
         {
           loggingProgress.Report(new MessageEventArgs(MessageIntent.Display, MessageLevel.Error, "Unable to get stream list"));
         }
-        
+
 
         coordinator.Account = accountCandidate;
         coordinator.ServerStreamList.StreamListItems.Clear();
@@ -127,21 +127,22 @@ namespace ConnectorGSA
     }
 
     public static bool ExtractSavedReceptionStreamInfo(bool? receive, bool? send, out List<StreamState> streamStates)
-    { 
+    {
       List<StreamState> allSaved;
       try
       {
         var sid = ((GsaProxy)Instance.GsaModel.Proxy).GetTopLevelSid();
         allSaved = JsonConvert.DeserializeObject<List<StreamState>>(sid);
-        if (allSaved == null) {
+        if (allSaved == null)
+        {
           allSaved = new List<StreamState>();
         }
       }
       catch
       {
         allSaved = new List<StreamState>();
-      }      
-      
+      }
+
       var userId = ((GsaModel)Instance.GsaModel).Account.userInfo.id;
       var restApi = ((GsaModel)Instance.GsaModel).Account.serverInfo.url;
 
@@ -160,8 +161,8 @@ namespace ConnectorGSA
     }
 
     public static bool UpsertSavedReceptionStreamInfo(bool? receive, bool? send, params StreamState[] streamStates)
-    {            
-      if(((GsaProxy)Instance.GsaModel.Proxy) != null)
+    {
+      if (((GsaProxy)Instance.GsaModel.Proxy) != null)
       {
         var sid = ((GsaProxy)Instance.GsaModel.Proxy).GetTopLevelSid();
         List<StreamState> allSs = null;
@@ -205,10 +206,11 @@ namespace ConnectorGSA
 
         var newSid = JsonConvert.SerializeObject(allSs);
         return ((GsaProxy)Instance.GsaModel.Proxy).SetTopLevelSid(newSid);
-      } else
+      }
+      else
       {
         return false;
-      }      
+      }
     }
 
     public static bool CloseFile(string filePath, bool visible)
@@ -220,7 +222,7 @@ namespace ConnectorGSA
     public static bool LoadDataFromFile(ProgressViewModel progress = null, IEnumerable<ResultGroup> resultGroups = null, IEnumerable<ResultType> resultTypes = null, List<string> cases = null, List<int> elemIds = null)
     {
       ((GsaProxy)Instance.GsaModel.Proxy).Clear();
-      
+
       var loadedCache = UpdateCache(progress);
       int cumulativeErrorRows = 0;
 
@@ -249,6 +251,16 @@ namespace ConnectorGSA
       try
       {
         var nativeObjects = converter.ConvertToNative(objects).Cast<GsaRecord>().ToList();
+
+        foreach (var no in nativeObjects)
+        {
+          if (no.GetType() == typeof(GsaNode))
+          {
+            var casted = (GsaNode)no;
+            progress.Report.Log($"Index: {casted.Index}, Name = {casted.Name}");
+          }
+        }
+
         Instance.GsaModel.Cache.Upsert(nativeObjects);
       }
       catch (Exception ex)
@@ -312,7 +324,7 @@ namespace ConnectorGSA
         onErrorAction: (s, e) =>
         {
           progress.Report.LogOperationError(e);
-          if(e.InnerException != null) progress.Report.LogOperationError(e.InnerException);
+          if (e.InnerException != null) progress.Report.LogOperationError(e.InnerException);
           progress.CancellationTokenSource.Cancel();
         },
         disposeTransports: false
@@ -327,7 +339,7 @@ namespace ConnectorGSA
     public static async Task<string> SendCommit(Base commitObj, DesktopUI2.Models.StreamState state, ProgressViewModel progress, string parent, params ITransport[] transports)
     {
       var objId = await Commands.SendObject(commitObj, progress, transports);
-      if(objId != null)
+      if (objId != null)
       {
         if (transports.Any(t => t is ServerTransport))
         {
@@ -672,7 +684,7 @@ namespace ConnectorGSA
     private static bool UpdateCache(ProgressViewModel progress = null, bool onlyNodesWithApplicationIds = true)
     {
       var errored = new Dictionary<int, GsaRecord>();
-      
+
       try
       {
         if (((GsaProxy)Instance.GsaModel.Proxy).GetGwaData(Instance.GsaModel.StreamLayer, progress, out var records, null))
@@ -686,7 +698,7 @@ namespace ConnectorGSA
             }
           }
         }
-       return true;
+        return true;
       }
       catch
       {
@@ -904,7 +916,7 @@ namespace ConnectorGSA
       return true;
     }
 
-    internal static async Task<bool> SendTriggered(TabCoordinator coordinator, IProgress<MessageEventArgs> loggingProgress, 
+    internal static async Task<bool> SendTriggered(TabCoordinator coordinator, IProgress<MessageEventArgs> loggingProgress,
       IProgress<string> statusProgress, IProgress<double> percentageProgress)
     {
       var result = await Send(coordinator, coordinator.SenderTab.SenderStreamStates.First(), loggingProgress, statusProgress, percentageProgress);
@@ -1117,7 +1129,7 @@ namespace ConnectorGSA
       return true;
     }
 
-    internal static async Task<bool> SendInitial(TabCoordinator coordinator, IProgress<StreamState> streamCreationProgress, IProgress<StreamStateOld> streamDeletionProgress, 
+    internal static async Task<bool> SendInitial(TabCoordinator coordinator, IProgress<StreamState> streamCreationProgress, IProgress<StreamStateOld> streamDeletionProgress,
       IProgress<MessageEventArgs> loggingProgress, IProgress<string> statusProgress, IProgress<double> percentageProgress)
     {
       Instance.GsaModel.StreamLayer = coordinator.SenderTab.TargetLayer;
@@ -1150,7 +1162,7 @@ namespace ConnectorGSA
           ((GsaModel)Instance.GsaModel).LastCommitId = mainBranch.commits.items[0].id;
         }
       }
-      
+
       streamCreationProgress.Report(streamState); //This will add it to the sender tab's streamState list
 
       await Send(coordinator, streamState, loggingProgress, statusProgress, percentageProgress);

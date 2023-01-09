@@ -199,6 +199,11 @@ namespace ConnectorGSA.UI
 
       var flattenedGroups = Commands.FlattenCommitObject(commitObject, (Base o) => converter.CanConvertToNative(o));
 
+      foreach (var obj in flattenedGroups)
+      {
+        progress.Report.Log($"obj id: {obj.id}");
+      }
+
       int numConverted = 0;
       int numToConvert = flattenedGroups.Count;
       int totalConversionPercentage = 90 - percentage;
