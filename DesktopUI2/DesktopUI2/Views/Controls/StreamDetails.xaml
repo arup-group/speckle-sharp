@@ -15,74 +15,55 @@
     <conv:RoleCanSendValueConverter x:Key="RoleCanSendValueConverter" />
     <conv:EnumBooleanConverter x:Key="EnumBooleanConverter" />
   </UserControl.Resources>
-  <Grid Margin="0,3,0,0" ColumnDefinitions="auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,*">
-    <TextBlock
-     Grid.Column="0"
-     Classes="Overline"
-     IsVisible="{Binding Stream.jobNumber, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-     Text="JN:" />
-    <TextBlock
-      Grid.Column="1"
-      Classes="Overline"
-      IsVisible="{Binding Stream.jobNumber, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-      Text="{Binding Stream.jobNumber}"
-      TextTrimming="CharacterEllipsis" />
-    <TextBlock
-      Grid.Column="2"
-      Classes="Overline"
-      IsVisible="{Binding Stream.jobNumber, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-      Text=" - " />      
+  <Grid Margin="0,3,0,0" ColumnDefinitions="auto,auto,auto,auto,auto,auto,auto,auto,auto,*">
     <icons:MaterialIcon
-      Grid.Column="3"
-      Margin="3,0,0,0"
-      Height="12"
+      Grid.Column="0"
+      Margin="0,0,3,0"
       VerticalAlignment="Center"
       Classes="StreamCard"
       Kind="Users"
       ToolTip.Tip="Number of collaborators on this stream" />
     <TextBlock
-      Grid.Column="4"
+      Grid.Column="1"
       Classes="Overline"
       Text="{Binding Stream.collaborators.Count}" />
     <icons:MaterialIcon
-      Grid.Column="5"
-      Height="12"
-      Margin="3,0,0,0"
+      Grid.Column="2"
+      Margin="3,0"
       VerticalAlignment="Center"
       Classes="StreamCard"
       Kind="Comments"
       ToolTip.Tip="Number of comments on this stream" />
     <TextBlock
-      Grid.Column="6"
+      Grid.Column="3"
       Classes="Overline"
       Text="{Binding Stream.commentCount}" />
     <icons:MaterialIcon
-      Grid.Column="7"
-      Height="12"
-      Margin="3,0,0,0"
+      Grid.Column="4"
+      Margin="3,0"
       VerticalAlignment="Center"
       Classes="StreamCard"
       Kind="Hearts"
       ToolTip.Tip="Number of people who favorited this stream" />
     <TextBlock
-      Grid.Column="8"
+      Grid.Column="5"
       Classes="Overline"
       Text="{Binding Stream.favoritesCount}" />
     <TextBlock
-      Grid.Column="9"
+      Grid.Column="6"
       Classes="Overline"
       Text=" - " />
     <TextBlock
-      Grid.Column="10"
+      Grid.Column="7"
       Classes="Overline"
       Text="{Binding Stream.role, Converter={StaticResource RoleValueConverter}}"
       TextTrimming="CharacterEllipsis" />
     <TextBlock
-      Grid.Column="11"
+      Grid.Column="8"
       Classes="Overline"
       Text=" - " />
     <TextBlock
-      Grid.Column="12"
+      Grid.Column="9"
       Classes="Overline"
       Text="{Binding Stream.id}"
       TextTrimming="CharacterEllipsis" />

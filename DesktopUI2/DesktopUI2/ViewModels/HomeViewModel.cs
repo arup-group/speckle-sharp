@@ -28,7 +28,6 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Stream = Speckle.Core.Api.Stream;
-using DesktopUI2.Views;
 
 namespace DesktopUI2.ViewModels
 {
@@ -36,16 +35,12 @@ namespace DesktopUI2.ViewModels
   public class HomeViewModel : ReactiveObject, IRoutableViewModel
   {
     //Instance of this HomeViewModel, so that the SavedStreams are kept in memory and not disposed on navigation
-    public static HomeViewModel Instance { get; internal set; }
+    public static HomeViewModel Instance { get; private set; }
     public IScreen HostScreen { get; }
+
     public string UrlPathSegment { get; } = "home";
 
-    private ConnectorBindings _Bindings;
-    public virtual ConnectorBindings Bindings
-    {
-      get { return _Bindings; }
-      set { _Bindings = value; }
-    }
+    private ConnectorBindings Bindings;
 
     public enum Filter
     {
@@ -67,15 +62,9 @@ namespace DesktopUI2.ViewModels
     public bool InProgress
     {
       get => _showProgress;
-      set => this.RaiseAndSetIfChanged(ref _showProgress, value);
+      private set => this.RaiseAndSetIfChanged(ref _showProgress, value);
     }
 
-    private bool _isLoggingIn;
-    public bool IsLoggingIn
-    {
-      get => _isLoggingIn;
-      set => this.RaiseAndSetIfChanged(ref _isLoggingIn, value);
-    }
 
 
     private ObservableCollection<MenuItemViewModel> _menuItems = new ObservableCollection<MenuItemViewModel>();
@@ -92,7 +81,7 @@ namespace DesktopUI2.ViewModels
     public List<StreamAccountWrapper> Streams
     {
       get => _streams;
-      set
+      private set
       {
         this.RaiseAndSetIfChanged(ref _streams, value);
         this.RaisePropertyChanged("FilteredStreams");
@@ -303,13 +292,6 @@ namespace DesktopUI2.ViewModels
       }
     }
 
-    //write changes to file every time they happen
-    //this is because if there is an active document change we need to swap saved streams and restore them later
-    //even if the doc has not been saved
-    internal void SavedStreams_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-    {
-      WriteStreamsToFile();
-    }
 
     internal void WriteStreamsToFile()
     {
@@ -341,7 +323,8 @@ namespace DesktopUI2.ViewModels
       }
     }
 
-    public virtual async Task GetStreams()
+
+    private async Task GetStreams()
     {
       try
       {
@@ -697,24 +680,21 @@ namespace DesktopUI2.ViewModels
 
     public async void NewStreamCommand()
     {
-      var dialog = new NewStreamDialog
-      {
-        DataContext = new NewStreamViewModel(HostScreen, Accounts),
-      };
-
+      var dialog = new NewStreamDialog(Accounts);
       var result = await dialog.ShowDialog<bool>();
+
       if (result)
       {
         try
         {
-          //var client = new Client(dialog.Account);
-          //var streamId = await client.StreamCreate(new StreamCreateInput { description = dialog.Description, name = dialog.StreamName, isPublic = dialog.IsPublic });
-          //var stream = await client.StreamGet(streamId);
-          //var streamState = new StreamState(dialog.Account, stream);
+          var client = new Client(dialog.Account);
+          var streamId = await client.StreamCreate(new StreamCreateInput { description = dialog.Description, name = dialog.StreamName, isPublic = dialog.IsPublic });
+          var stream = await client.StreamGet(streamId);
+          var streamState = new StreamState(dialog.Account, stream);
 
-          //MainViewModel.RouterInstance.Navigate.Execute(new StreamViewModel(streamState, HostScreen, RemoveSavedStreamCommand));
+          MainViewModel.RouterInstance.Navigate.Execute(new StreamViewModel(streamState, HostScreen, RemoveSavedStreamCommand));
 
-          //Analytics.TrackEvent(dialog.Account, Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Create" } });
+          Analytics.TrackEvent(dialog.Account, Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Create" } });
 
           GetStreams().ConfigureAwait(false); //update streams
         }
@@ -814,7 +794,7 @@ namespace DesktopUI2.ViewModels
 
 
 
-    public void OpenStreamCommand(object streamAccountWrapper)
+    private async void OpenStreamCommand(object streamAccountWrapper)
     {
       if (await CheckIsOffline())
         return;
@@ -822,13 +802,13 @@ namespace DesktopUI2.ViewModels
       if (streamAccountWrapper != null)
       {
         var streamState = new StreamState(streamAccountWrapper as StreamAccountWrapper);
-        MainViewModel.RouterInstance.Navigate.Execute(new StreamViewModel(streamState, Instance.HostScreen, Instance.RemoveSavedStreamCommand));
+        MainViewModel.RouterInstance.Navigate.Execute(new StreamViewModel(streamState, HostScreen, RemoveSavedStreamCommand));
         Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Open" } });
       }
     }
 
 
-    internal void OpenSavedStreamCommand(object streamViewModel)
+    private async void OpenSavedStreamCommand(object streamViewModel)
     {
       if (await CheckIsOffline())
         return;
@@ -847,11 +827,6 @@ namespace DesktopUI2.ViewModels
           Log.CaptureException(ex, Sentry.SentryLevel.Error);
         }
       }
-    }
-
-    internal static void OpenStream(StreamState streamState)
-    {
-      MainViewModel.RouterInstance.Navigate.Execute(new StreamViewModel(streamState, Instance.HostScreen, Instance.RemoveSavedStreamCommand));
     }
 
     public void ToggleDarkThemeCommand()

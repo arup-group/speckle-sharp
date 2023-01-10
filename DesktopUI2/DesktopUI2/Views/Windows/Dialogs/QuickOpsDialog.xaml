@@ -44,13 +44,13 @@
         Content="Cancel"
         Foreground="White"
         IsVisible="{Binding IsProgressing}" />
-      <!--<Button
+      <Button
         Margin="0,0,10,0"
         Classes="Outline"
         Command="{Binding OpenReportCommand}"
         Content="Open Report"
         Foreground="White"
-        IsVisible="{Binding IsProgressing, Converter={x:Static BoolConverters.Not}}" />-->
+        IsVisible="{Binding IsProgressing, Converter={x:Static BoolConverters.Not}}" />
       <Button
         Margin="0,0,10,0"
         Background="White"

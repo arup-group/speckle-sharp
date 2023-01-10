@@ -1,5 +1,5 @@
 <UserControl
-  x:Class="DesktopUI2.Views.Pages.HomeViewStandalone"
+
   xmlns="https://github.com/avaloniaui"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
@@ -460,7 +460,7 @@
                   IsVisible="{Binding HasSavedStreams}"
                   Text="SAVED STREAMS:" />
               </Expander.Header>
-              <uc:SavedStreams />
+              <!--<uc:SavedStreams />-->
             </Expander>
 
 
@@ -535,7 +535,7 @@
                                             Text="{Binding Stream.description}"
                                             TextTrimming="CharacterEllipsis" />
 
-                                          <sc:StreamDetails Grid.Row="1" />
+                                          <!--<sc:StreamDetails Grid.Row="1" />-->
 
                                           <Grid
                                             Grid.Row="2"

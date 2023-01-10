@@ -8,7 +8,7 @@ namespace DesktopUI2.Views.Windows.Dialogs
   public partial class AddAccountDialog : DialogUserControl
   {
 
-    public string Url { get; set; }
+    private string Url { get; set; }
 
     TextBox UrlField;
     public AddAccountDialog(string url)
@@ -36,7 +36,6 @@ namespace DesktopUI2.Views.Windows.Dialogs
     {
       //too lazy to create a view model for this or properly style the Dialogs
       Url = this.FindControl<TextBox>("url").Text;
-
       this.Close(Url);
     }
 

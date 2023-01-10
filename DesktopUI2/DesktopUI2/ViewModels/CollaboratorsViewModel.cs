@@ -29,9 +29,9 @@ namespace DesktopUI2.ViewModels
 
     public ReactiveCommand<Unit, Unit> GoBack => MainViewModel.RouterInstance.NavigateBack;
 
-    public string _searchQuery = "";
+    private string _searchQuery = "";
 
-    public Action userSearchDebouncer = null;
+    private Action userSearchDebouncer = null;
 
     public string SearchQuery
     {
@@ -46,7 +46,7 @@ namespace DesktopUI2.ViewModels
     public List<AccountViewModel> Users
     {
       get => _users;
-      set
+      private set
       {
         this.RaiseAndSetIfChanged(ref _users, value);
       }
@@ -56,7 +56,7 @@ namespace DesktopUI2.ViewModels
     public ObservableCollection<AccountViewModel> AddedUsers
     {
       get => _selectedUsers;
-      set
+      private set
       {
         this.RaiseAndSetIfChanged(ref _selectedUsers, value);
       }
@@ -81,7 +81,7 @@ namespace DesktopUI2.ViewModels
     public bool DropDownOpen
     {
       get => _dropDownOpen;
-      set
+      private set
       {
         this.RaiseAndSetIfChanged(ref _dropDownOpen, value);
       }
@@ -101,7 +101,7 @@ namespace DesktopUI2.ViewModels
     public bool ShowProgress
     {
       get => _showProgress;
-      set
+      private set
       {
         this.RaiseAndSetIfChanged(ref _showProgress, value);
       }
@@ -111,7 +111,7 @@ namespace DesktopUI2.ViewModels
     public string Role
     {
       get => _role;
-      set
+      private set
       {
         this.RaiseAndSetIfChanged(ref _role, value);
       }
@@ -122,12 +122,11 @@ namespace DesktopUI2.ViewModels
       get => SelectionModel.SelectedItems.Any();
     }
 
-    public SelectionModel<AccountViewModel> SelectionModel { get; set; }
+    public SelectionModel<AccountViewModel> SelectionModel { get; private set; }
     #endregion
 
     private StreamViewModel _stream;
 
-    public CollaboratorsViewModel() { }
 
     public CollaboratorsViewModel(IScreen screen, StreamViewModel stream)
     {
@@ -166,7 +165,7 @@ namespace DesktopUI2.ViewModels
       this.RaisePropertyChanged(nameof(AddedUsers));
     }
 
-    public void Search()
+    private async void Search()
     {
 
       Focus();
@@ -208,19 +207,19 @@ namespace DesktopUI2.ViewModels
     }
 
     //focus is lost when the dropdown gets closed
-    public void Focus()
+    private void Focus()
     {
       DropDownOpen = false;
       var searchBox = CollaboratorsControl.Instance.FindControl<TextBox>("SearchBox");
       searchBox.Focus();
     }
 
-    public void SelectionModel_SelectionChanged(object sender, SelectionModelSelectionChangedEventArgs<AccountViewModel> e)
+    private void SelectionModel_SelectionChanged(object sender, SelectionModelSelectionChangedEventArgs<AccountViewModel> e)
     {
       this.RaisePropertyChanged("HasSelectedUsers");
     }
 
-    public async void SearchUsers()
+    private async void SearchUsers()
     {
       ShowProgress = true;
 
@@ -384,12 +383,12 @@ namespace DesktopUI2.ViewModels
     }
 
 
-    public void ClearSearchCommand()
+    private void ClearSearchCommand()
     {
       SearchQuery = "";
     }
 
-    public void RemoveSeletedUsersCommand()
+    private void RemoveSeletedUsersCommand()
     {
       foreach (var item in SelectionModel.SelectedItems.ToList())
       {

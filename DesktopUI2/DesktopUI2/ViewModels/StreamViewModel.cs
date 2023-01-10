@@ -4,7 +4,6 @@ using Avalonia.Controls.Selection;
 using Avalonia.Media.Imaging;
 using Avalonia.Metadata;
 using Avalonia.Threading;
-using Avalonia.Controls.Selection;
 using DesktopUI2.Models;
 using DesktopUI2.Models.Filters;
 using DesktopUI2.Models.Settings;
@@ -31,7 +30,6 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Input;
 using Stream = Speckle.Core.Api.Stream;
-using DesktopUI2.Views.Windows.Dialogs;
 
 namespace DesktopUI2.ViewModels
 {
@@ -67,10 +65,6 @@ namespace DesktopUI2.ViewModels
         this.RaiseAndSetIfChanged(ref _previewOn, value);
       }
     }
-
-    public bool IsStandalone { get; set; } = true;
-
-    #region bindings
     private Stream _stream;
     public Stream Stream
     {
@@ -118,42 +112,6 @@ namespace DesktopUI2.ViewModels
         this.RaisePropertyChanged("LastUsed");
       }
     }
-
-    public string NotificationUrl { get; set; }
-    public bool SuccessfulSend { get; set; } = false;
-
-    private string _notification;
-    public string Notification
-    {
-      get => _notification;
-      set
-      {
-        this.RaiseAndSetIfChanged(ref _notification, value);
-        this.RaisePropertyChanged("ShowNotification");
-        this.RaisePropertyChanged("ShowSharePrompt");
-      }
-    }
-
-    public bool ShowNotification
-    {
-      get => !string.IsNullOrEmpty(Notification);
-    }
-
-    public bool ShowSharePrompt
-    {
-      get => !string.IsNullOrEmpty(Notification) && !IsReceiver && SuccessfulSend && Stream.collaborators.Count == 1;
-    }
-
-    private bool _showReport;
-    public bool ShowReport
-    {
-        get => _showReport;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _showReport, value);
-        }
-    }
-
 
     private bool _isRemovingStream;
     public bool IsRemovingStream
@@ -327,7 +285,7 @@ namespace DesktopUI2.ViewModels
     public List<ActivityViewModel> Activity
     {
       get => _activity;
-      set => this.RaiseAndSetIfChanged(ref _activity, value);
+      private set => this.RaiseAndSetIfChanged(ref _activity, value);
     }
 
     #region report
@@ -459,14 +417,14 @@ namespace DesktopUI2.ViewModels
     public List<FilterViewModel> AvailableFilters
     {
       get => _availableFilters;
-      set => this.RaiseAndSetIfChanged(ref _availableFilters, value);
+      private set => this.RaiseAndSetIfChanged(ref _availableFilters, value);
     }
 
     private List<ReceiveMode> _receiveModes;
     public List<ReceiveMode> ReceiveModes
     {
       get => _receiveModes;
-      set => this.RaiseAndSetIfChanged(ref _receiveModes, value);
+      private set => this.RaiseAndSetIfChanged(ref _receiveModes, value);
     }
 
     private List<ISetting> _settings;
@@ -478,13 +436,6 @@ namespace DesktopUI2.ViewModels
         this.RaiseAndSetIfChanged(ref _settings, value);
         this.RaisePropertyChanged("HasSettings");
       }
-    }
-
-    private ResultSettings _resultSettings;
-    public ResultSettings ResultSettings
-    {
-      get => _resultSettings;
-      set => this.RaiseAndSetIfChanged(ref _resultSettings, value);
     }
     public bool HasSettings => true; //AvailableSettings != null && AvailableSettings.Any();
 
@@ -562,8 +513,6 @@ namespace DesktopUI2.ViewModels
     /// Unique identifier to identify this stream view model
     /// </summary>
     private string _guid { get; set; }
-
-    public StreamViewModel() { }
     public StreamViewModel(StreamState streamState, IScreen hostScreen, ICommand removeSavedStreamCommand)
     {
       try
@@ -591,12 +540,6 @@ namespace DesktopUI2.ViewModels
         //use dependency injection to get bindings
         Bindings = Locator.Current.GetService<ConnectorBindings>();
         CanOpenCommentsIn3DView = Bindings.CanOpen3DView;
-
-        IConnectorBindingsStandalone bindingsStandalone = Bindings as IConnectorBindingsStandalone;
-        if (bindingsStandalone != null)
-        {
-          IsStandalone = true;
-        }
 
         if (Client == null)
         {
@@ -652,7 +595,6 @@ namespace DesktopUI2.ViewModels
         menu.Items = new List<MenuItemViewModel> {
         new MenuItemViewModel (ViewOnlineSavedStreamCommand, "View online",  MaterialIconKind.ExternalLink),
         new MenuItemViewModel (CopyStreamURLCommand, "Copy URL to clipboard",  MaterialIconKind.ContentCopy),
-        new MenuItemViewModel (OpenReportCommand, "Open Report",  MaterialIconKind.TextBox)
       };
         var customMenues = Bindings.GetCustomStreamMenuItems();
         if (customMenues != null)
@@ -689,7 +631,7 @@ namespace DesktopUI2.ViewModels
       }
     }
 
-    internal virtual async void GetBranchesAndRestoreState()
+    internal async void GetBranchesAndRestoreState()
     {
       try
       {
@@ -768,7 +710,7 @@ namespace DesktopUI2.ViewModels
       ReportFilterItems = report.Select(o => o.Status).Distinct().ToList();
     }
 
-    public async void GetActivity()
+    private async void GetActivity()
     {
       try
       {
@@ -833,7 +775,7 @@ namespace DesktopUI2.ViewModels
     /// <summary>
     /// Update the model Stream state whenever we send, receive or save a stream
     /// </summary>
-    public virtual void UpdateStreamState()
+    private void UpdateStreamState()
     {
       try
       {
@@ -1146,37 +1088,14 @@ namespace DesktopUI2.ViewModels
 
     public void ShareCommand()
     {
-      //if(IsStandalone)
-      //  MainViewModelStandalone.RouterInstance.Navigate.Execute(new CollaboratorsViewModel(HostScreen, this));
-      //else
       MainViewModel.RouterInstance.Navigate.Execute(new CollaboratorsViewModel(HostScreen, this));
 
       Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Share Open" } });
     }
 
-    public void CloseNotificationCommand()
-    {
-      Notification = "";
-      NotificationUrl = "";
-
-    }
-
-    public void LaunchNotificationCommand()
-    {
-      Analytics.TrackEvent(StreamState.Client.Account, Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Notification Click" } });
-
-      if (!string.IsNullOrEmpty(NotificationUrl))
-        Process.Start(new ProcessStartInfo(NotificationUrl) { UseShellExecute = true });
-
-      CloseNotificationCommand();
-    }
-
     public void EditSavedStreamCommand()
     {
-      if (IsStandalone)
-        MainViewModelStandalone.RouterInstance.Navigate.Execute(this);
-      else
-        MainViewModel.RouterInstance.Navigate.Execute(this);
+      MainViewModel.RouterInstance.Navigate.Execute(this);
       Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Edit" } });
     }
 
@@ -1203,7 +1122,7 @@ namespace DesktopUI2.ViewModels
       Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Copy Link" } });
     }
 
-    public virtual async void SendCommand()
+    public async void SendCommand()
     {
       try
       {
@@ -1212,17 +1131,6 @@ namespace DesktopUI2.ViewModels
         HomeViewModel.Instance.AddSavedStream(this); //save the stream as well
 
         Reset();
-        Progress.ProgressTitle = "Sending to Speckle 🚀";
-        Progress.IsProgressing = true;
-
-        QuickOpsDialog dialog = null;
-        if (IsStandalone)
-        {
-          dialog = new QuickOpsDialog();
-          dialog.DataContext = Progress;
-          dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-          dialog.Show();
-        }
 
         if (!await Helpers.UserHasInternet())
         {
@@ -1273,13 +1181,6 @@ namespace DesktopUI2.ViewModels
             Message = $"Something went wrong",
             Type = Avalonia.Controls.Notifications.NotificationType.Error
           });
-
-          Notification = "Nothing sent!";
-
-          if (IsStandalone)
-          {
-            dialog.Close();
-          }
         }
 
         GetActivity();
@@ -1327,7 +1228,7 @@ namespace DesktopUI2.ViewModels
       }
     }
 
-    public virtual async void ReceiveCommand()
+    public async void ReceiveCommand()
     {
       try
       {
@@ -1351,19 +1252,8 @@ namespace DesktopUI2.ViewModels
         }
 
 
-        Progress.ProgressTitle = "Receiving from Speckle 🚀";
         Progress.IsProgressing = true;
-
-        QuickOpsDialog dialog = null;
-        if (IsStandalone)
-        {
-          dialog = new QuickOpsDialog();
-          dialog.DataContext = Progress;
-          dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-          dialog.Show();
-        }
         var state = await Task.Run(() => Bindings.ReceiveStream(StreamState, Progress));
-
         Progress.IsProgressing = false;
         var view = MainViewModel.RouterInstance.NavigationStack.Last() is StreamViewModel ? "Stream" : "Home";
 
@@ -1384,18 +1274,8 @@ namespace DesktopUI2.ViewModels
               { "savedStreams", HomeViewModel.Instance.SavedStreams?.Count }
 
             });
-
-          Notification = $"Received successfully";
         }
-        else
-        {
-          Notification = "Nothing received!";
 
-          if (IsStandalone)
-          {
-            dialog.Close();
-          }
-        }
 
         GetActivity();
         GetReport();
@@ -1428,49 +1308,11 @@ namespace DesktopUI2.ViewModels
 
     public void CancelPreviewCommand()
     {
-        Progress.CancellationTokenSource.Cancel();
-        string cancelledEvent = IsReceiver ? "Cancel Preview Receive" : "Cancel Preview Send";
-        Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", cancelledEvent } });
-        Progress.IsPreviewProgressing = false;
-        PreviewOn = false;
-    }
-
-    public virtual async void OpenReportCommand()
-    {
-      try
-      {
-        //ensure click transition has finished
-        await Task.Delay(1000);
-        Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Open Report" } });
-        ShowReport = true;
-        var report = new DesktopUI2.Views.Windows.Report();
-        //report.Title = $"Report of the last operation, {LastUsed.ToLower()}";
-        report.DataContext = Progress;
-        await report.ShowDialog();
-
-      }
-      catch (Exception ex)
-      {
-
-      }
-    }
-
-    public virtual async void OpenResultsCommand()
-    {
-      ResultSettings = ((IConnectorBindingsStandalone)Bindings).ResultSettings;
-
-      try
-      {            
-        var resultsViewModel = new ResultsViewModelStandalone(this);
-
-        var resultsWindow = new DesktopUI2.Views.Windows.ResultsStandalone();
-        resultsWindow.DataContext = resultsViewModel;
-        await resultsWindow.ShowDialog();
-      }
-      catch (Exception e)
-      {
-      }
-
+      Progress.CancellationTokenSource.Cancel();
+      string cancelledEvent = IsReceiver ? "Cancel Preview Receive" : "Cancel Preview Send";
+      Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", cancelledEvent } });
+      Progress.IsPreviewProgressing = false;
+      PreviewOn = false;
     }
 
     private void SaveCommand()
@@ -1478,9 +1320,6 @@ namespace DesktopUI2.ViewModels
       try
       {
         UpdateStreamState();
-        //if(IsStandalone)
-        //  MainViewModelStandalone.RouterInstance.Navigate.Execute(HomeViewModelStandalone.Instance);
-        //else
         MainViewModel.RouterInstance.Navigate.Execute(HomeViewModel.Instance);
         HomeViewModel.Instance.AddSavedStream(this);
 
@@ -1502,8 +1341,7 @@ namespace DesktopUI2.ViewModels
       }
     }
 
-
-    public virtual async void OpenSettingsCommand()
+    private void OpenSettingsCommand()
     {
       try
       {

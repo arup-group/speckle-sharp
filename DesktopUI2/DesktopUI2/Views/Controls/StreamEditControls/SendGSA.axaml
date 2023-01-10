@@ -1,5 +1,5 @@
 <UserControl
-  x:Class="DesktopUI2.Views.Pages.StreamEditControls.SendGSA"
+  x:Class="DesktopUI2.Views.Controls.StreamEditControls.SendGSA"
   xmlns="https://github.com/avaloniaui"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
@@ -241,7 +241,7 @@
 				</m:FloatingButton>
 
 				<!--  SEND BTN  -->
-				<c:SendButton />
+				<!--<c:SendButton />-->
 			</StackPanel>
 		</Grid>
 

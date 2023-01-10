@@ -3,202 +3,95 @@
   xmlns="https://github.com/avaloniaui"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
-  xmlns:conv="clr-namespace:DesktopUI2.Views.Converters"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-  xmlns:m="clr-namespace:Material.Styles;assembly=Material.Styles"
-  xmlns:viewModels="clr-namespace:DesktopUI2.ViewModels"
-  d:DesignHeight="200"
-  d:DesignWidth="400"
   mc:Ignorable="d">
-    <UserControl.Styles>
+	<UserControl.Styles>
 
-        <Style Selector="ToggleSwitch[IsChecked=true]">
-            <Setter Property="Content" Value="Public stream" />
-        </Style>
+		<Style Selector="ToggleSwitch[IsChecked=true]">
+			<Setter Property="Content" Value="Public stream" />
+		</Style>
 
-        <Style Selector="ToggleSwitch[IsChecked=false]">
-            <Setter Property="Content" Value="Private stream" />
-        </Style>
+		<Style Selector="ToggleSwitch[IsChecked=false]">
+			<Setter Property="Content" Value="Private stream" />
+		</Style>
 
-    </UserControl.Styles>
-    <Grid RowDefinitions="auto, auto, auto, auto, auto, auto, auto, auto">
-        <TextBlock
+
+	</UserControl.Styles>
+  <Grid RowDefinitions="auto, auto, auto, auto, auto, auto">
+    <TextBlock
       Margin="15,15,15,0"
       Classes="Subtitle1"
       Text="Create a new Stream"
       TextTrimming="CharacterEllipsis" />
-        <ComboBox
+    <ComboBox
       Name="accounts"
       Grid.Row="1"
       Margin="10,20,13,5"
       HorizontalAlignment="Stretch"
       VerticalAlignment="Center"
-      Items="{Binding Accounts}"
-      SelectedItem="{Binding Account}"
       IsEnabled="{Binding InProgress, Converter={x:Static BoolConverters.Not}}"
       PlaceholderText="Select an account">
-            <ComboBox.ItemTemplate>
-                <DataTemplate>
-                    <Grid ColumnDefinitions="auto,*,auto,*">
-                        <icons:MaterialIcon
+      <ComboBox.ItemTemplate>
+        <DataTemplate>
+          <Grid ColumnDefinitions="auto,*,auto,*">
+            <icons:MaterialIcon
               Margin="0,0,5,0"
               Foreground="DarkGray"
               Kind="Account" />
-                        <TextBlock
+            <TextBlock
               Grid.Column="1"
               Text="{Binding Account.userInfo.email}"
               TextTrimming="CharacterEllipsis" />
-                        <icons:MaterialIcon
+            <icons:MaterialIcon
               Grid.Column="2"
               Margin="10,0,5,0"
               Foreground="DarkGray"
               Kind="Server" />
-                        <TextBlock
+            <TextBlock
               Grid.Column="3"
               Text="{Binding Account.serverInfo.url}"
               TextTrimming="CharacterEllipsis" />
-                    </Grid>
-                </DataTemplate>
-            </ComboBox.ItemTemplate>
-        </ComboBox>
+          </Grid>
+        </DataTemplate>
+      </ComboBox.ItemTemplate>
+    </ComboBox>
 
-        <Grid
-        Grid.Row="2"
-        Margin="15,15,15,5">
-            <ComboBox
-          Margin="8,19,8,0"
-          Classes="Stealth"
-          IsDropDownOpen="{Binding DropDownOpen, FallbackValue=True}"
-          Items="{Binding Jobs}"
-          SelectedItem="{Binding SelectedJob}">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock
-                  Grid.Column="1"
-                  Margin="5,0,0,0"
-                  VerticalAlignment="Center"
-                  Text="{Binding JobDisplayName}"
-                  TextTrimming="CharacterEllipsis" />
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-            <Grid IsVisible="{Binding JobNumberRequired}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" MinWidth="100"/>
-                    <ColumnDefinition Width="auto"/>
-                </Grid.ColumnDefinitions>
 
-                <m:Card Grid.Column="0" Margin="0,0,5,0"
-                          Padding="5 0"
-                          HorizontalAlignment="Stretch" CornerRadius="25">
-                    <!--  SEARCH JOB NUMBERS  -->
-                    <TextBox
-			            Grid.Column="0"
-                        Name="SearchBox"
-                        Margin="0"
-                        Padding="0"
-                        Classes="Solo Small"
-                        Text="{Binding SearchQuery}"
-                        Watermark="{Binding JobNumberWatermark}">
-                        <TextBox.InnerRightContent>
-                            <Button
-						        Width="{Binding $self.Bounds.Height}"
-						        Padding="4"
-						        Classes="Flat"
-						        Command="{Binding ClearSearchCommand}"
-						        IsVisible="{Binding SearchQuery, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-						        Content="{icons:MaterialIconExt CloseCircle,
-                                                            Size=15}" />
-                        </TextBox.InnerRightContent>
-                        <TextBox.InnerLeftContent>
-                            <icons:MaterialIcon
-						        Width="15"
-						        Height="15"
-						        Margin="10,0,0,0"
-						        Kind="Search" />
-                        </TextBox.InnerLeftContent>
-                    </TextBox>
-                </m:Card>
-                <TextBlock
-                  Grid.Column="1"
-                  Name="jobNumber"
-                  Text="{Binding SelectedJob.JobDisplayName}"
-				  VerticalAlignment="Center"
-                  Margin="10,5"/>
-            </Grid>
-
-        </Grid>
-
-        <Grid RowDefinitions="auto, auto"
-            Grid.Row="3">
-            <TextBox
-            Name="errorMessage"
-            IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-            IsEnabled="False"
-            FontSize="10"
-            Foreground="Red"
-            Grid.Row="0"
-            Text="{Binding ErrorMessage}"
-            Margin="12,0,12,0"
-            Padding="0"
-            Classes="Solo Small" />
-
-            <ProgressBar
-            Margin="12"
-            Grid.Row="1"
-            IsIndeterminate="True"
-            IsVisible="{Binding ShowProgress, FallbackValue=True}" />
-        </Grid>
-
-        <TextBox
+    <TextBox
       Name="name"
-	  Text="{Binding StreamName}"
-      Grid.Row="5"
+      Grid.Row="2"
       Margin="15,5"
       Watermark="Stream Name (optional)" />
 
-        <TextBox
+    <TextBox
       Name="description"
-      Text="{Binding Description}"
-      Grid.Row="6"
+      Grid.Row="3"
       Margin="15,5"
       Watermark="Description (optional)" />
 
-        <ToggleSwitch
+    <ToggleSwitch
       Name="isPublic"
-      IsChecked="{Binding IsPublic}"
-      Grid.Row="7"
+      Grid.Row="4"
       Margin="15" />
 
 
-        <StackPanel
-      Grid.Row="8"
+    <StackPanel
+      Grid.Row="5"
       Margin="15"
       HorizontalAlignment="Right"
       Orientation="Horizontal">
-            <Button
+      <Button
         Margin="0,0,10,0"
         Classes="Outline"
         Click="Close_Click"
         Content="Cancel" />
+      <Button
+        Margin="0,0,10,0"
+        Click="Create_Click"
+        Content="Create" />
 
-            <Button
-          Margin="0,0,10,0"
-          Classes="Outline"
-          IsEnabled="{Binding JobNumberProvided}"
-          Command="{Binding NewStreamCommand}">
-
-                <TextBlock
-              Grid.Column="1"
-              Margin="8,0"
-              Padding="0"
-              VerticalAlignment="Center"
-              Text="Create"
-              TextTrimming="CharacterEllipsis" />
-            </Button>
-
-        </StackPanel>
-    </Grid>
+    </StackPanel>
+  </Grid>
 </UserControl>

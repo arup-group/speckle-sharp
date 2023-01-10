@@ -51,7 +51,7 @@
     <None Remove="Views\Filters\ListFilterView.xaml" />
     <None Remove="Views\Filters\ManualFilterView.xaml" />
     <None Remove="Views\Filters\PropertyFilterView.xaml" />
-    <None Remove="Views\MainUserControl.xaml" />	
+    <None Remove="Views\MainUserControl.xaml" />
     <None Remove="Views\MainWindow.xaml" />
     <None Remove="Views\MappingsControl.xaml" />
     <None Remove="Views\MappingsWindow.xaml" />
@@ -64,12 +64,8 @@
     <None Remove="Views\Controls\StreamEditControls\Comments.xaml" />
     <None Remove="Views\Controls\StreamEditControls\Report.xaml" />
     <None Remove="Views\Pages\SettingsView.xaml" />
-    <None Remove="Views\Pages\ShareControls\AddCollaborators.xaml" />
-    <None Remove="Views\Pages\ShareControls\CollaboratorsView.xaml" />
-    <None Remove="Views\Pages\ShareControls\Sending.xaml" />
-    <None Remove="Views\Pages\StreamEditControls\Receive.xaml" />
-    <None Remove="Views\Pages\StreamEditControls\Send.xaml" />
-    <None Remove="Views\Pages\StreamEditControls\SendGSA.xaml" />
+    <None Remove="Views\Controls\StreamEditControls\Receive.xaml" />
+    <None Remove="Views\Controls\StreamEditControls\Send.xaml" />
     <None Remove="Views\Pages\StreamEditView.xaml" />
     <None Remove="Views\Scheduler.xaml" />
     <None Remove="Views\Settings\CheckBoxSettingView.xaml" />
@@ -84,9 +80,7 @@
     <None Remove="Views\Windows\Dialogs\MappingViewDialog.xaml" />
     <None Remove="Views\Windows\Dialogs\NewBranchDialog.xaml" />
     <None Remove="Views\Windows\Dialogs\NewStreamDialog.xaml" />
-    <None Remove="Views\Windows\Dialogs\QuickOpsDialog.xaml" />
-    <None Remove="Views\Windows\Report.xaml" />
-    <None Remove="Views\Windows\SettingsView.xaml" />
+    <None Remove="Views\Windows\QuickOpsDialog.xaml" />
     <None Remove="Views\Windows\Settings.xaml" />
     <AvaloniaResource Include="Styles\Expander.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -156,18 +150,6 @@
     <AvaloniaXaml Include="Views\Filters\PropertyFilterView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </AvaloniaXaml>
-    <AvaloniaXaml Include="Views\Filters\AllFilterViewStandalone.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </AvaloniaXaml>
-    <AvaloniaXaml Include="Views\Filters\ListFilterViewStandalone.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </AvaloniaXaml>
-    <AvaloniaXaml Include="Views\Filters\PropertyFilterViewStandalone.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </AvaloniaXaml>
-    <AvaloniaXaml Include="Views\Pages\ShareControls\AddCollaborators.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </AvaloniaXaml>
     <AvaloniaXaml Include="Views\MainUserControl.xaml">
       <Generator>MSBuild:Compile</Generator>
     </AvaloniaXaml>
@@ -213,6 +195,9 @@
     <AvaloniaXaml Include="Views\Pages\StreamEditView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </AvaloniaXaml>
+    <AvaloniaXaml Include="Views\Scheduler.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaXaml>
     <AvaloniaXaml Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
     </AvaloniaXaml>
@@ -226,9 +211,6 @@
       <Generator>MSBuild:Compile</Generator>
     </AvaloniaXaml>
     <AvaloniaXaml Include="Views\Controls\StreamEditControls\Send.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </AvaloniaXaml>
-    <AvaloniaXaml Include="Views\Scheduler.xaml">
       <Generator>MSBuild:Compile</Generator>
     </AvaloniaXaml>
     <AvaloniaXaml Include="Views\Settings\CheckBoxSettingView.xaml">
@@ -249,15 +231,6 @@
     <AvaloniaXaml Include="Views\Windows\Dialogs\Dialog.xaml">
       <Generator>MSBuild:Compile</Generator>
     </AvaloniaXaml>
-    <AvaloniaXaml Include="Views\Windows\Dialogs\NewStreamDialog.xaml">
-        <Generator>MSBuild:Compile</Generator>
-    </AvaloniaXaml>
-    <AvaloniaXaml Include="Views\Windows\Dialogs\QuickOpsDialog.xaml">
-        <Generator>MSBuild:Compile</Generator>
-    </AvaloniaXaml>
-    <AvaloniaXaml Include="Views\Windows\Report.xaml">
-        <Generator>MSBuild:Compile</Generator>
-    </AvaloniaXaml>      
     <AvaloniaXaml Include="Views\Windows\Dialogs\ImportExportAlert.xaml">
       <Generator>MSBuild:Compile</Generator>
     </AvaloniaXaml>
@@ -268,6 +241,12 @@
       <Generator>MSBuild:Compile</Generator>
     </AvaloniaXaml>
     <AvaloniaXaml Include="Views\Windows\Dialogs\NewBranchDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaXaml>
+    <AvaloniaXaml Include="Views\Windows\Dialogs\NewStreamDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaXaml>
+    <AvaloniaXaml Include="Views\Windows\Dialogs\QuickOpsDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
     </AvaloniaXaml>
     <None Update="Native\libAvalonia.Native.OSX.dylib">
@@ -316,15 +295,6 @@
     <Compile Update="Views\Filters\PropertyFilterView.xaml.cs">
       <DependentUpon>PropertyFilterView.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Filters\AllFilterViewStandalone.xaml.cs">
-      <DependentUpon>AllFilterViewStandalone.xaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\Filters\ListFilterViewStandalone.xaml.cs">
-      <DependentUpon>ListFilterViewStandalone.xaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\Filters\PropertyFilterViewStandalone.xaml.cs">
-      <DependentUpon>PropertyFilterViewStandalone.xaml</DependentUpon>
-    </Compile>          
     <Compile Update="Views\MappingsControl.xaml.cs">
       <DependentUpon>MappingsControl.xaml</DependentUpon>
     </Compile>
@@ -361,9 +331,6 @@
     <Compile Update="Views\Scheduler.xaml.cs">
       <DependentUpon>Scheduler.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Scheduler.xaml.cs">
-      <DependentUpon>Scheduler.xaml</DependentUpon>
-    </Compile>
     <Compile Update="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
@@ -379,17 +346,8 @@
     <Compile Update="Views\Controls\StreamEditControls\Send.xaml.cs">
       <DependentUpon>Send.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Pages\StreamEditControls\SendGSA.xaml.cs">
-      <DependentUpon>SendGSA.xaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\Settings\CheckBoxSettingView.xaml.cs">
-      <DependentUpon>CheckBoxSettingView.xaml</DependentUpon>
-    </Compile>
     <Compile Update="Views\Settings\ListBoxSettingView.xaml.cs">
       <DependentUpon>ListBoxSettingView.xaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\Share.xaml.cs">
-      <DependentUpon>Share.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Settings\MultiSelectBoxSettingView.xaml.cs">
       <DependentUpon>MultiSelectBoxSettingView.xaml</DependentUpon>
@@ -423,12 +381,6 @@
     </Compile>
     <Compile Update="Views\Windows\Dialogs\QuickOpsDialog.xaml.cs">
       <DependentUpon>QuickOpsDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\Windows\Report.xaml.cs">
-      <DependentUpon>Report.xaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\Windows\ResultsStandalone.axaml.cs">
-      <DependentUpon>ResultsStandalone.axaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>

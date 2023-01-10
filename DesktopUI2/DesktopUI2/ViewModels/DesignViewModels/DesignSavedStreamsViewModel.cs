@@ -49,7 +49,6 @@ namespace DesktopUI2.ViewModels.DesignViewModels
     public string name { get; set; }
     public string id { get; set; }
     public string role { get; set; }
-    public string jobNumber { get; set; }
   }
 
   public class DesignSavedStreamViewModel
@@ -70,7 +69,7 @@ namespace DesktopUI2.ViewModels.DesignViewModels
 
     public DesignSavedStreamViewModel()
     {
-      Stream = new DesignStream { name = "Sample stream x", id = "1324235", role = "owner", jobNumber = "JN123" };
+      Stream = new DesignStream { name = "Sample stream x", id = "1324235", role = "owner" };
 
       StreamState = new DesignStreamState()
       {

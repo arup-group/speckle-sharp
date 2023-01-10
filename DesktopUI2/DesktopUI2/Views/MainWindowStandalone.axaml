@@ -1,5 +1,5 @@
 <Window
-  x:Class="DesktopUI2.Views.MainWindowStandalone"
+
   xmlns="https://github.com/avaloniaui"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
@@ -17,16 +17,16 @@
   mc:Ignorable="d">
 
   <Design.DataContext>
-    <vm:MainViewModelStandalone />
+    <!--<vm:MainViewModelStandalone />-->
   </Design.DataContext>
 
-  <reactiveUi:RoutedViewHost Grid.Row="1" Router="{Binding Router}">
+  <!--<reactiveUi:RoutedViewHost Grid.Row="1" Router="{Binding Router}">
     <reactiveUi:RoutedViewHost.PageTransition>
 
 
       <CrossFade Duration="0.15" />
 
     </reactiveUi:RoutedViewHost.PageTransition>
-  </reactiveUi:RoutedViewHost>
+  </reactiveUi:RoutedViewHost>-->
 
 </Window>

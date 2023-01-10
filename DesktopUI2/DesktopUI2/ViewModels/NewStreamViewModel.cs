@@ -1,6 +1,5 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Controls.Selection;
-using DesktopUI2.Views.Pages.ShareControls;
 using ReactiveUI;
 using Speckle.Core.Api;
 using Speckle.Core.Credentials;
@@ -319,7 +318,7 @@ namespace DesktopUI2.ViewModels
 
         NewStreamDialog.Instance.Close(true);
 
-        HomeViewModel.OpenStream(streamState);
+        //HomeViewModel.OpenStream(streamState);
         Analytics.TrackEvent(Account.Account, Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Create" } });
 
       }

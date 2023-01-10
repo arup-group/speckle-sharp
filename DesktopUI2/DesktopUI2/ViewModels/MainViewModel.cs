@@ -24,8 +24,6 @@ namespace DesktopUI2.ViewModels
 
     public ReactiveCommand<Unit, Unit> GoBack => Router.NavigateBack;
 
-    public bool IsStandalone { get; set; } = false;
-
     internal static MainViewModel Instance { get; private set; }
 
     public static HomeViewModel Home { get; private set; }
@@ -72,12 +70,6 @@ namespace DesktopUI2.ViewModels
       Instance = this;
       Setup.Init(Bindings.GetHostAppNameVersion(), Bindings.GetHostAppName());
 
-      IConnectorBindingsStandalone bindingsStandalone = Bindings as IConnectorBindingsStandalone;
-      if (bindingsStandalone != null)
-      {
-        IsStandalone = true;
-      }
-
       RxApp.DefaultExceptionHandler = Observer.Create<Exception>(CatchReactiveException);
 
       Router = new RoutingState();
@@ -91,22 +83,7 @@ namespace DesktopUI2.ViewModels
       Locator.CurrentMutable.Register(() => new LogInView(), typeof(IViewFor<LogInViewModel>));
       Locator.CurrentMutable.Register(() => Bindings, typeof(ConnectorBindings));
 
-      if (IsStandalone)
-      {
-        Locator.CurrentMutable.Register(() => new StreamEditViewStandalone(), typeof(IViewFor<StreamViewModel>));
-        Locator.CurrentMutable.Register(() => new HomeViewStandalone(), typeof(IViewFor<HomeViewModelStandalone>));
-        RouterInstance = Router; // makes the router available app-wide
-        Router.Navigate.Execute(new HomeViewModelStandalone(this));
-
-        Bindings.UpdateSavedStreams = HomeViewModel.Instance.UpdateSavedStreams;
-        Bindings.UpdateSelectedStream = HomeViewModel.Instance.UpdateSelectedStream;
-      }
-      else
-      {
-        Locator.CurrentMutable.Register(() => new StreamEditView(), typeof(IViewFor<StreamViewModel>));
-        Locator.CurrentMutable.Register(() => new HomeView(), typeof(IViewFor<HomeViewModel>));
-        RouterInstance = Router; // makes the router available app-wide
-        Router.Navigate.Execute(new HomeViewModel(this));
+      RouterInstance = Router; // makes the router available app-wide
 
       var config = ConfigManager.Load();
       ChangeTheme(config.DarkTheme);

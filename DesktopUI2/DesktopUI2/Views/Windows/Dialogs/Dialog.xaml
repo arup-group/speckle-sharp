@@ -10,22 +10,22 @@
   d:DesignWidth="400"
   mc:Ignorable="d">
   <Grid RowDefinitions="auto, auto, auto" ColumnDefinitions="auto,*">
-    <icons:MaterialIcon
+      <icons:MaterialIcon
 				
-      Name="Icon"
-      Width="20"
-      Height="20"
-      Margin="15,15,10,15"
+        Name="Icon"
+        Width="20"
+        Height="20"
+        Margin="15,15,10,15"
 
-      Kind="HandOkay" />
-    <TextBlock
-      Name="Title"
-      Grid.Column="1"
-      Margin="0,15,15,15"
-      VerticalAlignment="Center"
-      Classes="Subtitle1"
+        Kind="HandOkay" />
+      <TextBlock
+        Name="Title"
+				Grid.Column="1"
+        Margin="0,15,15,15"
+        VerticalAlignment="Center"
+        Classes="Subtitle1"
 TextWrapping="Wrap"
-      Text="Something happened and it is really bad test new line"
+        Text="Something happened and it is really bad test new line"
          />
 
     <TextBlock

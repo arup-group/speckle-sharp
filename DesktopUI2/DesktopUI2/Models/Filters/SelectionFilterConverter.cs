@@ -33,17 +33,9 @@ namespace DesktopUI2.Models.Filters
       {
         filter = new AllSelectionFilter();
       }
-      else if (type == typeof(AllSelectionFilterStandalone).ToString())
-      {
-        filter = new AllSelectionFilterStandalone();
-      }
       else if (type == typeof(ListSelectionFilter).ToString())
       {
         filter = new ListSelectionFilter();
-      }
-      else if (type == typeof(ListSelectionFilterStandalone).ToString())
-      {
-        filter = new ListSelectionFilterStandalone();
       }
       else if (type == typeof(ManualSelectionFilter).ToString())
       {
@@ -52,10 +44,6 @@ namespace DesktopUI2.Models.Filters
       else if (type == typeof(PropertySelectionFilter).ToString())
       {
         filter = new PropertySelectionFilter();
-      }
-      else if (type == typeof(PropertySelectionFilterStandalone).ToString())
-      {
-        filter = new PropertySelectionFilterStandalone();
       }
       else
       {

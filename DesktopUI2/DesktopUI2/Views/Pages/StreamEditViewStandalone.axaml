@@ -1,5 +1,4 @@
 <UserControl
-  x:Class="DesktopUI2.Views.Pages.StreamEditViewStandalone"
   xmlns="https://github.com/avaloniaui"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
@@ -68,7 +67,7 @@
                     Foreground="White"
                     Text="{Binding Stream.name}"
                     TextTrimming="CharacterEllipsis" />
-                  <sc:StreamDetails Grid.Row="1">
+                  <!--<sc:StreamDetails Grid.Row="1">
                       <sc:StreamDetails.Styles>
                           <Style Selector="TextBlock">
                               <Setter Property="Foreground" Value="White" />
@@ -78,7 +77,7 @@
                           </Style>
 
                       </sc:StreamDetails.Styles>
-                  </sc:StreamDetails>
+                  </sc:StreamDetails>-->
               </Grid>
               <!--  SHARE STREAM  -->
               <m:FloatingButton
@@ -199,7 +198,7 @@
             NOTE FORMATTED TEXT IS COMING TO AVALONIA !
             https://github.com/AvaloniaUI/Avalonia/pull/6953
           -->
-          <uc:Activity />
+          <!--<uc:Activity />-->
         </TabItem>
 
         <TabItem>
@@ -217,7 +216,7 @@
                 Text="Comments" />
             </StackPanel>
           </TabItem.Header>
-          <uc:Comments />
+          <!--<uc:Comments />-->
         </TabItem>
 
           <!--  REPORT  -->
@@ -320,10 +319,10 @@
                     SelectionMode="Multiple, Toggle" />
 
                   <!--  APP OBJS  -->
-                  <uc:Report
+                  <!--<uc:Report
                     Grid.Row="3"
                     Grid.ColumnSpan="2"
-                    IsVisible="{Binding HasReportItems}" />
+                    IsVisible="{Binding HasReportItems}" />-->
               </Grid>
 
           </TabItem>
@@ -494,7 +493,7 @@
               Text="Send" />
           </StackPanel>
         </TabItem.Header>
-        <uc:SendGSA />
+        <!--<uc:SendGSA />-->
       </TabItem>
 
       <TabItem>
@@ -518,7 +517,7 @@
               Text="Receive" />
           </StackPanel>
         </TabItem.Header>
-        <uc:ReceiveGSA />
+        <!--<uc:ReceiveGSA />-->
       </TabItem>
     </TabControl>
 

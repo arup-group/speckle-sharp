@@ -148,7 +148,7 @@ namespace DesktopUI2.ViewModels
         {
           this.RaiseAndSetIfChanged(ref _avatarUrl, value);
         }
-        //DownloadImage(AvatarUrl);
+        DownloadImage(AvatarUrl);
       }
 
     }
