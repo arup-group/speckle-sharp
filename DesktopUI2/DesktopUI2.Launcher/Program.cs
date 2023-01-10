@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.ReactiveUI;
+using System.Diagnostics;
 using System.IO;
 using System;
 using System.Collections.Generic;

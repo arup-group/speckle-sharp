@@ -61,6 +61,10 @@ namespace Speckle.Core.Logging
       /// Event triggered when the connector is registered
       /// </summary>
       Registered,
+      /// <summary>
+      /// Event triggered by the Mapping Tool
+      /// </summary>
+      MappingsAction,
       GSA
     };
 

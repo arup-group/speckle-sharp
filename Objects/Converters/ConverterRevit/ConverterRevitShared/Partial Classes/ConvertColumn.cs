@@ -171,6 +171,7 @@ namespace Objects.Converter.Revit
       var state = isUpdate ? ApplicationObject.State.Updated : ApplicationObject.State.Created;
       appObj.Update(status: state, createdId: revitColumn.UniqueId, convertedItem: revitColumn);
       // TODO: nested elements.
+      appObj = SetHostedElements(speckleColumn, revitColumn, appObj);
       return appObj;
     }
 
@@ -239,7 +240,10 @@ namespace Objects.Converter.Revit
       //make line from point and height
       if (baseLine == null && baseGeometry is Point basePoint)
       {
-        var elevation = ConvertAndCacheLevel(revitColumn, BuiltInParameter.FAMILY_TOP_LEVEL_PARAM).elevation;
+        if (symbol.Family.FamilyPlacementType == FamilyPlacementType.OneLevelBased)
+          return PointBasedFamilyInstanceToSpeckle(revitColumn, basePoint, out notes);
+
+        var elevation = speckleColumn.topLevel.elevation;
         baseLine = new Line(basePoint, new Point(basePoint.x, basePoint.y, elevation + speckleColumn.topOffset, ModelUnits), ModelUnits);
       }
 
