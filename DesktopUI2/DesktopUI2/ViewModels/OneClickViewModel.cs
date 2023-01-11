@@ -1,5 +1,7 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Threading;
 using DesktopUI2.Models;
+using DesktopUI2.Views;
 using DesktopUI2.Views.Windows.Dialogs;
 using ReactiveUI;
 using Speckle.Core.Api;
@@ -119,79 +121,98 @@ namespace DesktopUI2.ViewModels
       _fileName = fileName;
 
       if (_fileStream == null)
-        _fileStream = await GetOrCreateStreamState();
-      // check if objs are selected and set streamstate filter
-      var filters = Bindings.GetSelectionFilters();
-      var selection = Bindings.GetSelectedObjects();
-      //TODO: check if these filters exist
-      if (selection.Count > 0)
-      {
-        _fileStream.Filter = filters.First(o => o.Slug == "manual");
-        _fileStream.Filter.Selection = selection;
-        _fileStream.CommitMessage = "Sent selection";
-      }
-      else
-      {
-        _fileStream.Filter = filters.First(o => o.Slug == "all");
-        _fileStream.CommitMessage = "Sent everything";
-      }
-      _fileStream.BranchName = "main";
-
-      // set settings
-      if (_fileStream.Settings == null || _fileStream.Settings.Count == 0)
-      {
-        var settings = Bindings.GetSettings();
-        _fileStream.Settings = settings;
-      }
-
-      // send to stream
-      // TODO: report conversions errors, empty commit etc
-      try
-      {
-        Id = await Task.Run(() => Bindings.SendStream(_fileStream, Progress));
-
-        if (!string.IsNullOrEmpty(Id))
+        try
         {
-          var errorsCount = Progress.Report.ReportObjects.Count(x => x.Status == Speckle.Core.Models.ApplicationObject.State.Failed);
-          if (errorsCount > 0)
+          _fileStream = await GetOrCreateStreamState();
+        }
+        catch (SpeckleException ex)
+        {
+          Dispatcher.UIThread.Post(() =>
+          MainUserControl.NotificationManager.Show(new PopUpNotificationViewModel()
           {
-            var s = errorsCount == 1 ? "" : "s";
-            SentText = $"Done 🎉\nOperation completed with {errorsCount} error{s}";
-            SuccessfulSend = true;
-          }
-          else if (Progress.Report.ReportObjects.Count == 0)
-          {
-            SentText = "Nothing was sent!\nPlease try again or switch to advanced mode.";
-            SuccessfulSend = false;
-          }
-          else
-          {
-            SentText = "Done 🎉\nYour model has been sent!";
-            SuccessfulSend = true;
-          }
+            Title = "⚠️ Unable to fetch saved stream or create new.",
+            Message = $"{ex.Message}",
+            Type = Avalonia.Controls.Notifications.NotificationType.Error
+          }));
+
+          MainViewModel.Instance.NavigateToDefaultScreen();
+        }
+
+      if (_fileStream != null)
+      {
+        // check if objs are selected and set streamstate filter
+        var filters = Bindings.GetSelectionFilters();
+        var selection = Bindings.GetSelectedObjects();
+        //TODO: check if these filters exist
+        if (selection.Count > 0)
+        {
+          _fileStream.Filter = filters.First(o => o.Slug == "manual");
+          _fileStream.Filter.Selection = selection;
+          _fileStream.CommitMessage = "Sent selection";
         }
         else
         {
-          SentText = "Semething went wrong!\nPlease try again or switch to advanced mode.";
-          SuccessfulSend = false;
+          _fileStream.Filter = filters.First(o => o.Slug == "all");
+          _fileStream.CommitMessage = "Sent everything";
         }
+        _fileStream.BranchName = "main";
 
-        Progress.IsProgressing = false;
-
-        if (!Progress.CancellationTokenSource.IsCancellationRequested)
+        // set settings
+        if (_fileStream.Settings == null || _fileStream.Settings.Count == 0)
         {
-          Analytics.TrackEvent(AccountManager.GetDefaultAccount(), Analytics.Events.Send, new Dictionary<string, object> { { "method", "OneClick" } });
-          _fileStream.LastUsed = DateTime.Now.ToString();
+          var settings = Bindings.GetSettings();
+          _fileStream.Settings = settings;
         }
-      }
-      catch (Exception ex)
-      {
-        //TODO: report errors to user
-        Log.CaptureException(ex, Sentry.SentryLevel.Error);
-      }
 
-      if (HomeViewModel.Instance != null)
-        HomeViewModel.Instance.AddSavedStream(new StreamViewModel(_fileStream, HostScreen, HomeViewModel.Instance.RemoveSavedStreamCommand));
+        // send to stream
+        // TODO: report conversions errors, empty commit etc
+        try
+        {
+          Id = await Task.Run(() => Bindings.SendStream(_fileStream, Progress));
+
+          if (!string.IsNullOrEmpty(Id))
+          {
+            var errorsCount = Progress.Report.ReportObjects.Count(x => x.Status == Speckle.Core.Models.ApplicationObject.State.Failed);
+            if (errorsCount > 0)
+            {
+              var s = errorsCount == 1 ? "" : "s";
+              SentText = $"Done 🎉\nOperation completed with {errorsCount} error{s}";
+              SuccessfulSend = true;
+            }
+            else if (Progress.Report.ReportObjects.Count == 0)
+            {
+              SentText = "Nothing was sent!\nPlease try again or switch to advanced mode.";
+              SuccessfulSend = false;
+            }
+            else
+            {
+              SentText = "Done 🎉\nYour model has been sent!";
+              SuccessfulSend = true;
+            }
+          }
+          else
+          {
+            SentText = "Semething went wrong!\nPlease try again or switch to advanced mode.";
+            SuccessfulSend = false;
+          }
+
+          Progress.IsProgressing = false;
+
+          if (!Progress.CancellationTokenSource.IsCancellationRequested)
+          {
+            Analytics.TrackEvent(AccountManager.GetDefaultAccount(), Analytics.Events.Send, new Dictionary<string, object> { { "method", "OneClick" } });
+            _fileStream.LastUsed = DateTime.Now.ToString();
+          }
+        }
+        catch (Exception ex)
+        {
+          //TODO: report errors to user
+          Log.CaptureException(ex, Sentry.SentryLevel.Error);
+        }
+
+        if (HomeViewModel.Instance != null)
+          HomeViewModel.Instance.AddSavedStream(new StreamViewModel(_fileStream, HostScreen, HomeViewModel.Instance.RemoveSavedStreamCommand));
+      }
     }
 
     private async Task<StreamState> GetOrCreateStreamState()
