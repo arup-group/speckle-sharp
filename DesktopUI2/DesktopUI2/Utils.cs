@@ -218,14 +218,14 @@ namespace DesktopUI2
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-          path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Speckle", "Manager", "Manager.exe");
+          path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "speckle-connection-manager-ui", "SpeckleConnectionManagerUI.exe");
         }
 
         if (File.Exists(path) || Directory.Exists(path))
           Process.Start(path);
         else
         {
-          Process.Start(new ProcessStartInfo($"https://speckle.systems/download") { UseShellExecute = true });
+          Process.Start(new ProcessStartInfo($"https://speckle.arup.com/") { UseShellExecute = true });
         }
       }
       catch (Exception ex)
