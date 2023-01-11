@@ -225,7 +225,7 @@ namespace DesktopUI2
           Process.Start(path);
         else
         {
-          Process.Start(new ProcessStartInfo($"http://speckle.arup.com/") { UseShellExecute = true });
+          Process.Start(new ProcessStartInfo($"https://speckle.arup.com/") { UseShellExecute = true });
         }
       }
       catch (Exception ex)
