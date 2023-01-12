@@ -135,6 +135,8 @@ namespace DesktopUI2.ViewModels
           }));
 
           MainViewModel.Instance.NavigateToDefaultScreen();
+
+          return;
         }
       }
 
