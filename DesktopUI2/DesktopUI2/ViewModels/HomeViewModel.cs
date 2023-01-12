@@ -408,12 +408,13 @@ namespace DesktopUI2.ViewModels
       try
       {
 
-        var hasUpdate = await Helpers.IsConnectorUpdateAvailable(Bindings.GetHostAppName()).ConfigureAwait(false);
+        //var hasUpdate = await Helpers.IsConnectorUpdateAvailable(Bindings.GetHostAppName()).ConfigureAwait(false);
 
         Notifications.Clear();
 
-        if (hasUpdate)
-          Notifications.Add(new NotificationViewModel { Message = "An update for this connector is available, install it now!", Launch = LaunchManagerCommand, Icon = MaterialIconKind.Gift, IconColor = Avalonia.Media.Brushes.Gold });
+        // Avoid update notifications from speckle systems
+        //if (hasUpdate)
+        //  Notifications.Add(new NotificationViewModel { Message = "An update for this connector is available, install it now!", Launch = LaunchManagerCommand, Icon = MaterialIconKind.Gift, IconColor = Avalonia.Media.Brushes.Gold });
 
         foreach (var account in Accounts)
         {
