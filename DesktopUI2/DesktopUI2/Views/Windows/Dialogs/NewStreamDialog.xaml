@@ -32,8 +32,8 @@
       Margin="10,20,13,5"
       HorizontalAlignment="Stretch"
       VerticalAlignment="Center"
-			Items="{Binding Accounts}"
-			SelectedItem="{Binding Account}"
+      Items="{Binding Accounts}"
+      SelectedItem="{Binding Account}"
       IsEnabled="{Binding InProgress, Converter={x:Static BoolConverters.Not}}"
       PlaceholderText="Select an account">
       <ComboBox.ItemTemplate>
@@ -130,19 +130,19 @@
       Name="name"
       Grid.Row="3"
       Margin="15,5"
-			Text="{Binding StreamName}"
+      Text="{Binding StreamName}"
       Watermark="Stream Name (optional)" />
 
     <TextBox
       Name="description"
       Grid.Row="4"
       Margin="15,5"
-			Text="{Binding Description}"
+      Text="{Binding Description}"
       Watermark="Description (optional)" />
 
     <ToggleSwitch
       Name="isPublic"
-			IsChecked="{Binding IsPublic}"
+      IsChecked="{Binding IsPublic}"
       Grid.Row="5"
       Margin="15" />
 
@@ -160,7 +160,7 @@
       <Button
         Margin="0,0,10,0"
         IsEnabled="{Binding JobNumberProvided}"
-				Command="{Binding NewStreamCommand}"
+        Command="{Binding NewStreamCommand}"
         Content="Create" />
 
     </StackPanel>
