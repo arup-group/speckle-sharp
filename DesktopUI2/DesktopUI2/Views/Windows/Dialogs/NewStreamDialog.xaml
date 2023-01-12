@@ -6,6 +6,7 @@
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:m="clr-namespace:Material.Styles;assembly=Material.Styles"
   mc:Ignorable="d">
 	<UserControl.Styles>
 
@@ -19,7 +20,7 @@
 
 
 	</UserControl.Styles>
-  <Grid RowDefinitions="auto, auto, auto, auto, auto, auto">
+  <Grid RowDefinitions="auto, auto, auto, auto, auto, auto, auto">
     <TextBlock
       Margin="15,15,15,0"
       Classes="Subtitle1"
@@ -31,6 +32,8 @@
       Margin="10,20,13,5"
       HorizontalAlignment="Stretch"
       VerticalAlignment="Center"
+			Items="{Binding Accounts}"
+			SelectedItem="{Binding Account}"
       IsEnabled="{Binding InProgress, Converter={x:Static BoolConverters.Not}}"
       PlaceholderText="Select an account">
       <ComboBox.ItemTemplate>
@@ -58,27 +61,94 @@
       </ComboBox.ItemTemplate>
     </ComboBox>
 
+    <Grid
+      Grid.Row="2"
+      Margin="15,15,15,5">
+      <ComboBox
+      Margin="8,19,8,0"
+      Classes="Stealth"
+      IsDropDownOpen="{Binding DropDownOpen, FallbackValue=True}"
+      Items="{Binding Jobs}"
+      SelectedItem="{Binding SelectedJob}">
+        <ComboBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock
+          Grid.Column="1"
+          Margin="5,0,0,0"
+          VerticalAlignment="Center"
+          Text="{Binding JobDisplayName}"
+          TextTrimming="CharacterEllipsis" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+      <Grid IsVisible="{Binding JobNumberRequired}">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <m:Card Grid.Column="0" Margin="0,0,5,0"
+                Padding="5 0"
+                HorizontalAlignment="Stretch" CornerRadius="25">
+          <!--  SEARCH JOB NUMBERS  -->
+          <TextBox
+              Grid.Row="0"
+              Name="SearchBox"
+              Margin="0"
+              Padding="0"
+              Classes="Solo Small"
+              Text="{Binding SearchQuery}"
+              Watermark="{Binding JobNumberWatermark}">
+            <TextBox.InnerRightContent>
+              <Button
+                Width="{Binding $self.Bounds.Height}"
+                Padding="4"
+                Classes="Flat"
+                Command="{Binding ClearSearchCommand}"
+                IsVisible="{Binding SearchQuery, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                Content="{icons:MaterialIconExt CloseCircle, Size=15}" />
+            </TextBox.InnerRightContent>
+            <TextBox.InnerLeftContent>
+              <icons:MaterialIcon
+            Width="15"
+            Height="15"
+            Margin="10,0,0,0"
+            Kind="Search" />
+            </TextBox.InnerLeftContent>
+          </TextBox>
+        </m:Card>
+        <TextBlock
+          Grid.Row="1"
+          Name="jobNumber"
+          Text="{Binding SelectedJob.JobDisplayName}"
+          VerticalAlignment="Center"
+          Margin="10,10"/>
+      </Grid>
+    </Grid>
 
     <TextBox
       Name="name"
-      Grid.Row="2"
+      Grid.Row="3"
       Margin="15,5"
+			Text="{Binding StreamName}"
       Watermark="Stream Name (optional)" />
 
     <TextBox
       Name="description"
-      Grid.Row="3"
+      Grid.Row="4"
       Margin="15,5"
+			Text="{Binding Description}"
       Watermark="Description (optional)" />
 
     <ToggleSwitch
       Name="isPublic"
-      Grid.Row="4"
+			IsChecked="{Binding IsPublic}"
+      Grid.Row="5"
       Margin="15" />
 
 
     <StackPanel
-      Grid.Row="5"
+      Grid.Row="6"
       Margin="15"
       HorizontalAlignment="Right"
       Orientation="Horizontal">
@@ -89,7 +159,8 @@
         Content="Cancel" />
       <Button
         Margin="0,0,10,0"
-        Click="Create_Click"
+        IsEnabled="{Binding JobNumberProvided}"
+				Command="{Binding NewStreamCommand}"
         Content="Create" />
 
     </StackPanel>

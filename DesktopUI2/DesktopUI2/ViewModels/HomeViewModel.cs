@@ -681,21 +681,25 @@ namespace DesktopUI2.ViewModels
 
     public async void NewStreamCommand()
     {
-      var dialog = new NewStreamDialog(Accounts);
+      var dialog = new NewStreamDialog
+      {
+        DataContext = new NewStreamViewModel(HostScreen, Accounts)
+      };
+
       var result = await dialog.ShowDialog<bool>();
 
       if (result)
       {
         try
         {
-          var client = new Client(dialog.Account);
-          var streamId = await client.StreamCreate(new StreamCreateInput { description = dialog.Description, name = dialog.StreamName, isPublic = dialog.IsPublic });
-          var stream = await client.StreamGet(streamId);
-          var streamState = new StreamState(dialog.Account, stream);
+          //var client = new Client(dialog.Account);
+          //var streamId = await client.StreamCreate(new StreamCreateInput { description = dialog.Description, name = dialog.StreamName, isPublic = dialog.IsPublic });
+          //var stream = await client.StreamGet(streamId);
+          //var streamState = new StreamState(dialog.Account, stream);
 
-          MainViewModel.RouterInstance.Navigate.Execute(new StreamViewModel(streamState, HostScreen, RemoveSavedStreamCommand));
+          //MainViewModel.RouterInstance.Navigate.Execute(new StreamViewModel(streamState, HostScreen, RemoveSavedStreamCommand));
 
-          Analytics.TrackEvent(dialog.Account, Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Create" } });
+          //Analytics.TrackEvent(dialog.Account, Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Create" } });
 
           GetStreams().ConfigureAwait(false); //update streams
         }
