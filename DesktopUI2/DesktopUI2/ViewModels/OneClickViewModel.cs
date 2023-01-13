@@ -119,7 +119,27 @@ namespace DesktopUI2.ViewModels
       _fileName = fileName;
 
       if (_fileStream == null)
-        _fileStream = await GetOrCreateStreamState();
+      {
+        try
+        {
+          _fileStream = await GetOrCreateStreamState();
+        }
+        catch (SpeckleException ex)
+        {
+          Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+          Views.MainUserControl.NotificationManager.Show(new PopUpNotificationViewModel()
+          {
+            Title = "⚠️ Unable to fetch saved stream or create new.",
+            Message = $"{ex.Message}",
+            Type = Avalonia.Controls.Notifications.NotificationType.Error
+          }));
+
+          MainViewModel.Instance.NavigateToDefaultScreen();
+
+          return;
+        }
+      }
+
       // check if objs are selected and set streamstate filter
       var filters = Bindings.GetSelectionFilters();
       var selection = Bindings.GetSelectedObjects();
