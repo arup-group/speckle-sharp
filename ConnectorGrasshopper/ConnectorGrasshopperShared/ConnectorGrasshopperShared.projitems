@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Accounts\Accounts.AccountDetails.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Accounts\Accounts.GetAccount.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Accounts\Accounts.ListAccounts.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BaseComponents\ComponentTracker.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BaseComponents\GH_SpeckleAsyncComponent.cs" />
@@ -28,7 +29,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Extras\DebounceDispatcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extras\GenericAccessParam.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extras\GH_SpeckleGoo.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Extras\QueryDownloadedStream.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Objects\QueryDownloadedStream.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extras\SendReceiveDataParam.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extras\Speckle.IGH_Goo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extras\SpeckleBaseParam.cs" />

@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using Speckle.Core.Credentials;
+using Speckle.Core.Helpers;
 using Speckle.Newtonsoft.Json;
 
 namespace Speckle.Core.Logging
@@ -198,6 +199,11 @@ namespace Speckle.Core.Logging
               properties
             });
 
+          var query = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("data=" + HttpUtility.UrlEncode(json))));
+          HttpClient client = Http.GetHttpProxyClient();
+          client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
+          query.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+          client.PostAsync(MixpanelServer + "/track?ip=1", query);
             streamWriter.Write("data=" + HttpUtility.UrlEncode(json));
             streamWriter.Flush();
             streamWriter.Close();
@@ -232,13 +238,18 @@ namespace Speckle.Core.Logging
               {
                  {"Connectors", new List<string>{ connector } },
               }
+            },
+            { "set",  new Dictionary<string, object>()
+              {
+                 {"Identified", true },
+            }
             }
           };
           string json = JsonConvert.SerializeObject(data);
 
 
           var query = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("data=" + HttpUtility.UrlEncode(json))));
-          HttpClient client = new HttpClient();
+          HttpClient client = Http.GetHttpProxyClient();
           client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
           query.Headers.ContentType = new MediaTypeHeaderValue("application/json");
           client.PostAsync(MixpanelServer + "/engage#profile-union", query);
