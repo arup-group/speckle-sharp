@@ -9,7 +9,7 @@
   xmlns:m="clr-namespace:Material.Styles;assembly=Material.Styles"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   xmlns:sc="clr-namespace:DesktopUI2.Views.Pages.SharedControls"
-  xmlns:uc="clr-namespace:DesktopUI2.Views.Pages.StreamEditControls"
+  xmlns:uc="clr-namespace:DesktopUI2.Views.Controls.StreamEditControls"
   xmlns:viewModels="clr-namespace:DesktopUI2.ViewModels.DesignViewModels"
   d:DesignHeight="550"
   d:DesignWidth="400"
@@ -517,7 +517,7 @@
               Text="Receive" />
           </StackPanel>
         </TabItem.Header>
-        <!--<uc:ReceiveGSA />-->
+        <uc:Receive />
       </TabItem>
     </TabControl>
 
