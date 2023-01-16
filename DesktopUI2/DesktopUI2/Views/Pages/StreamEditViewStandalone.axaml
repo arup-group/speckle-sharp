@@ -19,9 +19,9 @@
     <dataTemplates:FilterTemplateSelector />
   </UserControl.DataTemplates>
 
-  <Design.DataContext>
+  <!--<Design.DataContext>
     <viewModels:DesignSavedStreamViewModel />
-  </Design.DataContext>
+  </Design.DataContext>-->
   
   <UserControl.Resources>
     <conv:RoleCanSendValueConverter x:Key="RoleCanSendValueConverter" />
