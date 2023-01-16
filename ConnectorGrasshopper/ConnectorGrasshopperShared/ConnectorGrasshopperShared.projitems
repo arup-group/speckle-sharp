@@ -10,7 +10,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Accounts\Accounts.AccountDetails.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Accounts\Accounts.GetAccount.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Accounts\Accounts.ListAccounts.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BaseComponents\ComponentTracker.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BaseComponents\GH_SpeckleAsyncComponent.cs" />
