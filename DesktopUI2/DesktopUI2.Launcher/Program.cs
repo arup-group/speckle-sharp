@@ -84,7 +84,7 @@ namespace DesktopUI2.Launcher
 
     public static void OpenOrFocusSpeckle()
     {
-      Bindings = new DummyBindings();
+      Bindings = new DummyBindingsStandalone();
       CreateOrFocusSpeckle();
     }
 

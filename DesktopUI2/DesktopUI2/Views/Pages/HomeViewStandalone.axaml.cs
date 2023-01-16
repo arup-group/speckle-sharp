@@ -1,21 +1,21 @@
-//using Avalonia;
-//using Avalonia.Controls;
-//using Avalonia.Markup.Xaml;
-//using Avalonia.ReactiveUI;
-//using DesktopUI2.ViewModels;
-//using ReactiveUI;
-//using Speckle.Core.Api;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Markup.Xaml;
+using Avalonia.ReactiveUI;
+using DesktopUI2.ViewModels;
+using ReactiveUI;
+using Speckle.Core.Api;
 
-//namespace DesktopUI2.Views.Pages
-//{
-//  public partial class HomeViewStandalone : ReactiveUserControl<HomeViewModelStandalone>
-//  {
-//    public HomeViewStandalone()
-//    {
-//      this.WhenActivated(disposables => { });
-//      AvaloniaXamlLoader.Load(this);
-//    }
+namespace DesktopUI2.Views.Pages
+{
+  public partial class HomeViewStandalone : ReactiveUserControl<HomeViewModelStandalone>
+  {
+    public HomeViewStandalone()
+    {
+      this.WhenActivated(disposables => { });
+      AvaloniaXamlLoader.Load(this);
+    }
 
 
-//  }
-//}
+  }
+}

@@ -1,40 +1,40 @@
-//using Avalonia;
-//using Avalonia.Input;
-//using Avalonia.Markup.Xaml;
-//using Avalonia.ReactiveUI;
-//using DesktopUI2.ViewModels;
-//using ReactiveUI;
-//using Speckle.Core.Logging;
-//using System.Collections.Generic;
-//using System.ComponentModel;
+using Avalonia;
+using Avalonia.Input;
+using Avalonia.Markup.Xaml;
+using Avalonia.ReactiveUI;
+using DesktopUI2.ViewModels;
+using ReactiveUI;
+using Speckle.Core.Logging;
+using System.Collections.Generic;
+using System.ComponentModel;
 
-//namespace DesktopUI2.Views
-//{
-//  public partial class MainWindowStandalone : ReactiveWindow<MainViewModelStandalone>
-//  {
-//    public MainWindowStandalone()
-//    {
+namespace DesktopUI2.Views
+{
+  public partial class MainWindowStandalone : ReactiveWindow<MainViewModelStandalone>
+  {
+    public MainWindowStandalone()
+    {
 
-//      this.WhenActivated(disposables => { });
-//      AvaloniaXamlLoader.Load(this);
-//      Instance = this;
+      this.WhenActivated(disposables => { });
+      AvaloniaXamlLoader.Load(this);
+      Instance = this;
 
-//      Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Launched" } });
-
-
-//#if DEBUG
-//      this.AttachDevTools(KeyGesture.Parse("CTRL+R"));
-//#endif
-//    }
-
-//    public static MainWindowStandalone Instance { get; private set; }
+      Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Launched" } });
 
 
-//    protected override void OnClosing(CancelEventArgs e)
-//    {
-//      this.Hide();
-//      e.Cancel = true;
-//      base.OnClosing(e);
-//    }
-//  }
-//}
+#if DEBUG
+      this.AttachDevTools(KeyGesture.Parse("CTRL+R"));
+#endif
+    }
+
+    public static MainWindowStandalone Instance { get; private set; }
+
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+      this.Hide();
+      e.Cancel = true;
+      base.OnClosing(e);
+    }
+  }
+}

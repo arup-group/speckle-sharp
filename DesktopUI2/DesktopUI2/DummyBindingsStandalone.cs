@@ -417,6 +417,12 @@ namespace DesktopUI2
 
     public override async Task<Dictionary<string, List<MappingValue>>> ImportFamilyCommand(Dictionary<string, List<MappingValue>> Mapping)
     {
+      await Task.Delay(TimeSpan.FromMilliseconds(rnd.Next(200, 1000)));
+      return new Dictionary<string, List<MappingValue>>();
+    }
+
+    public override Task Open3DView(List<double> viewCoordinates, string viewName = "")
+    {
       throw new NotImplementedException();
     }
 

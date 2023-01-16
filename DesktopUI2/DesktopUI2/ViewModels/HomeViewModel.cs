@@ -36,12 +36,12 @@ namespace DesktopUI2.ViewModels
   public class HomeViewModel : ReactiveObject, IRoutableViewModel
   {
     //Instance of this HomeViewModel, so that the SavedStreams are kept in memory and not disposed on navigation
-    public static HomeViewModel Instance { get; private set; }
+    public static HomeViewModel Instance { get; internal set; }
     public IScreen HostScreen { get; }
 
     public string UrlPathSegment { get; } = "home";
 
-    private ConnectorBindings Bindings;
+    internal ConnectorBindings Bindings;
 
     public enum Filter
     {

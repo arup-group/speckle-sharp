@@ -24,6 +24,8 @@ namespace DesktopUI2.ViewModels
 
     public ReactiveCommand<Unit, Unit> GoBack => Router.NavigateBack;
 
+    public bool IsStandalone { get; set; } = false;
+
     public static MainViewModel Instance { get; private set; }
 
     public static HomeViewModel Home { get; private set; }
@@ -70,18 +72,35 @@ namespace DesktopUI2.ViewModels
       Instance = this;
       Setup.Init(Bindings.GetHostAppNameVersion(), Bindings.GetHostAppName());
 
+      IConnectorBindingsStandalone bindingsStandalone = Bindings as IConnectorBindingsStandalone;
+      if (bindingsStandalone != null)
+      {
+        IsStandalone = true;
+      }
+
       RxApp.DefaultExceptionHandler = Observer.Create<Exception>(CatchReactiveException);
 
       Router = new RoutingState();
 
-      Locator.CurrentMutable.Register(() => new StreamEditView(), typeof(IViewFor<StreamViewModel>));
-      Locator.CurrentMutable.Register(() => new HomeView(), typeof(IViewFor<HomeViewModel>));
-      Locator.CurrentMutable.Register(() => new OneClickView(), typeof(IViewFor<OneClickViewModel>));
       Locator.CurrentMutable.Register(() => new CollaboratorsView(), typeof(IViewFor<CollaboratorsViewModel>));
       Locator.CurrentMutable.Register(() => new SettingsView(), typeof(IViewFor<SettingsPageViewModel>));
+      Locator.CurrentMutable.Register(() => Bindings, typeof(ConnectorBindings));
+      Locator.CurrentMutable.Register(() => new OneClickView(), typeof(IViewFor<OneClickViewModel>));
       Locator.CurrentMutable.Register(() => new NotificationsView(), typeof(IViewFor<NotificationsViewModel>));
       Locator.CurrentMutable.Register(() => new LogInView(), typeof(IViewFor<LogInViewModel>));
-      Locator.CurrentMutable.Register(() => Bindings, typeof(ConnectorBindings));
+
+      if (IsStandalone)
+      {
+        Locator.CurrentMutable.Register(() => new StreamEditViewStandalone(), typeof(IViewFor<StreamViewModel>));
+        Locator.CurrentMutable.Register(() => new HomeViewStandalone(), typeof(IViewFor<HomeViewModelStandalone>));
+        Home = new HomeViewModelStandalone(this);
+      }
+      else
+      {
+        Locator.CurrentMutable.Register(() => new StreamEditView(), typeof(IViewFor<StreamViewModel>));
+        Locator.CurrentMutable.Register(() => new HomeView(), typeof(IViewFor<HomeViewModel>));
+        Home = new HomeViewModel(this);
+      }
 
       RouterInstance = Router; // makes the router available app-wide
 
@@ -89,7 +108,7 @@ namespace DesktopUI2.ViewModels
       ChangeTheme(config.DarkTheme);
 
       //reusing the same view model not to lose its state
-      Home = new HomeViewModel(this);
+      //Home = new HomeViewModel(this);
       NavigateToDefaultScreen();
     }
 
