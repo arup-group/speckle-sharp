@@ -63,6 +63,7 @@
     <None Remove="Views\Pages\LogInView.xaml" />
     <None Remove="Views\Pages\NotificationsView.xaml" />
     <None Remove="Views\Pages\OneClickView.xaml" />
+    <None Remove="Views\Pages\OneClickView.xaml" />
     <None Remove="Views\Controls\StreamEditControls\Activity.xaml" />
     <None Remove="Views\Controls\StreamEditControls\Comments.xaml" />
     <None Remove="Views\Controls\StreamEditControls\Report.xaml" />
@@ -70,6 +71,7 @@
     <None Remove="Views\Controls\StreamEditControls\Receive.xaml" />
     <None Remove="Views\Controls\StreamEditControls\Send.xaml" />
     <None Remove="Views\Pages\StreamEditView.xaml" />
+	<None Remove="Views\Pages\StreamEditViewStandalone.xaml" />
     <None Remove="Views\Scheduler.xaml" />
     <None Remove="Views\Settings\CheckBoxSettingView.xaml" />
 	  <None Remove="Views\Settings\ListBoxSettingView.xaml" />
@@ -338,6 +340,9 @@
     <Compile Update="Views\Pages\StreamEditView.xaml.cs">
       <DependentUpon>StreamEditView.xaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\Pages\StreamEditViewStandalone.xaml.cs">
+      <DependentUpon>StreamEditViewStandalone.xaml</DependentUpon>
+    </Compile>	
     <Compile Update="Views\Scheduler.xaml.cs">
       <DependentUpon>Scheduler.xaml</DependentUpon>
     </Compile>
