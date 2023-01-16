@@ -800,7 +800,7 @@ namespace DesktopUI2.ViewModels
 
 
 
-    private async void OpenStreamCommand(object streamAccountWrapper)
+    public async void OpenStreamCommand(object streamAccountWrapper)
     {
       if (await CheckIsOffline())
         return;
