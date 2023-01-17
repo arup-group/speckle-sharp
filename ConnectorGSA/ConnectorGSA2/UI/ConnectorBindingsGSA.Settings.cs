@@ -34,7 +34,7 @@ namespace ConnectorGSA.UI
         //new CheckBoxSetting {Slug = "send-content", Name = "Send results", Icon ="Repeat", IsChecked= false, Description = "Whether to send the model only or the model and results"},
         new TextBoxSetting {Slug = "node-coincidence-allowance", Name = "Coincident node allowance", Icon = "mdiCounter", Description = "Tolerance within which nodes are assumed to be coincident" , Selection = "10"},
         new ListBoxSetting {Slug = "unit", Name = "Distance unit", Icon ="mdiLayers", Values = DistanceUnits, Description = "Which distance units to use", Selection = "Millimetres"},
-        new ListBoxSetting {Slug = "section-mapping", Name = "Section mapping", Icon ="mdiArrowLeftRight", Values = mappingStream, Description = "Sends or receives structural stick objects (ex. columns, beams) using the section name-family/family type mappings contained in this stream"}
+        //new ListBoxSetting {Slug = "section-mapping", Name = "Section mapping", Icon ="mdiArrowLeftRight", Values = mappingStream, Description = "Sends or receives structural stick objects (ex. columns, beams) using the section name-family/family type mappings contained in this stream"}
       };
     }
 
