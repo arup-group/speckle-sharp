@@ -13,6 +13,7 @@
 #define Revit2020Version  GetFileVersion("..\ConnectorRevit\ConnectorRevit2020\bin\Release\SpeckleConnectorRevit.dll")
 #define Revit2021Version  GetFileVersion("..\ConnectorRevit\ConnectorRevit2021\bin\Release\SpeckleConnectorRevit.dll")
 #define Revit2022Version  GetFileVersion("..\ConnectorRevit\ConnectorRevit2022\bin\Release\SpeckleConnectorRevit.dll")
+#define Revit2023Version  GetFileVersion("..\ConnectorRevit\ConnectorRevit2023\bin\Release\SpeckleConnectorRevit.dll")
 
 #define GrasshopperVersion  GetFileVersion("..\ConnectorRhino\ConnectorRhino7\bin\Release\SpeckleConnectorGrasshopper.gha")
 #define Rhino6Version  GetFileVersion("..\ConnectorRhino\ConnectorRhino6\bin\Release\SpeckleConnectorRhino.rhp")
@@ -77,7 +78,8 @@ Name: gh; Description: Speckle for Grasshopper - v{#GrasshopperVersion};  Types:
 Name: revit19; Description: Speckle for Revit 2019 - v{#Revit2019Version};  Types: full
 Name: revit20; Description: Speckle for Revit 2020 - v{#Revit2020Version};  Types: full
 Name: revit21; Description: Speckle for Revit 2021 - v{#Revit2021Version};  Types: full
-Name: revit22; Description: Speckle for Revit 2022 - v{#Revit2021Version};  Types: full
+Name: revit22; Description: Speckle for Revit 2022 - v{#Revit2022Version};  Types: full
+Name: revit23; Description: Speckle for Revit 2023 - v{#Revit2023Version};  Types: full
 Name: autocad21; Description: Speckle for AutoCAD 2021 - v{#Autocad2021Version};  Types: full
 Name: autocad22; Description: Speckle for AutoCAD 2022 - v{#Autocad2022Version};  Types: full
 Name: civil21; Description: Speckle for Civil 3D 2021 - v{#Civil2021Version};  Types: full
@@ -140,6 +142,11 @@ Source: "..\Objects\Converters\ConverterRevit\ConverterRevit2021\bin\Release\net
 Source: "..\ConnectorRevit\ConnectorRevit2022\bin\Release\*"; DestDir: "{userappdata}\Autodesk\Revit\Addins\2022\SpeckleRevit2\"; Flags: ignoreversion recursesubdirs; Components: revit22
 Source: "..\ConnectorRevit\ConnectorRevit2022\bin\Release\SpeckleRevit2.addin"; DestDir: "{userappdata}\Autodesk\Revit\Addins\2022\"; Flags: ignoreversion recursesubdirs; Components: revit22
 Source: "..\Objects\Converters\ConverterRevit\ConverterRevit2022\bin\Release\netstandard2.0\Objects.Converter.Revit2022.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects\"; Flags: ignoreversion recursesubdirs; Components: revit22
+
+;revit23
+Source: "..\ConnectorRevit\ConnectorRevit2023\bin\Release\*"; DestDir: "{userappdata}\Autodesk\Revit\Addins\2023\SpeckleRevit2\"; Flags: ignoreversion recursesubdirs; Components: revit23
+Source: "..\ConnectorRevit\ConnectorRevit2023\bin\Release\SpeckleRevit2.addin"; DestDir: "{userappdata}\Autodesk\Revit\Addins\2023\"; Flags: ignoreversion recursesubdirs; Components: revit23
+Source: "..\Objects\Converters\ConverterRevit\ConverterRevit2023\bin\Release\netstandard2.0\Objects.Converter.Revit2023.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects\"; Flags: ignoreversion recursesubdirs; Components: revit23
 
 ;autocad21
 Source: "..\ConnectorAutocadCivil\ConnectorAutocad2021\bin\Release\*"; DestDir: "{userappdata}\Autodesk\ApplicationPlugins\Speckle2AutoCAD2021\"; Flags: ignoreversion recursesubdirs; Components: autocad21
