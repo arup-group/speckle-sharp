@@ -168,7 +168,7 @@ public class OneClickViewModel : ReactiveObject, IRoutableViewModel
 
     if (HomeViewModel.Instance != null)
       HomeViewModel.Instance.AddSavedStream(
-        new StreamViewModel(_fileStream, HostScreen, HomeViewModel.Instance.RemoveSavedStreamCommand)
+        new StreamViewModel(_fileStream, HostScreen, HomeViewModel.Instance.RemoveSavedStreamCommand, HomeViewModel.Instance.OpenSavedStreamCommand)
       );
   }
 
@@ -226,7 +226,7 @@ public class OneClickViewModel : ReactiveObject, IRoutableViewModel
   private void ShareCommand()
   {
     MainViewModel.RouterInstance.Navigate.Execute(
-      new CollaboratorsViewModel(HostScreen, new StreamViewModel(_fileStream, HostScreen, null))
+      new CollaboratorsViewModel(HostScreen, new StreamViewModel(_fileStream, HostScreen, null, null))
     );
 
     Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object> { { "name", "Share Open" } });

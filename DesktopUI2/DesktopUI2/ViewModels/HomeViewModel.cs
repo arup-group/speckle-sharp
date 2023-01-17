@@ -52,7 +52,7 @@ public class HomeViewModel : ReactiveObject, IRoutableViewModel
       Instance = this;
       HostScreen = screen;
       RemoveSavedStreamCommand = ReactiveCommand.Create<string>(RemoveSavedStream);
-
+      OpenSavedStreamCommand = ReactiveCommand.Create<object>(OpenSavedStream);
       Bindings = Locator.Current.GetService<ConnectorBindings>();
 
       Bindings.UpdateSavedStreams = UpdateSavedStreams;
@@ -88,7 +88,7 @@ public class HomeViewModel : ReactiveObject, IRoutableViewModel
       ClearSavedStreams();
 
       foreach (StreamState stream in streams)
-        SavedStreams.Add(new StreamViewModel(stream, HostScreen, RemoveSavedStreamCommand));
+        SavedStreams.Add(new StreamViewModel(stream, HostScreen, RemoveSavedStreamCommand, OpenSavedStreamCommand));
 
       this.RaisePropertyChanged(nameof(SavedStreams));
       this.RaisePropertyChanged(nameof(HasSavedStreams));
@@ -661,7 +661,7 @@ public class HomeViewModel : ReactiveObject, IRoutableViewModel
         }
 
         MainViewModel.RouterInstance.Navigate.Execute(
-          new StreamViewModel(streamState, HostScreen, RemoveSavedStreamCommand)
+          new StreamViewModel(streamState, HostScreen, RemoveSavedStreamCommand, OpenSavedStreamCommand)
         );
 
         Analytics.TrackEvent(
@@ -725,13 +725,13 @@ public class HomeViewModel : ReactiveObject, IRoutableViewModel
     {
       var streamState = new StreamState(streamAccountWrapper as StreamAccountWrapper);
       MainViewModel.RouterInstance.Navigate.Execute(
-        new StreamViewModel(streamState, HostScreen, RemoveSavedStreamCommand)
+        new StreamViewModel(streamState, HostScreen, RemoveSavedStreamCommand, OpenSavedStreamCommand)
       );
       Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object> { { "name", "Stream Open" } });
     }
   }
 
-  internal async void OpenSavedStreamCommand(object streamViewModel)
+  internal async void OpenSavedStream(object streamViewModel)
   {
     if (await CheckIsOffline().ConfigureAwait(true))
       return;
@@ -819,6 +819,7 @@ public class HomeViewModel : ReactiveObject, IRoutableViewModel
   public string Title => "for " + Bindings.GetHostAppNameVersion();
   public string Version => "v" + Bindings.ConnectorVersion;
   public ReactiveCommand<string, Unit> RemoveSavedStreamCommand { get; }
+  public ReactiveCommand<object, Unit> OpenSavedStreamCommand { get; }
 
   private CancellationTokenSource StreamGetCancelTokenSource;
 

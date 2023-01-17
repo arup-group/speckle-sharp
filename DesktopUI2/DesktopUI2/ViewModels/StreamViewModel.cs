@@ -40,7 +40,7 @@ namespace DesktopUI2.ViewModels;
 
 public class StreamViewModel : ReactiveObject, IRoutableViewModel, IDisposable
 {
-  public StreamViewModel(StreamState streamState, IScreen hostScreen, ICommand removeSavedStreamCommand)
+  public StreamViewModel(StreamState streamState, IScreen hostScreen, ICommand removeSavedStreamCommand, ICommand openSavedStreamCommand)
   {
     try
     {
@@ -60,6 +60,7 @@ public class StreamViewModel : ReactiveObject, IRoutableViewModel, IDisposable
 
       HostScreen = hostScreen;
       RemoveSavedStreamCommand = removeSavedStreamCommand;
+      OpenSavedStreamCommand = openSavedStreamCommand;
       Collaborators = new CollaboratorsViewModel(HostScreen, this);
 
       //use dependency injection to get bindings
@@ -89,6 +90,8 @@ public class StreamViewModel : ReactiveObject, IRoutableViewModel, IDisposable
   }
 
   public StreamState StreamState { get; set; }
+
+  public ICommand OpenSavedStreamCommand { get; }
 
   private string Url
   {
