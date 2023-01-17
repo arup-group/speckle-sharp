@@ -90,8 +90,9 @@ namespace Objects.Converter.Bentley
 #endif
     public double UoR { get; private set; }
     public List<ApplicationObject> ContextObjects { get; set; } = new List<ApplicationObject>();
+    public List<ApplicationObject> PreviousContextObjects { get; set; } = new List<ApplicationObject>();
     public void SetContextObjects(List<ApplicationObject> objects) => ContextObjects = objects;
-    public void SetPreviousContextObjects(List<ApplicationObject> objects) => throw new NotImplementedException();
+    public void SetPreviousContextObjects(List<ApplicationObject> objects) => PreviousContextObjects = objects;
     public void SetConverterSettings(object settings)
     {
       throw new NotImplementedException("This converter does not have any settings.");
