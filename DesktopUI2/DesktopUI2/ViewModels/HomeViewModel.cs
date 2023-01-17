@@ -102,7 +102,7 @@ namespace DesktopUI2.ViewModels
     public Filter SelectedFilter
     {
       get => _selectedFilter;
-      private set
+      internal set
       {
         SetFilters(_selectedFilter, value);
       }
@@ -118,7 +118,7 @@ namespace DesktopUI2.ViewModels
           return true;
       }
     }
-    private async void SetFilters(Filter oldValue, Filter newValue)
+    internal async void SetFilters(Filter oldValue, Filter newValue)
     {
       this.RaiseAndSetIfChanged(ref _selectedFilter, newValue);
       //refresh stream list if the previous filter is/was favorite
