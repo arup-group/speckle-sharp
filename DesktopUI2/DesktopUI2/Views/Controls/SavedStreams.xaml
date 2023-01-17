@@ -70,7 +70,7 @@
             <Button
               Padding="5,7"
               Classes="Invisible"
-              Command="{Binding $parent[local:HomeView].DataContext.OpenSavedStreamCommand}"
+              Command="{Binding OpenSavedStreamCommand}"
               CommandParameter="{Binding}"
               IsEnabled="{Binding StreamEnabled}">
 

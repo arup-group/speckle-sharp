@@ -56,6 +56,7 @@ namespace DesktopUI2.ViewModels
     public string Title => "for " + Bindings.GetHostAppNameVersion();
     public string Version => "v" + Bindings.ConnectorVersion;
     public ReactiveCommand<string, Unit> RemoveSavedStreamCommand { get; }
+    public ReactiveCommand<object, Unit> OpenSavedStreamCommand { get; }
 
     private CancellationTokenSource StreamGetCancelTokenSource = null;
 
@@ -227,6 +228,7 @@ namespace DesktopUI2.ViewModels
         Instance = this;
         HostScreen = screen;
         RemoveSavedStreamCommand = ReactiveCommand.Create<string>(RemoveSavedStream);
+        OpenSavedStreamCommand = ReactiveCommand.Create<object>(OpenSavedStream);
 
         Bindings = Locator.Current.GetService<ConnectorBindings>();
 
@@ -255,7 +257,7 @@ namespace DesktopUI2.ViewModels
 
         foreach (StreamState stream in streams)
         {
-          SavedStreams.Add(new StreamViewModel(stream, HostScreen, RemoveSavedStreamCommand));
+          SavedStreams.Add(new StreamViewModel(stream, HostScreen, RemoveSavedStreamCommand, OpenSavedStreamCommand));
         }
 
         this.RaisePropertyChanged("SavedStreams");
@@ -270,7 +272,7 @@ namespace DesktopUI2.ViewModels
       }
     }
 
-    private void ClearSavedStreams()
+    internal void ClearSavedStreams()
     {
       //dispose subscriptions!
       SavedStreams.ForEach(x => x.Dispose());
@@ -617,7 +619,7 @@ namespace DesktopUI2.ViewModels
       }
     }
 
-    private void RemoveSavedStream(string stateId)
+    internal void RemoveSavedStream(string stateId)
     {
       try
       {
@@ -753,7 +755,7 @@ namespace DesktopUI2.ViewModels
             streamState.BranchName = commit.branchName;
           }
 
-          MainViewModel.RouterInstance.Navigate.Execute(new StreamViewModel(streamState, HostScreen, RemoveSavedStreamCommand));
+          MainViewModel.RouterInstance.Navigate.Execute(new StreamViewModel(streamState, HostScreen, RemoveSavedStreamCommand, OpenSavedStreamCommand));
 
           Analytics.TrackEvent(account, Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Add From URL" } });
         }
@@ -808,13 +810,13 @@ namespace DesktopUI2.ViewModels
       if (streamAccountWrapper != null)
       {
         var streamState = new StreamState(streamAccountWrapper as StreamAccountWrapper);
-        MainViewModel.RouterInstance.Navigate.Execute(new StreamViewModel(streamState, HostScreen, RemoveSavedStreamCommand));
+        MainViewModel.RouterInstance.Navigate.Execute(new StreamViewModel(streamState, HostScreen, RemoveSavedStreamCommand, OpenSavedStreamCommand));
         Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Open" } });
       }
     }
 
 
-    private async void OpenSavedStreamCommand(object streamViewModel)
+    internal async void OpenSavedStream(object streamViewModel)
     {
       if (await CheckIsOffline())
         return;

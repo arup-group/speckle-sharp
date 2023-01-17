@@ -51,6 +51,8 @@ namespace DesktopUI2.ViewModels
 
     public ICommand RemoveSavedStreamCommand { get; }
 
+    public ICommand OpenSavedStreamCommand { get; }
+
     private bool _previewOn = false;
     public bool PreviewOn
     {
@@ -530,7 +532,7 @@ namespace DesktopUI2.ViewModels
     /// Unique identifier to identify this stream view model
     /// </summary>
     private string _guid { get; set; }
-    public StreamViewModel(StreamState streamState, IScreen hostScreen, ICommand removeSavedStreamCommand)
+    public StreamViewModel(StreamState streamState, IScreen hostScreen, ICommand removeSavedStreamCommand, ICommand openSavedStreamCommand)
     {
       try
       {
@@ -552,6 +554,7 @@ namespace DesktopUI2.ViewModels
 
         HostScreen = hostScreen;
         RemoveSavedStreamCommand = removeSavedStreamCommand;
+        OpenSavedStreamCommand = openSavedStreamCommand;
         Collaborators = new CollaboratorsViewModel(HostScreen, this);
 
         //use dependency injection to get bindings
