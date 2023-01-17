@@ -484,6 +484,14 @@ namespace DesktopUI2.ViewModels
 
     public bool CanOpenCommentsIn3DView { get; set; } = false;
     public bool CanReceive { get; set; }
+
+    private ResultSettings _resultSettings;
+    public ResultSettings ResultSettings
+    {
+      get => _resultSettings;
+      set => this.RaiseAndSetIfChanged(ref _resultSettings, value);
+    }
+
     public bool HasSettings { get; set; } = true;
     private bool _isAddingBranches = false;
 
@@ -1336,6 +1344,24 @@ namespace DesktopUI2.ViewModels
       Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", cancelledEvent } });
       Progress.IsPreviewProgressing = false;
       PreviewOn = false;
+    }
+
+    public virtual async void OpenResultsCommand()
+    {
+      ResultSettings = ((IConnectorBindingsStandalone)Bindings).ResultSettings;
+
+      try
+      {
+        var resultsViewModel = new ResultsViewModelStandalone(this);
+
+        var resultsWindow = new DesktopUI2.Views.Windows.ResultsStandalone();
+        resultsWindow.DataContext = resultsViewModel;
+        await resultsWindow.ShowDialog();
+      }
+      catch (Exception e)
+      {
+      }
+
     }
 
     private void SaveCommand()

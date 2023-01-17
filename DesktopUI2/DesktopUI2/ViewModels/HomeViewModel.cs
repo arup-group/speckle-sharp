@@ -866,7 +866,7 @@ namespace DesktopUI2.ViewModels
       MainViewModel.Instance.NavigateToDefaultScreen();
     }
 
-    private void NotificationsCommand()
+    internal void NotificationsCommand()
     {
       MainViewModel.RouterInstance.Navigate.Execute(new NotificationsViewModel(HostScreen, Notifications.ToList()));
     }
