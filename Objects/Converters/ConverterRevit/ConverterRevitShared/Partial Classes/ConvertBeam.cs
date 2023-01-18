@@ -1,9 +1,10 @@
-﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Structure;
 using Objects.BuiltElements;
 using Objects.BuiltElements.Revit;
 using Speckle.Core.Models;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using DB = Autodesk.Revit.DB;
 
@@ -18,9 +19,9 @@ namespace Objects.Converter.Revit
     {
       var docObj = GetExistingElementByApplicationId(speckleBeam.applicationId);
       var appObj = new ApplicationObject(speckleBeam.id, speckleBeam.speckle_type) { applicationId = speckleBeam.applicationId };
-      
+
       // skip if element already exists in doc & receive mode is set to ignore
-      if (IsIgnore(docObj, appObj, out appObj)) 
+      if (IsIgnore(docObj, appObj, out appObj))
         return appObj;
 
       if (speckleBeam.baseLine == null)
@@ -100,7 +101,8 @@ namespace Objects.Converter.Revit
         revitBeam = Doc.Create.NewFamilyInstance(baseLine, familySymbol, level, structuralType);
         // check for disallow join for beams in user settings
         // currently, this setting only applies to beams being created
-        if (Settings.ContainsKey("disallow-join"))
+
+        if (Settings.ContainsKey("disallow-join") && !string.IsNullOrEmpty(Settings["disallow-join"]))
         {
           List<string> joinSettings = new List<string>(Regex.Split(Settings["disallow-join"], @"\,\ "));
           if (joinSettings.Contains(StructuralFraming) || structuralType == StructuralType.Beam)
@@ -120,6 +122,7 @@ namespace Objects.Converter.Revit
       // TODO: get sub families, it's a family! 
       var state = isUpdate ? ApplicationObject.State.Updated : ApplicationObject.State.Created;
       appObj.Update(status: state, createdId: revitBeam.UniqueId, convertedItem: revitBeam);
+      appObj = SetHostedElements(speckleBeam, revitBeam, appObj);
       return appObj;
     }
 
@@ -140,11 +143,19 @@ namespace Objects.Converter.Revit
       speckleBeam.type = revitBeam.Document.GetElement(revitBeam.GetTypeId()).Name;
       speckleBeam.baseLine = baseLine;
       speckleBeam.level = ConvertAndCacheLevel(revitBeam, BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM);
-      speckleBeam.displayValue = GetElementMesh(revitBeam);
+
+      // structural connection modifiers alter family instance geometry, but the modifiers are view specific
+      // so we need to pass in the view we want in order to get the correct geometry
+      // TODO: we need to make sure we are passing in the correct view
+      var connectionHandlerFilter = new ElementClassFilter(typeof(DB.Structure.StructuralConnectionHandler));
+      if (revitBeam.GetSubelements().Where(o => (BuiltInCategory)o.Category.Id.IntegerValue == DB.BuiltInCategory.OST_StructConnectionModifiers).Any() || revitBeam.GetDependentElements(connectionHandlerFilter).Any())
+        speckleBeam.displayValue = GetElementDisplayMesh(revitBeam, new Options() { View = Doc.ActiveView, ComputeReferences = true });
+      else
+        speckleBeam.displayValue = GetElementMesh(revitBeam);
 
       GetAllRevitParamsAndIds(speckleBeam, revitBeam);
 
       return speckleBeam;
     }
-  }
 }
+  }

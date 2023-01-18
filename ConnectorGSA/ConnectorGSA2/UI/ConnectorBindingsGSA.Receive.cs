@@ -146,6 +146,8 @@ namespace ConnectorGSA.UI
       {
         myCommit = await state.Client.CommitGet(progress.CancellationTokenSource.Token, state.StreamId, state.CommitId);
       }
+
+      state.LastSourceApp = myCommit.sourceApplication;
       string referencedObject = myCommit.referencedObject;
 
       var commitObject = await Operations.Receive(
@@ -258,7 +260,7 @@ namespace ConnectorGSA.UI
 
       Console.WriteLine("Receiving complete");
 
-      return null;
+      return state;
     }
   }
 }

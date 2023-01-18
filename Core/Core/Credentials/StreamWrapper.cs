@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Speckle.Core.Api;
+using Speckle.Core.Helpers;
 using Speckle.Core.Logging;
 
 namespace Speckle.Core.Credentials
@@ -165,7 +166,7 @@ namespace Speckle.Core.Credentials
 
             break;
           case 5: // ie http://speckle.server/streams/8fecc9aa6d/commits/76a23d7179
-            switch ( uri.Segments[3].ToLowerInvariant() )
+            switch (uri.Segments[3].ToLowerInvariant())
             {
               // NOTE: this is a good practice reminder on how it should work
               case "commits/":
@@ -292,7 +293,7 @@ namespace Speckle.Core.Credentials
       if (ServerUrl != acc.serverInfo.url)
         throw new SpeckleException($"Account is not from server {ServerUrl}", false);
 
-      var hasInternet = await Helpers.UserHasInternet();
+      var hasInternet = await Http.UserHasInternet();
       if (!hasInternet)
       {
         throw new Exception("You are not connected to the internet.");

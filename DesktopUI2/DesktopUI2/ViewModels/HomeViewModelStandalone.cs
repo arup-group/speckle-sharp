@@ -51,15 +51,10 @@ namespace DesktopUI2.ViewModels
     {
       Instance = this;
 
-      SavedStreams.CollectionChanged += SavedStreams_CollectionChanged;
 
       Bindings = Locator.Current.GetService<ConnectorBindings>();
       this.RaisePropertyChanged("SavedStreams");
 
-      //Init();
-
-      var config = ConfigManager.Load();
-      ChangeTheme(config.DarkTheme);
     }
 
 

@@ -24,8 +24,6 @@ namespace DesktopUI2.ViewModels
       private set => this.RaiseAndSetIfChanged(ref _settings, value);
     }
 
-    public SettingsPageViewModel() { }
-
     public SettingsPageViewModel(IScreen screen, List<SettingViewModel> settings, StreamViewModel streamViewModel)
     {
       HostScreen = screen;

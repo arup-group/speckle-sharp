@@ -19,10 +19,10 @@ namespace Objects.Converter.Revit
     public ApplicationObject AnalyticalStickToNative(Element1D speckleStick)
     {
       ApplicationObject appObj = null;
-      XYZ offset1 = VectorToNative(speckleStick.end1Offset ?? new Geometry.Vector(0,0,0));
-      XYZ offset2 = VectorToNative(speckleStick.end2Offset ?? new Geometry.Vector(0,0,0));
+      XYZ offset1 = VectorToNative(speckleStick.end1Offset ?? new Geometry.Vector(0, 0, 0));
+      XYZ offset2 = VectorToNative(speckleStick.end2Offset ?? new Geometry.Vector(0, 0, 0));
 
-#if REVIT2019 || REVIT2020 || REVIT2021 || REVIT2022
+#if REVIT2020 || REVIT2021 || REVIT2022
       appObj = CreatePhysicalMember(speckleStick);
       DB.FamilyInstance physicalMember = (DB.FamilyInstance)appObj.Converted.FirstOrDefault();
       SetAnalyticalProps(physicalMember, speckleStick, offset1, offset2);
@@ -56,6 +56,8 @@ namespace Objects.Converter.Revit
       }
 
       AnalyticalMember revitMember = null;
+      DB.FamilyInstance physicalMember = null;
+
       if (docObj != null && docObj is AnalyticalMember analyticalMember)
       {      
         // update location
@@ -65,6 +67,14 @@ namespace Objects.Converter.Revit
         analyticalMember.SectionTypeId = familySymbol.Id;
         isUpdate = true;
         revitMember = analyticalMember;
+
+        if (analyticalToPhysicalManager.HasAssociation(revitMember.Id))
+        {
+          var physicalMemberId = analyticalToPhysicalManager.GetAssociatedElementId(revitMember.Id);
+          physicalMember = (DB.FamilyInstance)Doc.GetElement(physicalMemberId);
+          if (physicalMember.Symbol != familySymbol)
+            physicalMember.Symbol = familySymbol;
+        }
       }
 
       //create family instance
@@ -78,7 +88,6 @@ namespace Objects.Converter.Revit
       // set or update analytical properties
       SetAnalyticalProps(revitMember, speckleStick, offset1, offset2);
 
-      DB.FamilyInstance physicalMember = null;
       // if there isn't an associated physical element to the analytical element, create it
       if (!analyticalToPhysicalManager.HasAssociation(revitMember.Id))
       {
@@ -100,85 +109,14 @@ namespace Objects.Converter.Revit
       XYZ offset1 = VectorToNative(speckleStick.end1Offset ?? new Geometry.Vector(0, 0, 0));
       XYZ offset2 = VectorToNative(speckleStick.end2Offset ?? new Geometry.Vector(0, 0, 0));
 
-      var profileName = String.Empty; var mappings = new Dictionary<string, string>();
-      if (speckleStick.property != null)
-      {
-        var speckleProp1d = speckleStick.property as Property1D;
-        if (speckleProp1d != null)
-        {
-          profileName = speckleProp1d.profile != null ? speckleProp1d.profile.name : null;
-          mappings = UseMappings ? GetMappingFromProfileName(profileName) : null;
-        }
-      }
-
-      switch (speckleStick.memberType)
-      {
-        case MemberType.Generic1D:
-        case MemberType.Beam:
-          if (speckleStick.type == ElementType1D.Brace)
-          {
-            RevitBrace revitBrace = new RevitBrace();
-            revitBrace.type = speckleStick.property.name.Replace('X', 'x');
-            revitBrace.baseLine = speckleStick.baseLine;
-#if REVIT2019 || REVIT2020 || REVIT2021 || REVIT2022
-            revitBrace.applicationId = speckleStick.applicationId;
-#endif
-            appObj = BraceToNative(revitBrace);
-            return appObj;
-          }
-          else
-          {
-            RevitBeam revitBeam = new RevitBeam();
-            revitBeam.applicationId = speckleStick.applicationId;
-            if (mappings != null)
-            {
-              revitBeam.type = mappings["familyType"];
-              revitBeam.family = mappings["familyFraming"];
-              Report.Log($"Found corresponding family {mappings["familyFraming"]} and family type {mappings["familyType"]} for section {profileName} in mapping data");
-            }
-            else
-            {
-              //This only works for CISC sections now for sure. Need to test on other sections
-              revitBeam.type = ParseFamilyTypeFromProperty(speckleStick.property.name);
-              revitBeam.family = ParseFamilyNameFromProperty(speckleStick.property.name);
-            }
-            revitBeam.baseLine = speckleStick.baseLine;
-#if REVIT2019 || REVIT2020 || REVIT2021 || REVIT2022
-            revitBeam.applicationId = speckleStick.applicationId;
-#endif
-            appObj = BeamToNative(revitBeam);
-            return appObj;
-          }
-        case MemberType.Column:
-          RevitColumn revitColumn = new RevitColumn();
-          revitColumn.applicationId = speckleStick.applicationId;
-          if (mappings != null)
-          {
-            revitColumn.type = mappings["familyType"];
-            revitColumn.family = mappings["familyColumn"];
-            Report.Log($"Found corresponding family {mappings["familyColumn"]} and family type {mappings["familyType"]} for column section in mapping data");
-          }
-          else
-          {
-            revitColumn.family = ParseFamilyNameFromProperty(speckleStick.property.name);
-            revitColumn.type = ParseFamilyTypeFromProperty(speckleStick.property.name);
-          }
-          revitColumn.baseLine = speckleStick.baseLine;
-          revitColumn.units = speckleStick.end1Offset.units; // column units are used for setting offset
-#if REVIT2019 || REVIT2020 || REVIT2021 || REVIT2022
-          revitColumn.applicationId = speckleStick.applicationId;
-#endif                                                              
-          appObj = ColumnToNative(revitColumn, StructuralType.Column);
-          return appObj;
-      }
-
       switch (speckleStick.type)
       {
         case ElementType1D.Beam:
           RevitBeam revitBeam = new RevitBeam();
+          //This only works for CSIC sections now for sure. Need to test on other sections
           revitBeam.type = speckleStick.property.name.Replace('X', 'x');
           revitBeam.baseLine = speckleStick.baseLine;
-#if REVIT2019 || REVIT2020 || REVIT2021 || REVIT2022
+#if REVIT2020 || REVIT2021 || REVIT2022
           revitBeam.applicationId = speckleStick.applicationId;
 #endif
           appObj = BeamToNative(revitBeam);
@@ -189,7 +127,7 @@ namespace Objects.Converter.Revit
           RevitBrace revitBrace = new RevitBrace();
           revitBrace.type = speckleStick.property.name.Replace('X', 'x');
           revitBrace.baseLine = speckleStick.baseLine;
-#if REVIT2019 || REVIT2020 || REVIT2021 || REVIT2022
+#if REVIT2020 || REVIT2021 || REVIT2022
           revitBrace.applicationId = speckleStick.applicationId;
 #endif
           appObj = BraceToNative(revitBrace);
@@ -198,21 +136,10 @@ namespace Objects.Converter.Revit
 
         case ElementType1D.Column:
           RevitColumn revitColumn = new RevitColumn();
-          revitColumn.applicationId = speckleStick.applicationId;
-          if (mappings != null)
-          {
-            revitColumn.type = mappings["familyType"];
-            revitColumn.family = mappings["familyColumn"];
-            Report.Log($"Found corresponding family {mappings["familyColumn"]} and family type {mappings["familyType"]} for column section in mapping data");
-          }
-          else
-          {
-            revitColumn.family = ParseFamilyNameFromProperty(speckleStick.property.name);
-            revitColumn.type = ParseFamilyTypeFromProperty(speckleStick.property.name);
-          }
+          revitColumn.type = speckleStick.property.name.Replace('X', 'x');
           revitColumn.baseLine = speckleStick.baseLine;
           revitColumn.units = speckleStick.units;
-#if REVIT2019 || REVIT2020 || REVIT2021 || REVIT2022
+#if REVIT2020 || REVIT2021 || REVIT2022
           revitColumn.applicationId = speckleStick.applicationId;
 #endif
           appObj = ColumnToNative(revitColumn);
@@ -226,7 +153,7 @@ namespace Objects.Converter.Revit
     {
       Func<char, bool> releaseConvert = rel => rel == 'R';
 
-#if !REVIT2023
+#if REVIT2020 || REVIT2021 || REVIT2022
       var analyticalModel = (AnalyticalModelStick)element.GetAnalyticalModel();
       analyticalModel.SetReleases(true, releaseConvert(element1d.end1Releases.code[0]), releaseConvert(element1d.end1Releases.code[1]), releaseConvert(element1d.end1Releases.code[2]), releaseConvert(element1d.end1Releases.code[3]), releaseConvert(element1d.end1Releases.code[4]), releaseConvert(element1d.end1Releases.code[5]));
       analyticalModel.SetReleases(false, releaseConvert(element1d.end2Releases.code[0]), releaseConvert(element1d.end2Releases.code[1]), releaseConvert(element1d.end2Releases.code[2]), releaseConvert(element1d.end2Releases.code[3]), releaseConvert(element1d.end2Releases.code[4]), releaseConvert(element1d.end2Releases.code[5]));
@@ -235,14 +162,13 @@ namespace Objects.Converter.Revit
 #else
       if (element is AnalyticalMember analyticalMember)
       {
-        analyticalMember.SetReleaseConditions(new ReleaseConditions(true, Convert.ToBoolean(element1d.end1Releases.stiffnessX), Convert.ToBoolean(element1d.end1Releases.stiffnessY), Convert.ToBoolean(element1d.end1Releases.stiffnessZ), Convert.ToBoolean(element1d.end1Releases.stiffnessXX), Convert.ToBoolean(element1d.end1Releases.stiffnessYY), Convert.ToBoolean(element1d.end1Releases.stiffnessZZ)));
-        analyticalMember.SetReleaseConditions(new ReleaseConditions(false, Convert.ToBoolean(element1d.end2Releases.stiffnessX), Convert.ToBoolean(element1d.end2Releases.stiffnessY), Convert.ToBoolean(element1d.end2Releases.stiffnessZ), Convert.ToBoolean(element1d.end2Releases.stiffnessXX), Convert.ToBoolean(element1d.end2Releases.stiffnessYY), Convert.ToBoolean(element1d.end2Releases.stiffnessZZ)));
+        analyticalMember.SetReleaseConditions(new ReleaseConditions(true, releaseConvert(element1d.end1Releases.code[0]), releaseConvert(element1d.end1Releases.code[1]), releaseConvert(element1d.end1Releases.code[2]), releaseConvert(element1d.end1Releases.code[3]), releaseConvert(element1d.end1Releases.code[4]), releaseConvert(element1d.end1Releases.code[5])));
+        analyticalMember.SetReleaseConditions(new ReleaseConditions(false, releaseConvert(element1d.end2Releases.code[0]), releaseConvert(element1d.end2Releases.code[1]), releaseConvert(element1d.end2Releases.code[2]), releaseConvert(element1d.end2Releases.code[3]), releaseConvert(element1d.end2Releases.code[4]), releaseConvert(element1d.end2Releases.code[5])));
       }
       //TODO Set offsets
 #endif
     }
-
-#if !REVIT2023
+#if REVIT2020 || REVIT2021 || REVIT2022
     private Element1D AnalyticalStickToSpeckle(AnalyticalModelStick revitStick)
     {
       if (!revitStick.IsEnabled())
@@ -284,42 +210,19 @@ namespace Objects.Converter.Revit
       SetEndReleases(revitStick, ref speckleElement1D);
 
       var prop = new Property1D();
-      var speckleSection = new SectionProfile();
 
       var stickFamily = (Autodesk.Revit.DB.FamilyInstance)revitStick.Document.GetElement(revitStick.GetElementId());
-      var stickFamilyName = stickFamily.Symbol.FamilyName;
-      var stickFamilyType = stickFamily.Symbol.Name;
-      var familyAndTypeName = $"{stickFamilyName}:{stickFamilyType}";
 
-      var section = stickFamily.Symbol.GetStructuralSection();
-      if (section != null)
-      {
-        var speckleSectionName = UseMappings ? GetProfileNameFromMapping(stickFamilyName, stickFamilyType, speckleElement1D.memberType != MemberType.Column) : null;
-        var sectionName = speckleSectionName ?? familyAndTypeName;
-        speckleSection.name = sectionName;
+      var speckleSection = GetSectionProfile(stickFamily.Symbol);
 
-        speckleSection = GetSectionProfile(section);
-      }
-
-      var materialType = stickFamily.StructuralMaterialType;
       var structMat = (DB.Material)stickFamily.Document.GetElement(stickFamily.StructuralMaterialId);
       if (structMat == null)
-        structMat = (DB.Material)Doc.GetElement(stickFamily.Symbol.get_Parameter(BuiltInParameter.STRUCTURAL_MATERIAL_PARAM).AsElementId());
+        structMat = (DB.Material)stickFamily.Document.GetElement(stickFamily.Symbol.get_Parameter(BuiltInParameter.STRUCTURAL_MATERIAL_PARAM).AsElementId());
 
-      var structAsset = (PropertySetElement)Doc.GetElement(structMat.StructuralAssetId);
-
-      // If material has no physical properties in revit, assign null
-      var materialAsset = structAsset != null ? structAsset.GetStructuralAsset() : null;
-      //materialAsset = ((PropertySetElement)Doc.GetElement(structMat.StructuralAssetId)).GetStructuralAsset();
-
-      var name = stickFamily.Document.GetElement(stickFamily.StructuralMaterialId).Name;
-      Structural.Materials.StructuralMaterial speckleMaterial = GetStructuralMaterial(materialType, materialAsset, name);
-      speckleMaterial.applicationId = $"{materialType}:{structMat.UniqueId}";
 
       prop.profile = speckleSection;
-      prop.material = speckleMaterial;
-      prop.name = familyAndTypeName;
-      prop.applicationId = stickFamily.Symbol.UniqueId;
+      prop.material = GetStructuralMaterial(structMat);
+      prop.name = revitStick.Document.GetElement(revitStick.GetElementId()).Name;
 
       var structuralElement = Doc.GetElement(revitStick.GetElementId());
       var mark = GetParamValue<string>(structuralElement, BuiltInParameter.ALL_MODEL_MARK);
@@ -393,19 +296,14 @@ namespace Objects.Converter.Revit
   
       var stickFamily = (Autodesk.Revit.DB.FamilySymbol)revitStick.Document.GetElement(revitStick.SectionTypeId);
 
-      var speckleSection = GetSectionProfile(stickFamily.GetStructuralSection());
+      var speckleSection = GetSectionProfile(stickFamily);
 
-      var materialType = stickFamily.StructuralMaterialType;
       var structMat = (DB.Material)stickFamily.Document.GetElement(revitStick.MaterialId);
       if (structMat == null)
         structMat = (DB.Material)stickFamily.Document.GetElement(stickFamily.get_Parameter(BuiltInParameter.STRUCTURAL_MATERIAL_PARAM).AsElementId());
-      var materialAsset = ((PropertySetElement)structMat.Document.GetElement(structMat.StructuralAssetId)).GetStructuralAsset();
-
-      var name = structMat.Document.GetElement(structMat.StructuralAssetId).Name;
-      var speckleMaterial = GetStructuralMaterial(materialType, materialAsset, name);
 
       prop.profile = speckleSection;
-      prop.material = speckleMaterial;
+      prop.material = GetStructuralMaterial(structMat);
       prop.name = stickFamily.Name;
 
       var mark = GetParamValue<string>(stickFamily, BuiltInParameter.ALL_MODEL_MARK);
@@ -481,8 +379,12 @@ namespace Objects.Converter.Revit
       }
     }
 
-    private SectionProfile GetSectionProfile(StructuralSection section)
+    private SectionProfile GetSectionProfile(FamilySymbol familySymbol)
     {
+      var section = familySymbol.GetStructuralSection();
+      if (section == null)
+        return null;
+
       var speckleSection = new SectionProfile();
       speckleSection.name = section.StructuralSectionShapeName;
 
@@ -610,30 +512,35 @@ namespace Objects.Converter.Revit
       return speckleSection;
     }
 
+    private StructuralMaterial GetStructuralMaterial(Material material)
+    {
+      if (material == null)
+        return null;
+
+      StructuralAsset materialAsset = null;
+      string name = null;
+      if (material.StructuralAssetId != ElementId.InvalidElementId)
+      {
+        materialAsset = ((PropertySetElement)material.Document.GetElement(material.StructuralAssetId)).GetStructuralAsset();
+
+        name = material.Document.GetElement(material.StructuralAssetId)?.Name;
+      }
+      var materialName = material.MaterialClass;
+      var materialType = GetMaterialType(materialName);
+      return GetStructuralMaterial(materialType, materialAsset, name);
+    }
+
     private StructuralMaterial GetStructuralMaterial(StructuralMaterialType materialType, StructuralAsset materialAsset, string name)
     {
       Structural.Materials.StructuralMaterial speckleMaterial = null;
 
-      if (materialType == StructuralMaterialType.Undefined)
-      {
-        switch (materialAsset.StructuralAssetClass)
-        {
-          case StructuralAssetClass.Metal:
-            materialType = StructuralMaterialType.Steel;
-            break;
-          case StructuralAssetClass.Concrete:
-            materialType = StructuralMaterialType.Concrete;
-            break;
-          case StructuralAssetClass.Wood:
-            materialType = StructuralMaterialType.Wood;
-            break;
-        }
-      }
+      if (materialType == StructuralMaterialType.Undefined && materialAsset != null)
+        materialType = GetMaterialType(materialAsset);
 
+      name ??= materialType.ToString();
       switch (materialType)
       {
         case StructuralMaterialType.Concrete:
-
           var concreteMaterial = new Concrete
           {
             name = name,
@@ -641,20 +548,25 @@ namespace Objects.Converter.Revit
             grade = null,
             designCode = null,
             codeYear = null,
-            elasticModulus = materialAsset.YoungModulus.X,
-            compressiveStrength = materialAsset.ConcreteCompression,
             tensileStrength = 0,
             flexuralStrength = 0,
             maxCompressiveStrain = 0,
             maxTensileStrain = 0,
             maxAggregateSize = 0,
-            lightweight = materialAsset.Lightweight,
-            poissonsRatio = materialAsset.PoissonRatio.X,
-            shearModulus = materialAsset.ShearModulus.X,
-            density = materialAsset.Density,
-            thermalExpansivity = materialAsset.ThermalExpansionCoefficient.X,
             dampingRatio = 0
           };
+
+          if (materialAsset != null)
+          {
+            concreteMaterial.elasticModulus = materialAsset.YoungModulus.X;
+            concreteMaterial.compressiveStrength = materialAsset.ConcreteCompression;
+            concreteMaterial.lightweight = materialAsset.Lightweight;
+            concreteMaterial.poissonsRatio = materialAsset.PoissonRatio.X;
+            concreteMaterial.shearModulus = materialAsset.ShearModulus.X;
+            concreteMaterial.density = materialAsset.Density;
+            concreteMaterial.thermalExpansivity = materialAsset.ThermalExpansionCoefficient.X;
+          }
+
           speckleMaterial = concreteMaterial;
           break;
         case StructuralMaterialType.Steel:
@@ -662,19 +574,24 @@ namespace Objects.Converter.Revit
           {
             name = name,
             materialType = Structural.MaterialType.Steel,
-            grade = materialAsset.Name,
             designCode = null,
             codeYear = null,
-            elasticModulus = materialAsset.YoungModulus.X, // Newtons per foot meter 
-            yieldStrength = materialAsset.MinimumYieldStress, // Newtons per foot meter
-            ultimateStrength = materialAsset.MinimumTensileStrength, // Newtons per foot meter
             maxStrain = 0,
-            poissonsRatio = materialAsset.PoissonRatio.X,
-            shearModulus = materialAsset.ShearModulus.X, // Newtons per foot meter
-            density = materialAsset.Density, // kilograms per cubed feet 
-            thermalExpansivity = materialAsset.ThermalExpansionCoefficient.X, // inverse Kelvin
-            dampingRatio = 0
+            dampingRatio = 0,
           };
+
+          if (materialAsset != null)
+          {
+            steelMaterial.grade = materialAsset.Name;
+            steelMaterial.elasticModulus = materialAsset.YoungModulus.X; // Newtons per foot meter 
+            steelMaterial.yieldStrength = materialAsset.MinimumYieldStress; // Newtons per foot meter
+            steelMaterial.ultimateStrength = materialAsset.MinimumTensileStrength; // Newtons per foot meter
+            steelMaterial.poissonsRatio = materialAsset.PoissonRatio.X;
+            steelMaterial.shearModulus = materialAsset.ShearModulus.X; // Newtons per foot meter
+            steelMaterial.density = materialAsset.Density; // kilograms per cubed feet 
+            steelMaterial.thermalExpansivity = materialAsset.ThermalExpansionCoefficient.X; // inverse Kelvin
+          }
+
           speckleMaterial = steelMaterial;
           break;
         case StructuralMaterialType.Wood:
@@ -682,22 +599,27 @@ namespace Objects.Converter.Revit
           {
             name = name,
             materialType = Structural.MaterialType.Timber,
-            grade = materialAsset.WoodGrade,
             designCode = null,
             codeYear = null,
-            elasticModulus = materialAsset.YoungModulus.X, // Newtons per foot meter 
-            poissonsRatio = materialAsset.PoissonRatio.X,
-            shearModulus = materialAsset.ShearModulus.X, // Newtons per foot meter
-            density = materialAsset.Density, // kilograms per cubed feet 
-            thermalExpansivity = materialAsset.ThermalExpansionCoefficient.X, // inverse Kelvin
-            species = materialAsset.WoodSpecies,
             dampingRatio = 0
           };
-          timberMaterial["bendingStrength"] = materialAsset.WoodBendingStrength;
-          timberMaterial["parallelCompressionStrength"] = materialAsset.WoodParallelCompressionStrength;
-          timberMaterial["parallelShearStrength"] = materialAsset.WoodParallelShearStrength;
-          timberMaterial["perpendicularCompressionStrength"] = materialAsset.WoodPerpendicularCompressionStrength;
-          timberMaterial["perpendicularShearStrength"] = materialAsset.WoodPerpendicularShearStrength;
+
+          if (materialAsset != null)
+          {
+            timberMaterial.grade = materialAsset.WoodGrade;
+            timberMaterial.elasticModulus = materialAsset.YoungModulus.X; // Newtons per foot meter 
+            timberMaterial.poissonsRatio = materialAsset.PoissonRatio.X;
+            timberMaterial.shearModulus = materialAsset.ShearModulus.X; // Newtons per foot meter
+            timberMaterial.density = materialAsset.Density; // kilograms per cubed feet 
+            timberMaterial.thermalExpansivity = materialAsset.ThermalExpansionCoefficient.X; // inverse Kelvin
+            timberMaterial.species = materialAsset.WoodSpecies;
+            timberMaterial["bendingStrength"] = materialAsset.WoodBendingStrength;
+            timberMaterial["parallelCompressionStrength"] = materialAsset.WoodParallelCompressionStrength;
+            timberMaterial["parallelShearStrength"] = materialAsset.WoodParallelShearStrength;
+            timberMaterial["perpendicularCompressionStrength"] = materialAsset.WoodPerpendicularCompressionStrength;
+            timberMaterial["perpendicularShearStrength"] = materialAsset.WoodPerpendicularShearStrength;
+          }
+
           speckleMaterial = timberMaterial;
           break;
         default:
@@ -710,6 +632,44 @@ namespace Objects.Converter.Revit
       }
 
       return speckleMaterial;
+    }
+
+    private StructuralMaterialType GetMaterialType(string materialName)
+    {
+      StructuralMaterialType materialType = StructuralMaterialType.Undefined;
+      switch (materialName.ToLower())
+      {
+        case "concrete":
+          materialType = StructuralMaterialType.Concrete;
+          break;
+        case "steel":
+          materialType = StructuralMaterialType.Steel;
+          break;
+        case "wood":
+          materialType = StructuralMaterialType.Wood;
+          break;
+      }
+
+      return materialType;
+    }
+
+    private StructuralMaterialType GetMaterialType(StructuralAsset materialAsset)
+    {
+      StructuralMaterialType materialType = StructuralMaterialType.Undefined;
+      switch (materialAsset?.StructuralAssetClass)
+      {
+        case StructuralAssetClass.Metal:
+          materialType = StructuralMaterialType.Steel;
+          break;
+        case StructuralAssetClass.Concrete:
+          materialType = StructuralMaterialType.Concrete;
+          break;
+        case StructuralAssetClass.Wood:
+          materialType = StructuralMaterialType.Wood;
+          break;
+      }
+
+      return materialType;
     }
   }
 }

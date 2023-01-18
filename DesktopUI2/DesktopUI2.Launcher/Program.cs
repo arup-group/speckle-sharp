@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.ReactiveUI;
+using System.Diagnostics;
 using System.IO;
 using System;
 using System.Collections.Generic;
@@ -83,7 +84,7 @@ namespace DesktopUI2.Launcher
 
     public static void OpenOrFocusSpeckle()
     {
-      Bindings = new DummyBindings();
+      Bindings = new DummyBindingsStandalone();
       CreateOrFocusSpeckle();
     }
 

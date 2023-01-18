@@ -4,8 +4,6 @@ using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using DesktopUI2.ViewModels;
 using ReactiveUI;
-using Speckle.Core.Logging;
-using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace DesktopUI2.Views
@@ -18,16 +16,14 @@ namespace DesktopUI2.Views
       this.WhenActivated(disposables => { });
       AvaloniaXamlLoader.Load(this);
       Instance = this;
-      Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Launched" } });
-
 
 #if DEBUG
       this.AttachDevTools(KeyGesture.Parse("CTRL+R"));
 #endif
+
     }
 
-   public static MainWindow Instance { get; private set; }
-
+    public static MainWindow Instance { get; private set; }
 
     protected override void OnClosing(CancelEventArgs e)
     {

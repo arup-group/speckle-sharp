@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Objects.Other;
 using Speckle.Core.Kits;
 using Speckle.Core.Models;
@@ -212,15 +211,31 @@ namespace Objects.Geometry
       return new Vector(x, y, z);
     }
 
+    [Obsolete("Renamed to " + nameof(Vector.Normalize))]
+    public void Unitize() => Normalize();
+    
     /// <summary>
-    /// Divides this vector by it's euclidean length.
+    /// Compute and return a unit vector from this vector
     /// </summary>
-    public void Unitize()
+    /// <returns>a normalized unit vector</returns>
+    public void Normalize()
     {
-      var length = this.Length;
-      this.x /= length;
-      this.y /= length;
-      this.z /= length;
+      var length = Length;
+      x /= length;
+      y /= length;
+      z /= length;
+    }
+
+    /// <summary>
+    /// Inverses the direction of the vector, equivalent to multiplying by -1
+    /// </summary>
+    /// <returns>A pointing in the opposite direction</returns>
+    public Vector Negate()
+    {
+      x *= -1;
+      y *= -1;
+      z *= -1;
+      return this;
     }
 
     /// <summary>

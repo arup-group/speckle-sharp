@@ -12,7 +12,7 @@ using System.Linq;
 namespace DesktopUI2.ViewModels
 {
   public class ResultsViewModelStandalone : ReactiveObject
-  {        
+  {
     private StreamViewModel _streamViewModel;
 
     public ResultSettings ResultSettings { get; set; }

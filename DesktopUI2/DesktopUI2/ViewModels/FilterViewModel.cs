@@ -29,7 +29,6 @@ namespace DesktopUI2.ViewModels
 
     public string Summary { get { return Filter.Summary; } }
 
-    public FilterViewModel() { }
     public FilterViewModel(ISelectionFilter filter)
     {
       try
@@ -52,6 +51,13 @@ namespace DesktopUI2.ViewModels
 
         //TODO:
         //FilterView.DataContext = this;
+
+        if (filter is TreeSelectionFilter tree)
+        {
+           //TODO:
+        }
+
+
       }
       catch (Exception ex)
       {
@@ -80,7 +86,7 @@ namespace DesktopUI2.ViewModels
 
       }
     }
-    public bool isSearching = false;
+    private bool isSearching = false;
     private string _searchQuery;
     public string SearchQuery
     {

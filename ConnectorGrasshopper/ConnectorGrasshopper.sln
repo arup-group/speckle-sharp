@@ -24,47 +24,74 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConverterGrasshopper6", "..
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConverterGrasshopper7", "..\Objects\Converters\ConverterRhinoGh\ConverterGrasshopper7\ConverterGrasshopper7.csproj", "{D0783323-D28A-4A2B-9F4E-3534275D3909}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectorGrasshopper", "ConnectorGrasshopper\ConnectorGrasshopper.csproj", "{109B3382-634B-408A-8A5C-4CD09CB92641}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConnectorGrasshopper7", "ConnectorGrasshopper7\ConnectorGrasshopper7.csproj", "{109B3382-634B-408A-8A5C-4CD09CB92641}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConnectorGrasshopper6", "ConnectorGrasshopper6\ConnectorGrasshopper6.csproj", "{86920221-416E-4A66-A601-3418207E2401}"
 EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		..\Objects\Converters\ConverterRhinoGh\ConverterRhinoGhShared\ConverterRhinoGhShared.projitems*{b74cb8c1-187b-46a6-b20b-92b8c129f3ee}*SharedItemsImports = 13
-		..\Objects\Converters\ConverterRhinoGh\ConverterRhinoGhShared\ConverterRhinoGhShared.projitems*{d0783323-d28a-4a2b-9f4e-3534275d3909}*SharedItemsImports = 5
-		..\Objects\Converters\ConverterRhinoGh\ConverterRhinoGhShared\ConverterRhinoGhShared.projitems*{d79a3aac-b7c4-46ea-90ac-5f63be1e8775}*SharedItemsImports = 5
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug Mac|Any CPU = Debug Mac|Any CPU
 		Debug|Any CPU = Debug|Any CPU
+		Release Mac|Any CPU = Release Mac|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B4D98D2C-E5DA-463E-BF6C-68E9B77C72F3}.Debug Mac|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4D98D2C-E5DA-463E-BF6C-68E9B77C72F3}.Debug Mac|Any CPU.Build.0 = Debug|Any CPU
 		{B4D98D2C-E5DA-463E-BF6C-68E9B77C72F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B4D98D2C-E5DA-463E-BF6C-68E9B77C72F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4D98D2C-E5DA-463E-BF6C-68E9B77C72F3}.Release Mac|Any CPU.ActiveCfg = Release|Any CPU
+		{B4D98D2C-E5DA-463E-BF6C-68E9B77C72F3}.Release Mac|Any CPU.Build.0 = Release|Any CPU
 		{B4D98D2C-E5DA-463E-BF6C-68E9B77C72F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B4D98D2C-E5DA-463E-BF6C-68E9B77C72F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F16A9A1-DC5F-4800-821C-336E6CCF8F9C}.Debug Mac|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F16A9A1-DC5F-4800-821C-336E6CCF8F9C}.Debug Mac|Any CPU.Build.0 = Debug|Any CPU
 		{8F16A9A1-DC5F-4800-821C-336E6CCF8F9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8F16A9A1-DC5F-4800-821C-336E6CCF8F9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F16A9A1-DC5F-4800-821C-336E6CCF8F9C}.Release Mac|Any CPU.ActiveCfg = Release|Any CPU
+		{8F16A9A1-DC5F-4800-821C-336E6CCF8F9C}.Release Mac|Any CPU.Build.0 = Release|Any CPU
 		{8F16A9A1-DC5F-4800-821C-336E6CCF8F9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F16A9A1-DC5F-4800-821C-336E6CCF8F9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9103058A-0D20-49AA-B053-01548DD66D16}.Debug Mac|Any CPU.ActiveCfg = Debug|Any CPU
+		{9103058A-0D20-49AA-B053-01548DD66D16}.Debug Mac|Any CPU.Build.0 = Debug|Any CPU
 		{9103058A-0D20-49AA-B053-01548DD66D16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9103058A-0D20-49AA-B053-01548DD66D16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9103058A-0D20-49AA-B053-01548DD66D16}.Release Mac|Any CPU.ActiveCfg = Release|Any CPU
+		{9103058A-0D20-49AA-B053-01548DD66D16}.Release Mac|Any CPU.Build.0 = Release|Any CPU
 		{9103058A-0D20-49AA-B053-01548DD66D16}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9103058A-0D20-49AA-B053-01548DD66D16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2A8E961-6DB6-4474-9E31-0C00FEB4A067}.Debug Mac|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2A8E961-6DB6-4474-9E31-0C00FEB4A067}.Debug Mac|Any CPU.Build.0 = Debug|Any CPU
 		{E2A8E961-6DB6-4474-9E31-0C00FEB4A067}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E2A8E961-6DB6-4474-9E31-0C00FEB4A067}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2A8E961-6DB6-4474-9E31-0C00FEB4A067}.Release Mac|Any CPU.ActiveCfg = Release|Any CPU
+		{E2A8E961-6DB6-4474-9E31-0C00FEB4A067}.Release Mac|Any CPU.Build.0 = Release|Any CPU
 		{E2A8E961-6DB6-4474-9E31-0C00FEB4A067}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E2A8E961-6DB6-4474-9E31-0C00FEB4A067}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D79A3AAC-B7C4-46EA-90AC-5F63BE1E8775}.Debug Mac|Any CPU.ActiveCfg = Debug|Any CPU
+		{D79A3AAC-B7C4-46EA-90AC-5F63BE1E8775}.Debug Mac|Any CPU.Build.0 = Debug|Any CPU
 		{D79A3AAC-B7C4-46EA-90AC-5F63BE1E8775}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D79A3AAC-B7C4-46EA-90AC-5F63BE1E8775}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D79A3AAC-B7C4-46EA-90AC-5F63BE1E8775}.Release Mac|Any CPU.ActiveCfg = Release|Any CPU
+		{D79A3AAC-B7C4-46EA-90AC-5F63BE1E8775}.Release Mac|Any CPU.Build.0 = Release|Any CPU
 		{D79A3AAC-B7C4-46EA-90AC-5F63BE1E8775}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D79A3AAC-B7C4-46EA-90AC-5F63BE1E8775}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0783323-D28A-4A2B-9F4E-3534275D3909}.Debug Mac|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0783323-D28A-4A2B-9F4E-3534275D3909}.Debug Mac|Any CPU.Build.0 = Debug|Any CPU
 		{D0783323-D28A-4A2B-9F4E-3534275D3909}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D0783323-D28A-4A2B-9F4E-3534275D3909}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0783323-D28A-4A2B-9F4E-3534275D3909}.Release Mac|Any CPU.ActiveCfg = Release|Any CPU
+		{D0783323-D28A-4A2B-9F4E-3534275D3909}.Release Mac|Any CPU.Build.0 = Release|Any CPU
 		{D0783323-D28A-4A2B-9F4E-3534275D3909}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D0783323-D28A-4A2B-9F4E-3534275D3909}.Release|Any CPU.Build.0 = Release|Any CPU
-		{109B3382-634B-408A-8A5C-4CD09CB92641}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{109B3382-634B-408A-8A5C-4CD09CB92641}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{109B3382-634B-408A-8A5C-4CD09CB92641}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{109B3382-634B-408A-8A5C-4CD09CB92641}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86920221-416E-4A66-A601-3418207E2401}.Debug Mac|Any CPU.ActiveCfg = Debug Mac|Any CPU
+		{86920221-416E-4A66-A601-3418207E2401}.Debug Mac|Any CPU.Build.0 = Debug Mac|Any CPU
+		{86920221-416E-4A66-A601-3418207E2401}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86920221-416E-4A66-A601-3418207E2401}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86920221-416E-4A66-A601-3418207E2401}.Release Mac|Any CPU.ActiveCfg = Release Mac|Any CPU
+		{86920221-416E-4A66-A601-3418207E2401}.Release Mac|Any CPU.Build.0 = Release Mac|Any CPU
+		{86920221-416E-4A66-A601-3418207E2401}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86920221-416E-4A66-A601-3418207E2401}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -79,5 +106,10 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3196A316-D590-4D60-8363-3A2FB801A6DC}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\Objects\Converters\ConverterRhinoGh\ConverterRhinoGhShared\ConverterRhinoGhShared.projitems*{b74cb8c1-187b-46a6-b20b-92b8c129f3ee}*SharedItemsImports = 13
+		..\Objects\Converters\ConverterRhinoGh\ConverterRhinoGhShared\ConverterRhinoGhShared.projitems*{d0783323-d28a-4a2b-9f4e-3534275d3909}*SharedItemsImports = 5
+		..\Objects\Converters\ConverterRhinoGh\ConverterRhinoGhShared\ConverterRhinoGhShared.projitems*{d79a3aac-b7c4-46ea-90ac-5f63be1e8775}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal

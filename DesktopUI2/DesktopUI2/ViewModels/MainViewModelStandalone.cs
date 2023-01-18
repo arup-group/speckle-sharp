@@ -1,6 +1,4 @@
-﻿using DesktopUI2.ViewModels.Share;
-using DesktopUI2.Views.Pages;
-using DesktopUI2.Views.Pages.ShareControls;
+﻿using DesktopUI2.Views.Pages;
 using ReactiveUI;
 using Speckle.Core.Logging;
 using Splat;
@@ -36,8 +34,8 @@ namespace DesktopUI2.ViewModels
     {
       Router = new RoutingState();
 
-      Locator.CurrentMutable.Register(() => new StreamEditViewStandalone(), typeof(IViewFor<StreamViewModel>));
-      Locator.CurrentMutable.Register(() => new HomeViewStandalone(), typeof(IViewFor<HomeViewModelStandalone>));
+      //Locator.CurrentMutable.Register(() => new StreamEditViewStandalone(), typeof(IViewFor<StreamViewModel>));
+      //Locator.CurrentMutable.Register(() => new HomeViewStandalone(), typeof(IViewFor<HomeViewModelStandalone>));
       //Locator.CurrentMutable.Register(() => new CollaboratorsView(), typeof(IViewFor<CollaboratorsViewModelStandalone>));
       //Locator.CurrentMutable.Register(() => new SettingsView(), typeof(IViewFor<SettingsPageViewModelStandalone>));
       Locator.CurrentMutable.Register(() => Bindings, typeof(ConnectorBindings));
@@ -45,8 +43,8 @@ namespace DesktopUI2.ViewModels
       RouterInstance = Router; // makes the router available app-wide
       Router.Navigate.Execute(new HomeViewModelStandalone(this));
 
-      Bindings.UpdateSavedStreams = HomeViewModelStandalone.Instance.UpdateSavedStreams;
-      Bindings.UpdateSelectedStream = HomeViewModelStandalone.Instance.UpdateSelectedStream;
+      //Bindings.UpdateSavedStreams = HomeViewModelStandalone.Instance.UpdateSavedStreams;
+      //Bindings.UpdateSelectedStream = HomeViewModelStandalone.Instance.UpdateSelectedStream;
 
       Router.PropertyChanged += Router_PropertyChanged;
       //var theme = PaletteHelper.GetTheme();

@@ -1,4 +1,6 @@
 ﻿using Grasshopper.Kernel.Types;
+using Objects.BuiltElements;
+using Objects.BuiltElements.Revit;
 using Objects.Geometry;
 using Objects.Other;
 using Objects.Primitive;
@@ -6,10 +8,13 @@ using Rhino;
 using Rhino.Display;
 using Rhino.DocObjects;
 using Rhino.Geometry;
+using Speckle.Core.Api;
 using Speckle.Core.Kits;
 using Speckle.Core.Models;
+using Speckle.Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Alignment = Objects.BuiltElements.Alignment;
 using Arc = Objects.Geometry.Arc;
@@ -31,6 +36,7 @@ using Polyline = Objects.Geometry.Polyline;
 using RH = Rhino.Geometry;
 using Spiral = Objects.Geometry.Spiral;
 using Surface = Objects.Geometry.Surface;
+using Text = Objects.Other.Text;
 using Transform = Objects.Other.Transform;
 using Vector = Objects.Geometry.Vector;
 using View3D = Objects.BuiltElements.View3D;
@@ -75,7 +81,7 @@ namespace Objects.Converter.RhinoGh
       return new[] { RhinoAppName };
     }
 
-    public RhinoDoc Doc { get; private set; } = Rhino.RhinoDoc.ActiveDoc ?? null;
+    public RhinoDoc Doc { get; private set; }
 
     public List<ApplicationObject> ContextObjects { get; set; } = new List<ApplicationObject>();
 
@@ -96,6 +102,7 @@ namespace Objects.Converter.RhinoGh
 
     // speckle user string for custom schemas
     private string SpeckleSchemaKey = "SpeckleSchema";
+    private string SpeckleMappingKey = "SpeckleMapping";
     private string ApplicationIdKey = "applicationId";
 
     public RH.Mesh GetRhinoRenderMesh(RhinoObject rhinoObj)
@@ -124,6 +131,8 @@ namespace Objects.Converter.RhinoGh
       Base schema = null;
       ApplicationObject reportObj = null;
       var notes = new List<string>();
+      try
+      {
 
       if (@object is RhinoObject ro)
       {
@@ -137,8 +146,14 @@ namespace Objects.Converter.RhinoGh
         if (ro is BrepObject || ro is ExtrusionObject)
           displayMesh = GetRhinoRenderMesh(ro);
 
+          //rhino BIM to be deprecated after the mapping tool is released
         if (ro.Attributes.GetUserString(SpeckleSchemaKey) != null) // schema check - this will change in the near future
           schema = ConvertToSpeckleBE(ro, reportObj, displayMesh) ?? ConvertToSpeckleStr(ro, reportObj);
+
+        //mapping tool
+        var mappingString = ro.Attributes.GetUserString(SpeckleMappingKey);
+        if (mappingString != null)
+            schema = MappingToSpeckle(mappingString, ro, notes);
 
         attributes = ro.Attributes;
 
@@ -228,16 +243,16 @@ namespace Objects.Converter.RhinoGh
 #if RHINO7
         case RH.SubD o:
           if (o.HasBrepForm)
-            @base = BrepToSpeckle(o.ToBrep(new SubDToBrepOptions()),null, displayMesh);
+            @base = BrepToSpeckle(o.ToBrep(new SubDToBrepOptions()),null, displayMesh, material);
           else
             @base = MeshToSpeckle(o);
           break;
 #endif
         case RH.Extrusion o:
-          @base = BrepToSpeckle(o.ToBrep(), null, displayMesh);
+            @base = BrepToSpeckle(o.ToBrep(), null, displayMesh, material);
           break;
         case RH.Brep o:
-          @base = BrepToSpeckle(o.DuplicateBrep(), null, displayMesh);
+            @base = BrepToSpeckle(o.DuplicateBrep(), null, displayMesh, material);
           break;
         case NurbsSurface o:
           @base = SurfaceToSpeckle(o);
@@ -269,16 +284,23 @@ namespace Objects.Converter.RhinoGh
       if (@base is null) return @base;
 
       if (attributes != null)
-        GetUserInfo(@base, attributes);
+        {
+          GetUserInfo(@base, attributes, out List<string> attributeNotes);
+          notes.AddRange(attributeNotes);
+        }
       if (material != null)
         @base["renderMaterial"] = material;
       if (style != null)
         @base["displayStyle"] = style;
       if (schema != null)
       {
-        notes.Add($"Attached {schema.speckle_type} schema");
         schema["renderMaterial"] = material;
         @base["@SpeckleSchema"] = schema;
+      }
+      }
+      catch (Exception ex)
+      {
+        reportObj.Update(status: ApplicationObject.State.Failed, logItem: $"{@object.GetType()} unhandled converion error: {ex.Message}\n{ex.StackTrace}");
       }
 
       if (reportObj != null)
@@ -293,6 +315,96 @@ namespace Objects.Converter.RhinoGh
     public List<Base> ConvertToSpeckle(List<object> objects)
     {
       return objects.Select(x => ConvertToSpeckle(x)).ToList();
+    }
+
+    private Base MappingToSpeckle(string mapping, RhinoObject @object, List<string> notes)
+    {
+      Base schemaObject = Operations.Deserialize(mapping);
+      try
+      {
+      switch (schemaObject)
+      {
+        case RevitWall o:
+          var extrusion = ((RH.Extrusion)@object.Geometry);
+          var bottomCrv = extrusion.Profile3d(new ComponentIndex(ComponentIndexType.ExtrusionBottomProfile, 0));
+          var topCrv = extrusion.Profile3d(new ComponentIndex(ComponentIndexType.ExtrusionTopProfile, 0));
+          var height = topCrv.PointAtStart.Z - bottomCrv.PointAtStart.Z;
+          o.height = height;
+          o.baseLine = CurveToSpeckle(bottomCrv);
+          break;
+
+          case RevitFloor o:
+            var brep = ((RH.Brep)@object.Geometry);
+            var extCurves = GetSurfaceBrepEdges(brep, getExterior: true); // extract outline
+            var intCurves = GetSurfaceBrepEdges(brep, getInterior: true); // extract voids
+            o.outline = extCurves.First();
+            o.voids = intCurves;
+            break;
+
+        case RevitBeam o:
+          o.baseLine = CurveToSpeckle((RH.Curve)@object.Geometry);
+          break;
+
+        case RevitBrace o:
+          o.baseLine = CurveToSpeckle((RH.Curve)@object.Geometry);
+          break;
+
+          case RevitColumn o:
+            o.baseLine = CurveToSpeckle((RH.Curve)@object.Geometry);
+            break;
+
+          case RevitPipe o:
+            o.baseCurve = CurveToSpeckle((RH.Curve)@object.Geometry);
+            break;
+
+          case RevitDuct o:
+            o.baseCurve = CurveToSpeckle((RH.Curve)@object.Geometry);
+            break;
+
+          case RevitTopography o:
+            o.baseGeometry = MeshToSpeckle((RH.Mesh)@object.Geometry);
+            break;
+
+        case DirectShape o:
+            if (@object.Geometry as RH.Brep != null)
+          o.baseGeometries = new List<Base> { BrepToSpeckle((RH.Brep)@object.Geometry) };
+            else if (@object.Geometry as RH.Mesh != null)
+              o.baseGeometries = new List<Base> { MeshToSpeckle((RH.Mesh)@object.Geometry) };
+          break;
+
+        case FreeformElement o:
+            if (@object.Geometry as RH.Brep != null)
+          o.baseGeometries = new List<Base> { BrepToSpeckle((RH.Brep)@object.Geometry) };
+            else if (@object.Geometry as RH.Mesh != null)
+              o.baseGeometries = new List<Base> { MeshToSpeckle((RH.Mesh)@object.Geometry) };
+          break;
+
+        case FamilyInstance o:
+          if (@object.Geometry is Rhino.Geometry.Point p)
+          {
+            o.basePoint = PointToSpeckle(p);
+          }
+          else if (@object is InstanceObject)
+          {
+            var block = BlockInstanceToSpeckle(@object as InstanceObject);
+            o.basePoint = block.GetInsertionPoint();
+            o.rotation = block.transform.rotationZ;
+          }
+          break;
+
+        default:
+          break;
+      }
+      schemaObject.applicationId = @object.Id.ToString();
+      schemaObject["units"] = ModelUnits;
+
+        notes.Add($"Attached {schemaObject.speckle_type} schema");
+      }
+      catch (Exception ex)
+      {
+        notes.Add($"Could not attach {schemaObject.speckle_type} schema: {ex.Message}");
+      }
+      return schemaObject;
     }
 
     public Base ConvertToSpeckleBE(object @object, ApplicationObject reportObj, RH.Mesh displayMesh)
@@ -493,6 +605,8 @@ namespace Objects.Converter.RhinoGh
       bool isFromRhino = @object[RhinoPropName] != null ? true : false;
       var reportObj = Report.GetReportObject(@object.id, out int index) ? new ApplicationObject(@object.id, @object.speckle_type) : null;
       List<string> notes = new List<string>();
+      try
+      {
       switch (@object)
       {
         case Point o:
@@ -582,11 +696,6 @@ namespace Objects.Converter.RhinoGh
           break;
 
         case Alignment o:
-          if (o.curves is null) // TODO: remove after a few releases, this is for backwards compatibility
-          {
-            rhinoObj = CurveToNative(o.baseCurve);
-            break;
-          }
           rhinoObj = AlignmentToNative(o);
           break;
 
@@ -607,7 +716,7 @@ namespace Objects.Converter.RhinoGh
           break;
 
         case BlockInstance o:
-          rhinoObj = BlockInstanceToNative(o, out notes);
+            rhinoObj = BlockInstanceToNative(o);
           break;
 
         case Text o:
@@ -616,7 +725,6 @@ namespace Objects.Converter.RhinoGh
 
         case Dimension o:
           rhinoObj = isFromRhino ? RhinoDimensionToNative(o) : DimensionToNative(o);
-          Report.Log($"Created Dimension {o.id}");
           break;
 
         case Objects.Structural.Geometry.Element1D o:
@@ -656,13 +764,24 @@ namespace Objects.Converter.RhinoGh
           }
           break;
       }
-
-      if (reportObj != null)
+      }
+      catch (Exception ex)
       {
-        reportObj.Update(log: notes);
-        Report.UpdateReportObject(reportObj);
+        reportObj.Update(status: ApplicationObject.State.Failed, logItem: $"{@object.GetType()} unhandled converion error: {ex.Message}\n{ex.StackTrace}");
       }
 
+      switch (rhinoObj)
+      {
+        case ApplicationObject o: // some to native methods return an application object (if object is baked to doc during conv)
+          rhinoObj = o.Converted.Any() ? o.Converted : null;
+          if (reportObj != null) reportObj.Update(status: o.Status, createdIds: o.CreatedIds, converted: o.Converted, container: o.Container, log: o.Log);
+          break;
+        default:
+          if (reportObj != null) reportObj.Update(log: notes);
+          break;
+      }
+
+      if (reportObj != null) Report.UpdateReportObject(reportObj);
       return rhinoObj;
     }
 
@@ -775,5 +894,6 @@ namespace Objects.Converter.RhinoGh
           return false;
       }
     }
+
   }
 }
