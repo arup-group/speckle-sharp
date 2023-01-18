@@ -9,7 +9,6 @@
 #define DynamoExtensionVersion  GetFileVersion("..\ConnectorDynamo\ConnectorDynamoExtension\bin\Release\SpeckleConnectorDynamoExtension.dll")
 #define DynamoFunctionsVersion  GetFileVersion("..\ConnectorDynamo\ConnectorDynamoFunctions\bin\Release\SpeckleConnectorDynamoFunctions.dll")
 
-#define Revit2019Version  GetFileVersion("..\ConnectorRevit\ConnectorRevit2019\bin\Release\SpeckleConnectorRevit.dll")
 #define Revit2020Version  GetFileVersion("..\ConnectorRevit\ConnectorRevit2020\bin\Release\SpeckleConnectorRevit.dll")
 #define Revit2021Version  GetFileVersion("..\ConnectorRevit\ConnectorRevit2021\bin\Release\SpeckleConnectorRevit.dll")
 #define Revit2022Version  GetFileVersion("..\ConnectorRevit\ConnectorRevit2022\bin\Release\SpeckleConnectorRevit.dll")
@@ -75,7 +74,6 @@ Name: dynamofunc; Description: Speckle for Dynamo Functions - v{#DynamoFunctions
 Name: rhino6; Description: Speckle for Rhino 6 - v{#Rhino6Version};  Types: full
 Name: rhino7; Description: Speckle for Rhino 7 - v{#Rhino7Version};  Types: full
 Name: gh; Description: Speckle for Grasshopper - v{#GrasshopperVersion};  Types: full
-Name: revit19; Description: Speckle for Revit 2019 - v{#Revit2019Version};  Types: full
 Name: revit20; Description: Speckle for Revit 2020 - v{#Revit2020Version};  Types: full
 Name: revit21; Description: Speckle for Revit 2021 - v{#Revit2021Version};  Types: full
 Name: revit22; Description: Speckle for Revit 2022 - v{#Revit2022Version};  Types: full
@@ -122,11 +120,6 @@ Source: "..\Objects\Converters\ConverterRhinoGh\ConverterRhino6\bin\Release\nets
 Source: "..\Objects\Converters\ConverterRhinoGh\ConverterRhino7\bin\Release\net48\Objects.Converter.Rhino7.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects\"; Flags: ignoreversion recursesubdirs; Components: rhino7 gh
 Source: "..\Objects\Converters\ConverterRhinoGh\ConverterGrasshopper6\bin\Release\netstandard2.0\Objects.Converter.Grasshopper6.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects\"; Flags: ignoreversion recursesubdirs; Components: rhino6 gh
 Source: "..\Objects\Converters\ConverterRhinoGh\ConverterGrasshopper7\bin\Release\net48\Objects.Converter.Grasshopper7.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects\"; Flags: ignoreversion recursesubdirs; Components: rhino7 gh
-
-;revit19
-Source: "..\ConnectorRevit\ConnectorRevit2019\bin\Release\*"; DestDir: "{userappdata}\Autodesk\Revit\Addins\2019\SpeckleRevit2\"; Flags: ignoreversion recursesubdirs; Components: revit19
-Source: "..\ConnectorRevit\ConnectorRevit2019\bin\Release\SpeckleRevit2.addin"; DestDir: "{userappdata}\Autodesk\Revit\Addins\2019\"; Flags: ignoreversion recursesubdirs; Components: revit19
-Source: "..\Objects\Converters\ConverterRevit\ConverterRevit2019\bin\Release\netstandard2.0\Objects.Converter.Revit2019.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects\"; Flags: ignoreversion recursesubdirs; Components: revit19
 
 ;revit20
 Source: "..\ConnectorRevit\ConnectorRevit2020\bin\Release\*"; DestDir: "{userappdata}\Autodesk\Revit\Addins\2020\SpeckleRevit2\"; Flags: ignoreversion recursesubdirs; Components: revit20
@@ -265,10 +258,10 @@ Source: "Updater\bin\Release\*"; DestDir: "{#SpeckleFolder}"; Flags: ignoreversi
 Type: filesandordirs; Name: "{userappdata}\McNeel\Rhinoceros\6.0\Plug-ins\SpeckleRhino2 (8dd5f30b-a13d-4a24-abdc-3e05c8c87143)"; Components: rhino6 gh
 Type: filesandordirs; Name: "{userappdata}\McNeel\Rhinoceros\7.0\Plug-ins\SpeckleRhino2 (8dd5f30b-a13d-4a24-abdc-3e05c8c87143)"; Components: rhino7 gh
 Type: filesandordirs; Name: "{userappdata}\Grasshopper\Libraries\SpeckleGrasshopper2"
-Type: filesandordirs; Name: "{userappdata}\Autodesk\Revit\Addins\2019\*"; Components: revit19
-Type: filesandordirs; Name: "{userappdata}\Autodesk\Revit\Addins\2020\*"; Components: revit20
-Type: filesandordirs; Name: "{userappdata}\Autodesk\Revit\Addins\2021\*"; Components: revit21
-Type: filesandordirs; Name: "{userappdata}\Autodesk\Revit\Addins\2022\*"; Components: revit22
+Type: filesandordirs; Name: "{userappdata}\Autodesk\Revit\Addins\2020\SpeckleRevit2"; Components: revit20
+Type: filesandordirs; Name: "{userappdata}\Autodesk\Revit\Addins\2021\SpeckleRevit2"; Components: revit21
+Type: filesandordirs; Name: "{userappdata}\Autodesk\Revit\Addins\2022\SpeckleRevit2"; Components: revit22
+Type: filesandordirs; Name: "{userappdata}\Autodesk\Revit\Addins\2023\SpeckleRevit2"; Components: revit23
 Type: filesandordirs; Name: "{userappdata}\Autodesk\ApplicationPlugins\Speckle2AutoCAD2021\*"; Components: autocad21
 Type: filesandordirs; Name: "{userappdata}\Autodesk\ApplicationPlugins\Speckle2AutoCAD2022\*"; Components: autocad22
 Type: filesandordirs; Name: "{userappdata}\Autodesk\ApplicationPlugins\Speckle2Civil3D2021\*"; Components: civil21
@@ -302,10 +295,16 @@ Type: filesandordirs; Name: "{userappdata}\Microsoft\Windows\Start Menu\Programs
 Type: filesandordirs; Name: "{userappdata}\McNeel\Rhinoceros\6.0\Plug-ins\SpeckleRhino2 (8dd5f30b-a13d-4a24-abdc-3e05c8c87143)"
 Type: filesandordirs; Name: "{userappdata}\McNeel\Rhinoceros\7.0\Plug-ins\SpeckleRhino2 (8dd5f30b-a13d-4a24-abdc-3e05c8c87143)"
 Type: filesandordirs; Name: "{userappdata}\Grasshopper\Libraries\SpeckleGrasshopper2"
-Type: filesandordirs; Name: "{userappdata}\Autodesk\Revit\Addins\2019"
-Type: filesandordirs; Name: "{userappdata}\Autodesk\Revit\Addins\2020";
-Type: filesandordirs; Name: "{userappdata}\Autodesk\Revit\Addins\2021";
-Type: filesandordirs; Name: "{userappdata}\Autodesk\Revit\Addins\2022";
+Type: filesandordirs; Name: "{userappdata}\Autodesk\Revit\Addins\2019\SpeckleRevit2"
+Type: filesandordirs; Name: "{userappdata}\Autodesk\Revit\Addins\2020\SpeckleRevit2";
+Type: filesandordirs; Name: "{userappdata}\Autodesk\Revit\Addins\2021\SpeckleRevit2";
+Type: filesandordirs; Name: "{userappdata}\Autodesk\Revit\Addins\2022\SpeckleRevit2";
+Type: filesandordirs; Name: "{userappdata}\Autodesk\Revit\Addins\2023\SpeckleRevit2";
+Type: filesandordirs; Name: "{userappdata}\Autodesk\Revit\Addins\2019\SpeckleRevit2\SpeckleRevit2.addin"
+Type: filesandordirs; Name: "{userappdata}\Autodesk\Revit\Addins\2020\SpeckleRevit2\SpeckleRevit2.addin";
+Type: filesandordirs; Name: "{userappdata}\Autodesk\Revit\Addins\2021\SpeckleRevit2\SpeckleRevit2.addin";
+Type: filesandordirs; Name: "{userappdata}\Autodesk\Revit\Addins\2022\SpeckleRevit2\SpeckleRevit2.addin";
+Type: filesandordirs; Name: "{userappdata}\Autodesk\Revit\Addins\2023\SpeckleRevit2\SpeckleRevit2.addin";
 Type: filesandordirs; Name: "{userappdata}\Autodesk\ApplicationPlugins\Speckle2AutoCAD2021"; 
 Type: filesandordirs; Name: "{userappdata}\Autodesk\ApplicationPlugins\Speckle2AutoCAD2022";
 Type: filesandordirs; Name: "{userappdata}\Autodesk\ApplicationPlugins\Speckle2Civil3D2021";
