@@ -153,7 +153,7 @@ namespace Objects.Converter.Revit
     {
       Func<char, bool> releaseConvert = rel => rel == 'R';
 
-#if REVIT2020 || REVIT2021 || REVIT2022
+#if REVIT2019 || REVIT2020 || REVIT2021 || REVIT2022
       var analyticalModel = (AnalyticalModelStick)element.GetAnalyticalModel();
       analyticalModel.SetReleases(true, releaseConvert(element1d.end1Releases.code[0]), releaseConvert(element1d.end1Releases.code[1]), releaseConvert(element1d.end1Releases.code[2]), releaseConvert(element1d.end1Releases.code[3]), releaseConvert(element1d.end1Releases.code[4]), releaseConvert(element1d.end1Releases.code[5]));
       analyticalModel.SetReleases(false, releaseConvert(element1d.end2Releases.code[0]), releaseConvert(element1d.end2Releases.code[1]), releaseConvert(element1d.end2Releases.code[2]), releaseConvert(element1d.end2Releases.code[3]), releaseConvert(element1d.end2Releases.code[4]), releaseConvert(element1d.end2Releases.code[5]));
@@ -168,11 +168,12 @@ namespace Objects.Converter.Revit
       //TODO Set offsets
 #endif
     }
-#if REVIT2020 || REVIT2021 || REVIT2022
+
+#if REVIT2019 || REVIT2020 || REVIT2021 || REVIT2022
     private Element1D AnalyticalStickToSpeckle(AnalyticalModelStick revitStick)
     {
       if (!revitStick.IsEnabled())
-        return null;
+        return new Element1D();
 
       var speckleElement1D = new Element1D();
       switch (revitStick.Category.Name)
@@ -191,12 +192,17 @@ namespace Objects.Converter.Revit
           break;
         default:
           speckleElement1D.memberType = MemberType.Generic1D;
-          speckleElement1D.type = ElementType1D.Beam;
+          speckleElement1D.type = ElementType1D.Other;
           break;
       }
 
-      var baseLine = AnalyticalCurvesToBaseline(revitStick);
-      speckleElement1D.baseLine = baseLine;
+      var curves = revitStick.GetCurves(AnalyticalCurveType.RigidLinkHead).ToList();
+      curves.AddRange(revitStick.GetCurves(AnalyticalCurveType.ActiveCurves));
+      curves.AddRange(revitStick.GetCurves(AnalyticalCurveType.RigidLinkTail));
+
+      ICurve baseLine = null;
+      if (curves.Count <= 1)
+        speckleElement1D.baseLine = (Objects.Geometry.Line)CurveToSpeckle(curves[0]);
 
       var coordinateSystem = revitStick.GetLocalCoordinateSystem();
       if (coordinateSystem != null)
@@ -223,12 +229,15 @@ namespace Objects.Converter.Revit
       prop.profile = speckleSection;
       prop.material = GetStructuralMaterial(structMat);
       prop.name = revitStick.Document.GetElement(revitStick.GetElementId()).Name;
+      prop.applicationId = stickFamily.Symbol.UniqueId;
 
-      var structuralElement = Doc.GetElement(revitStick.GetElementId());
+      var structuralElement = revitStick.Document.GetElement(revitStick.GetElementId());
       var mark = GetParamValue<string>(structuralElement, BuiltInParameter.ALL_MODEL_MARK);
 
       if (revitStick is AnalyticalModelColumn)
       {
+        speckleElement1D.type = ElementType1D.Column;
+        //prop.memberType = MemberType.Column;
         var locationMark = GetParamValue<string>(structuralElement, BuiltInParameter.COLUMN_LOCATION_MARK);
         if (locationMark == null)
           speckleElement1D.name = mark;
@@ -244,28 +253,16 @@ namespace Objects.Converter.Revit
 
       GetAllRevitParamsAndIds(speckleElement1D, revitStick);
 
-      var points = baseLine.start.ToList();
-      points.AddRange(baseLine.end.ToList());
-      speckleElement1D.displayValue = new Objects.Geometry.Polyline(points, speckleElement1D.units); //GetElementDisplayMesh(revitStick.Document.GetElement(revitStick.GetElementId()));
+      if(baseLine != null)
+      {
+        var points = ((Objects.Geometry.Line)baseLine).start.ToList();
+        points.AddRange(((Objects.Geometry.Line)baseLine).end.ToList());
+        speckleElement1D.displayValue = new Objects.Geometry.Polyline(points, speckleElement1D.units); //GetElementDisplayMesh(revitStick.Document.GetElement(revitStick.GetElementId()));
+      }
+
       return speckleElement1D;
     }
 
-    private Geometry.Line AnalyticalCurvesToBaseline(AnalyticalModelStick analyticalStick)
-    {
-      var curves = analyticalStick.GetCurves(AnalyticalCurveType.RigidLinkHead).ToList();
-      curves.AddRange(analyticalStick.GetCurves(AnalyticalCurveType.ActiveCurves));
-      curves.AddRange(analyticalStick.GetCurves(AnalyticalCurveType.RigidLinkTail));
-
-      if (curves.Count > 1)
-      {
-        var curveList = CurveListToSpeckle(curves);
-        var firstSegment = (Geometry.Line)curveList.segments[0];
-        var lastSegment = (Geometry.Line)curveList.segments[-1];
-        return new Geometry.Line(firstSegment.start, lastSegment.end);
-
-      }
-      return LineToSpeckle((Line)curves[0]);
-    }
 
 #else
     private Element1D AnalyticalStickToSpeckle(AnalyticalMember revitStick)
@@ -274,26 +271,30 @@ namespace Objects.Converter.Revit
       switch (revitStick.StructuralRole)
       {
         case AnalyticalStructuralRole.StructuralRoleColumn:
+          speckleElement1D.memberType = MemberType.Column;
           speckleElement1D.type = ElementType1D.Column;
           break;
         case AnalyticalStructuralRole.StructuralRoleBeam:
+          speckleElement1D.memberType = MemberType.Beam;
           speckleElement1D.type = ElementType1D.Beam;
           break;
         case AnalyticalStructuralRole.StructuralRoleMember:
+          speckleElement1D.memberType = MemberType.Beam;
           speckleElement1D.type = ElementType1D.Brace;
           break;
         default:
+          speckleElement1D.memberType = MemberType.Generic1D;
           speckleElement1D.type = ElementType1D.Other;
           break;
       }
 
-      var baseLine = CurveToSpeckle(revitStick.GetCurve());
-      speckleElement1D.baseLine = (Objects.Geometry.Line)baseLine;
+      var baseLine = (Objects.Geometry.Line)CurveToSpeckle(revitStick.GetCurve());
+      speckleElement1D.baseLine = speckleElement1D.baseLine;
 
       SetEndReleases(revitStick, ref speckleElement1D);
 
       var prop = new Property1D();
-  
+
       var stickFamily = (Autodesk.Revit.DB.FamilySymbol)revitStick.Document.GetElement(revitStick.SectionTypeId);
 
       var speckleSection = GetSectionProfile(stickFamily);
@@ -330,7 +331,9 @@ namespace Objects.Converter.Revit
 
       GetAllRevitParamsAndIds(speckleElement1D, revitStick);
 
-      speckleElement1D.displayValue = (Objects.Geometry.Polyline)baseLine;
+      var points = ((Objects.Geometry.Line)baseLine).start.ToList();
+      points.AddRange(((Objects.Geometry.Line)baseLine).end.ToList());
+      speckleElement1D.displayValue = new Objects.Geometry.Polyline(points, speckleElement1D.units); //GetElementDisplayMesh(revitStick.Document.GetElement(revitStick.GetElementId()));
 
       //var analyticalToPhysicalManager = AnalyticalToPhysicalAssociationManager.GetAnalyticalToPhysicalAssociationManager(Doc);
       //if (analyticalToPhysicalManager.HasAssociation(revitStick.Id))
@@ -339,7 +342,7 @@ namespace Objects.Converter.Revit
       //  var physicalElement = Doc.GetElement(physicalElementId);
       //  speckleElement1D.displayValue = GetElementDisplayMesh(physicalElement);
       //}
-      
+
       return speckleElement1D;
     }
 #endif
