@@ -59,6 +59,10 @@ namespace Objects.Converter.Revit
         //structuralType = speckleRevitColumn.structural ? StructuralType.Column : StructuralType.NonStructural;
         //non slanted columns are point based
         isLineBased = speckleRevitColumn.isSlanted;
+
+        // Slanted columns must be structural
+        if (speckleRevitColumn.isSlanted)
+          structuralType = StructuralType.Column;
       }
 
       if (level == null)
