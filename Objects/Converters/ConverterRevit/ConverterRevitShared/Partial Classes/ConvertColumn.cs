@@ -51,14 +51,6 @@ namespace Objects.Converter.Revit
 
       var speckleRevitColumn = speckleColumn as RevitColumn;
 
-      // If family name or type not present in Revit model, add speckle section info as instance parameters
-      if (familySymbol.FamilyName != speckleRevitColumn.family || familySymbol.Name != speckleRevitColumn.type)
-      {
-        var paramNames = new List<string> { "Section Family", "Section Type" };
-        var paramValues = new List<object> { speckleRevitColumn.family, speckleRevitColumn.type };
-        speckleRevitColumn.parameters = AddSpeckleParameters(speckleRevitColumn.parameters, paramNames, paramValues);
-      }
-
       var levelState = ApplicationObject.State.Unknown;
       if (speckleRevitColumn != null)
       {
@@ -122,10 +114,13 @@ namespace Objects.Converter.Revit
       if (revitColumn == null && isLineBased)
       {
         revitColumn = Doc.Create.NewFamilyInstance(baseLine, familySymbol, level, structuralType);
-        if (revitColumn.Symbol.Family.FamilyPlacementType == FamilyPlacementType.CurveDrivenStructural)
+        if(revitColumn != null)
         {
-          StructuralFramingUtils.DisallowJoinAtEnd(revitColumn, 0);
-          StructuralFramingUtils.DisallowJoinAtEnd(revitColumn, 1);
+          if (revitColumn.Symbol.Family.FamilyPlacementType == FamilyPlacementType.CurveDrivenStructural) 
+          {
+            StructuralFramingUtils.DisallowJoinAtEnd(revitColumn, 0);
+            StructuralFramingUtils.DisallowJoinAtEnd(revitColumn, 1);
+          }
         }
       }
 

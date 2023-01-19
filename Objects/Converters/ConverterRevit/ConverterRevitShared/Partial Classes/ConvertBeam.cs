@@ -1,4 +1,4 @@
-using Autodesk.Revit.DB;
+﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Structure;
 using Objects.BuiltElements;
 using Objects.BuiltElements.Revit;
@@ -43,15 +43,6 @@ namespace Objects.Converter.Revit
       //comes from revit or schema builder, has these props
       var speckleRevitBeam = speckleBeam as RevitBeam;
 
-      // If family name or type not present in Revit model, add speckle section info as instance parameters
-      if (familySymbol.FamilyName != speckleRevitBeam.family || familySymbol.Name != speckleRevitBeam.type)
-      {
-        var paramNames = new List<string> { "Section Family", "Section Type" };
-        var paramValues = new List<object> { speckleRevitBeam.family, speckleRevitBeam.type };
-        speckleRevitBeam.parameters = AddSpeckleParameters(speckleRevitBeam.parameters, paramNames, paramValues);
-        Report.Log($"Instance parameters containing family name and family type added to Beam");
-      }
-      
       if (speckleRevitBeam != null)
         if (level != null)
           level = GetLevelByName(speckleRevitBeam.level.name);
