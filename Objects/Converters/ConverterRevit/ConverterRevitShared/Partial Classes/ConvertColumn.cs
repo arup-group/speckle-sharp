@@ -116,11 +116,8 @@ namespace Objects.Converter.Revit
         revitColumn = Doc.Create.NewFamilyInstance(baseLine, familySymbol, level, StructuralType.Column);
         if (revitColumn.Symbol.Family.FamilyPlacementType == FamilyPlacementType.CurveDrivenStructural)
         {
-          if (revitColumn.Symbol.Family.FamilyPlacementType == FamilyPlacementType.CurveDrivenStructural) 
-          {
-            StructuralFramingUtils.DisallowJoinAtEnd(revitColumn, 0);
-            StructuralFramingUtils.DisallowJoinAtEnd(revitColumn, 1);
-          }
+          StructuralFramingUtils.DisallowJoinAtEnd(revitColumn, 0);
+          StructuralFramingUtils.DisallowJoinAtEnd(revitColumn, 1);
         }
       }
 
@@ -207,7 +204,7 @@ namespace Objects.Converter.Revit
       }
       else
       {
-        baseOffsetParam.Set(baseOffset/2); // temporarily set this value to something else so the sides of the column can switch places
+        baseOffsetParam.Set(baseOffset / 2); // temporarily set this value to something else so the sides of the column can switch places
         topOffsetParam.Set(topOffset);
         baseOffsetParam.Set(baseOffset);
       }
