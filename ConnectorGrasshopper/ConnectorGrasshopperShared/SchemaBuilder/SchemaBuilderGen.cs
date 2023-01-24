@@ -37,6 +37,666 @@ public class AdaptiveComponentSchemaComponent: CreateSchemaObjectBase {
 }
 
 // This is generated code:
+public class AdSecBarBundleSchemaComponent: CreateSchemaObjectBase {
+    static AdSecBarBundleSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AdSecBarBundleSchemaComponent(): base("AdSecBarBundle", "AdSecBarBundle", "Creates a Speckle bar bundle object for AdSec", "Speckle 2 AdSec", "Reinforcement") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 AdSec";
+
+    internal static Guid internalGuid => new Guid("bd50ba54-21cb-01c7-19a9-8af74c7c5b9c");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.AdSec.Properties.Reinforcement.AdSecBarBundle.ctor(System.String,System.Int32,System.Double,Objects.Structural.Materials.StructuralMaterial)","Objects.Structural.AdSec.Properties.Reinforcement.AdSecBarBundle");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AdSecCircleGroupSchemaComponent: CreateSchemaObjectBase {
+    static AdSecCircleGroupSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AdSecCircleGroupSchemaComponent(): base("AdSecCircleGroup", "AdSecCircleGroup", "Creates a Speckle reinforcement group with a circle of bars for AdSec", "Speckle 2 AdSec", "Reinforcement") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 AdSec";
+
+    internal static Guid internalGuid => new Guid("6f7a05ee-452e-916a-4a1d-bf96109a88d8");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.AdSec.Properties.Reinforcement.Groups.AdSecCircleGroup.ctor(System.String,Objects.Structural.AdSec.Properties.Reinforcement.AdSecPoint,System.Double,System.Double,Objects.Structural.AdSec.Properties.Reinforcement.Layers.AdSecReinforcementLayer)","Objects.Structural.AdSec.Properties.Reinforcement.Groups.AdSecCircleGroup");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AdSecCruciformSchemaComponent: CreateSchemaObjectBase {
+    static AdSecCruciformSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AdSecCruciformSchemaComponent(): base("Cruciform", "Cruciform", "Creates a Speckle structural cruciform section profile", "Speckle 2 AdSec", "Section Profile") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 AdSec";
+
+    internal static Guid internalGuid => new Guid("8ce71f53-b28f-edde-6578-31980df70d86");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.AdSec.Properties.Profiles.AdSecCruciform.ctor(System.String,System.Double,System.Double,System.Double,System.Double)","Objects.Structural.AdSec.Properties.Profiles.AdSecCruciform");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AdSecCSectionSchemaComponent: CreateSchemaObjectBase {
+    static AdSecCSectionSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AdSecCSectionSchemaComponent(): base("General C", "General C", "Creates a Speckle structural C section profile", "Speckle 2 AdSec", "Section Profile") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 AdSec";
+
+    internal static Guid internalGuid => new Guid("21250042-a8c9-09fa-1f36-6ceafd959ffe");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.AdSec.Properties.Profiles.AdSecCSection.ctor(System.String,System.Double,System.Double,System.Double,System.Double)","Objects.Structural.AdSec.Properties.Profiles.AdSecCSection");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AdSecEllipseSchemaComponent: CreateSchemaObjectBase {
+    static AdSecEllipseSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AdSecEllipseSchemaComponent(): base("Ellipse", "Ellipse", "Creates a Speckle structural ellipse section profile", "Speckle 2 AdSec", "Section Profile") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 AdSec";
+
+    internal static Guid internalGuid => new Guid("cc008963-9882-3baf-5e86-a0eed4256c87");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.AdSec.Properties.Profiles.AdSecEllipse.ctor(System.String,System.Double,System.Double,System.Double)","Objects.Structural.AdSec.Properties.Profiles.AdSecEllipse");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AdSecIAssymetricSchemaComponent: CreateSchemaObjectBase {
+    static AdSecIAssymetricSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AdSecIAssymetricSchemaComponent(): base("Assymetric I", "Assymetric I", "Creates a Speckle structural assymetric I section profile", "Speckle 2 AdSec", "Section Profile") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 AdSec";
+
+    internal static Guid internalGuid => new Guid("e47cc2e6-2cd3-0831-5e3b-dd617157dbcf");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.AdSec.Properties.Profiles.AdSecIAssymetric.ctor(System.String,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double)","Objects.Structural.AdSec.Properties.Profiles.AdSecIAssymetric");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AdSecLayerSchemaComponent: CreateSchemaObjectBase {
+    static AdSecLayerSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AdSecLayerSchemaComponent(): base("AdSecLayer", "AdSecLayer", "Creates a Speckle reinforcement layer based on a bar bundle for AdSec", "Speckle 2 AdSec", "Reinforcement") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 AdSec";
+
+    internal static Guid internalGuid => new Guid("a76bccec-d69c-44a8-9723-5a8833aa3863");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.AdSec.Properties.Reinforcement.Layers.AdSecLayer.ctor(System.String,Objects.Structural.AdSec.Properties.Reinforcement.AdSecBarBundle)","Objects.Structural.AdSec.Properties.Reinforcement.Layers.AdSecLayer");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AdSecLayerByBarCountSchemaComponent: CreateSchemaObjectBase {
+    static AdSecLayerByBarCountSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AdSecLayerByBarCountSchemaComponent(): base("AdSecLayerByBarCount", "AdSecLayerByBarCount", "Creates a Speckle reinforcement layer based on a number of bars for AdSec", "Speckle 2 AdSec", "Reinforcement") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 AdSec";
+
+    internal static Guid internalGuid => new Guid("e0cdf35d-a2b4-9ff3-de85-70ac3edbac35");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.AdSec.Properties.Reinforcement.Layers.AdSecLayerByBarCount.ctor(System.String,System.Int32,Objects.Structural.AdSec.Properties.Reinforcement.AdSecBarBundle)","Objects.Structural.AdSec.Properties.Reinforcement.Layers.AdSecLayerByBarCount");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AdSecLineGroupSchemaComponent: CreateSchemaObjectBase {
+    static AdSecLineGroupSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AdSecLineGroupSchemaComponent(): base("AdSecLineGroup", "AdSecLineGroup", "Creates a Speckle reinforcement group with a line of bars for AdSec", "Speckle 2 AdSec", "Reinforcement") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 AdSec";
+
+    internal static Guid internalGuid => new Guid("6e2727d8-fe13-ff19-2563-8be1992ae307");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.AdSec.Properties.Reinforcement.Groups.AdSecLineGroup.ctor(System.String,Objects.Structural.AdSec.Properties.Reinforcement.AdSecPoint,Objects.Structural.AdSec.Properties.Reinforcement.AdSecPoint,Objects.Structural.AdSec.Properties.Reinforcement.Layers.AdSecReinforcementLayer)","Objects.Structural.AdSec.Properties.Reinforcement.Groups.AdSecLineGroup");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AdSecPointSchemaComponent: CreateSchemaObjectBase {
+    static AdSecPointSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AdSecPointSchemaComponent(): base("AdSecPoint", "AdSecPoint", "Creates a Speckle reinforcement point object for AdSec", "Speckle 2 AdSec", "Reinforcement") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 AdSec";
+
+    internal static Guid internalGuid => new Guid("e49aad5f-8ce5-f9ff-b1d9-ef6aac2e84bc");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.AdSec.Properties.Reinforcement.AdSecPoint.ctor(System.Double,System.Double)","Objects.Structural.AdSec.Properties.Reinforcement.AdSecPoint");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AdSecRectoEllipseSchemaComponent: CreateSchemaObjectBase {
+    static AdSecRectoEllipseSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AdSecRectoEllipseSchemaComponent(): base("Recto Ellipse", "Recto Ellipse", "Creates a Speckle structural rectangular profile with elliptical corners", "Speckle 2 AdSec", "Section Profile") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 AdSec";
+
+    internal static Guid internalGuid => new Guid("786763ef-5676-b6d7-e3fa-15bf7b7839d1");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.AdSec.Properties.Profiles.AdSecRectoEllipse.ctor(System.String,System.Double,System.Double,System.Double,System.Double)","Objects.Structural.AdSec.Properties.Profiles.AdSecRectoEllipse");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AdSecReinforcementGroupSchemaComponent: CreateSchemaObjectBase {
+    static AdSecReinforcementGroupSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AdSecReinforcementGroupSchemaComponent(): base("AdSecReinforcementGroup", "AdSecReinforcementGroup", "Creates a Speckle reinforcement group for AdSec", "Speckle 2 AdSec", "Reinforcement") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 AdSec";
+
+    internal static Guid internalGuid => new Guid("3fae92f4-152f-2a27-6dc1-fdc5f314cb43");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.AdSec.Properties.Reinforcement.Groups.AdSecReinforcementGroup.ctor(System.String)","Objects.Structural.AdSec.Properties.Reinforcement.Groups.AdSecReinforcementGroup");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AdSecReinforcementLayerSchemaComponent: CreateSchemaObjectBase {
+    static AdSecReinforcementLayerSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AdSecReinforcementLayerSchemaComponent(): base("AdSecReinforcementLayer", "AdSecReinforcementLayer", "Creates a Speckle reinforcement layer for AdSec", "Speckle 2 AdSec", "Reinforcement") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 AdSec";
+
+    internal static Guid internalGuid => new Guid("af69ec4e-80bc-cc0e-66cf-71eec955e6c8");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.AdSec.Properties.Reinforcement.Layers.AdSecReinforcementLayer.ctor(System.String)","Objects.Structural.AdSec.Properties.Reinforcement.Layers.AdSecReinforcementLayer");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AdSecSecantPileSchemaComponent: CreateSchemaObjectBase {
+    static AdSecSecantPileSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AdSecSecantPileSchemaComponent(): base("Secant Pile", "Secant Pile", "Creates a Speckle structural secant pile section profile", "Speckle 2 AdSec", "Section Profile") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 AdSec";
+
+    internal static Guid internalGuid => new Guid("6c654e15-2401-7f68-e670-70403440e132");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.AdSec.Properties.Profiles.AdSecSecantPile.ctor(System.String,System.Double,System.Double,System.Int32,System.Boolean)","Objects.Structural.AdSec.Properties.Profiles.AdSecSecantPile");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AdSecSectionSchemaComponent: CreateSchemaObjectBase {
+    static AdSecSectionSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AdSecSectionSchemaComponent(): base("AdSecSection", "AdSecSection", "Creates a Speckle section for AdSec", "Speckle 2 AdSec", "Geometry") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 AdSec";
+
+    internal static Guid internalGuid => new Guid("5efbbd87-116e-7b6d-f053-f3f0f62d0116");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.AdSec.Geometry.AdSecSection.ctor(System.String,Objects.Structural.Materials.StructuralMaterial,Objects.Structural.Properties.Profiles.SectionProfile,Objects.Structural.AdSec.Properties.AdSecSectionProperties,System.Collections.Generic.List`1[Objects.Structural.AdSec.Properties.Reinforcement.Groups.AdSecReinforcementGroup])","Objects.Structural.AdSec.Geometry.AdSecSection");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AdSecSectionPropertiesSchemaComponent: CreateSchemaObjectBase {
+    static AdSecSectionPropertiesSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AdSecSectionPropertiesSchemaComponent(): base("AdSecSectionProperties", "AdSecSectionProperties", "Creates Speckle structural section properties for AdSec", "Speckle 2 AdSec", "Section Properties") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 AdSec";
+
+    internal static Guid internalGuid => new Guid("89f78379-8616-8162-969d-6380717d1789");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.AdSec.Properties.AdSecSectionProperties.ctor(System.Double,System.Double,System.Double,System.Double,System.Double,System.Double)","Objects.Structural.AdSec.Properties.AdSecSectionProperties");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AdSecSectionPropertiesSteelSchemaComponent: CreateSchemaObjectBase {
+    static AdSecSectionPropertiesSteelSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AdSecSectionPropertiesSteelSchemaComponent(): base("AdSecSectionPropertiesSteel", "AdSecSectionPropertiesSteel", "Creates Speckle structural steel section properties", "Speckle 2 AdSec", "Section Properties") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 AdSec";
+
+    internal static Guid internalGuid => new Guid("fb02ac6c-b6c8-c995-24be-37df6c7fba89");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.AdSec.Properties.AdSecSectionPropertiesSteel.ctor(System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double)","Objects.Structural.AdSec.Properties.AdSecSectionPropertiesSteel");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AdSecSheetPileSchemaComponent: CreateSchemaObjectBase {
+    static AdSecSheetPileSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AdSecSheetPileSchemaComponent(): base("Sheet Pile", "Sheet Pile", "Creates a Speckle structural sheet pile section profile", "Speckle 2 AdSec", "Section Profile") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 AdSec";
+
+    internal static Guid internalGuid => new Guid("5140bcf0-70a9-9468-db58-3771d13dbe0e");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.AdSec.Properties.Profiles.AdSecSheetPile.ctor(System.String,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double)","Objects.Structural.AdSec.Properties.Profiles.AdSecSheetPile");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AdSecSingleBarsSchemaComponent: CreateSchemaObjectBase {
+    static AdSecSingleBarsSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AdSecSingleBarsSchemaComponent(): base("AdSecSingleBars", "AdSecSingleBars", "Creates a Speckle reinforcement group with single bars for AdSec", "Speckle 2 AdSec", "Reinforcement") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 AdSec";
+
+    internal static Guid internalGuid => new Guid("c36c1d13-6c12-a185-2604-8bed001f79bc");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.AdSec.Properties.Reinforcement.Groups.AdSecSingleBars.ctor(System.String,Objects.Structural.AdSec.Properties.Reinforcement.AdSecBarBundle,System.Collections.Generic.List`1[Objects.Structural.AdSec.Properties.Reinforcement.AdSecPoint])","Objects.Structural.AdSec.Properties.Reinforcement.Groups.AdSecSingleBars");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AdSecStadiumSchemaComponent: CreateSchemaObjectBase {
+    static AdSecStadiumSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AdSecStadiumSchemaComponent(): base("Stadium", "Stadium", "Creates a Speckle structural stadium section profile. It is a profile consisting of a rectangle whose ends are capped off with semicircles", "Speckle 2 AdSec", "Section Profile") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 AdSec";
+
+    internal static Guid internalGuid => new Guid("f28a55dd-d952-d789-9236-8084e0536436");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.AdSec.Properties.Profiles.AdSecStadium.ctor(System.String,System.Double,System.Double)","Objects.Structural.AdSec.Properties.Profiles.AdSecStadium");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AdSecTrapezoidSchemaComponent: CreateSchemaObjectBase {
+    static AdSecTrapezoidSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AdSecTrapezoidSchemaComponent(): base("Trapezoid", "Trapezoid", "Creates a Speckle structural trapezoidal section profile", "Speckle 2 AdSec", "Section Profile") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 AdSec";
+
+    internal static Guid internalGuid => new Guid("9b078e26-f643-1e65-894a-4ced7b9e6e73");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.AdSec.Properties.Profiles.AdSecTrapezoid.ctor(System.String,System.Double,System.Double,System.Double)","Objects.Structural.AdSec.Properties.Profiles.AdSecTrapezoid");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AdSecZSectionSchemaComponent: CreateSchemaObjectBase {
+    static AdSecZSectionSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AdSecZSectionSchemaComponent(): base("General Z", "General Z", "Creates a Speckle structural Z section profile", "Speckle 2 AdSec", "Section Profile") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 AdSec";
+
+    internal static Guid internalGuid => new Guid("4e082331-0777-d8d8-56d6-97430a1b2ecf");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.AdSec.Properties.Profiles.AdSecZSection.ctor(System.String,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double)","Objects.Structural.AdSec.Properties.Profiles.AdSecZSection");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
 public class AngleSchemaComponent: CreateSchemaObjectBase {
     static AngleSchemaComponent() {
        SpeckleGHSettings.SettingsChanged += (_, args) =>
@@ -77,7 +737,7 @@ public class ArchicadBeamSchemaComponent: CreateSchemaObjectBase {
             proxy.Exposure = internalExposure;
           };
     }
-    public ArchicadBeamSchemaComponent(): base("ArchicadBeam", "ArchicadBeam", "Creates an Archicad Structures beam by curve.", "Speckle 2 Archicad", "Structure") { }
+    public ArchicadBeamSchemaComponent(): base("ArchicadBeam", "ArchicadBeam", "Creates an Archicad beam by curve.", "Speckle 2 Archicad", "Structure") { }
     
     internal static string internalCategory { get; }  = "Speckle 2 Archicad";
 
@@ -92,6 +752,36 @@ public class ArchicadBeamSchemaComponent: CreateSchemaObjectBase {
     
     public override void AddedToDocument(GH_Document document){
         SelectedConstructor = CSOUtils.FindConstructor("Objects.BuiltElements.Archicad.ArchicadBeam.ctor(Objects.Geometry.Point,Objects.Geometry.Point)","Objects.BuiltElements.Archicad.ArchicadBeam");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class ArchicadColumnSchemaComponent: CreateSchemaObjectBase {
+    static ArchicadColumnSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public ArchicadColumnSchemaComponent(): base("ArchicadColumn", "ArchicadColumn", "Creates an Archicad Column by curve.", "Speckle 2 Archicad", "Structure") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 Archicad";
+
+    internal static Guid internalGuid => new Guid("c69190c1-3311-5407-4a00-e58ea275fa89");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.BuiltElements.Archicad.ArchicadColumn.ctor(Objects.Geometry.Point,System.Double)","Objects.BuiltElements.Archicad.ArchicadColumn");
         base.AddedToDocument(document);
     }
 }
@@ -557,7 +1247,7 @@ public class CSIElement1DSchemaComponent: CreateSchemaObjectBase {
             proxy.Exposure = internalExposure;
           };
     }
-    public CSIElement1DSchemaComponent(): base("Element1D (from local axis)", "Element1D (from local axis)", "Creates a Speckle CSI 1D element (from local axis)", "Speckle 2 CSI", "Geometry") { }
+    public CSIElement1DSchemaComponent(): base("CSIElement1D (from local axis)", "CSIElement1D (from local axis)", "Creates a Speckle CSI 1D element (from local axis)", "Speckle 2 CSI", "Geometry") { }
     
     internal static string internalCategory { get; }  = "Speckle 2 CSI";
 
@@ -587,7 +1277,7 @@ public class CSIElement1D1SchemaComponent: CreateSchemaObjectBase {
             proxy.Exposure = internalExposure;
           };
     }
-    public CSIElement1D1SchemaComponent(): base("Element1D (from orientation node and angle)", "Element1D (from orientation node and angle)", "Creates a Speckle CSI 1D element (from orientation node and angle)", "Speckle 2 CSI", "Geometry") { }
+    public CSIElement1D1SchemaComponent(): base("CSIElement1D (from orientation node and angle)", "CSIElement1D (from orientation node and angle)", "Creates a Speckle CSI 1D element (from orientation node and angle)", "Speckle 2 CSI", "Geometry") { }
     
     internal static string internalCategory { get; }  = "Speckle 2 CSI";
 
@@ -617,7 +1307,7 @@ public class CSIElement2DSchemaComponent: CreateSchemaObjectBase {
             proxy.Exposure = internalExposure;
           };
     }
-    public CSIElement2DSchemaComponent(): base("Element2D", "Element2D", "Creates a Speckle CSI 2D element (based on a list of edge ie. external, geometry defining nodes)", "Speckle 2 CSI", "Geometry") { }
+    public CSIElement2DSchemaComponent(): base("CSIElement2D", "CSIElement2D", "Creates a Speckle CSI 2D element (based on a list of edge ie. external, geometry defining nodes)", "Speckle 2 CSI", "Geometry") { }
     
     internal static string internalCategory { get; }  = "Speckle 2 CSI";
 
@@ -1052,7 +1742,7 @@ public class Element1DSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Geometry.Element1D.ctor(Objects.Geometry.Line,Objects.Structural.Properties.Property1D,Objects.Structural.Geometry.ElementType1D,System.String,Objects.Structural.Geometry.Restraint,Objects.Structural.Geometry.Restraint,Objects.Geometry.Vector,Objects.Geometry.Vector,Objects.Geometry.Plane)","Objects.Structural.Geometry.Element1D");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Geometry.Element1D.ctor(Objects.Geometry.Line,Objects.Structural.Properties.Property,Objects.Structural.Geometry.ElementType1D,System.String,Objects.Structural.Geometry.Restraint,Objects.Structural.Geometry.Restraint,Objects.Geometry.Vector,Objects.Geometry.Vector,Objects.Geometry.Plane)","Objects.Structural.Geometry.Element1D");
         base.AddedToDocument(document);
     }
 }
@@ -1082,7 +1772,37 @@ public class Element1D1SchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Geometry.Element1D.ctor(Objects.Geometry.Line,Objects.Structural.Properties.Property1D,Objects.Structural.Geometry.ElementType1D,System.String,Objects.Structural.Geometry.Restraint,Objects.Structural.Geometry.Restraint,Objects.Geometry.Vector,Objects.Geometry.Vector,Objects.Structural.Geometry.Node,System.Double)","Objects.Structural.Geometry.Element1D");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Geometry.Element1D.ctor(Objects.Geometry.Line,Objects.Structural.Properties.Property,Objects.Structural.Geometry.ElementType1D,System.String,Objects.Structural.Geometry.Restraint,Objects.Structural.Geometry.Restraint,Objects.Geometry.Vector,Objects.Geometry.Vector,Objects.Structural.Geometry.Node,System.Double)","Objects.Structural.Geometry.Element1D");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class Element1D2SchemaComponent: CreateSchemaObjectBase {
+    static Element1D2SchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public Element1D2SchemaComponent(): base("Element1D (from nodes)", "Element1D (from nodes)", "Creates a Speckle structural 1D element (from nodes)", "Speckle 2 Structural", "Geometry") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 Structural";
+
+    internal static Guid internalGuid => new Guid("ffe8c605-0ffb-25a3-c3c8-6b87725690a1");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Geometry.Element1D.ctor(Objects.Structural.Geometry.Node,Objects.Structural.Geometry.Node,Objects.Structural.Properties.Property,Objects.Structural.Geometry.ElementType1D,System.String,Objects.Structural.Geometry.Restraint,Objects.Structural.Geometry.Restraint,Objects.Geometry.Vector,Objects.Geometry.Vector,Objects.Geometry.Plane)","Objects.Structural.Geometry.Element1D");
         base.AddedToDocument(document);
     }
 }
@@ -1113,6 +1833,66 @@ public class Element2DSchemaComponent: CreateSchemaObjectBase {
     
     public override void AddedToDocument(GH_Document document){
         SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Geometry.Element2D.ctor(System.Collections.Generic.List`1[Objects.Structural.Geometry.Node],Objects.Structural.Properties.Property2D,System.Double,System.Double)","Objects.Structural.Geometry.Element2D");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class Element2D1SchemaComponent: CreateSchemaObjectBase {
+    static Element2D1SchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public Element2D1SchemaComponent(): base("Element2D", "Element2D", "Creates a Speckle structural 2D element (based on a list of edge ie. external, geometry defining nodes)", "Speckle 2 Structural", "Geometry") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 Structural";
+
+    internal static Guid internalGuid => new Guid("e56d73d9-2e14-2114-0de4-cbcc4d6cef3e");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Geometry.Element2D.ctor(System.Collections.Generic.List`1[Objects.Structural.Geometry.Node],Objects.Structural.Properties.Property2D,Objects.Structural.Geometry.MemberType,System.Collections.Generic.List`1[System.Collections.Generic.List`1[Objects.Structural.Geometry.Node]],System.Double,System.Double)","Objects.Structural.Geometry.Element2D");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class Element2D2SchemaComponent: CreateSchemaObjectBase {
+    static Element2D2SchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public Element2D2SchemaComponent(): base("Element2D (from polyline)", "Element2D (from polyline)", "Creates a Speckle structural 2D element (based on a list of edge ie. external, geometry defining nodes)", "Speckle 2 Structural", "Geometry") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 Structural";
+
+    internal static Guid internalGuid => new Guid("f98f3b2a-bdc2-9135-28f3-3671439f53cb");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Geometry.Element2D.ctor(Objects.Geometry.Polyline,Objects.Structural.Properties.Property2D,Objects.Structural.Geometry.MemberType,System.Collections.Generic.List`1[Objects.Geometry.Polyline],System.Double,System.Double)","Objects.Structural.Geometry.Element2D");
         base.AddedToDocument(document);
     }
 }
@@ -1415,7 +2195,7 @@ public class GSAAlignmentSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Bridge.GSAAlignment.ctor(System.Int32,System.String,Objects.Structural.GSA.Geometry.GSAGridSurface,System.Collections.Generic.List`1[System.Double],System.Collections.Generic.List`1[System.Double])","Objects.Structural.GSA.Bridge.GSAAlignment");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Bridge.GSAAlignment.ctor(Objects.Structural.GSA.Geometry.GSAGridSurface,System.Collections.Generic.List`1[System.Double],System.Collections.Generic.List`1[System.Double],System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Bridge.GSAAlignment");
         base.AddedToDocument(document);
     }
 }
@@ -1431,7 +2211,7 @@ public class GSAAnalysisCaseSchemaComponent: CreateSchemaObjectBase {
             proxy.Exposure = internalExposure;
           };
     }
-    public GSAAnalysisCaseSchemaComponent(): base("GSAAnalysisCase", "GSAAnalysisCase", "Creates a Speckle structural analysis case for GSA", "Speckle 2 GSA", "Analysis") { }
+    public GSAAnalysisCaseSchemaComponent(): base("GSAAnalysisCase", "GSAAnalysisCase", "Creates a GSA analysis case", "Speckle 2 GSA", "Analysis") { }
     
     internal static string internalCategory { get; }  = "Speckle 2 GSA";
 
@@ -1445,7 +2225,37 @@ public class GSAAnalysisCaseSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Analysis.GSAAnalysisCase.ctor(System.Int32,System.String,Objects.Structural.GSA.Analysis.GSATask,System.Collections.Generic.List`1[Objects.Structural.Loading.LoadCase],System.Collections.Generic.List`1[System.Double])","Objects.Structural.GSA.Analysis.GSAAnalysisCase");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Analysis.GSAAnalysisCase.ctor(System.Collections.Generic.List`1[Objects.Structural.Loading.LoadCase],System.Collections.Generic.List`1[System.Double],System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Analysis.GSAAnalysisCase");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class GSAAnalysisTaskSchemaComponent: CreateSchemaObjectBase {
+    static GSAAnalysisTaskSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public GSAAnalysisTaskSchemaComponent(): base("GSAAnalysisTask", "GSAAnalysisTask", "Creates a Speckle structural analysis task for GSA", "Speckle 2 GSA", "Analysis") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 GSA";
+
+    internal static Guid internalGuid => new Guid("0d08ee5e-9cd2-94cf-c511-5e6919fb66dd");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Analysis.GSAAnalysisTask.ctor(Objects.Structural.GSA.Analysis.SolutionType,System.Collections.Generic.List`1[Objects.Structural.GSA.Analysis.GSAAnalysisCase],Objects.Structural.GSA.Analysis.GSAStage,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Analysis.GSAAnalysisTask");
         base.AddedToDocument(document);
     }
 }
@@ -1475,7 +2285,37 @@ public class GSAAssemblySchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAAssembly.ctor(System.Int32,System.String,System.Collections.Generic.List`1[Speckle.Core.Models.Base],Objects.Structural.GSA.Geometry.GSANode,Objects.Structural.GSA.Geometry.GSANode,Objects.Structural.GSA.Geometry.GSANode,System.Double,System.Double,System.String,System.Int32,System.String,System.Collections.Generic.List`1[System.Double])","Objects.Structural.GSA.Geometry.GSAAssembly");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAAssembly.ctor(System.Collections.Generic.List`1[Speckle.Core.Models.Base],Objects.Structural.GSA.Geometry.GSANode,Objects.Structural.GSA.Geometry.GSANode,Objects.Structural.GSA.Geometry.GSANode,System.Double,System.Double,System.String,System.Int32,System.String,System.Collections.Generic.List`1[System.Double],System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Geometry.GSAAssembly");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class GSACombinationCaseSchemaComponent: CreateSchemaObjectBase {
+    static GSACombinationCaseSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public GSACombinationCaseSchemaComponent(): base("GSACombinationCase", "GSACombinationCase", "Creates a GSA combination case", "Speckle 2 GSA", "Loading") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 GSA";
+
+    internal static Guid internalGuid => new Guid("6f2a666e-984b-383f-5dc4-36082fe8af18");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Analysis.GSACombinationCase.ctor(System.String,System.Collections.Generic.List`1[Speckle.Core.Models.Base],System.Collections.Generic.List`1[System.Double],Objects.Structural.Loading.CombinationType,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Analysis.GSACombinationCase");
         base.AddedToDocument(document);
     }
 }
@@ -1505,7 +2345,37 @@ public class GSAConcreteSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Materials.GSAConcrete.ctor(System.Int32,System.String,System.String,System.String,System.String,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Boolean,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.String)","Objects.Structural.GSA.Materials.GSAConcrete");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Materials.GSAConcrete.ctor(System.String,System.String,System.String,System.String,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Boolean,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Materials.GSAConcrete");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class GSAConstraintConditionSchemaComponent: CreateSchemaObjectBase {
+    static GSAConstraintConditionSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public GSAConstraintConditionSchemaComponent(): base("GSAConstraintCondition", "GSAConstraintCondition", "Creates a custom link description for a rigid constraint (ie. to be used with rigid contraints with custom linkage type)", "Speckle 2 GSA", "Geometry") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 GSA";
+
+    internal static Guid internalGuid => new Guid("59d3d09e-1992-ef7b-6164-ae46c3bbf8a9");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAConstraintCondition.ctor(System.String,System.String,System.String,System.Boolean,System.Boolean,System.Boolean)","Objects.Structural.GSA.Geometry.GSAConstraintCondition");
         base.AddedToDocument(document);
     }
 }
@@ -1535,7 +2405,7 @@ public class GSAElement1DSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAElement1D.ctor(System.Int32,Objects.Geometry.Line,Objects.Structural.Properties.Property1D,Objects.Structural.Geometry.ElementType1D,Objects.Structural.Geometry.Restraint,Objects.Structural.Geometry.Restraint,Objects.Geometry.Vector,Objects.Geometry.Vector,Objects.Geometry.Plane)","Objects.Structural.GSA.Geometry.GSAElement1D");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAElement1D.ctor(Objects.ICurve,Objects.Structural.Properties.Property,Objects.Structural.Geometry.ElementType1D,System.String,Objects.Structural.Geometry.Restraint,Objects.Structural.Geometry.Restraint,Objects.Geometry.Vector,Objects.Geometry.Vector,Objects.Geometry.Plane,System.Int32,System.String,System.Boolean,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Geometry.GSAElement1D");
         base.AddedToDocument(document);
     }
 }
@@ -1565,7 +2435,7 @@ public class GSAElement1D1SchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAElement1D.ctor(System.Int32,Objects.Geometry.Line,Objects.Structural.Properties.Property1D,Objects.Structural.Geometry.ElementType1D,Objects.Structural.Geometry.Restraint,Objects.Structural.Geometry.Restraint,Objects.Geometry.Vector,Objects.Geometry.Vector,Objects.Structural.Geometry.Node,System.Double)","Objects.Structural.GSA.Geometry.GSAElement1D");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAElement1D.ctor(Objects.ICurve,Objects.Structural.Properties.Property,Objects.Structural.Geometry.ElementType1D,System.String,Objects.Structural.Geometry.Restraint,Objects.Structural.Geometry.Restraint,Objects.Geometry.Vector,Objects.Geometry.Vector,Objects.Structural.Geometry.Node,System.Double,System.Int32,System.String,System.Boolean,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Geometry.GSAElement1D");
         base.AddedToDocument(document);
     }
 }
@@ -1595,7 +2465,7 @@ public class GSAElement2DSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAElement2D.ctor(System.Int32,System.Collections.Generic.List`1[Objects.Structural.Geometry.Node],Objects.Structural.Properties.Property2D,Objects.Structural.Geometry.ElementType2D,System.String,System.Double,System.Double,System.Int32,System.String,System.Boolean)","Objects.Structural.GSA.Geometry.GSAElement2D");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAElement2D.ctor(System.Collections.Generic.List`1[Objects.Structural.Geometry.Node],Objects.Structural.Properties.Property2D,Objects.Structural.Geometry.ElementType2D,System.String,System.Double,System.Double,System.Int32,System.String,System.Boolean,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Geometry.GSAElement2D");
         base.AddedToDocument(document);
     }
 }
@@ -1625,7 +2495,7 @@ public class GSAElement3DSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAElement3D.ctor(System.Int32,Objects.Geometry.Mesh,Objects.Structural.Properties.Property3D,Objects.Structural.Geometry.ElementType3D,System.String,System.Double,System.Int32,System.String,System.Boolean)","Objects.Structural.GSA.Geometry.GSAElement3D");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAElement3D.ctor(Objects.Geometry.Mesh,Objects.Structural.Properties.Property3D,Objects.Structural.Geometry.ElementType3D,System.String,System.Double,System.Int32,System.String,System.Boolean,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Geometry.GSAElement3D");
         base.AddedToDocument(document);
     }
 }
@@ -1655,7 +2525,7 @@ public class GSAGeneralisedRestraintSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAGeneralisedRestraint.ctor(System.Int32,System.String,Objects.Structural.Geometry.Restraint,System.Collections.Generic.List`1[Objects.Structural.Geometry.Node],System.Collections.Generic.List`1[Objects.Structural.GSA.Analysis.GSAStage])","Objects.Structural.GSA.Geometry.GSAGeneralisedRestraint");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAGeneralisedRestraint.ctor(Objects.Structural.Geometry.Restraint,System.Collections.Generic.List`1[Objects.Structural.Geometry.Node],System.Collections.Generic.List`1[Objects.Structural.GSA.Analysis.GSAStage],System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Geometry.GSAGeneralisedRestraint");
         base.AddedToDocument(document);
     }
 }
@@ -1685,7 +2555,7 @@ public class GSAGridLineSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAGridLine.ctor(System.Int32,System.String,Objects.ICurve)","Objects.Structural.GSA.Geometry.GSAGridLine");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAGridLine.ctor(System.String,Objects.ICurve,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Geometry.GSAGridLine");
         base.AddedToDocument(document);
     }
 }
@@ -1715,7 +2585,7 @@ public class GSAGridPlaneSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAGridPlane.ctor(System.Int32,System.String,Objects.Structural.Geometry.Axis,System.Double)","Objects.Structural.GSA.Geometry.GSAGridPlane");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAGridPlane.ctor(Objects.Structural.Geometry.Axis,System.Double,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Geometry.GSAGridPlane");
         base.AddedToDocument(document);
     }
 }
@@ -1745,7 +2615,7 @@ public class GSAGridSurfaceSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAGridSurface.ctor(System.String,System.Int32,Objects.Structural.GSA.Geometry.GSAGridPlane,System.Double,System.Double,Objects.Structural.GSA.Geometry.LoadExpansion,Objects.Structural.GSA.Geometry.GridSurfaceSpanType,System.Collections.Generic.List`1[Speckle.Core.Models.Base])","Objects.Structural.GSA.Geometry.GSAGridSurface");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAGridSurface.ctor(Objects.Structural.GSA.Geometry.GSAGridPlane,System.Collections.Generic.List`1[Speckle.Core.Models.Base],System.Nullable`1[System.Double],Objects.Structural.GSA.Geometry.GridSurfaceElementType,Objects.Structural.GSA.Geometry.GridSurfaceSpanType,System.Double,Objects.Structural.GSA.Geometry.LoadExpansion,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Geometry.GSAGridSurface");
         base.AddedToDocument(document);
     }
 }
@@ -1775,7 +2645,7 @@ public class GSAInfluenceBeamSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Bridge.GSAInfluenceBeam.ctor(System.Int32,System.String,System.Double,Objects.Structural.GSA.Bridge.InfluenceType,Objects.Structural.Loading.LoadDirection,Objects.Structural.GSA.Geometry.GSAElement1D,System.Double)","Objects.Structural.GSA.Bridge.GSAInfluenceBeam");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Bridge.GSAInfluenceBeam.ctor(System.Double,Objects.Structural.GSA.Bridge.InfluenceType,Objects.Structural.Loading.LoadDirection,Objects.Structural.GSA.Geometry.GSAElement1D,System.Double,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Bridge.GSAInfluenceBeam");
         base.AddedToDocument(document);
     }
 }
@@ -1791,7 +2661,7 @@ public class GSAInfluenceNodeSchemaComponent: CreateSchemaObjectBase {
             proxy.Exposure = internalExposure;
           };
     }
-    public GSAInfluenceNodeSchemaComponent(): base("GSAInfluenceBeam", "GSAInfluenceBeam", "Creates a Speckle structural node influence effect for GSA (for an influence analysis)", "Speckle 2 GSA", "Bridge") { }
+    public GSAInfluenceNodeSchemaComponent(): base("GSAInfluenceNode", "GSAInfluenceNode", "Creates a Speckle structural node influence effect for GSA (for an influence analysis)", "Speckle 2 GSA", "Bridge") { }
     
     internal static string internalCategory { get; }  = "Speckle 2 GSA";
 
@@ -1805,7 +2675,37 @@ public class GSAInfluenceNodeSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Bridge.GSAInfluenceNode.ctor(System.Int32,System.String,System.Double,Objects.Structural.GSA.Bridge.InfluenceType,Objects.Structural.Loading.LoadDirection,Objects.Structural.Geometry.Node,Objects.Structural.Geometry.Axis)","Objects.Structural.GSA.Bridge.GSAInfluenceNode");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Bridge.GSAInfluenceNode.ctor(System.Double,Objects.Structural.GSA.Bridge.InfluenceType,Objects.Structural.Loading.LoadDirection,Objects.Structural.Geometry.Node,Objects.Structural.Geometry.Axis,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Bridge.GSAInfluenceNode");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class GSAListSchemaComponent: CreateSchemaObjectBase {
+    static GSAListSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public GSAListSchemaComponent(): base("GSAList", "GSAList", "Creates a Speckle object for a GSA List", "Speckle 2 GSA", "General Data") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 GSA";
+
+    internal static Guid internalGuid => new Guid("c11f5eca-a67a-d759-14b7-e2a227f4c389");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.ApplicationSpecific.GSA.GeneralData.GSAList.ctor(System.String,Objects.Structural.ApplicationSpecific.GSA.GeneralData.GSAListType,System.Collections.Generic.List`1[Speckle.Core.Models.Base],System.Nullable`1[System.Int32])","Objects.Structural.ApplicationSpecific.GSA.GeneralData.GSAList");
         base.AddedToDocument(document);
     }
 }
@@ -1835,7 +2735,7 @@ public class GSALoadBeamSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadBeam.ctor(System.Int32,Objects.Structural.Loading.LoadCase,System.Collections.Generic.List`1[Speckle.Core.Models.Base],Objects.Structural.Loading.BeamLoadType,Objects.Structural.Loading.LoadDirection,Objects.Structural.LoadAxisType,System.Collections.Generic.List`1[System.Double],System.Collections.Generic.List`1[System.Double],System.Boolean)","Objects.Structural.GSA.Loading.GSALoadBeam");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadBeam.ctor(Objects.Structural.Loading.LoadCase,System.Collections.Generic.List`1[Speckle.Core.Models.Base],Objects.Structural.Loading.BeamLoadType,Objects.Structural.Loading.LoadDirection,Objects.Structural.LoadAxisType,System.Collections.Generic.List`1[System.Double],System.Collections.Generic.List`1[System.Double],System.Boolean,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Loading.GSALoadBeam");
         base.AddedToDocument(document);
     }
 }
@@ -1865,7 +2765,7 @@ public class GSALoadBeam1SchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadBeam.ctor(System.Int32,Objects.Structural.Loading.LoadCase,System.Collections.Generic.List`1[Speckle.Core.Models.Base],Objects.Structural.Loading.BeamLoadType,Objects.Structural.Loading.LoadDirection,Objects.Structural.Geometry.Axis,System.Collections.Generic.List`1[System.Double],System.Collections.Generic.List`1[System.Double],System.Boolean)","Objects.Structural.GSA.Loading.GSALoadBeam");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadBeam.ctor(Objects.Structural.Loading.LoadCase,System.Collections.Generic.List`1[Speckle.Core.Models.Base],Objects.Structural.Loading.BeamLoadType,Objects.Structural.Loading.LoadDirection,Objects.Structural.Geometry.Axis,System.Collections.Generic.List`1[System.Double],System.Collections.Generic.List`1[System.Double],System.Boolean,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Loading.GSALoadBeam");
         base.AddedToDocument(document);
     }
 }
@@ -1895,37 +2795,7 @@ public class GSALoadCaseSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadCase.ctor(System.Int32,System.String,Objects.Structural.Loading.LoadType,Objects.Structural.Loading.LoadDirection2D,System.String,Objects.Structural.Loading.ActionType,System.String,System.String,System.Boolean)","Objects.Structural.GSA.Loading.GSALoadCase");
-        base.AddedToDocument(document);
-    }
-}
-
-// This is generated code:
-public class GSALoadCombinationSchemaComponent: CreateSchemaObjectBase {
-    static GSALoadCombinationSchemaComponent() {
-       SpeckleGHSettings.SettingsChanged += (_, args) =>
-          {
-            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
-            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
-            if (proxy == null) return;
-            proxy.Exposure = internalExposure;
-          };
-    }
-    public GSALoadCombinationSchemaComponent(): base("GSALoadCombination", "GSALoadCombination", "Creates a Speckle load combination for GSA", "Speckle 2 GSA", "Loading") { }
-    
-    internal static string internalCategory { get; }  = "Speckle 2 GSA";
-
-    internal static Guid internalGuid => new Guid("a79c8825-221a-d44f-5faa-b257f3f6c98e");
-
-    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
-      ? GH_Exposure.tertiary
-      : GH_Exposure.hidden;
-
-    public override Guid ComponentGuid => internalGuid;
-    public override GH_Exposure Exposure => internalExposure;
-    
-    public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadCombination.ctor(System.Int32,System.String,System.Collections.Generic.List`1[Speckle.Core.Models.Base],System.Collections.Generic.List`1[System.Double])","Objects.Structural.GSA.Loading.GSALoadCombination");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadCase.ctor(Objects.Structural.Loading.LoadType,System.String,Objects.Structural.Loading.ActionType,System.String,System.String,System.Boolean,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Loading.GSALoadCase");
         base.AddedToDocument(document);
     }
 }
@@ -1955,7 +2825,7 @@ public class GSALoadFaceSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadFace.ctor(System.Int32,Objects.Structural.Loading.LoadCase,System.Collections.Generic.List`1[Speckle.Core.Models.Base],Objects.Structural.Loading.FaceLoadType,Objects.Structural.Loading.LoadDirection2D,Objects.Structural.LoadAxisType,System.Collections.Generic.List`1[System.Double],System.Collections.Generic.List`1[System.Double],System.Boolean)","Objects.Structural.GSA.Loading.GSALoadFace");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadFace.ctor(Objects.Structural.Loading.LoadCase,System.Collections.Generic.List`1[Speckle.Core.Models.Base],Objects.Structural.Loading.FaceLoadType,Objects.Structural.Loading.LoadDirection2D,Objects.Structural.LoadAxisType,System.Collections.Generic.List`1[System.Double],System.Collections.Generic.List`1[System.Double],System.Boolean,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Loading.GSALoadFace");
         base.AddedToDocument(document);
     }
 }
@@ -1985,7 +2855,7 @@ public class GSALoadGravitySchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadGravity.ctor(System.Int32,System.String,Objects.Structural.Loading.LoadCase,Objects.Geometry.Vector)","Objects.Structural.GSA.Loading.GSALoadGravity");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadGravity.ctor(Objects.Structural.Loading.LoadCase,Objects.Geometry.Vector,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Loading.GSALoadGravity");
         base.AddedToDocument(document);
     }
 }
@@ -2015,7 +2885,7 @@ public class GSALoadGravity1SchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadGravity.ctor(System.Int32,System.String,Objects.Structural.Loading.LoadCase,System.Collections.Generic.List`1[Speckle.Core.Models.Base],Objects.Geometry.Vector)","Objects.Structural.GSA.Loading.GSALoadGravity");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadGravity.ctor(Objects.Structural.Loading.LoadCase,System.Collections.Generic.List`1[Speckle.Core.Models.Base],Objects.Geometry.Vector,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Loading.GSALoadGravity");
         base.AddedToDocument(document);
     }
 }
@@ -2045,7 +2915,187 @@ public class GSALoadGravity2SchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadGravity.ctor(System.Int32,System.String,Objects.Structural.Loading.LoadCase,System.Collections.Generic.List`1[Speckle.Core.Models.Base],System.Collections.Generic.List`1[Speckle.Core.Models.Base],Objects.Geometry.Vector,System.String)","Objects.Structural.GSA.Loading.GSALoadGravity");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadGravity.ctor(Objects.Structural.Loading.LoadCase,System.Collections.Generic.List`1[Speckle.Core.Models.Base],System.Collections.Generic.List`1[Speckle.Core.Models.Base],Objects.Geometry.Vector,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Loading.GSALoadGravity");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class GSALoadGridAreaSchemaComponent: CreateSchemaObjectBase {
+    static GSALoadGridAreaSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public GSALoadGridAreaSchemaComponent(): base("GSALoadGridArea (explicit polyline)", "GSALoadGridArea (explicit polyline)", "Creates a Speckle structural grid area load (by polyline) for GSA", "Speckle 2 GSA", "Loading") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 GSA";
+
+    internal static Guid internalGuid => new Guid("241a756f-0a76-4174-91d5-c2e68f458e30");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadGridArea.ctor(Objects.Structural.Loading.LoadCase,Objects.Structural.GSA.Geometry.GSAGridSurface,Objects.Geometry.Polyline,System.Double,Objects.Structural.Geometry.Axis,Objects.Structural.Loading.LoadDirection2D,System.Boolean,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Loading.GSALoadGridArea");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class GSALoadGridArea1SchemaComponent: CreateSchemaObjectBase {
+    static GSALoadGridArea1SchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public GSALoadGridArea1SchemaComponent(): base("GSALoadGridArea (GSAPolyline)", "GSALoadGridArea (GSAPolyline)", "Creates a Speckle structural grid area load (by GSAPolyline) for GSA", "Speckle 2 GSA", "Loading") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 GSA";
+
+    internal static Guid internalGuid => new Guid("6bb8f012-2eef-5a93-534b-31208c18e041");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadGridArea.ctor(Objects.Structural.Loading.LoadCase,Objects.Structural.GSA.Geometry.GSAGridSurface,Objects.Structural.GSA.Geometry.GSAPolyline,System.Double,Objects.Structural.Geometry.Axis,Objects.Structural.Loading.LoadDirection2D,System.Boolean,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Loading.GSALoadGridArea");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class GSALoadGridArea2SchemaComponent: CreateSchemaObjectBase {
+    static GSALoadGridArea2SchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public GSALoadGridArea2SchemaComponent(): base("GSALoadGridArea (whole plane)", "GSALoadGridArea (whole plane)", "Creates a Speckle structural grid area load for GSA", "Speckle 2 GSA", "Loading") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 GSA";
+
+    internal static Guid internalGuid => new Guid("b1740e03-4ea7-8ebc-1f75-00063a0703b5");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadGridArea.ctor(Objects.Structural.Loading.LoadCase,Objects.Structural.GSA.Geometry.GSAGridSurface,System.Double,Objects.Structural.Geometry.Axis,Objects.Structural.Loading.LoadDirection2D,System.Boolean,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Loading.GSALoadGridArea");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class GSALoadGridLineSchemaComponent: CreateSchemaObjectBase {
+    static GSALoadGridLineSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public GSALoadGridLineSchemaComponent(): base("GSALoadGridLine (explicit polyline)", "GSALoadGridLine (explicit polyline)", "Creates a Speckle structural grid line load (based on an explicit polyline) for GSA", "Speckle 2 GSA", "Loading") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 GSA";
+
+    internal static Guid internalGuid => new Guid("eb8b87ac-b3e2-1fae-0522-d46bf681965d");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadGridLine.ctor(Objects.Structural.Loading.LoadCase,Objects.Structural.GSA.Geometry.GSAGridSurface,Objects.Geometry.Polyline,System.Collections.Generic.List`1[System.Double],Objects.Structural.Geometry.Axis,Objects.Structural.Loading.LoadDirection2D,System.Boolean,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Loading.GSALoadGridLine");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class GSALoadGridLine1SchemaComponent: CreateSchemaObjectBase {
+    static GSALoadGridLine1SchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public GSALoadGridLine1SchemaComponent(): base("GSALoadGridLine (GSAPolyline)", "GSALoadGridLine (GSAPolyline)", "Creates a Speckle structural grid line load (based on a GSAPolyline) for GSA", "Speckle 2 GSA", "Loading") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 GSA";
+
+    internal static Guid internalGuid => new Guid("13d9fd61-3c2b-a54e-0187-532d997db518");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadGridLine.ctor(Objects.Structural.Loading.LoadCase,Objects.Structural.GSA.Geometry.GSAGridSurface,Objects.Structural.GSA.Geometry.GSAPolyline,System.Collections.Generic.List`1[System.Double],Objects.Structural.Geometry.Axis,Objects.Structural.Loading.LoadDirection2D,System.Boolean,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Loading.GSALoadGridLine");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class GSALoadGridPointSchemaComponent: CreateSchemaObjectBase {
+    static GSALoadGridPointSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public GSALoadGridPointSchemaComponent(): base("GSALoadGridPoint", "GSALoadGridPoint", "Creates a Speckle structural grid point load for GSA", "Speckle 2 GSA", "Loading") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 GSA";
+
+    internal static Guid internalGuid => new Guid("71ddf41d-e50f-734b-48d6-ce3ca61787a4");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadGridPoint.ctor(Objects.Structural.Loading.LoadCase,Objects.Structural.GSA.Geometry.GSAGridSurface,Objects.Geometry.Point,System.Double,Objects.Structural.Geometry.Axis,Objects.Structural.Loading.LoadDirection2D,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Loading.GSALoadGridPoint");
         base.AddedToDocument(document);
     }
 }
@@ -2075,7 +3125,7 @@ public class GSALoadNodeSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadNode.ctor(System.Int32,System.String,Objects.Structural.Loading.LoadCase,System.Collections.Generic.List`1[Objects.Structural.GSA.Geometry.GSANode],Objects.Structural.Loading.LoadDirection,System.Double)","Objects.Structural.GSA.Loading.GSALoadNode");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadNode.ctor(Objects.Structural.Loading.LoadCase,System.Collections.Generic.List`1[Objects.Structural.GSA.Geometry.GSANode],Objects.Structural.Loading.LoadDirection,System.Double,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Loading.GSALoadNode");
         base.AddedToDocument(document);
     }
 }
@@ -2105,7 +3155,67 @@ public class GSALoadNode1SchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadNode.ctor(System.Int32,System.String,Objects.Structural.Loading.LoadCase,System.Collections.Generic.List`1[Objects.Structural.Geometry.Node],Objects.Structural.Geometry.Axis,Objects.Structural.Loading.LoadDirection,System.Double)","Objects.Structural.GSA.Loading.GSALoadNode");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadNode.ctor(Objects.Structural.Loading.LoadCase,System.Collections.Generic.List`1[Objects.Structural.Geometry.Node],Objects.Structural.Geometry.Axis,Objects.Structural.Loading.LoadDirection,System.Double,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Loading.GSALoadNode");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class GSALoadThermal1dSchemaComponent: CreateSchemaObjectBase {
+    static GSALoadThermal1dSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public GSALoadThermal1dSchemaComponent(): base("GSALoadThermal1d ", "GSALoadThermal1d ", "Creates a Speckle 1d thermal load for GSA", "Speckle 2 GSA", "Loading") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 GSA";
+
+    internal static Guid internalGuid => new Guid("13e72b05-228b-5f2a-f267-0286cc6a5070");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadThermal1d.ctor(Objects.Structural.Loading.LoadCase,Objects.Structural.GSA.Loading.Thermal1dLoadType,System.Collections.Generic.List`1[System.Double],System.Collections.Generic.List`1[Objects.Structural.Geometry.Element1D],System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Loading.GSALoadThermal1d");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class GSALoadThermal2dSchemaComponent: CreateSchemaObjectBase {
+    static GSALoadThermal2dSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public GSALoadThermal2dSchemaComponent(): base("GSALoadThermal2d ", "GSALoadThermal2d ", "Creates a Speckle 2d thermal load for GSA", "Speckle 2 GSA", "Loading") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 GSA";
+
+    internal static Guid internalGuid => new Guid("bd1c82a1-675e-da5f-4fd9-8ebe3459dabe");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSALoadThermal2d.ctor(Objects.Structural.Loading.LoadCase,Objects.Structural.GSA.Loading.Thermal2dLoadType,System.Collections.Generic.List`1[System.Double],System.Collections.Generic.List`1[Objects.Structural.Geometry.Element2D],System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Loading.GSALoadThermal2d");
         base.AddedToDocument(document);
     }
 }
@@ -2135,7 +3245,7 @@ public class GSAMaterialSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Materials.GSAMaterial.ctor(System.Int32,System.String,Objects.Structural.MaterialType,System.String,System.String,System.String,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.String)","Objects.Structural.GSA.Materials.GSAMaterial");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Materials.GSAMaterial.ctor(System.String,Objects.Structural.MaterialType,System.String,System.String,System.String,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Materials.GSAMaterial");
         base.AddedToDocument(document);
     }
 }
@@ -2165,7 +3275,7 @@ public class GSAMember1DSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAMember1D.ctor(System.Int32,Objects.Geometry.Line,Objects.Structural.Properties.Property1D,Objects.Structural.Geometry.ElementType1D,Objects.Structural.Geometry.Restraint,Objects.Structural.Geometry.Restraint,Objects.Geometry.Vector,Objects.Geometry.Vector,Objects.Geometry.Plane)","Objects.Structural.GSA.Geometry.GSAMember1D");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAMember1D.ctor(Objects.ICurve,Objects.Structural.Properties.Property1D,Objects.Structural.Geometry.MemberType,Objects.Structural.Geometry.ElementType1D,System.String,Objects.Structural.Geometry.Restraint,Objects.Structural.Geometry.Restraint,Objects.Geometry.Vector,Objects.Geometry.Vector,Objects.Geometry.Plane,System.Int32,System.String,System.Boolean,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Geometry.GSAMember1D");
         base.AddedToDocument(document);
     }
 }
@@ -2195,7 +3305,37 @@ public class GSAMember1D1SchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAMember1D.ctor(System.Int32,Objects.Geometry.Line,Objects.Structural.Properties.Property1D,Objects.Structural.Geometry.ElementType1D,Objects.Structural.Geometry.Restraint,Objects.Structural.Geometry.Restraint,Objects.Geometry.Vector,Objects.Geometry.Vector,Objects.Structural.GSA.Geometry.GSANode,System.Double)","Objects.Structural.GSA.Geometry.GSAMember1D");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAMember1D.ctor(Objects.ICurve,Objects.Structural.Properties.Property1D,Objects.Structural.Geometry.MemberType,Objects.Structural.Geometry.ElementType1D,System.String,Objects.Structural.Geometry.Restraint,Objects.Structural.Geometry.Restraint,Objects.Geometry.Vector,Objects.Geometry.Vector,Objects.Structural.GSA.Geometry.GSANode,System.Double,System.Int32,System.String,System.Boolean,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Geometry.GSAMember1D");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class GSAMember1D2SchemaComponent: CreateSchemaObjectBase {
+    static GSAMember1D2SchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public GSAMember1D2SchemaComponent(): base("GSAMember1D (from local axis and topology)", "GSAMember1D (from local axis and topology)", "Creates a Speckle structural 1D member for GSA (from local axis and topology)", "Speckle 2 GSA", "Geometry") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 GSA";
+
+    internal static Guid internalGuid => new Guid("921614e5-d07c-6e12-e356-3e93dd04bee8");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAMember1D.ctor(System.Collections.Generic.List`1[Objects.Structural.Geometry.Node],Objects.Structural.Properties.Property1D,Objects.Structural.Geometry.MemberType,Objects.Structural.Geometry.ElementType1D,System.String,Objects.Structural.Geometry.Restraint,Objects.Structural.Geometry.Restraint,Objects.Geometry.Vector,Objects.Geometry.Vector,Objects.Geometry.Plane,System.Int32,System.String,System.Boolean,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Geometry.GSAMember1D");
         base.AddedToDocument(document);
     }
 }
@@ -2225,7 +3365,67 @@ public class GSAMember2DSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAMember2D.ctor(System.Collections.Generic.List`1[Objects.Structural.Geometry.Node],Objects.Structural.Properties.Property2D,Objects.Structural.Geometry.ElementType2D,System.Collections.Generic.List`1[System.Collections.Generic.List`1[Objects.Structural.Geometry.Node]],System.Double,System.Double)","Objects.Structural.GSA.Geometry.GSAMember2D");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAMember2D.ctor(System.Collections.Generic.List`1[Objects.Structural.Geometry.Node],Objects.Structural.Properties.Property2D,Objects.Structural.Geometry.MemberType2D,Objects.Structural.Geometry.AnalysisType2D,System.Collections.Generic.List`1[System.Collections.Generic.List`1[Objects.Structural.Geometry.Node]],System.Double,System.Double,System.String,System.Int32,System.String,System.Boolean,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Geometry.GSAMember2D");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class GSAMember2D1SchemaComponent: CreateSchemaObjectBase {
+    static GSAMember2D1SchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public GSAMember2D1SchemaComponent(): base("GSAMember2D (from polyline)", "GSAMember2D (from polyline)", "Creates a Speckle structural 2D member for GSA", "Speckle 2 GSA", "Geometry") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 GSA";
+
+    internal static Guid internalGuid => new Guid("782e51ae-a3ba-89df-0150-076a456f7e71");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAMember2D.ctor(Objects.Geometry.Polyline,Objects.Structural.Properties.Property2D,Objects.Structural.Geometry.MemberType2D,Objects.Structural.Geometry.AnalysisType2D,System.Collections.Generic.List`1[Objects.Geometry.Polyline],System.Double,System.Double,System.String,System.Int32,System.String,System.Boolean,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Geometry.GSAMember2D");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class GSAModelSchemaComponent: CreateSchemaObjectBase {
+    static GSAModelSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public GSAModelSchemaComponent(): base("GSAModel", "GSAModel", "Creates a GSA model", "Speckle 2 GSA", "Analysis") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 GSA";
+
+    internal static Guid internalGuid => new Guid("692e9c02-2a38-f3d4-1cfb-32308312137b");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Analysis.GSAModel.ctor(Objects.Structural.Analysis.Model,Objects.Structural.Analysis.Model,Objects.Structural.Results.ResultSetAll,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Analysis.GSAModel");
         base.AddedToDocument(document);
     }
 }
@@ -2255,7 +3455,7 @@ public class GSANodeSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSANode.ctor(System.Int32,Objects.Geometry.Point,Objects.Structural.Geometry.Restraint,Objects.Structural.Geometry.Axis,Objects.Structural.Properties.PropertySpring,Objects.Structural.Properties.PropertyMass,Objects.Structural.Properties.PropertyDamper,System.Double,System.String)","Objects.Structural.GSA.Geometry.GSANode");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSANode.ctor(Objects.Geometry.Point,Objects.Structural.Geometry.Restraint,Objects.Structural.Geometry.Axis,Objects.Structural.Properties.PropertySpring,Objects.Structural.Properties.PropertyMass,Objects.Structural.Properties.PropertyDamper,System.Double,System.String,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Geometry.GSANode");
         base.AddedToDocument(document);
     }
 }
@@ -2285,7 +3485,7 @@ public class GSAPathSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Bridge.GSAPath.ctor(System.Int32,System.String,Objects.Structural.GSA.Bridge.PathType,System.Int32,Objects.Structural.GSA.Bridge.GSAAlignment,System.Double,System.Double,System.Double,System.Int32)","Objects.Structural.GSA.Bridge.GSAPath");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Bridge.GSAPath.ctor(Objects.Structural.GSA.Bridge.PathType,System.Int32,Objects.Structural.GSA.Bridge.GSAAlignment,System.Double,System.Double,System.Double,System.Int32,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Bridge.GSAPath");
         base.AddedToDocument(document);
     }
 }
@@ -2315,7 +3515,37 @@ public class GSAPolylineSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Loading.GSAPolyline.ctor(System.String,System.Int32,System.Collections.Generic.IEnumerable`1[System.Double],System.String,Objects.Structural.GSA.Geometry.GSAGridPlane)","Objects.Structural.GSA.Loading.GSAPolyline");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAPolyline.ctor(Objects.Geometry.Polyline,System.String,Objects.Structural.GSA.Geometry.GSAGridPlane,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Geometry.GSAPolyline");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class GSAPolyline1SchemaComponent: CreateSchemaObjectBase {
+    static GSAPolyline1SchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public GSAPolyline1SchemaComponent(): base("GSAPolyline (from coordinates)", "GSAPolyline (from coordinates)", "Creates a Speckle structural polyline from coordinates for GSA", "Speckle 2 GSA", "Geometry") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 GSA";
+
+    internal static Guid internalGuid => new Guid("2fb4a853-1afd-3065-b51c-f9a32b454329");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAPolyline.ctor(System.Collections.Generic.List`1[System.Double],System.String,Objects.Structural.GSA.Geometry.GSAGridPlane,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Geometry.GSAPolyline");
         base.AddedToDocument(document);
     }
 }
@@ -2345,7 +3575,7 @@ public class GSAProperty1DSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Properties.GSAProperty1D.ctor(System.Int32,System.String,Objects.Structural.Materials.StructuralMaterial,Objects.Structural.Properties.Profiles.SectionProfile,System.Double,System.Double)","Objects.Structural.GSA.Properties.GSAProperty1D");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Properties.GSAProperty1D.ctor(System.String,Objects.Structural.Materials.StructuralMaterial,Objects.Structural.Properties.Profiles.SectionProfile,System.Double,System.Double,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Properties.GSAProperty1D");
         base.AddedToDocument(document);
     }
 }
@@ -2375,7 +3605,97 @@ public class GSAProperty2DSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Properties.GSAProperty2D.ctor(System.Int32,System.String,Objects.Structural.Materials.StructuralMaterial,System.Double)","Objects.Structural.GSA.Properties.GSAProperty2D");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Properties.GSAProperty2D.ctor(System.String,Objects.Structural.Materials.StructuralMaterial,System.Double,Objects.Structural.PropertyType2D,Objects.Structural.ReferenceSurface,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Properties.GSAProperty2D");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class GSAProperty2D1SchemaComponent: CreateSchemaObjectBase {
+    static GSAProperty2D1SchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public GSAProperty2D1SchemaComponent(): base("GSAProperty2D (with modifiers)", "GSAProperty2D (with modifiers)", "Creates a Speckle structural 2D element property for GSA", "Speckle 2 GSA", "Properties") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 GSA";
+
+    internal static Guid internalGuid => new Guid("32e6596f-3b26-34e0-0d64-a2dea51b4821");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Properties.GSAProperty2D.ctor(System.String,Objects.Structural.Materials.StructuralMaterial,Objects.Structural.PropertyType2D,System.Double,System.Nullable`1[System.Double],Objects.Structural.GSA.Properties.ModifierType,System.Nullable`1[System.Double],Objects.Structural.GSA.Properties.ModifierType,System.Nullable`1[System.Double],Objects.Structural.GSA.Properties.ModifierType,System.Nullable`1[System.Double],Objects.Structural.GSA.Properties.ModifierType,System.Double,Objects.Structural.ReferenceSurface,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Properties.GSAProperty2D");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class GSAPropertyLinkSchemaComponent: CreateSchemaObjectBase {
+    static GSAPropertyLinkSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public GSAPropertyLinkSchemaComponent(): base("GSAPropertyLink", "GSAPropertyLink", "Creates a Speckle structural link element property for GSA", "Speckle 2 GSA", "Properties") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 GSA";
+
+    internal static Guid internalGuid => new Guid("753d843d-f81b-66ac-b6ac-1c6ed4ff2341");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Properties.GSAPropertyLink.ctor(System.String,Objects.Structural.GSA.Properties.NonCustomLinkPropertyType,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Properties.GSAPropertyLink");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class GSAPropertyLink1SchemaComponent: CreateSchemaObjectBase {
+    static GSAPropertyLink1SchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public GSAPropertyLink1SchemaComponent(): base("GSAPropertyLink (custom)", "GSAPropertyLink (custom)", "Creates a Speckle structural link element property (with custom constraint conditions) for GSA", "Speckle 2 GSA", "Properties") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 GSA";
+
+    internal static Guid internalGuid => new Guid("3a80d505-3f7a-9415-a305-d9c6a47d8594");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Properties.GSAPropertyLink.ctor(System.String,Objects.Structural.GSA.Geometry.GSAConstraintCondition,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Properties.GSAPropertyLink");
         base.AddedToDocument(document);
     }
 }
@@ -2391,7 +3711,7 @@ public class GSARigidConstraintSchemaComponent: CreateSchemaObjectBase {
             proxy.Exposure = internalExposure;
           };
     }
-    public GSARigidConstraintSchemaComponent(): base("GSARigidConstraint", "GSARigidConstraint", "Creates a Speckle structural rigid restraint (a set of nodes constrained to move as a rigid body) for GSA", "Speckle 2 GSA", "Geometry") { }
+    public GSARigidConstraintSchemaComponent(): base("GSARigidConstraint (custom link)", "GSARigidConstraint (custom link)", "Creates a Speckle structural rigid restraint (a set of nodes constrained to move as a rigid body) for GSA", "Speckle 2 GSA", "Geometry") { }
     
     internal static string internalCategory { get; }  = "Speckle 2 GSA";
 
@@ -2405,7 +3725,37 @@ public class GSARigidConstraintSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSARigidConstraint.ctor(System.String,System.Int32,Objects.Structural.Geometry.Node,System.Collections.Generic.List`1[Objects.Structural.Geometry.Node],Speckle.Core.Models.Base,System.Collections.Generic.List`1[Objects.Structural.GSA.Analysis.GSAStage],Objects.Structural.GSA.Geometry.LinkageType,System.Collections.Generic.Dictionary`2[Objects.Structural.GSA.Geometry.AxisDirection6,System.Collections.Generic.List`1[Objects.Structural.GSA.Geometry.AxisDirection6]])","Objects.Structural.GSA.Geometry.GSARigidConstraint");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSARigidConstraint.ctor(Objects.Structural.Geometry.Node,System.Collections.Generic.List`1[Objects.Structural.Geometry.Node],Objects.Structural.GSA.Geometry.GSAConstraintCondition,System.Collections.Generic.List`1[Objects.Structural.GSA.Analysis.GSAStage],System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Geometry.GSARigidConstraint");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class GSARigidConstraint1SchemaComponent: CreateSchemaObjectBase {
+    static GSARigidConstraint1SchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public GSARigidConstraint1SchemaComponent(): base("GSARigidConstraint", "GSARigidConstraint", "Creates a Speckle structural rigid restraint (a set of nodes constrained to move as a rigid body) for GSA", "Speckle 2 GSA", "Geometry") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 GSA";
+
+    internal static Guid internalGuid => new Guid("f685affc-2585-7771-c345-c223632a796b");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSARigidConstraint.ctor(Objects.Structural.Geometry.Node,System.Collections.Generic.List`1[Objects.Structural.Geometry.Node],Objects.Structural.GSA.Geometry.LinkageType,System.Collections.Generic.List`1[Objects.Structural.GSA.Analysis.GSAStage],System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Geometry.GSARigidConstraint");
         base.AddedToDocument(document);
     }
 }
@@ -2435,7 +3785,37 @@ public class GSAStageSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Analysis.GSAStage.ctor(System.Int32,System.String,System.String,System.Collections.Generic.List`1[Speckle.Core.Models.Base],System.Double,System.Int32,System.Collections.Generic.List`1[Speckle.Core.Models.Base])","Objects.Structural.GSA.Analysis.GSAStage");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Analysis.GSAStage.ctor(System.Collections.Generic.List`1[Speckle.Core.Models.Base],System.Double,System.Int32,System.Collections.Generic.List`1[Speckle.Core.Models.Base],System.String,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Analysis.GSAStage");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class GSAStagePropSchemaComponent: CreateSchemaObjectBase {
+    static GSAStagePropSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public GSAStagePropSchemaComponent(): base("GSAStageProp", "GSAStageProp", "Creates a Speckle structural analysis stage property for GSA", "Speckle 2 GSA", "Analysis") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 GSA";
+
+    internal static Guid internalGuid => new Guid("7a655069-e4f3-a3f9-0290-43ade3130cf1");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Analysis.GSAStageProp.ctor(Objects.Structural.GSA.Analysis.GSAStage,Objects.Structural.Properties.Property,Objects.Structural.Properties.Property,Objects.Structural.GSA.Analysis.PropertyType,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Analysis.GSAStageProp");
         base.AddedToDocument(document);
     }
 }
@@ -2451,7 +3831,7 @@ public class GSASteelSchemaComponent: CreateSchemaObjectBase {
             proxy.Exposure = internalExposure;
           };
     }
-    public GSASteelSchemaComponent(): base("Steel", "Steel", "Creates a Speckle structural material for steel (to be used in structural analysis models)", "Speckle 2 Structural", "Materials") { }
+    public GSASteelSchemaComponent(): base("GSASteel", "GSASteel", "Creates a Speckle structural material for steel (to be used in structural analysis models)", "Speckle 2 Structural", "Materials") { }
     
     internal static string internalCategory { get; }  = "Speckle 2 Structural";
 
@@ -2465,7 +3845,7 @@ public class GSASteelSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Materials.GSASteel.ctor(System.Int32,System.String,System.String,System.String,System.String,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.String)","Objects.Structural.GSA.Materials.GSASteel");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Materials.GSASteel.ctor(System.String,System.String,System.String,System.String,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Materials.GSASteel");
         base.AddedToDocument(document);
     }
 }
@@ -2495,37 +3875,7 @@ public class GSAStoreySchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAStorey.ctor(System.Int32,System.String,Objects.Structural.Geometry.Axis,System.Double,System.Double,System.Double)","Objects.Structural.GSA.Geometry.GSAStorey");
-        base.AddedToDocument(document);
-    }
-}
-
-// This is generated code:
-public class GSATaskSchemaComponent: CreateSchemaObjectBase {
-    static GSATaskSchemaComponent() {
-       SpeckleGHSettings.SettingsChanged += (_, args) =>
-          {
-            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
-            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
-            if (proxy == null) return;
-            proxy.Exposure = internalExposure;
-          };
-    }
-    public GSATaskSchemaComponent(): base("GSAAnalysisTask", "GSAAnalysisTask", "Creates a Speckle structural analysis task for GSA", "Speckle 2 GSA", "Analysis") { }
-    
-    internal static string internalCategory { get; }  = "Speckle 2 GSA";
-
-    internal static Guid internalGuid => new Guid("958d20e6-b44e-1dbc-4df3-6dee9b9e13bb");
-
-    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
-      ? GH_Exposure.tertiary
-      : GH_Exposure.hidden;
-
-    public override Guid ComponentGuid => internalGuid;
-    public override GH_Exposure Exposure => internalExposure;
-    
-    public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Analysis.GSATask.ctor(System.Int32,System.String)","Objects.Structural.GSA.Analysis.GSATask");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Geometry.GSAStorey.ctor(Objects.Structural.Geometry.Axis,System.Double,System.Double,System.Double,System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Geometry.GSAStorey");
         base.AddedToDocument(document);
     }
 }
@@ -2555,7 +3905,7 @@ public class GSAUserVehicleSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Bridge.GSAUserVehicle.ctor(System.Int32,System.String,System.Double,System.Collections.Generic.List`1[System.Double],System.Collections.Generic.List`1[System.Double],System.Collections.Generic.List`1[System.Double],System.Collections.Generic.List`1[System.Double])","Objects.Structural.GSA.Bridge.GSAUserVehicle");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.GSA.Bridge.GSAUserVehicle.ctor(System.Double,System.Collections.Generic.List`1[System.Double],System.Collections.Generic.List`1[System.Double],System.Collections.Generic.List`1[System.Double],System.Collections.Generic.List`1[System.Double],System.String,System.Nullable`1[System.Int32])","Objects.Structural.GSA.Bridge.GSAUserVehicle");
         base.AddedToDocument(document);
     }
 }
@@ -3201,7 +4551,7 @@ public class NodeSchemaComponent: CreateSchemaObjectBase {
             proxy.Exposure = internalExposure;
           };
     }
-    public NodeSchemaComponent(): base("Node with properties", "Node with properties", "Creates a Speckle structural node with spring, mass and/or damper properties", "Speckle 2 Structural", "Geometry") { }
+    public NodeSchemaComponent(): base("Node", "Node", "Creates a Speckle structural node with spring, mass and/or damper properties", "Speckle 2 Structural", "Geometry") { }
     
     internal static string internalCategory { get; }  = "Speckle 2 Structural";
 
@@ -3335,7 +4685,7 @@ public class PerimeterSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Properties.Profiles.Perimeter.ctor(System.String,Objects.ICurve,System.Collections.Generic.List`1[Objects.ICurve])","Objects.Structural.Properties.Profiles.Perimeter");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Properties.Profiles.Perimeter.ctor(System.String,Objects.Geometry.Polyline,System.Collections.Generic.List`1[Objects.Geometry.Polyline])","Objects.Structural.Properties.Profiles.Perimeter");
         base.AddedToDocument(document);
     }
 }
@@ -3366,6 +4716,36 @@ public class PipeSchemaComponent: CreateSchemaObjectBase {
     
     public override void AddedToDocument(GH_Document document){
         SelectedConstructor = CSOUtils.FindConstructor("Objects.BuiltElements.Pipe.ctor(Objects.ICurve,System.Double,System.Double,System.Double,System.Double)","Objects.BuiltElements.Pipe");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class PointcloudSchemaComponent: CreateSchemaObjectBase {
+    static PointcloudSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public PointcloudSchemaComponent(): base("Pointcloud", "Pointcloud", "Create a point cloud object", "Speckle 2 Objects", "Geometry") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 Objects";
+
+    internal static Guid internalGuid => new Guid("2945c627-5f85-3119-d437-48a5426a12ae");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Geometry.Pointcloud.ctor(System.Collections.Generic.List`1[System.Double],System.Collections.Generic.List`1[System.Int32],System.Collections.Generic.List`1[System.Double])","Objects.Geometry.Pointcloud");
         base.AddedToDocument(document);
     }
 }
@@ -3515,7 +4895,7 @@ public class Property2D1SchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Properties.Property2D.ctor(System.String,Objects.Structural.Materials.StructuralMaterial,Objects.Structural.PropertyType2D,System.Double)","Objects.Structural.Properties.Property2D");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Properties.Property2D.ctor(System.String,Objects.Structural.Materials.StructuralMaterial,Objects.Structural.PropertyType2D,System.Double,Objects.Structural.ReferenceSurface)","Objects.Structural.Properties.Property2D");
         base.AddedToDocument(document);
     }
 }
@@ -3641,6 +5021,36 @@ public class PropertyDamper1SchemaComponent: CreateSchemaObjectBase {
 }
 
 // This is generated code:
+public class PropertyLinkSchemaComponent: CreateSchemaObjectBase {
+    static PropertyLinkSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public PropertyLinkSchemaComponent(): base("PropertyLink", "PropertyLink", "Creates a Speckle structural link property", "Speckle 2 Structural", "Properties") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 Structural";
+
+    internal static Guid internalGuid => new Guid("d2816028-d979-2ede-f243-3c6d27f7f8e5");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Properties.PropertyLink.ctor(System.String)","Objects.Structural.Properties.PropertyLink");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
 public class PropertyMassSchemaComponent: CreateSchemaObjectBase {
     static PropertyMassSchemaComponent() {
        SpeckleGHSettings.SettingsChanged += (_, args) =>
@@ -3741,7 +5151,7 @@ public class PropertySpring1SchemaComponent: CreateSchemaObjectBase {
             proxy.Exposure = internalExposure;
           };
     }
-    public PropertySpring1SchemaComponent(): base("PropertySpring (linear/elastic)", "PropertySpring (linear/elastic)", "Creates a Speckle structural spring property (linear/elastic spring)", "Speckle 2 Structural", "Properties") { }
+    public PropertySpring1SchemaComponent(): base("PropertySpring (compression-only)", "PropertySpring (compression-only)", "Creates a Speckle structural spring property (compression-only spring)", "Speckle 2 Structural", "Properties") { }
     
     internal static string internalCategory { get; }  = "Speckle 2 Structural";
 
@@ -3755,7 +5165,7 @@ public class PropertySpring1SchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Properties.PropertySpring.ctor(System.String,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double)","Objects.Structural.Properties.PropertySpring");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Properties.PropertySpring.ctor(System.String,System.Double,System.Double)","Objects.Structural.Properties.PropertySpring");
         base.AddedToDocument(document);
     }
 }
@@ -3771,11 +5181,41 @@ public class PropertySpring2SchemaComponent: CreateSchemaObjectBase {
             proxy.Exposure = internalExposure;
           };
     }
-    public PropertySpring2SchemaComponent(): base("PropertySpring (non-linear)", "PropertySpring (non-linear)", "Creates a Speckle structural spring property (non-linear spring)", "Speckle 2 Structural", "Properties") { }
+    public PropertySpring2SchemaComponent(): base("PropertySpring (linear/elastic)", "PropertySpring (linear/elastic)", "Creates a Speckle structural spring property (linear/elastic spring)", "Speckle 2 Structural", "Properties") { }
     
     internal static string internalCategory { get; }  = "Speckle 2 Structural";
 
     internal static Guid internalGuid => new Guid("761c5a65-bec6-b6fb-1df5-c49cc427631b");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Properties.PropertySpring.ctor(System.String,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double)","Objects.Structural.Properties.PropertySpring");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class PropertySpring3SchemaComponent: CreateSchemaObjectBase {
+    static PropertySpring3SchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public PropertySpring3SchemaComponent(): base("PropertySpring (non-linear)", "PropertySpring (non-linear)", "Creates a Speckle structural spring property (non-linear spring)", "Speckle 2 Structural", "Properties") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 Structural";
+
+    internal static Guid internalGuid => new Guid("316c6279-53c2-90f4-d4d3-f9b2550db217");
 
     internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
       ? GH_Exposure.tertiary
@@ -4145,7 +5585,7 @@ public class ResultGlobalSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Results.ResultGlobal.ctor(Objects.Structural.Loading.LoadCase,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single)","Objects.Structural.Results.ResultGlobal");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Results.ResultGlobal.ctor(Objects.Structural.Loading.LoadCase,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Nullable`1[System.Int32],System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single)","Objects.Structural.Results.ResultGlobal");
         base.AddedToDocument(document);
     }
 }
@@ -4175,7 +5615,7 @@ public class ResultGlobal1SchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Results.ResultGlobal.ctor(Objects.Structural.Loading.LoadCombination,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single)","Objects.Structural.Results.ResultGlobal");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Results.ResultGlobal.ctor(Objects.Structural.Loading.LoadCombination,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Nullable`1[System.Int32],System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single)","Objects.Structural.Results.ResultGlobal");
         base.AddedToDocument(document);
     }
 }
@@ -4355,7 +5795,37 @@ public class ResultSetAllSchemaComponent: CreateSchemaObjectBase {
     public override GH_Exposure Exposure => internalExposure;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Results.ResultSetAll.ctor(Objects.Structural.Results.ResultSet1D,Objects.Structural.Results.ResultSet2D,Objects.Structural.Results.ResultSet3D,Objects.Structural.Results.ResultGlobal,Objects.Structural.Results.ResultSetNode)","Objects.Structural.Results.ResultSetAll");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Results.ResultSetAll.ctor(Objects.Structural.Results.ResultSet1D,Objects.Structural.Results.ResultSet2D,Objects.Structural.Results.ResultSet3D,Objects.Structural.Results.ResultSetGlobal,Objects.Structural.Results.ResultSetNode)","Objects.Structural.Results.ResultSetAll");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class ResultSetGlobalSchemaComponent: CreateSchemaObjectBase {
+    static ResultSetGlobalSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public ResultSetGlobalSchemaComponent(): base("ResultSetGlobal", "ResultSetGlobal", "Creates a Speckle global result set object", "Speckle 2 Structural", "Results") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 Structural";
+
+    internal static Guid internalGuid => new Guid("fc1c8a62-20c6-ff3a-575f-ac4a00f1bfa4");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Results.ResultSetGlobal.ctor(System.Collections.Generic.List`1[Objects.Structural.Results.ResultGlobal])","Objects.Structural.Results.ResultSetGlobal");
         base.AddedToDocument(document);
     }
 }
@@ -4472,10 +5942,41 @@ public class RevitCeilingSchemaComponent: CreateSchemaObjectBase {
       : GH_Exposure.hidden;
 
     public override Guid ComponentGuid => internalGuid;
-    public override GH_Exposure Exposure => internalExposure;
+    public override bool Obsolete => true;
+    public override GH_Exposure Exposure => GH_Exposure.hidden;
     
     public override void AddedToDocument(GH_Document document){
         SelectedConstructor = CSOUtils.FindConstructor("Objects.BuiltElements.Revit.RevitCeiling.ctor(Objects.ICurve,System.String,System.String,Objects.BuiltElements.Level,System.Double,Objects.Geometry.Line,System.Double,System.Collections.Generic.List`1[Objects.ICurve],System.Collections.Generic.List`1[Speckle.Core.Models.Base])","Objects.BuiltElements.Revit.RevitCeiling");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class RevitCeiling1SchemaComponent: CreateSchemaObjectBase {
+    static RevitCeiling1SchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public RevitCeiling1SchemaComponent(): base("RevitCeiling", "RevitCeiling", "Creates a Revit ceiling", "Speckle 2 Revit", "Architecture") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 Revit";
+
+    internal static Guid internalGuid => new Guid("6c7f6ee3-d520-3153-1ade-47ad953c9540");
+
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+
+    public override Guid ComponentGuid => internalGuid;
+    public override GH_Exposure Exposure => internalExposure;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.BuiltElements.Revit.RevitCeiling.ctor(Objects.ICurve,System.String,System.String,Objects.BuiltElements.Level,System.Double,Objects.Geometry.Line,System.Collections.Generic.List`1[Objects.ICurve],System.Collections.Generic.List`1[Speckle.Core.Models.Base])","Objects.BuiltElements.Revit.RevitCeiling");
         base.AddedToDocument(document);
     }
 }
