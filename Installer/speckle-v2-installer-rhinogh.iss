@@ -32,14 +32,14 @@ ChangesAssociations=yes
 PrivilegesRequired=lowest
 VersionInfoVersion={#AppVersion}
 
+
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Components]
-Name: rhino6; Description: Speckle for Rhino 6 - v{#Rhino6Version};  Types: full
-Name: rhino7; Description: Speckle for Rhino 7 - v{#Rhino7Version};  Types: full
-Name: gh; Description: Speckle for Grasshopper - v{#GrasshopperVersion};  Types: full
-Name: kits; Description: Speckle Kits - v{#AppVersion};  Types: full custom; Flags: fixed
+Name: rhinogh6; Description: Speckle for Rhino 6 and Grasshoppper - v{#Rhino6Version};  Types: full
+Name: rhinogh7; Description: Speckle for Rhino 7 and Grasshoppper - v{#Rhino7Version};  Types: full
+Name: kits; Description: Speckle Kits - v;  Types: full custom; Flags: fixed
 
 [Types]
 Name: "full"; Description: "Full installation"
@@ -49,19 +49,17 @@ Name: "custom"; Description: "Custom installation"; Flags: iscustom
 Name: "{app}"; Permissions: everyone-full
 
 [Files]
-;rhino6                                                                                                                                    
-Source: "..\ConnectorRhino\ConnectorRhino6\bin\Release\win-x64\*"; DestDir: "{userappdata}\McNeel\Rhinoceros\6.0\Plug-ins\SpeckleRhino2 (8dd5f30b-a13d-4a24-abdc-3e05c8c87143)\"; Flags: ignoreversion recursesubdirs; Components: rhino6 gh
-Source: "..\ConnectorRhino\ConnectorRhino\Toolbars\SpeckleConnectorRhino.rui"; DestDir: "{userappdata}\McNeel\Rhinoceros\6.0\Plug-ins\SpeckleRhino2 (8dd5f30b-a13d-4a24-abdc-3e05c8c87143)\"; Flags: ignoreversion recursesubdirs; Components: rhino6 gh
+;rhinogh6                                                                                                                                    
+Source: "..\ConnectorRhino\ConnectorRhino6\bin\Release\win-x64\*"; DestDir: "{userappdata}\McNeel\Rhinoceros\6.0\Plug-ins\SpeckleRhino2 (8dd5f30b-a13d-4a24-abdc-3e05c8c87143)\"; Flags: ignoreversion recursesubdirs; Components: rhinogh6
+Source: "..\ConnectorRhino\ConnectorRhino\Toolbars\SpeckleConnectorRhino.rui"; DestDir: "{userappdata}\McNeel\Rhinoceros\6.0\Plug-ins\SpeckleRhino2 (8dd5f30b-a13d-4a24-abdc-3e05c8c87143)\"; Flags: ignoreversion recursesubdirs; Components: rhinogh6
+Source: "..\Objects\Converters\ConverterRhinoGh\ConverterRhino6\bin\Release\netstandard2.0\Objects.Converter.Rhino6.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects\"; Flags: ignoreversion recursesubdirs; Components: rhinogh6
+Source: "..\Objects\Converters\ConverterRhinoGh\ConverterGrasshopper6\bin\Release\netstandard2.0\Objects.Converter.Grasshopper6.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects\"; Flags: ignoreversion recursesubdirs; Components: rhinogh6
 
-;rhino7
-Source: "..\ConnectorRhino\ConnectorRhino7\bin\Release\win-x64\*"; DestDir: "{userappdata}\McNeel\Rhinoceros\7.0\Plug-ins\SpeckleRhino2 (8dd5f30b-a13d-4a24-abdc-3e05c8c87143)\"; Flags: ignoreversion recursesubdirs; Components: rhino7 gh
-Source: "..\ConnectorRhino\ConnectorRhino\Toolbars\SpeckleConnectorRhino.rui"; DestDir: "{userappdata}\McNeel\Rhinoceros\7.0\Plug-ins\SpeckleRhino2 (8dd5f30b-a13d-4a24-abdc-3e05c8c87143)\"; Flags: ignoreversion recursesubdirs; Components: rhino7 gh
-
-;gh
-Source: "..\Objects\Converters\ConverterRhinoGh\ConverterRhino6\bin\Release\netstandard2.0\Objects.Converter.Rhino6.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects\"; Flags: ignoreversion recursesubdirs; Components: rhino6 gh
-Source: "..\Objects\Converters\ConverterRhinoGh\ConverterRhino7\bin\Release\net48\Objects.Converter.Rhino7.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects\"; Flags: ignoreversion recursesubdirs; Components: rhino7 gh
-Source: "..\Objects\Converters\ConverterRhinoGh\ConverterGrasshopper6\bin\Release\netstandard2.0\Objects.Converter.Grasshopper6.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects\"; Flags: ignoreversion recursesubdirs; Components: rhino6 gh
-Source: "..\Objects\Converters\ConverterRhinoGh\ConverterGrasshopper7\bin\Release\net48\Objects.Converter.Grasshopper7.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects\"; Flags: ignoreversion recursesubdirs; Components: rhino7 gh
+;rhinogh7
+Source: "..\ConnectorRhino\ConnectorRhino7\bin\Release\win-x64\*"; DestDir: "{userappdata}\McNeel\Rhinoceros\7.0\Plug-ins\SpeckleRhino2 (8dd5f30b-a13d-4a24-abdc-3e05c8c87143)\"; Flags: ignoreversion recursesubdirs; Components: rhinogh7
+Source: "..\ConnectorRhino\ConnectorRhino\Toolbars\SpeckleConnectorRhino.rui"; DestDir: "{userappdata}\McNeel\Rhinoceros\7.0\Plug-ins\SpeckleRhino2 (8dd5f30b-a13d-4a24-abdc-3e05c8c87143)\"; Flags: ignoreversion recursesubdirs; Components: rhinogh7
+Source: "..\Objects\Converters\ConverterRhinoGh\ConverterRhino7\bin\Release\net48\Objects.Converter.Rhino7.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects\"; Flags: ignoreversion recursesubdirs; Components: rhinogh7
+Source: "..\Objects\Converters\ConverterRhinoGh\ConverterGrasshopper7\bin\Release\net48\Objects.Converter.Grasshopper7.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects\"; Flags: ignoreversion recursesubdirs; Components: rhinogh7
 
 ;kits
 Source: "..\Objects\Objects\bin\Release\netstandard2.0\Objects.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects"; Flags: ignoreversion recursesubdirs; Components: kits

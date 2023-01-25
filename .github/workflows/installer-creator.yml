@@ -92,7 +92,7 @@ jobs:
       shell: cmd
       run: |
         SET _version=${{ github.event.inputs.version }}
-        for %%x in (Objects, ConnectorAutocadCivil, ConnectorDynamo, ConnectorGrasshopper, ConnectorRevit, ConnectorRhino, ConnectorCSI, ConnectorGSA, ConnectorBentley) do (
+        for %%x in (Objects, ConnectorAutocadCivil, ConnectorDynamo, ConnectorRevit, ConnectorRhino, ConnectorCSI, ConnectorGSA, ConnectorBentley) do (
           cd %%x && msbuild %%x.sln /p:Configuration=Release /p:WarningLevel=0 /p:IsDesktopBuild=false /p:AssemblyVersionNumber=%_version% /p:AssemblyInformationalVersion=%_version% /p:Version=%_version% && cd ../ 
         )            
         
