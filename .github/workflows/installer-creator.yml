@@ -84,7 +84,7 @@ jobs:
     - name: Restore all the applications
       shell: cmd
       run: |
-        for %%x in (Objects, ConnectorAutocadCivil, ConnectorDynamo, ConnectorGrasshopper, ConnectorRevit, ConnectorRhino, ConnectorCSI, ConnectorGSA, ConnectorBentley) do (
+        for %%x in (Objects, ConnectorAutocadCivil, ConnectorDynamo, ConnectorRevit, ConnectorRhino, ConnectorCSI, ConnectorGSA, ConnectorBentley) do (
           cd %%x && msbuild %%x.sln /t:Restore /p:Configuration=Release /p:WarningLevel=0 /p:IsDesktopBuild=false && cd ../ 
         )
 
