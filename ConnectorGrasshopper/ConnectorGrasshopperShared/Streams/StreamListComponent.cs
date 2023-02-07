@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using ConnectorGrasshopper.Extras;
+using Grasshopper;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Speckle.Core.Api;
@@ -67,8 +68,8 @@ namespace ConnectorGrasshopper.Streams
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Max number of streams retrieved is 50.");
         }
 
-        var account = string.IsNullOrEmpty(userId) ? AccountManager.GetDefaultAccount() :
-          AccountManager.GetAccounts().FirstOrDefault(a => a.userInfo.id == userId);
+        var account = string.IsNullOrEmpty(userId) ? AccountManager.GetDefaultAccount(true) :
+          AccountManager.GetAccounts(true).FirstOrDefault(a => a.userInfo.id == userId);
 
         if (userId == null)
         {
@@ -85,51 +86,76 @@ namespace ConnectorGrasshopper.Streams
 
         Tracker.TrackNodeRun();
 
-        Task.Run(async () =>
+#if RHINO7
+        if (!Instances.RunningHeadless)
         {
-          if (!await Http.UserHasInternet())
-          {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "You are not connected to the internet");
-            Message = "Error";
-            return;
-          }
-          try
-          {
-            var client = new Client(account);
-            // Save the result
-            var result = await client.StreamsGet(limit);
-            streams = result
-              .Select(stream => new StreamWrapper(stream.id, account.userInfo.id, account.serverInfo.url))
-              .ToList();
-          }
-          catch (Exception e)
-          {
-            error = e;
-          }
-          finally
-          {
-            Rhino.RhinoApp.InvokeOnUiThread((Action)delegate { ExpireSolution(true); });
-          }
-        });
+          Task.Run(StreamListTask(limit, account));
+        }
+        else
+        {
+          var result = Task.Run(StreamListTask(limit, account)).Result;
+          if (result != null) { SetData(DA); }
+        }
+#else
+        Task.Run(StreamListTask(limit, account));
+#endif
+
+
       }
       else
       {
-        Message = "Done";
-        int limit = 10;
-        DA.GetData(1, ref limit); // Has default value so will never be empty.
-
-        if (limit > 50)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Max number of streams retrieved is 50.");
-        }
-
-        if (streams != null)
-        {
-          DA.SetDataList(0, streams.Select(item => new GH_SpeckleStream(item)));
-        }
-
-        streams = null;
+        SetData(DA);
       }
+    }
+
+    private void SetData(IGH_DataAccess DA)
+    {
+      Message = "Done";
+      int limit = 10;
+      DA.GetData(1, ref limit); // Has default value so will never be empty.
+
+      if (limit > 50)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Max number of streams retrieved is 50.");
+      }
+
+      if (streams != null)
+      {
+        DA.SetDataList(0, streams.Select(item => new GH_SpeckleStream(item)));
+      }
+
+      streams = null;
+    }
+
+    private Func<Task<List<StreamWrapper>>> StreamListTask(int limit, Account account)
+    {
+      return async () =>
+      {
+        if (!await Http.UserHasInternet())
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "You are not connected to the internet");
+          Message = "Error";
+          return null;
+        }
+        try
+        {
+          var client = new Client(account);
+          // Save the result
+          var result = await client.StreamsGet(limit);
+          streams = result
+            .Select(stream => new StreamWrapper(stream.id, account.userInfo.id, account.serverInfo.url))
+            .ToList();
+        }
+        catch (Exception e)
+        {
+          error = e;
+        }
+        finally
+        {
+          Rhino.RhinoApp.InvokeOnUiThread((Action)delegate { ExpireSolution(true); });
+        }
+        return streams;
+      };
     }
   }
 }

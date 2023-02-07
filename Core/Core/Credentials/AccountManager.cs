@@ -26,7 +26,7 @@ namespace Speckle.Core.Credentials
   /// <summary>
   /// Manage accounts locally for desktop applications.
   /// </summary>
-  public static class AccountManager
+  public static partial class AccountManager
   {
 
     private static SQLiteTransport AccountStorage = new SQLiteTransport(scope: "Accounts");
