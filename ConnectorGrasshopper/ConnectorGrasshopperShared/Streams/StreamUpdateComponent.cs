@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
 using ConnectorGrasshopper.Extras;
+using Grasshopper;
 using Grasshopper.Kernel;
 using Speckle.Core.Api;
+using Speckle.Core.Credentials;
 using Speckle.Core.Models.Extensions;
 using Logging = Speckle.Core.Logging;
 
@@ -76,39 +78,61 @@ namespace ConnectorGrasshopper.Streams
         if (DA.Iteration == 0)
           Tracker.TrackNodeRun();
         Message = "Fetching";
-        Task.Run(async () =>
+#if RHINO7
+        if (!Instances.RunningHeadless)
         {
-          try
-          {
-            var account = streamWrapper.GetAccount().Result;
-            var client = new Client(account);            
-            stream = await client.StreamGet(streamWrapper.StreamId);
-
-            var input = new StreamUpdateInput();
-            if (!string.IsNullOrEmpty(jobNumber)) input = new StreamWithJobNumberUpdateInput { id = streamWrapper.StreamId, name = name ?? stream.name, description = description ?? stream.description, jobNumber = jobNumber ?? stream.jobNumber };
-            else input = new StreamUpdateInput { id = streamWrapper.StreamId, name = name ?? stream.name, description = description ?? stream.description };
-
-            if (stream.isPublic != isPublic) input.isPublic = isPublic;
-
-            await client.StreamUpdate(input);
-          }
-          catch (Exception e)
-          {
-            error = e;
-          }
-          finally
-          {
-            Rhino.RhinoApp.InvokeOnUiThread((Action)delegate { ExpireSolution(true); });
-          }
-
-        });
+          Task.Run(StreamUpdateTask(name, description, isPublic, jobNumber, streamWrapper));
+        }
+        else
+        {
+          var result = Task.Run(StreamUpdateTask(name, description, isPublic, jobNumber, streamWrapper)).Result;
+          if (result != null) { SetData(DA, streamWrapper); }
+        }
+#else
+        Task.Run(StreamUpdateTask(name, description, isPublic, jobNumber, streamWrapper));
+#endif  
       }
       else
       {
-        stream = null;
-        Message = "Done";
-        DA.SetData(0, streamWrapper.StreamId);
+        SetData(DA, streamWrapper);
       }
+    }
+
+    private void SetData(IGH_DataAccess DA, StreamWrapper streamWrapper)
+    {
+      stream = null;
+      Message = "Done";
+      DA.SetData(0, streamWrapper.StreamId);
+    }
+
+    private Func<Task<Stream>> StreamUpdateTask(string name, string description, bool isPublic, string jobNumber, StreamWrapper streamWrapper)
+    {
+      return async () =>
+      {
+        try
+        {
+          var account = streamWrapper.GetAccount().Result;
+          var client = new Client(account);
+          stream = await client.StreamGet(streamWrapper.StreamId);
+
+          var input = new StreamUpdateInput();
+          if (!string.IsNullOrEmpty(jobNumber)) input = new StreamWithJobNumberUpdateInput { id = streamWrapper.StreamId, name = name ?? stream.name, description = description ?? stream.description, jobNumber = jobNumber ?? stream.jobNumber };
+          else input = new StreamUpdateInput { id = streamWrapper.StreamId, name = name ?? stream.name, description = description ?? stream.description };
+
+          if (stream.isPublic != isPublic) input.isPublic = isPublic;
+
+          await client.StreamUpdate(input);
+        }
+        catch (Exception e)
+        {
+          error = e;
+        }
+        finally
+        {
+          Rhino.RhinoApp.InvokeOnUiThread((Action)delegate { ExpireSolution(true); });
+        }
+        return stream;
+      };
     }
   }
 }

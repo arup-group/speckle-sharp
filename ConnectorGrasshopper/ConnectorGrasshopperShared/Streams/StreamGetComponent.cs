@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using ConnectorGrasshopper.Extras;
+using Grasshopper;
 using Grasshopper.Kernel;
 using Speckle.Core.Credentials;
 using Speckle.Core.Models.Extensions;
@@ -60,8 +61,8 @@ namespace ConnectorGrasshopper.Streams
       DA.GetData(1, ref userId);
       var idWrapper = ghIdWrapper.Value;
       var account = string.IsNullOrEmpty(userId)
-        ? AccountManager.GetAccounts().FirstOrDefault(a => a.serverInfo.url == idWrapper.ServerUrl) // If no user is passed in, get the first account for this server
-        : AccountManager.GetAccounts().FirstOrDefault(a => a.userInfo.id == userId); // If user is passed in, get matching user in the db
+        ? AccountManager.GetAccounts(true).FirstOrDefault(a => a.serverInfo.url == idWrapper.ServerUrl) // If no user is passed in, get the first account for this server
+        : AccountManager.GetAccounts(true).FirstOrDefault(a => a.userInfo.id == userId); // If user is passed in, get matching user in the db
       
       if (account == null || account.serverInfo.url != idWrapper.ServerUrl)
       {
@@ -89,36 +90,59 @@ namespace ConnectorGrasshopper.Streams
           AddRuntimeMessage(GH_RuntimeMessageLevel.Error, errorMessage);
           return;
         }
-        
-        if(DA.Iteration == 0)                 
+
+        if (DA.Iteration == 0)
           Tracker.TrackNodeRun();
 
         // Run
-        Task.Run(async () =>
+#if RHINO7
+        if (!Instances.RunningHeadless)
         {
-          try
-          {
-            var acc = idWrapper.GetAccount().Result;
-            idWrapper.UserId = acc.userInfo.id;
-            stream = idWrapper;
-          }
-          catch (Exception e)
-          {
-            stream = null;
-            error = e;
-          }
-          finally
-          {
-            Rhino.RhinoApp.InvokeOnUiThread((Action)delegate { ExpireSolution(true); });
-          }
-        });
+          Task.Run(StreamGetTask(idWrapper));
+        }
+        else
+        {
+          var result = Task.Run(StreamGetTask(idWrapper)).Result;
+          if (result != null) { SetData(DA); }
+        }
+#else
+        Task.Run(StreamGetTask(idWrapper));
+#endif  
       }
       else
       {
-        Message = "Done";
-        DA.SetData(0, new GH_SpeckleStream(stream));
-        stream = null;
+        SetData(DA);
       }
+    }
+
+    private void SetData(IGH_DataAccess DA)
+    {
+      Message = "Done";
+      DA.SetData(0, new GH_SpeckleStream(stream));
+      stream = null;
+    }
+
+    private Func<Task<StreamWrapper>> StreamGetTask(StreamWrapper idWrapper)
+    {
+      return async () =>
+      {
+        try
+        {
+          var acc = idWrapper.GetAccount().Result;
+          idWrapper.UserId = acc.userInfo.id;
+          stream = idWrapper;
+        }
+        catch (Exception e)
+        {
+          stream = null;
+          error = e;
+        }
+        finally
+        {
+          Rhino.RhinoApp.InvokeOnUiThread((Action)delegate { ExpireSolution(true); });
+        }
+        return stream;
+      };
     }
 
     private bool ValidateInput(Account account, string id, ref string s)

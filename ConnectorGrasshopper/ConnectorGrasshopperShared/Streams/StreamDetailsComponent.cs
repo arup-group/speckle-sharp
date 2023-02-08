@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Security.Principal;
 using System.Threading.Tasks;
 using ConnectorGrasshopper.Extras;
+using Grasshopper;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
@@ -82,112 +84,135 @@ namespace ConnectorGrasshopper.Streams
         {
           tooManyItems = true;
         }
-        
-        if(DA.Iteration == 0)
+
+        if (DA.Iteration == 0)
           Tracker.TrackNodeRun();
 
-        Task.Run(async () =>
+#if RHINO7
+        if (!Instances.RunningHeadless)
         {
-          try
-          {
-            int count = 0;
-            var tasks = new Dictionary<GH_Path, Task<Stream>>();
-
-            ghStreamTree.Paths.ToList().ForEach(path =>
-            {
-              if (count >= 20) return;
-              var branch = ghStreamTree[path];
-              var itemCount = 0;
-              branch.ForEach(item =>
-              {
-                if (item == null || count >= 20)
-                {
-                  itemCount++;
-                  return;
-                }
-
-                Account account = null;
-                try
-                {
-                  account = item.Value.GetAccount().Result;
-                }
-                catch (Exception e)
-                {
-                  error = e;
-                  return;
-                }
-                
-                var client = new Client(account);
-
-                var task = client.StreamGet(item.Value?.StreamId);
-                tasks[path.AppendElement(itemCount)] = task;
-                count++;
-                itemCount++;
-              });
-            });
-
-            var values = await Task.WhenAll(tasks.Values);
-            var fetchedStreams = new Dictionary<GH_Path, Stream>();
-
-            for (int i = 0; i < tasks.Keys.ToList().Count; i++)
-            {
-              var key = tasks.Keys.ToList()[i];
-              fetchedStreams[key] = values[i];
-            }
-
-            streams = fetchedStreams;
-
-          }
-          catch (Exception e)
-          {
-            error = e;
-          }
-          finally
-          {
-            Rhino.RhinoApp.InvokeOnUiThread((Action)delegate { ExpireSolution(true); });
-          }
-        });
+          Task.Run(StreamDetailsTask(ghStreamTree));
+        }
+        else
+        {
+          var result = Task.Run(StreamDetailsTask(ghStreamTree)).Result;
+          if (result != null) { SetData(DA); }
+        }
+#else
+        Task.Run(StreamDetailsTask(ghStreamTree));
+#endif        
       }
       else
       {
-        if (tooManyItems)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning,
-            "Input data has too many items. Only the first 20 streams will be fetched.");
-          tooManyItems = false;
-        }
-        var id = new GH_Structure<IGH_Goo>();
-        var name = new GH_Structure<IGH_Goo>();
-        var description = new GH_Structure<IGH_Goo>();
-        var createdAt = new GH_Structure<IGH_Goo>();
-        var updatedAt = new GH_Structure<IGH_Goo>();
-        var isPublic = new GH_Structure<GH_Boolean>();
-        var collaborators = new GH_Structure<IGH_Goo>();
-        var branches = new GH_Structure<IGH_Goo>();
-
-        streams.AsEnumerable()?.ToList().ForEach(pair =>
-        {
-          id.Append(GH_Convert.ToGoo(pair.Value.id), pair.Key);
-          name.Append(GH_Convert.ToGoo(pair.Value.name), pair.Key);
-          description.Append(GH_Convert.ToGoo(pair.Value.description), pair.Key);
-          createdAt.Append(GH_Convert.ToGoo(pair.Value.createdAt), pair.Key);
-          updatedAt.Append(GH_Convert.ToGoo(pair.Value.updatedAt), pair.Key);
-          isPublic.Append(new GH_Boolean(pair.Value.isPublic), pair.Key);
-          collaborators.AppendRange(pair.Value.collaborators.Select(GH_Convert.ToGoo).ToList(), pair.Key);
-          branches.AppendRange(pair.Value.branches.items.Select(GH_Convert.ToGoo), pair.Key);
-        });
-
-        Message = "Done";
-        DA.SetDataTree(0, id);
-        DA.SetDataTree(1, name);
-        DA.SetDataTree(2, description);
-        DA.SetDataTree(3, createdAt);
-        DA.SetDataTree(4, updatedAt);
-        DA.SetDataTree(5, isPublic);
-        DA.SetDataTree(6, collaborators);
-        DA.SetDataTree(7, branches);
-        streams = null;
+        SetData(DA);
       }
+    }
+
+    private void SetData(IGH_DataAccess DA)
+    {
+      if (tooManyItems)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning,
+          "Input data has too many items. Only the first 20 streams will be fetched.");
+        tooManyItems = false;
+      }
+      var id = new GH_Structure<IGH_Goo>();
+      var name = new GH_Structure<IGH_Goo>();
+      var description = new GH_Structure<IGH_Goo>();
+      var createdAt = new GH_Structure<IGH_Goo>();
+      var updatedAt = new GH_Structure<IGH_Goo>();
+      var isPublic = new GH_Structure<GH_Boolean>();
+      var collaborators = new GH_Structure<IGH_Goo>();
+      var branches = new GH_Structure<IGH_Goo>();
+
+      streams.AsEnumerable()?.ToList().ForEach(pair =>
+      {
+        id.Append(GH_Convert.ToGoo(pair.Value.id), pair.Key);
+        name.Append(GH_Convert.ToGoo(pair.Value.name), pair.Key);
+        description.Append(GH_Convert.ToGoo(pair.Value.description), pair.Key);
+        createdAt.Append(GH_Convert.ToGoo(pair.Value.createdAt), pair.Key);
+        updatedAt.Append(GH_Convert.ToGoo(pair.Value.updatedAt), pair.Key);
+        isPublic.Append(new GH_Boolean(pair.Value.isPublic), pair.Key);
+        collaborators.AppendRange(pair.Value.collaborators.Select(GH_Convert.ToGoo).ToList(), pair.Key);
+        branches.AppendRange(pair.Value.branches.items.Select(GH_Convert.ToGoo), pair.Key);
+      });
+
+      Message = "Done";
+      DA.SetDataTree(0, id);
+      DA.SetDataTree(1, name);
+      DA.SetDataTree(2, description);
+      DA.SetDataTree(3, createdAt);
+      DA.SetDataTree(4, updatedAt);
+      DA.SetDataTree(5, isPublic);
+      DA.SetDataTree(6, collaborators);
+      DA.SetDataTree(7, branches);
+      streams = null;
+    }
+
+    private Func<Task<Dictionary<GH_Path, Stream>>> StreamDetailsTask(GH_Structure<GH_SpeckleStream> ghStreamTree)
+    {
+      return async () =>
+      {
+        try
+        {
+          int count = 0;
+          var tasks = new Dictionary<GH_Path, Task<Stream>>();
+
+          ghStreamTree.Paths.ToList().ForEach(path =>
+          {
+            if (count >= 20) return;
+            var branch = ghStreamTree[path];
+            var itemCount = 0;
+            branch.ForEach(item =>
+            {
+              if (item == null || count >= 20)
+              {
+                itemCount++;
+                return;
+              }
+
+              Account account = null;
+              try
+              {
+                account = item.Value.GetAccount().Result;
+              }
+              catch (Exception e)
+              {
+                error = e;
+                return;
+              }
+
+              var client = new Client(account);
+
+              var task = client.StreamGet(item.Value?.StreamId);
+              tasks[path.AppendElement(itemCount)] = task;
+              count++;
+              itemCount++;
+            });
+          });
+
+          var values = await Task.WhenAll(tasks.Values);
+          var fetchedStreams = new Dictionary<GH_Path, Stream>();
+
+          for (int i = 0; i < tasks.Keys.ToList().Count; i++)
+          {
+            var key = tasks.Keys.ToList()[i];
+            fetchedStreams[key] = values[i];
+          }
+
+          streams = fetchedStreams;
+
+        }
+        catch (Exception e)
+        {
+          error = e;
+        }
+        finally
+        {
+          Rhino.RhinoApp.InvokeOnUiThread((Action)delegate { ExpireSolution(true); });
+        }
+        return streams;
+      };
     }
   }
 }

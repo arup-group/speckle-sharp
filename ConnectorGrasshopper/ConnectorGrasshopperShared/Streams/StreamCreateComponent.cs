@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ConnectorGrasshopper.Extras;
 using GH_IO.Serialization;
+using Grasshopper;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Speckle.Core.Api;
@@ -88,7 +89,7 @@ namespace ConnectorGrasshopper.Streams
       }
       else
       {
-        account = AccountManager.GetAccounts().FirstOrDefault(a => a.userInfo.id == userId);
+        account = AccountManager.GetAccounts(true).FirstOrDefault(a => a.userInfo.id == userId);
         if (account == null)
         {
           // Really last ditch effort - in case people delete accounts from the manager, and the selection dropdown is still using an outdated list.
@@ -109,15 +110,33 @@ namespace ConnectorGrasshopper.Streams
       }
 
       Tracker.TrackNodeRun("Stream Create");
-      
-      Task.Run(async () =>
+
+#if RHINO7
+      if (!Instances.RunningHeadless)
+      {
+        Task.Run(CreateStreamTask(account, jobNumber));
+      }
+      else
+      {
+        Task.Run(CreateStreamTask(account, jobNumber)).Wait();
+      }
+#else
+      Task.Run(CreateStreamTask(account, jobNumber));
+#endif
+
+
+    }
+
+    private Func<Task> CreateStreamTask(Account account, string jobNumber)
+    {
+      return async () =>
       {
         var client = new Client(account);
         try
         {
           StreamCreateInput createInput;
           if (!String.IsNullOrEmpty(jobNumber))
-            createInput = new StreamWithJobNumberCreateInput { isPublic = false, jobNumber = jobNumber };          
+            createInput = new StreamWithJobNumberCreateInput { isPublic = false, jobNumber = jobNumber };
           else
             createInput = new StreamCreateInput { isPublic = false };
 
@@ -127,7 +146,7 @@ namespace ConnectorGrasshopper.Streams
             account.userInfo.id,
             account.serverInfo.url
           );
-          if(!String.IsNullOrEmpty(jobNumber)) stream.JobNumber = jobNumber;
+          if (!String.IsNullOrEmpty(jobNumber)) stream.JobNumber = jobNumber;
 
           Rhino.RhinoApp.InvokeOnUiThread((Action)delegate
           {
@@ -142,7 +161,7 @@ namespace ConnectorGrasshopper.Streams
             AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Could not create stream at {account.serverInfo.url}:\n{e.ToFormattedString()}");
           });
         }
-      });
+      };
     }
   }
 }

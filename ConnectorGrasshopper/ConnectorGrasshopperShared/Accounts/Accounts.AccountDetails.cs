@@ -52,8 +52,8 @@ namespace ConnectorGrasshopper.Streams
         AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "No account provided. Trying with default account.");
       }
 
-      var account = string.IsNullOrEmpty(userId) ? AccountManager.GetDefaultAccount() :
-        AccountManager.GetAccounts().FirstOrDefault(a => a.userInfo.id == userId);
+      var account = string.IsNullOrEmpty(userId) ? AccountManager.GetDefaultAccount(true) :
+        AccountManager.GetAccounts(true).FirstOrDefault(a => a.userInfo.id == userId);
 
       if (account == null)
       {
