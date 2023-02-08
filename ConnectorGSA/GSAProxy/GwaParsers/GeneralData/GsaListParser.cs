@@ -37,7 +37,20 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
 
     public override bool Gwa(out List<string> gwa, bool includeSet = false)
     {
-      throw new NotImplementedException();
+      gwa = new List<string>();
+
+      if (!InitialiseGwa(includeSet, out var items) || string.IsNullOrEmpty(record.Name) || string.IsNullOrEmpty(record.Type))
+        return false;
+
+      // LIST.1 | num | name | type | list (definition)
+      var allItemsAdded = AddItems(ref items, record.Name, record.Type, string.Join(" ", record.Definition));
+
+      if (!allItemsAdded)
+        return false;
+
+      gwa = (Join(items, out var gwaLine)) ? new List<string>() { gwaLine } : new List<string>();
+
+      return true;
     }
 
     #region From GWA
