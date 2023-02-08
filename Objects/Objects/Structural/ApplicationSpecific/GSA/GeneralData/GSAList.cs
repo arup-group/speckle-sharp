@@ -31,7 +31,6 @@ namespace Objects.Structural.ApplicationSpecific.GSA.GeneralData
 
   public enum GSAListType
   {
-    Unspecified,
     Node,
     Element,
     Member,
