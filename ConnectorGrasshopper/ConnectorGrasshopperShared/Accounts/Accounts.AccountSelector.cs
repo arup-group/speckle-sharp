@@ -76,10 +76,9 @@ namespace ConnectorGrasshopper.Streams
               try
               {
                 var token = (string)detailsDeserialised.token;
-                var refreshtoken = (string)detailsDeserialised.refreshtoken;
                 var server = (string)detailsDeserialised.server;
 
-                theAccount = await AccountManager.CreateAccountFromToken(token, refreshtoken, server);
+                theAccount = await AccountManager.CreateAccountFromToken(token, server);
                 return theAccount;
               }
               catch (Exception e)

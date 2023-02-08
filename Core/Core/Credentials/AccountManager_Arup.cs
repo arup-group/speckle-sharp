@@ -22,12 +22,11 @@ namespace Speckle.Core.Credentials
     /// Creates an in-memory account by using token
     /// </summary>
     /// <param name="token">the token</param>
-    /// <param name="refreshToken">the refresh token</param>
     /// <param name="server">Server to use to create the account</param>
     /// <returns></returns>
-    public static async Task<Account> CreateAccountFromToken(string token, string refreshToken, string server)
+    public static async Task<Account> CreateAccountFromToken(string token, string server)
     {
-      _account = await CreateAccount(token, refreshToken, server);
+      _account = await CreateAccount(token, server);
       return _account;
     }
 
@@ -61,11 +60,11 @@ namespace Speckle.Core.Credentials
       return defaultAccount;
     }
 
-    private static async Task<Account> CreateAccount(string token, string refreshToken, string server)
+    private static async Task<Account> CreateAccount(string token, string server)
     {
-      if (String.IsNullOrWhiteSpace(token) && String.IsNullOrWhiteSpace(refreshToken))
+      if (String.IsNullOrWhiteSpace(token))
       {
-        throw new ArgumentNullException("either token or refreshToken must be provided");
+        throw new ArgumentNullException("token cannot be null");
       }
       else if (String.IsNullOrWhiteSpace(server))
       {
@@ -76,8 +75,7 @@ namespace Speckle.Core.Credentials
       if (!String.IsNullOrWhiteSpace(secret))
       {
         Console.WriteLine("decrypting tokens");
-        token = !String.IsNullOrWhiteSpace(token) ? Crypto.DecryptStringAES(token, secret) : null;
-        refreshToken = !String.IsNullOrWhiteSpace(refreshToken) ? Crypto.DecryptStringAES(refreshToken, secret) : null;
+        token = Crypto.DecryptStringAES(token, secret);
       }
 
       server = server.TrimEnd(new[] { '/' });
@@ -85,54 +83,20 @@ namespace Speckle.Core.Credentials
       if (string.IsNullOrEmpty(server))
         server = GetDefaultServerUrl();
 
-      if (String.IsNullOrWhiteSpace(token))
-      {
-        Console.WriteLine("using refresh token");
-        var tokenResponse = await RefreshToken(refreshToken, server);
-        token = tokenResponse.token;
-        refreshToken = tokenResponse.refreshToken;
-      }
-
-      var userResponse = await GetUserServerInfo(token, server);
+      UserServerInfoResponse userServerInfo = await GetUserServerInfo(token, server);
 
       var account = new Account()
       {
         token = token,
-        refreshToken = refreshToken,
+        refreshToken = null,
         isDefault = GetAccounts().Count() == 0,
-        serverInfo = userResponse.serverInfo,
-        userInfo = userResponse.user
+        serverInfo = userServerInfo.serverInfo,
+        userInfo = userServerInfo.user
       };
 
       account.serverInfo.url = server;
       return account;
     }
 
-    private static async Task<TokenExchangeResponse> RefreshToken(string refreshToken, string server)
-    {
-      try
-      {
-        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-        var client = Helpers.Http.GetHttpProxyClient();
-
-        var body = new
-        {
-          appId = "sca",
-          appSecret = "sca",
-          refreshToken = refreshToken
-        };
-
-        var content = new StringContent(JsonConvert.SerializeObject(body));
-        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-        var response = await client.PostAsync($"{server}/auth/token", content);
-
-        return JsonConvert.DeserializeObject<TokenExchangeResponse>(await response.Content.ReadAsStringAsync());
-
-      }
-      catch (Exception e)
-      {
-        throw new SpeckleException(e.Message, e);
-      }
-    }
   }
 }
