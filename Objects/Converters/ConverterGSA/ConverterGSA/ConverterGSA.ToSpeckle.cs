@@ -4426,12 +4426,10 @@ namespace ConverterGSA
           return GSAListType.Node;
         case "ELEMENT":
           return GSAListType.Element;
-        case "MEMBER":
-          return GSAListType.Member;
         case "CASE":
           return GSAListType.Case;
         default:
-          return GSAListType.Unspecified;
+          return GSAListType.Member;
       }
     }
 
