@@ -3142,7 +3142,7 @@ namespace ConnectorGSATests
     }
 
     [Fact]
-    public void GsaList_WithEmptyName_ShouldReturnFalse()
+    public void GsaList_WithEmptyName_DoesNotParse()
     {
       var gsaList = new GsaList();
       gsaList.Index = 1;
@@ -3158,7 +3158,7 @@ namespace ConnectorGSATests
     }
 
     [Fact]
-    public void GsaList_WithEmptyListType_ShouldReturnFalse()
+    public void GsaList_WithEmptyListType_DoesNotParse()
     {
       var gsaList = new GsaList();
       gsaList.Index = 1;
