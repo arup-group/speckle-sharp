@@ -27,6 +27,7 @@ using Speckle.Core.Models;
 using Objects.Structural.Properties;
 using Objects.Structural.Materials;
 using Objects.Structural.Properties.Profiles;
+using Objects.Structural.ApplicationSpecific.GSA.GeneralData;
 
 namespace ConverterGSA
 {
@@ -934,6 +935,24 @@ namespace ConverterGSA
         default: throw new Exception(speckleType.ToString() + " speckle enum can not be converted into native enum");
       }
     }
+
+    public static string ToNative(this GSAListType listType)
+    {
+      switch (listType)
+      {
+        case GSAListType.Case:
+          return "CASE";
+        case GSAListType.Member:
+          return "MEMBER";
+        case GSAListType.Node:
+          return "NODE";
+        case GSAListType.Element:
+          return "ELEMENT";
+        default:
+          return string.Empty;
+      }
+    }
+
 
     public static LoadBeamAxisRefType ToNativeBeamAxisRefType(this LoadAxisType speckleType)
     {

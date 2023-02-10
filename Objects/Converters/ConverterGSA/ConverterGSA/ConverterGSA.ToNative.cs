@@ -23,6 +23,7 @@ using Objects.Structural.Materials;
 using Objects;
 using Objects.Structural.Properties.Profiles;
 using Objects.Structural.Analysis;
+using Objects.Structural.ApplicationSpecific.GSA.GeneralData;
 using Speckle.GSA.API.GwaSchema.Loading.Beam;
 
 namespace ConverterGSA
@@ -108,6 +109,8 @@ namespace ConverterGSA
         // Analysis
         { typeof(GSAStage), AnalStageToNative },
         { typeof(GSAStageProp), AnalStagePropToNative },
+        // General Data
+        { typeof(GSAList), GSAListToNative }
       };
     }
 
@@ -3066,6 +3069,53 @@ namespace ConverterGSA
       }
 
       gsaRecords.Add(gsaAnalStageProp);
+      return gsaRecords;
+    }
+
+    #endregion
+
+    #region General Data
+
+    public List<GsaRecord> GSAListToNative(Base speckleObject)
+    {
+      var gsaRecords = new List<GsaRecord>();
+
+      var list = (GSAList)speckleObject;
+
+      var gsaList = new GsaList()
+      {
+        ApplicationId = list.applicationId,
+        Index = list.GetIndex<GsaList>(),
+        Name = list.name,
+        Definition = new List<int>()
+      };
+
+      var listType = gsaList.Type = list.listType.ToNative();
+
+      if (string.IsNullOrEmpty(listType))
+        return new List<GsaRecord>();
+
+      gsaList.Type = listType;
+
+      // Definition objects needed in cache prior to converting lists
+      switch (list.listType)
+      {
+        case GSAListType.Node:
+          gsaList.Definition = Instance.GsaModel.Cache.LookupIndices<GsaNode>(list.definitionRefs);
+          break;
+        case GSAListType.Member:
+          gsaList.Definition = Instance.GsaModel.Cache.LookupIndices<GsaMemb>(list.definitionRefs);
+          break;
+        case GSAListType.Element:
+          gsaList.Definition = Instance.GsaModel.Cache.LookupIndices<GsaEl>(list.definitionRefs);
+          break;
+        case GSAListType.Case:
+          gsaList.Definition = Instance.GsaModel.Cache.LookupIndices<GsaLoadCase>(list.definitionRefs);
+          break;
+      }
+
+      gsaRecords.Add(gsaList);
+
       return gsaRecords;
     }
 
