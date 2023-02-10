@@ -53,7 +53,7 @@ namespace Objects.Structural.Analysis
     /// <param name="properties"></param>
     /// <param name="materials"></param>
     [SchemaInfo("Model", "Creates a Speckle structural model object", "Structural", "Analysis")]
-    public Model(ModelInfo specs = null, List<Base> nodes = null, List<Base> elements = null, List<Base> loads = null, List<Base> restraints = null, List<Base> properties = null, List<Base> materials = null)
+    public Model(ModelInfo specs = null, List<Base> nodes = null, List<Base> elements = null, List<Base> loads = null, List<Base> restraints = null, List<Base> properties = null, List<Base> materials = null, List<Base> generalData = null)
     {
       this.specs = specs;
       this.nodes = nodes;
@@ -62,6 +62,7 @@ namespace Objects.Structural.Analysis
       this.restraints = restraints;
       this.properties = properties;
       this.materials = materials;
+      this.generalData = generalData;
     }
   }
 }
