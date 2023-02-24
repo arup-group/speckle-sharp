@@ -8,6 +8,8 @@ namespace SpeckleConnectionManagerUI.Models
     public string? ServerName { get; set; }
     public string? ServerUrl { get; set; }
 
+    public string? Id { get; set; }
+
     private string? _connectText;
     public string? ConnectText
     {

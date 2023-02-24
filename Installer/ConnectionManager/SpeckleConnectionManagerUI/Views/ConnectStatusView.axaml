@@ -7,7 +7,7 @@
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
              xmlns:vm="clr-namespace:SpeckleConnectionManagerUI.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="450"
              x:Class="SpeckleConnectionManagerUI.Views.ConnectStatusView">
   <Design.DataContext>
     <vm:ConnectStatusViewModel />
@@ -17,7 +17,7 @@
       <ItemsControl Margin="10 0 0 0" Items="{Binding Items}">
         <ItemsControl.ItemTemplate>
           <DataTemplate>
-            <Grid ShowGridLines="False" ColumnDefinitions="1.2*,3*,1.5*,1.2*" RowDefinitions="Auto,Auto">
+            <Grid ShowGridLines="False" ColumnDefinitions="1.7*,3.8*,1.5*,1.4*,1.7*" RowDefinitions="Auto,Auto">
               <Button FontSize="20"
                       Margin="0 5 10 5"
                       Grid.Row="0"
@@ -86,6 +86,21 @@
                   Foreground="White"
                   Text="REMOVE"/>
               </Button>
+			  <Button FontSize="10"
+					Margin="0 5 10 5"
+					Grid.Row="0"
+					Grid.Column="4"
+					Background="Gray"
+					assists:ShadowAssist.ShadowDepth="0"
+					Command="{Binding $parent[Window].DataContext.CopyTokenToClipboardAsync}"
+					CommandParameter="{Binding Identifier}">
+				<TextBlock
+				  VerticalAlignment="Center"
+				  FontSize="14"
+				  Classes="ButtonText"
+				  Foreground="White"
+				  Text="COPY TOKEN"/>
+			  </Button>
             </Grid>
           </DataTemplate>
         </ItemsControl.ItemTemplate>

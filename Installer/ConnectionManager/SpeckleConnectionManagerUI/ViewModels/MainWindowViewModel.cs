@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using ReactiveUI;
 using SpeckleConnectionManagerUI.Views;
 using SpeckleConnectionManagerUI.Services;
+using Avalonia;
 
 namespace SpeckleConnectionManagerUI.ViewModels
 {
@@ -128,6 +129,22 @@ namespace SpeckleConnectionManagerUI.ViewModels
         Sqlite.RemoveServer(connectionStatusItem.ServerUrl);
 
       List.Items.Remove(connectionStatusItem);
+    }
+
+    public async Task CopyTokenToClipboardAsync(int identifier)
+    {
+      var connectionStatusItem = List.Items.FirstOrDefault(i => i.Identifier == identifier);
+      if (connectionStatusItem == null || connectionStatusItem.Id == null) return;
+
+      var db = new Database();
+
+      var token = db.GetToken(connectionStatusItem.Id);
+
+      //if (connectionStatusItem.Token != null && Application.Current != null && Application.Current.Clipboard != null)
+      if (token != null && Application.Current != null && Application.Current.Clipboard != null)
+      {
+        await Application.Current.Clipboard.SetTextAsync(token);
+      }
     }
 
     public void LaunchDocs()
