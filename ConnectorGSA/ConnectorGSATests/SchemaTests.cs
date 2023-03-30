@@ -1238,6 +1238,16 @@ namespace ConnectorGSATests
       //Assert.True(ModelValidation(gwaToTest, GsaRecord.GetKeyword<GsaMemb>(), 3, out var mismatch));
     }
 
+    [Fact]
+    public void GsaMemb2dFromGwa_WithEmptyPointNodeIndices_ReturnsTrue()
+    {
+      var gsaMemb2d = "MEMB.8\t5730\t\tNO_RGB\t2D_GENERIC\tALL\t3\t0\t21759 4928 4927 21762 21759 P()\t0\t0\t0\tYES\tLINEAR\t0\t0\t0\t0\t0\t0\tACTIVE\t0\tNO\tREBAR_2D.1\t0.03\t0.03\t0";
+
+      var memParser = new GsaMembParser();
+
+      Assert.True(memParser.FromGwa(gsaMemb2d));
+    }
+
     [Fact (Skip = "WIP")]
     public void GsaMemb2dSimple()
     {
