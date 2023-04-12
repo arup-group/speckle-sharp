@@ -81,25 +81,25 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\..\xUnitRevit\speckle.xunit.runner.wpf\speckle.xunit.runner.wpf\speckle.xunit.runner.wpf.csproj">
-      <Project>{10653ecd-e11b-4d1b-827b-6fd6a454f3ac}</Project>
-      <Name>speckle.xunit.runner.wpf</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\..\xUnitRevit\xUnitRevitUtils\xUnitRevitUtils2023\xUnitRevitUtils2023.csproj">
-      <Project>{43f0f1cc-6875-4abf-8482-c30ee4bb2562}</Project>
-      <Name>xUnitRevitUtils2023</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\..\..\Core\Core\Core.csproj">
       <Project>{521d4aee-08cf-4913-bbe8-5511d176d126}</Project>
       <Name>Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\Objects\Objects.csproj">
-      <Project>{be852be3-37b8-4b62-ac2c-0872c41a2542}</Project>
+      <Project>{5fa52cda-04e8-4d42-9f9b-b4fbc0f79668}</Project>
       <Name>Objects</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\ConverterRevit2021\ConverterRevit2021.csproj">
       <Project>{cfbd9a83-5aa2-4849-8735-28d4f73f4f56}</Project>
       <Name>ConverterRevit2021</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\xUnitRevit\speckle.xunit.runner.wpf\speckle.xunit.runner.wpf\speckle.xunit.runner.wpf.csproj">
+      <Project>{8da8c0b0-d2c5-45c7-9ef4-f8208edba81f}</Project>
+      <Name>speckle.xunit.runner.wpf</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\xUnitRevit\xUnitRevitUtils\xUnitRevitUtils2023\xUnitRevitUtils2023.csproj">
+      <Project>{e82c73d9-9588-4df6-a638-945bb474f3f5}</Project>
+      <Name>xUnitRevitUtils2023</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="..\ConverterRevitTestsShared\ConverterRevitTestsShared.projitems" Label="Shared" />

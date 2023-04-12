@@ -340,8 +340,8 @@ namespace Objects.Converter.Revit
 
       GetAllRevitParamsAndIds(speckleElement1D, revitStick);
 
-      var points = ((Objects.Geometry.Line)baseLine).start.ToList();
-      points.AddRange(((Objects.Geometry.Line)baseLine).end.ToList());
+      var points = ((Objects.Geometry.Line)(speckleElement1D.baseLine)).start.ToList();
+      points.AddRange(((Objects.Geometry.Line)(speckleElement1D.baseLine)).end.ToList());
       speckleElement1D.displayValue = new Objects.Geometry.Polyline(points, speckleElement1D.units); //GetElementDisplayMesh(revitStick.Document.GetElement(revitStick.GetElementId()));
 
       //var analyticalToPhysicalManager = AnalyticalToPhysicalAssociationManager.GetAnalyticalToPhysicalAssociationManager(Doc);
