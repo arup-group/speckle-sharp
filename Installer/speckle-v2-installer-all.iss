@@ -242,14 +242,14 @@ Source: "ExcelAddin\ExcelAddinRequest\bin\Release\net5.0\win-x64\*"; DestDir: "{
 Source: "..\Objects\Objects\bin\Release\netstandard2.0\Objects.dll"; DestDir: "{userappdata}\Speckle\Kits\Objects"; Flags: ignoreversion recursesubdirs; Components: kits
 
 ;connectionmanager
-Source: "ConnectionManager\SpeckleConnectionManager\bin\Release\net5.0\win10-x64\*"; DestDir: "{userappdata}\speckle-connection-manager\"; Flags: ignoreversion recursesubdirs; Components: connectionmanager
-Source: "ConnectionManager\SpeckleConnectionManagerUI\bin\Release\net5.0\win10-x64\*"; DestDir: "{userappdata}\speckle-connection-manager-ui\"; Flags: ignoreversion recursesubdirs; Components: connectionmanager
+Source: "ConnectionManager\SpeckleConnectionManager\bin\Release\net6.0\win10-x64\*"; DestDir: "{userappdata}\speckle-connection-manager\"; Flags: ignoreversion recursesubdirs; Components: connectionmanager
+Source: "ConnectionManager\SpeckleConnectionManagerUI\bin\Release\net6.0\win10-x64\*"; DestDir: "{userappdata}\speckle-connection-manager-ui\"; Flags: ignoreversion recursesubdirs; Components: connectionmanager
 
 ;analytics
 Source: "Analytics\bin\Release\net48\*"; DestDir: "{#AnalyticsFolder}"; Flags: ignoreversion recursesubdirs;
 
 ;updater
-Source: "Updater\bin\Release\*"; DestDir: "{#SpeckleFolder}"; Flags: ignoreversion recursesubdirs;
+Source: "Updater\bin\Release\net48\*"; DestDir: "{#SpeckleFolder}"; Flags: ignoreversion recursesubdirs;
 
 [InstallDelete]
 Type: filesandordirs; Name: "{userappdata}\McNeel\Rhinoceros\6.0\Plug-ins\SpeckleRhino2 (8dd5f30b-a13d-4a24-abdc-3e05c8c87143)"; Components: rhinogh6
