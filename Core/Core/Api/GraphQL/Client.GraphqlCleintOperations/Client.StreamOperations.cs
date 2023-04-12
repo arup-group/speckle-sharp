@@ -429,13 +429,6 @@ namespace Speckle.Core.Api
         Variables = new { myStream = streamInput }
       };
       var res = await ExecuteGraphQLRequest<Dictionary<string, object>>(request, cancellationToken);
-      if (res?["streamCreate"] == null)
-      {
-        throw new SpeckleException(
-          "A job number is required to create a stream on this server.Please provide one."
-        );
-      }
-
       return (string)res["streamCreate"];
     }
 

@@ -15,6 +15,7 @@ using Speckle.Core.Helpers;
 using Speckle.Core.Kits;
 using Speckle.Core.Models;
 using Speckle.Core.Models.GraphTraversal;
+using Speckle.Core.Serialisation;
 
 using Objects.BuiltElements;
 using Objects.BuiltElements.Revit;
@@ -1312,7 +1313,7 @@ namespace Objects.Converter.Revit
 
           ((Base)curve)["elementId"] = segment.ElementId.ToString();
 
-          poly.segments.Add(CurveToSpeckle(c));
+          poly.segments.Add(curve);
         }
         profiles.Add(poly);
       }

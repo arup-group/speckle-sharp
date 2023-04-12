@@ -72,7 +72,8 @@ namespace Objects.Converter.Revit
 
       foreach (var point in points)
       {
-        var speckleNode = new Node(PointToSpeckle(point), null, restraint, localAxis);
+        var speckleNode = new Node();
+        //var speckleNode = new Node(PointToSpeckle(point), null, restraint, localAxis);
 
         GetAllRevitParamsAndIds(speckleNode, revitBoundary);
 

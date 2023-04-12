@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using Objects.Geometry;
 using Objects.Structural.Geometry;
+using Objects.Structural.Properties;
 using Speckle.Core.Models;
 using Objects.Structural.CSI.Geometry;
 using Objects.Structural.CSI.Properties;
 using System.Linq;
 using CSiAPIv1;
+using Objects.Structural.Properties;
 
 namespace Objects.Converter.CSI
 {
@@ -14,8 +16,9 @@ namespace Objects.Converter.CSI
   {
     public void UpdateFrame(Element1D element1D, string name, ref ApplicationObject appObj)
     {
-      var end1node = element1D.end1Node?.basePoint ?? element1D.baseLine?.start;
-      var end2node = element1D.end2Node?.basePoint ?? element1D.baseLine?.end;
+      var baseLine = (Line)element1D.baseLine;
+      var end1node = element1D.end1Node?.basePoint ?? baseLine?.start;
+      var end2node = element1D.end2Node?.basePoint ?? baseLine?.end;
 
       if (end1node == null || end2node == null)
       {
@@ -81,13 +84,13 @@ namespace Objects.Converter.CSI
         return;
       }
 
-      Line baseline = element1D.baseLine;
+      Line baseline = (Line)element1D.baseLine;
       string[] properties = new string[] { };
       int number = 0;
       Model.PropFrame.GetNameList(ref number, ref properties);
       if (!properties.Contains(element1D.property.name))
       {
-        Property1DToNative(element1D.property, ref appObj);
+        Property1DToNative((Property1D)element1D.property, ref appObj);
         Model.PropFrame.GetNameList(ref number, ref properties);
       }
       Point end1node;
@@ -313,7 +316,7 @@ namespace Objects.Converter.CSI
       }
 
       var propAppObj = new ApplicationObject(element1D.applicationId, element1D.speckle_type);
-      var propertyName = Property1DToNative(element1D.property, ref propAppObj);
+      var propertyName = Property1DToNative((Property1D)element1D.property, ref propAppObj);
       if (propertyName != null)
         Model.FrameObj.SetSection(newFrame, propertyName);
 
@@ -337,7 +340,7 @@ namespace Objects.Converter.CSI
           var modifiers = CSIelement1D.Modifiers;
           Model.FrameObj.SetModifiers(CSIelement1D.name, ref modifiers);
         }
-        if (CSIelement1D.property.material.name != null)
+        if (((Property1D)CSIelement1D.property).material.name != null)
         {
           switch (CSIelement1D.DesignProcedure)
           {

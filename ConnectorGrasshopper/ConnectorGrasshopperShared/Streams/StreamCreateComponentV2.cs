@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Speckle.Core.Api;
 using Speckle.Core.Credentials;
+using Speckle.Core.Logging;
 using Speckle.Core.Models.Extensions;
 using Bitmap = System.Drawing.Bitmap;
 
@@ -116,16 +118,25 @@ namespace ConnectorGrasshopper.Streams
       else
         createInput = new StreamCreateInput { isPublic = false };
 
-      var streamId = client.StreamCreate(CancelToken, createInput).Result;
+      try {
+        var streamId = client.StreamCreate(CancelToken, createInput).Result;
+        var sw = new StreamWrapper(
+          streamId,
+          account.userInfo.id,
+          account.serverInfo.url
+        );
 
-      var sw =  new StreamWrapper(
-        streamId,
-        account.userInfo.id,
-        account.serverInfo.url
-      );
-      sw.SetAccount(account);
-      
-      return Task.FromResult(sw);
+        sw.SetAccount(account);
+
+        return Task.FromResult(sw);
+      } catch(Exception e) {        
+        var jobNumberRelatedError = ((SpeckleGraphQLInternalErrorException<Dictionary<string, object>>)e.InnerException).ErrorMessages.Where(e => e.ToLower().Contains("job number"));
+
+        foreach(var msg in jobNumberRelatedError)
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, msg);
+
+        return null;        
+      }     
     }
   }
 }
