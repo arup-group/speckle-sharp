@@ -1,52 +1,38 @@
-﻿using Autodesk.Navisworks.Api;
-using Autodesk.Navisworks.Api.Interop;
-using Speckle.Core.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Autodesk.Navisworks.Api;
+using Autodesk.Navisworks.Api.Interop;
+using Objects.Geometry;
+using Speckle.Core.Models;
 
 namespace Objects.Converter.Navisworks
 {
   public partial class ConverterNavisworks
   {
-    internal static Base GetPropertiesBase(ModelItem element, ref Base @base)
+    internal static Base GetPropertiesBase(ModelItem element, Base @base)
     {
-      Base propertiesBase = new Base();
+      var propertiesBase = new Base();
       // GUI visible properties varies by a Global Options setting.
-      PropertyCategoryCollection userVisiblePropertyCategories = element.GetUserFilteredPropertyCategories();
+      var userVisiblePropertyCategories = element.GetUserFilteredPropertyCategories();
 
-      foreach (PropertyCategory propertyCategory in userVisiblePropertyCategories)
+      foreach (var propertyCategory in userVisiblePropertyCategories)
       {
-        DataPropertyCollection properties = propertyCategory.Properties;
-        Base propertyCategoryBase = new Base();
+        if (propertyCategory.DisplayName == "Geometry") continue;
+
+        var properties = propertyCategory.Properties;
+        var propertyCategoryBase = new Base();
 
         properties.ToList().ForEach(property =>
-          BuildPropertyCategory(propertyCategory, property, ref propertyCategoryBase));
+          BuildPropertyCategory(propertyCategory, property, propertyCategoryBase));
 
-        if (propertyCategoryBase.GetMembers().Any() && propertyCategory.DisplayName != null)
-        {
-          string propertyCategoryDisplayName = SanitizePropertyName(propertyCategory.DisplayName);
+        if (!propertyCategoryBase.GetMembers().Any() || propertyCategory.DisplayName == null) continue;
 
-          switch (propertyCategory.DisplayName)
-          {
-            case "Geometry":
-              continue;
-            case "Item":
-            {
-              foreach (string property in propertyCategoryBase.GetMembers().Keys)
-              {
-                @base[property] = propertyCategoryBase[property];
-              }
+        var propertyCategoryDisplayName = SanitizePropertyName(propertyCategory.DisplayName);
 
-              break;
-            }
-            default:
-              propertiesBase[propertyCategoryDisplayName] = propertyCategoryBase;
-              break;
-          }
-        }
+        propertiesBase[propertyCategoryDisplayName] = propertyCategoryBase;
       }
 
       return propertiesBase;
@@ -56,12 +42,13 @@ namespace Objects.Converter.Navisworks
     {
       // Regex pattern from speckle-sharp/Core/Core/Models/DynamicBase.cs IsPropNameValid
       return name == "Item"
-        ? "$Item"
+        // Item is a reserved term for Indexed Properties: https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/indexers/using-indexers
+        ? "Item_" 
         : Regex.Replace(name, @"[\.\/]", "_");
     }
 
     public static void BuildPropertyCategory(PropertyCategory propertyCategory, DataProperty property,
-      ref Base propertyCategoryBase)
+      Base propertyCategoryBase)
     {
       string propertyName;
       try
@@ -86,7 +73,7 @@ namespace Objects.Converter.Navisworks
 
       dynamic propertyValue = null;
 
-      VariantDataType type = property.Value.DataType;
+      var type = property.Value.DataType;
 
       switch (type)
       {
@@ -124,7 +111,9 @@ namespace Objects.Converter.Navisworks
           propertyValue = property.Value.ToNamedConstant().DisplayName;
           break;
         case VariantDataType.Point3D:
-          propertyValue = property.Value.ToPoint3D();
+          var point = property.Value.ToPoint3D();
+          var pointProperty = new Point(point.X, point.Y, point.Z);
+          propertyValue = pointProperty.ToString();
           break;
         case VariantDataType.None: break;
         case VariantDataType.Point2D:
@@ -133,7 +122,7 @@ namespace Objects.Converter.Navisworks
 
       if (propertyValue != null)
       {
-        object keyPropValue = propertyCategoryBase[propertyName];
+        var keyPropValue = propertyCategoryBase[propertyName];
 
         if (keyPropValue == null)
         {
@@ -141,12 +130,9 @@ namespace Objects.Converter.Navisworks
         }
         else if (keyPropValue is List<dynamic>)
         {
-          List<dynamic> arrayPropValue = (List<dynamic>)keyPropValue;
+          var arrayPropValue = (List<dynamic>)keyPropValue;
 
-          if (!arrayPropValue.Contains(propertyValue))
-          {
-            arrayPropValue.Add(propertyValue);
-          }
+          if (!arrayPropValue.Contains(propertyValue)) arrayPropValue.Add(propertyValue);
 
           propertyCategoryBase[propertyName] = arrayPropValue;
         }
@@ -156,36 +142,87 @@ namespace Objects.Converter.Navisworks
 
           if (existingValue != propertyValue)
           {
-            List<dynamic> arrayPropValue = new List<dynamic>
-            {
-              existingValue,
-              propertyValue
-            };
+            var arrayPropValue = new List<dynamic> { existingValue, propertyValue };
 
             propertyCategoryBase[propertyName] = arrayPropValue;
           }
         }
+
+        propertyCategoryBase.applicationId = propertyCategory.CombinedName.ToString();
       }
+    }
+
+    private static void AddItemProperties(ModelItem element, Base @base)
+    {
+      @base["class"] = element.ClassName;
+
+      var properties =
+        !bool.TryParse(Settings.FirstOrDefault(x => x.Key == "include-properties").Value, out var result) || result;
+
+      // Cascade through the Property Sets
+      @base["properties"] = properties
+        ? GetPropertiesBase(element, @base)
+        : new Base();
+
+      // If the node is a Model
+      if (element.HasModel) ((Base)@base["properties"])["Model"] = GetModelProperties(element.Model);
+
+      // Internal Properties - some are matched dynamically already, some can be added from the core API
+      var internals = (Base)((Base)@base["properties"])?["Internal"] ?? new Base();
+
+      internals["ClassDisplayName"] = element.ClassDisplayName ?? internals["ClassDisplayName"];
+      internals["ClassName"] = element.ClassName ?? internals["ClassName"];
+      internals["DisplayName"] = element.DisplayName ?? internals["DisplayName"];
+      internals["InstanceGuid"] = element.InstanceGuid.ToByteArray()
+        .Select(x => (int)x).Sum() > 0
+        ? element.InstanceGuid
+        : (Guid?)null;
+      internals["Source"] = element.Model?.SourceFileName ?? internals["Source"];
+      internals["Source Guid"] = element.Model?.SourceGuid ?? internals["Source Guid"];
+      internals["NodeType"] = element.IsCollection ? "Collection" :
+        element.IsComposite ? "Composite Object" :
+        element.IsInsert ? "Geometry Insert" :
+        element.IsLayer ? "Layer" : null;
+
+      ((Base)@base["properties"])["Internal"] = internals;
+    }
+
+    private static Base GetModelProperties(Autodesk.Navisworks.Api.Model elementModel)
+    {
+      var model = new Base
+      {
+        ["Creator"] = elementModel.Creator,
+        ["Filename"] = elementModel.FileName,
+        ["Source Filename"] = elementModel.SourceFileName,
+        ["Units"] = elementModel.Units.ToString(),
+        ["Transform"] = elementModel.Transform.ToString(),
+        ["Guid"] = elementModel.Guid.ToString()
+      };
+
+      if (elementModel.HasFrontVector) model["Front Vector"] = elementModel.FrontVector.ToString();
+      if (elementModel.HasNorthVector) model["North Vector"] = elementModel.NorthVector.ToString();
+      if (elementModel.HasRightVector) model["Right Vector"] = elementModel.RightVector.ToString();
+      if (elementModel.HasUpVector) model["Up Vector"] = elementModel.UpVector.ToString();
+
+      return model;
     }
 
     public static List<Tuple<NamedConstant, NamedConstant>> LoadQuickProperties()
     {
-      List<Tuple<NamedConstant, NamedConstant>> quickPropertiesCategoryPropertyPairs =
+      var quickPropertiesCategoryPropertyPairs =
         new List<Tuple<NamedConstant, NamedConstant>>();
-      using (LcUOptionLock optionLock = new LcUOptionLock())
+      using (var optionLock = new LcUOptionLock())
       {
-        LcUOptionSet set = LcUOption.GetSet("interface.smart_tags.definitions", optionLock);
-        int numOptions = set.GetNumOptions();
+        var set = LcUOption.GetSet("interface.smart_tags.definitions", optionLock);
+        var numOptions = set.GetNumOptions();
         if (numOptions > 0)
-        {
-          for (int index = 0; index < numOptions; ++index)
+          for (var index = 0; index < numOptions; ++index)
           {
-            LcUOptionSet optionSet = set.GetValue(index, null);
-            NamedConstant cat = optionSet.GetName("category").GetPtr();
-            NamedConstant prop = optionSet.GetName("property").GetPtr();
+            var optionSet = set.GetValue(index, null);
+            var cat = optionSet.GetName("category").GetPtr();
+            var prop = optionSet.GetName("property").GetPtr();
             quickPropertiesCategoryPropertyPairs.Add(Tuple.Create(cat, prop));
           }
-        }
       }
 
       return quickPropertiesCategoryPropertyPairs;

@@ -22,7 +22,7 @@ namespace Objects.Structural.GSA.Loading
       this.loadAxis = loadAxis == null ? new Axis("Global", AxisType.Cartesian, new Plane(new Point(0, 0, 0), new Vector(0, 0, 1), new Vector(1, 0, 0), new Vector(0, 1, 0))) : loadAxis;
       this.direction = direction;
       this.position = position;
-      this.value = value;      
+      this.value = value;
     }
   }
 }

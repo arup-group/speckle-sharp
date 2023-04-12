@@ -25,11 +25,11 @@ namespace Objects.Converter.CSI
     public static string CSIAppName = HostApplications.SAP2000.Name;
     public static string CSISlug = HostApplications.SAP2000.Slug;
 #elif CSIBRIDGE
-    public static string CSIAppName = HostApplications.CSIBridge.Name;
-    public static string CSISlug = HostApplications.CSIBridge.Slug;
+    public static string CSIAppName = HostApplications.CSiBridge.Name;
+    public static string CSISlug = HostApplications.CSiBridge.Slug;
 #elif SAFE
-      public static string CSIAppName = HostApplications.SAFE.Name;
-      public static string CSISlug = HostApplications.SAFE.Slug;
+    public static string CSIAppName = HostApplications.SAFE.Name;
+    public static string CSISlug = HostApplications.SAFE.Slug;
 #endif
     public string Description => "Default Speckle Kit for CSI";
 
@@ -43,8 +43,6 @@ namespace Objects.Converter.CSI
     public string ProgramVersion { get; private set; }
 
     public Model SpeckleModel { get; set; }
-
-    public ResultSetAll AnalysisResults { get; set; }
 
     public ReceiveMode ReceiveMode { get; set; }
     /// <summary>
@@ -86,7 +84,6 @@ namespace Objects.Converter.CSI
       else if (Settings["operation"] == "send")
       {
         SpeckleModel = ModelToSpeckle();
-        AnalysisResults = ResultsToSpeckle();
       }
       else
         throw new Exception("operation setting was not set to \"send\" or \"receive\"");
@@ -103,19 +100,22 @@ namespace Objects.Converter.CSI
     {
       switch (@object)
       {
-        case CSIDiaphragm csiDiaphragm:
-        case CSIStories csiStories:
-        case Element1D element1D:
-        case Element2D element2D:
-        case Load load:
+        case CSIDiaphragm _:
+        case CSIStories _:
+        case Element1D _:
+        case Element2D _:
+        case Load _:
         //case Geometry.Line line:
-        case Node node:
+        case Node _:
         //case Model o:
         //case Property property:
 
         // for the moment we need to have this in here so the flatten traversal skips over this object
         // otherwise it would add result.element to the list twice and the stored objects dictionary would throw
-        case Result result:
+        case Result _:
+        case BuiltElements.Beam _:
+        case BuiltElements.Brace _:
+        case BuiltElements.Column _:
           return true;
       };
       return false;
@@ -190,13 +190,24 @@ namespace Objects.Converter.CSI
         case Property1D o:
           Property1DToNative(o, ref appObj);
           break;
+        #region BuiltElements
+        case BuiltElements.Beam o:
+          CurveBasedElementToNative(o, o.baseLine, ref appObj);
+          break;
+        case BuiltElements.Brace o:
+          CurveBasedElementToNative(o, o.baseLine, ref appObj);
+          break;
+        case BuiltElements.Column o:
+          CurveBasedElementToNative(o, o.baseLine, ref appObj);
+          break;
+        #endregion
         default:
           appObj.Update(status: ApplicationObject.State.Skipped, logItem: $"Skipped not supported type: {@object.GetType()}");
           break;
       }
 
       // log 
-      var reportObj = Report.GetReportObject(@object.id, out int index) ? Report.ReportObjects[index] : null;
+      var reportObj = Report.ReportObjects.ContainsKey(@object.id) ? Report.ReportObjects[@object.id] : null;
       if (reportObj != null && notes.Count > 0)
         reportObj.Update(log: notes);
 
@@ -226,7 +237,7 @@ namespace Objects.Converter.CSI
           returnObject = SpeckleModel;
           break;
         case "AnalysisResults":
-          returnObject = AnalysisResults;
+          returnObject = ResultsToSpeckle();
           break;
         case "Stories":
           returnObject = StoriesToSpeckle();
@@ -382,6 +393,10 @@ namespace Objects.Converter.CSI
           //    returnObject = null;
           //    break;
       }
+
+      // send the object out with the same appId that it came in with for updating purposes
+      if (returnObject != null)
+        returnObject.applicationId = GetOriginalApplicationId(returnObject.applicationId);
 
       return returnObject;
     }

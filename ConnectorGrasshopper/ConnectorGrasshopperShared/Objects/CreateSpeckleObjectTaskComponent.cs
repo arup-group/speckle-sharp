@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using ConnectorGrasshopper.Extras;
 using Grasshopper.Kernel;
+using Serilog;
 using Speckle.Core.Models;
 using Speckle.Core.Models.Extensions;
 using Logging = Speckle.Core.Logging;
@@ -35,7 +36,7 @@ namespace ConnectorGrasshopper.Objects
       pManager.AddParameter(new SpeckleBaseParam("Speckle Object", "O", "Created speckle object", GH_ParamAccess.item));
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    public override void SolveInstanceWithLogContext(IGH_DataAccess DA)
     {
       if (InPreSolve)
       {
@@ -61,8 +62,8 @@ namespace ConnectorGrasshopper.Objects
           AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "You cannot set all parameters as optional");
           return;
         }
-        
-        //TODO: Original node 
+
+        //TODO: Original node
         if (DA.Iteration == 0)
           Tracker.TrackNodeRun("Create Object");
 
@@ -156,7 +157,7 @@ namespace ConnectorGrasshopper.Objects
         inputData?.Keys.ToList().ForEach(key =>
         {
           var value = inputData[key];
-
+          if (value is SpeckleObjectGroup group) value = group.Value;
           if (value is List<object> list)
           {
 
@@ -171,10 +172,10 @@ namespace ConnectorGrasshopper.Objects
                 return result;
               }).ToList();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-              Logging.Log.CaptureException(e);
-              AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"{e.ToFormattedString()}");
+              Logging.SpeckleLog.Logger.Error(ex, ex.Message);
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"{ex.ToFormattedString()}");
               hasErrors = true;
             }
 
@@ -182,10 +183,10 @@ namespace ConnectorGrasshopper.Objects
             {
               @base[key] = converted;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-              Logging.Log.CaptureException(e);
-              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.ToFormattedString()}");
+              Logging.SpeckleLog.Logger.Error(ex, ex.Message);
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{ex.ToFormattedString()}");
               hasErrors = true;
             }
           }
@@ -202,7 +203,7 @@ namespace ConnectorGrasshopper.Objects
             }
             catch (Exception e)
             {
-              Logging.Log.CaptureException(e);
+              Logging.SpeckleLog.Logger.Error(e, e.Message);
               AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.ToFormattedString()}");
               hasErrors = true;
             }
@@ -219,7 +220,7 @@ namespace ConnectorGrasshopper.Objects
       catch (Exception e)
       {
         // If we reach this, something happened that we weren't expecting...
-        Logging.Log.CaptureException(e);
+        Logging.SpeckleLog.Logger.Error(e, e.Message);
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Something went terribly wrong... " + e.ToFormattedString());
       }
 

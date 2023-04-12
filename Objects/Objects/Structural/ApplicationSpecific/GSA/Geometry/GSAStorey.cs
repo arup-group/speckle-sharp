@@ -1,6 +1,6 @@
 ﻿using Objects.Structural.Geometry;
-using Speckle.Core.Models;
 using Speckle.Core.Kits;
+using Speckle.Core.Models;
 
 namespace Objects.Structural.GSA.Geometry
 {

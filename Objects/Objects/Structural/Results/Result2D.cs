@@ -1,9 +1,9 @@
-﻿using Speckle.Newtonsoft.Json;
-using Speckle.Core.Kits;
-using Speckle.Core.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Objects.Structural.Geometry;
 using Objects.Structural.Loading;
+using Speckle.Core.Kits;
+using Speckle.Core.Models;
+using Speckle.Newtonsoft.Json;
 
 namespace Objects.Structural.Results
 {

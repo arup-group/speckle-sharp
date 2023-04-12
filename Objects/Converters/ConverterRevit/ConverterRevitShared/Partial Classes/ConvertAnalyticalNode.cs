@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Structure;
 using Objects.BuiltElements;
 using Objects.BuiltElements.Revit;
 using Objects.Structural.Geometry;
-using Vector = Objects.Geometry.Vector;
-using Plane = Objects.Geometry.Plane;
 using Speckle.Core.Models;
 using DB = Autodesk.Revit.DB;
+using Plane = Objects.Geometry.Plane;
+using Vector = Objects.Geometry.Vector;
 
 namespace Objects.Converter.Revit
 {
@@ -23,8 +23,8 @@ namespace Objects.Converter.Revit
     private Node AnalyticalNodeToSpeckle(ReferencePoint revitNode)
     {
       var cs = revitNode.GetCoordinateSystem();
-      var localAxis = new Axis(revitNode.Name, Structural.AxisType.Cartesian, new Plane(PointToSpeckle(cs.Origin), VectorToSpeckle(cs.BasisZ), VectorToSpeckle(cs.BasisX), VectorToSpeckle(cs.BasisY)));
-      var basePoint = PointToSpeckle(cs.Origin); // alternative to revitNode.Position
+      var localAxis = new Plane(PointToSpeckle(cs.Origin, revitNode.Document), VectorToSpeckle(cs.BasisZ, revitNode.Document), VectorToSpeckle(cs.BasisX, revitNode.Document), VectorToSpeckle(cs.BasisY, revitNode.Document));
+      var basePoint = PointToSpeckle(cs.Origin, revitNode.Document); // alternative to revitNode.Position
       var speckleNode = new Node(basePoint, revitNode.Name, null, null);
 
       GetAllRevitParamsAndIds(speckleNode, revitNode);
@@ -38,7 +38,7 @@ namespace Objects.Converter.Revit
       var nodes = new List<Node> { };
 
       var cs = revitBoundary.GetDegreesOfFreedomCoordinateSystem();
-      var localAxis = new Axis(revitBoundary.Name, Structural.AxisType.Cartesian, new Plane(PointToSpeckle(cs.Origin), VectorToSpeckle(cs.BasisZ), VectorToSpeckle(cs.BasisX), VectorToSpeckle(cs.BasisY)));
+      var localAxis = new Plane(PointToSpeckle(cs.Origin, revitBoundary.Document), VectorToSpeckle(cs.BasisZ, revitBoundary.Document), VectorToSpeckle(cs.BasisX, revitBoundary.Document), VectorToSpeckle(cs.BasisY, revitBoundary.Document));
 
       var restraintType = revitBoundary.GetBoundaryConditionsType();
       var state = 0;

@@ -38,7 +38,7 @@ jobs:
                   (Core|Objects|ConnectorDynamo|.*/ConverterDynamo)/.* dynamo true
                   (Core|Objects|ConnectorAutocadCivil|.*/ConverterAutocadCivil)/.* autocadcivil true
                   (Core|Objects|ConnectorCSI|.*/ConverterCSI)/.* csi true
-                  (Core|Objects|ConnectorMicroStation|.*/ConverterMicroStation)/.* microstation true
+                  (Core|Objects|ConnectorBentley|.*/ConverterBentley)/.* bentley true
                   (Core|Objects|ConnectorTeklaStructures|.*/ConverterTeklaStructures)/.* teklastructures true
                   (Core|Objects|ConnectorArchicad)/.* archicad true
                   (Core|Objects|ConnectorNavisworks|.*/ConverterNavisworks)/.* navisworks true
@@ -49,7 +49,7 @@ jobs:
       - run: # run a command
           name: Generate config
           command: |
-            python .circleci/scripts/config-generator.py -d ${CIRCLE_TAG:-none} -o .circleci/continuation-config.yml
+            python .circleci/scripts/config-generator.py -d ${CIRCLE_TAG:-none} -o .circleci/continuation-config.yml -e ${CIRCLE_PR_REPONAME:-none}
       - continuation/continue:
           configuration_path: .circleci/continuation-config.yml # use newly generated config to continue
 workflows:

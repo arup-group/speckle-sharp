@@ -1,10 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Interop;
+using DesktopUI2;
 using DesktopUI2.Models;
 using DesktopUI2.Models.Settings;
 using DesktopUI2.ViewModels;
@@ -17,14 +19,12 @@ using static Autodesk.Navisworks.Api.Interop.LcOpRegistry;
 using static Autodesk.Navisworks.Api.Interop.LcUOption;
 using static Speckle.ConnectorNavisworks.Utils;
 
+
 namespace Speckle.ConnectorNavisworks.Bindings
 {
   public partial class ConnectorBindingsNavisworks
   {
     public override bool CanPreviewSend => false;
-
-    // used to store the Stream State settings when sending
-    private List<ISetting> CurrentSettings { get; set; }
 
 
     // Stub - Preview send is not supported
@@ -34,102 +34,105 @@ namespace Speckle.ConnectorNavisworks.Bindings
       // TODO!
     }
 
-    private enum ConversionState
-    {
-      Converted = 0,
-      Skipped = 1,
-      ToConvert = 2
-    }
-
     public override async Task<string> SendStream(StreamState state, ProgressViewModel progress)
     {
-      List<string> filteredObjects = new List<string>();
-      Progress progressBar = Application.BeginProgress("Send to Speckle.");
+      if (Doc.ActiveSheet == null) throw new InvalidOperationException("Your Document is empty. Nothing to Send.");
+
+      var filteredObjects = new List<Tuple<string, int>>();
+
+      var progressBar = Application.BeginProgress("Send to Speckle.");
+
+      progress.CancellationToken.Register(() =>
+      {
+        progressBar.Cancel();
+        //progressBar.Update(1);
+        Application.EndProgress();
+      });
 
       DefaultKit = KitManager.GetDefaultKit();
 
-      if (DefaultKit == null)
-      {
-        progress.Report.LogOperationError(new SpeckleException("Could not find any Kit!"));
-        return null;
-      }
-
       NavisworksConverter = DefaultKit.LoadConverter(VersionedAppName);
-      if (NavisworksConverter == null)
-      {
-        progress.Report.LogOperationError(new SpeckleException($"Could not find Converter{VersionedAppName}!"));
-        return null;
-      }
-
-      NavisworksConverter.SetContextDocument(Doc);
-
-      NavisworksConverter.Report.ReportObjects.Clear();
 
       CurrentSettings = state.Settings;
 
-      Dictionary<string, string> settings =
+      var settings =
         state.Settings.ToDictionary(setting => setting.Slug, setting => setting.Selection);
-
+      NavisworksConverter.SetContextDocument(Doc);
       NavisworksConverter.SetConverterSettings(settings);
 
-      string streamId = state.StreamId;
-      Client client = state.Client;
+      NavisworksConverter.Report.ReportObjects.Clear();
 
+      var streamId = state.StreamId;
+      var client = state.Client;
 
       if (state.Filter != null)
       {
         progressBar.BeginSubOperation(0, $"Building object-tree from {state.Filter.Selection.Count} selections.");
-        IEnumerable<string> objects = GetObjectsFromFilter(state.Filter);
 
-        if (objects != null)
+        IEnumerable<Tuple<string, int>> nodes;
+
+        try
         {
-          filteredObjects.AddRange(objects);
+          nodes = GetObjectsFromFilter(state.Filter);
+        }
+        catch
+        {
+          throw new Exception("An error occurred retrieving objects from your saved selection source.");
         }
 
-        state.SelectedObjectIds = filteredObjects.ToList();
+        if (nodes != null) filteredObjects.AddRange(nodes);
+
+        state.SelectedObjectIds = filteredObjects.Select(x => x.Item1).ToList();
       }
 
       if (filteredObjects.Count == 0)
       {
-        progress.Report.LogOperationError(new SpeckleException(
-          "Zero objects selected; send stopped. Please select some objects, or check that your filter can actually select something."));
-        progressBar.Cancel();
-        Application.EndProgress();
-        return null;
+        if (state.Filter != null && state.Filter.Slug == "all")
+        {
+          throw new InvalidOperationException("Everything Mode is not yet implemented. Send stopped.");
+        }
+        else
+        {
+          throw new InvalidOperationException(
+            "Zero objects selected; send stopped. Please select some objects, or check that your filter can actually select something.");
+        }
       }
 
       progress.Report = new ProgressReport();
-      ConcurrentDictionary<string, int> conversionProgressDict = new ConcurrentDictionary<string, int>
+      var conversionProgressDict = new ConcurrentDictionary<string, int>
       {
         ["Conversion"] = 0
       };
 
-      progress.Max = state.SelectedObjectIds.Count;
+      var totalObjects = filteredObjects.Sum(x => x.Item2);
 
-      Base commitObject = new Base
+      progress.Max = totalObjects;
+
+      var commitObject = new Base
       {
         ["units"] = GetUnits(Doc)
       };
 
-      int convertedCount = 0;
-
-      SortedDictionary<string, ConversionState> toConvertDictionary =
+      var toConvertDictionary =
         new SortedDictionary<string, ConversionState>(new PseudoIdComparer());
       state.SelectedObjectIds.ForEach(pseudoId =>
       {
-        if (pseudoId != RootNodePseudoId) toConvertDictionary.Add(pseudoId, ConversionState.ToConvert);
+        //if (pseudoId != RootNodePseudoId)
+        {
+          toConvertDictionary.Add(pseudoId, ConversionState.ToConvert);
+        }
       });
 
       progressBar.EndSubOperation();
-      progressBar.BeginSubOperation(1, $"Converting {state.SelectedObjectIds.Count} Objects.");
+      progressBar.BeginSubOperation(1, $"Converting {filteredObjects.Count + totalObjects} Objects.");
       progressBar.Update(0);
 
       // We have to disable autosave because it explodes everything if it tries saving mid send process.
       bool autosaveSetting;
 
-      using (LcUOptionLock optionLock = new LcUOptionLock())
+      using (var optionLock = new LcUOptionLock())
       {
-        LcUOptionSet rootOptions = GetRoot(optionLock);
+        var rootOptions = GetRoot(optionLock);
         autosaveSetting = rootOptions.GetBoolean("general.autosave.enable");
         if (autosaveSetting)
         {
@@ -137,6 +140,9 @@ namespace Speckle.ConnectorNavisworks.Bindings
           SaveGlobalOptions();
         }
       }
+
+      NavisworksConverter.SetConverterSettings(new Dictionary<string, string> { { "_Mode", "objects" } });
+
 
       while (toConvertDictionary.Any(kv => kv.Value == ConversionState.ToConvert))
       {
@@ -146,32 +152,21 @@ namespace Speckle.ConnectorNavisworks.Bindings
         if (progressBar.IsCanceled)
         {
           progress.CancellationTokenSource.Cancel();
-          progressBar.Cancel();
-          Application.EndProgress();
-          return null;
         }
 
-        if (progress.CancellationTokenSource.Token.IsCancellationRequested)
-        {
-          progressBar.Cancel();
-          Application.EndProgress();
-          return null;
-        }
+        progress.CancellationToken.ThrowIfCancellationRequested();
 
         var nextToConvert = toConvertDictionary.First(kv => kv.Value == ConversionState.ToConvert);
 
-        Base converted = null;
-
-        string applicationId = string.Empty;
-
-
+        var applicationId = string.Empty;
         var pseudoId = nextToConvert.Key;
         var descriptor = ObjectDescriptor(pseudoId);
 
-        bool alreadyConverted = NavisworksConverter.Report.GetReportObject(pseudoId, out int index);
+        var alreadyConverted =
+          NavisworksConverter.Report.ReportObjects.TryGetValue(pseudoId, out var applicationObject);
 
-        ApplicationObject reportObject = alreadyConverted
-          ? NavisworksConverter.Report.ReportObjects[index]
+        var reportObject = alreadyConverted
+          ? applicationObject
           : new ApplicationObject(pseudoId, descriptor)
           {
             applicationId = pseudoId
@@ -184,53 +179,35 @@ namespace Speckle.ConnectorNavisworks.Bindings
           continue;
         }
 
-
         if (!NavisworksConverter.CanConvertToSpeckle(pseudoId))
         {
           reportObject.Update(status: ApplicationObject.State.Skipped,
-            logItem: $"Sending this object type is not supported in Navisworks");
+            logItem: "Sending this object type is not supported in Navisworks");
           progress.Report.Log(reportObject);
 
-          toConvertDictionary[pseudoId] = ConversionState.Converted;
+          toConvertDictionary[pseudoId] = ConversionState.Skipped;
           continue;
         }
 
         NavisworksConverter.Report.Log(reportObject);
 
-        // All Conversions should be on the main thread
-        if (Control.InvokeRequired)
-        {
-          Control.Invoke(new Action(() => converted = NavisworksConverter.ConvertToSpeckle(pseudoId)));
-        }
-        else
-        {
-          converted = NavisworksConverter.ConvertToSpeckle(pseudoId);
-        }
+        var converted = Convert(pseudoId);
 
         if (converted == null)
         {
-          reportObject.Update(status: ApplicationObject.State.Failed,
-            logItem: $"Conversion returned null");
+          reportObject.Update(status: ApplicationObject.State.Failed, logItem: "Conversion returned null");
           progress.Report.Log(reportObject);
-          toConvertDictionary[pseudoId] = ConversionState.Skipped;
+          toConvertDictionary[pseudoId] = ConversionState.Failed;
           continue;
         }
 
-        if (commitObject[$"@Elements"] == null)
-        {
-          commitObject[$"@Elements"] = new List<Base>();
-        }
+        if (commitObject["@elements"] == null) commitObject["@elements"] = new List<Base>();
 
-        ((List<Base>)commitObject[$"@Elements"]).Add(converted);
+        ((List<Base>)commitObject["@elements"]).Add(converted);
 
-        // read back the pseudoIds of nested children already converted
-        if (!(converted["__convertedIds"] is List<string> convertedChildrenAndSelf))
-        {
-          continue;
-        }
+        toConvertDictionary[pseudoId] = ConversionState.Converted;
 
-        convertedChildrenAndSelf.ForEach(x => toConvertDictionary[x] = ConversionState.Converted);
-        conversionProgressDict["Conversion"] += convertedChildrenAndSelf.Count;
+        conversionProgressDict["Conversion"] += filteredObjects.Where(x => x.Item1 == pseudoId).Sum(x => x.Item2);
 
         progress.Update(conversionProgressDict);
 
@@ -244,106 +221,146 @@ namespace Speckle.ConnectorNavisworks.Bindings
         reportObject.Update(status: ApplicationObject.State.Created,
           logItem: $"Sent as {converted.speckle_type}");
         progress.Report.Log(reportObject);
-
-        convertedCount += convertedChildrenAndSelf.Count;
       }
+
+      var convertedCount = toConvertDictionary.Count(x => x.Value == ConversionState.Converted);
 
       progressBar.Update(1.0);
 
       // Better set the users autosave back on or they might get cross
       if (autosaveSetting)
-      {
-        using (LcUOptionLock optionLock = new LcUOptionLock())
+        using (var optionLock = new LcUOptionLock())
         {
-          LcUOptionSet rootOptions = GetRoot(optionLock);
+          var rootOptions = GetRoot(optionLock);
           rootOptions.SetBoolean("general.autosave.enable", true);
           SaveGlobalOptions();
         }
-      }
 
       progressBar.EndSubOperation();
-      progressBar.BeginSubOperation(1, $"Sending {convertedCount} objects to Speckle.");
 
       progress.Report.Merge(NavisworksConverter.Report);
 
       if (convertedCount == 0)
       {
-        progress.Report.LogOperationError(
-          new SpeckleException("Zero objects converted successfully. Send stopped.", false));
-        return null;
+        throw new SpeckleException("Zero objects converted successfully. Send stopped.");
       }
 
-      if (progress.CancellationTokenSource.Token.IsCancellationRequested)
+      #region Views
+
+      var views = new List<Base>();
+
+      NavisworksConverter.SetConverterSettings(new Dictionary<string, string> { { "_Mode", "views" } });
+      if (state.Filter?.Slug == "views")
       {
-        return null;
+        var selectedViews = state.Filter.Selection.Select(Convert).Where(c => c != null).ToList();
+        views.AddRange(selectedViews);
       }
 
-      progress.Max = convertedCount;
+      if (CurrentSettings.Find(x => x.Slug == "current-view") is CheckBoxSetting checkBox && checkBox.IsChecked)
+      {
+        views.Add(Convert(Doc.CurrentViewpoint.ToViewpoint()));
+      }
 
-      List<ITransport> transports = new List<ITransport>()
+      if (views.Any()) commitObject["Views"] = views;
+
+      #endregion
+
+      var totalConversions = convertedCount + conversionProgressDict["Conversion"];
+
+      progressBar.BeginSubOperation(0,
+        $"Sending {convertedCount} objects and {conversionProgressDict["Conversion"]} children to Speckle.");
+
+      NavisworksConverter.SetConverterSettings(new Dictionary<string, string> { { "_Mode", null } });
+
+      progress.CancellationToken.ThrowIfCancellationRequested();
+
+      progress.Max = totalConversions;
+
+      var transports = new List<ITransport>
       {
         new ServerTransport(client.Account, streamId)
       };
 
-      void ErrorAction(string s, Exception e)
-      {
-        progress.Report.LogOperationError(e);
-        progress.CancellationTokenSource.Cancel();
-      }
+      var objectId = await Operations.Send(
+        commitObject,
+        progress.CancellationToken,
+        transports,
+        onProgressAction: dict => {
+          if (dict.TryGetValue("RemoteTransport", out var rc) && rc > 0) {
+            var p = (double)rc / 2 / totalConversions;
+            if (p <= 1) progressBar.Update(p);
+          }
+          progress.Update(dict);
+        },
 
-      string objectId = await Operations.Send(
-        @object: commitObject,
-        cancellationToken: progress.CancellationTokenSource.Token,
-        transports: transports,
-        onProgressAction: progress.Update,
-        onErrorAction: ErrorAction,
+        // Deviation from the ideal pattern, which should throw to the DefaultErrorHandler
+        onErrorAction: (err, ex) => { progress.Report.OperationErrors.Add(ex); },
         disposeTransports: true
       );
 
-      if (progress.Report.OperationErrorsCount != 0)
+      if (progress.Report.OperationErrors.Any())
       {
-        Application.EndProgress();
-        progressBar.Dispose();
-        return null;
+        ConnectorHelpers.DefaultSendErrorHandler("", progress.Report.OperationErrors.Last());
       }
 
-      if (progress.CancellationTokenSource.Token.IsCancellationRequested)
-      {
-        Application.EndProgress();
-        progressBar.Dispose();
-        return null;
-      }
+      progress.CancellationToken.ThrowIfCancellationRequested();
 
-      CommitCreateInput commit = new CommitCreateInput
+      var commit = new CommitCreateInput
       {
         streamId = streamId,
         objectId = objectId,
         branchName = state.BranchName,
-        message = state.CommitMessage ?? $"Sent {convertedCount} elements from {HostApplications.Navisworks.Name}.",
+        message = state.CommitMessage ?? $"Sent {totalConversions} elements from {HostApplications.Navisworks.Name}.",
         sourceApplication = HostApplications.Navisworks.Slug
       };
 
+      var commitId = await ConnectorHelpers.CreateCommit(progress.CancellationToken, client, commit);
+      return commitId;
+    }
+
+    private Base Convert(object inputObject)
+    {
       try
       {
-        progressBar.Update(0.5);
-        string commitId = await client.CommitCreate(commit);
-
-        progressBar.Update(1.0);
-        Application.EndProgress();
-        progressBar.Dispose();
-
-        return commitId;
+        Func<object, Base> convertToSpeckle = NavisworksConverter.ConvertToSpeckle;
+        return (Base)InvokeOnUIThreadWithException(Control, convertToSpeckle, inputObject);
       }
-      catch (Exception ex)
+      catch (TargetInvocationException ex)
       {
-        progress.Report.LogOperationError(ex);
+        // log the exception or re-throw it
+        throw ex.InnerException ?? ex;
       }
+    }
 
-      progressBar.Update(1.0);
-      Application.EndProgress();
-      progressBar.Dispose();
+    private static object InvokeOnUIThreadWithException(System.Windows.Forms.Control control, Delegate method,
+      params object[] args)
+    {
+      if (control == null) return null;
 
-      return null;
+      object result = null;
+
+      control.Invoke(new Action(() =>
+      {
+        try
+        {
+          result = method?.DynamicInvoke(args);
+        }
+        catch (TargetInvocationException ex)
+        {
+          // log the exception or re-throw it
+          throw ex.InnerException ?? ex;
+        }
+      }));
+
+      return result;
+    }
+
+    private enum ConversionState
+    {
+      Converted = 0,
+      Skipped = 1,
+      ToConvert = 2,
+      Failed = 3
     }
   }
 }

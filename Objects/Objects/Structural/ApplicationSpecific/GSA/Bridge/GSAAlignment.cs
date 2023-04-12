@@ -1,7 +1,7 @@
-﻿using Speckle.Core.Models;
-using Speckle.Core.Kits;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Objects.Structural.GSA.Geometry;
+using Speckle.Core.Kits;
+using Speckle.Core.Models;
 
 namespace Objects.Structural.GSA.Bridge
 {
@@ -29,7 +29,7 @@ namespace Objects.Structural.GSA.Bridge
 
     public int GetNumAlignmentPoints()
     {
-      return chainage.Count;
+      return chainage.Count + curvature.Count;
     }
 
   }

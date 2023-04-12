@@ -9,10 +9,13 @@ using Speckle.Core.Credentials;
 using Speckle.Core.Logging;
 using Speckle.Core.Models;
 using Speckle.Core.Transports;
+using Speckle.Core.Helpers;
+using Serilog;
 using Tests;
+using Serilog.Context;
 
 /// <summary>
-/// Quick and dirty tests/examples of Speckle usage. 
+/// Quick and dirty tests/examples of Speckle usage.
 /// </summary>
 namespace ExampleApp
 {
@@ -28,20 +31,74 @@ namespace ExampleApp
   {
     static async Task Main(string[] args)
     {
+      // Step 1. make sure to initialize the logger with the proper parameters
+      // note, this initialization is part of the current default setup, with sane
+      SpeckleLog.Initialize(
+        hostApplicationName: "Enterprise ",
+        hostApplicationVersion: "NCC-1701-D",
+        logConfiguration: new(Serilog.Events.LogEventLevel.Debug, logToConsole: true)
+      );
 
-      await Subscriptions.SubscriptionConnection();
+      // by default, this:
+      // logs to file in the Speckle folder / Logs / hostApplicationName
+      // reports errors to sentry
+      // sends all log events above the configured level to seq
+      // logs to the stdout console (useful when debugging)
+      // note, not all props are available in the file and console log, context is not rendered there
 
-      Console.Clear();
+      SpeckleLog.Logger.Information(
+        "Captain's first log, stardate {stardate:.0}. This is the beginning of our journey",
+        40759.5123
+      );
 
-      //await SendAndReceive(1_000);
+      var log = SpeckleLog.Logger.ForContext("currentSpeed", "warp 5").ForContext("captain", "Jean-Luc Picard");
 
-      Console.Clear();
+      SpeckleLog.Logger.Information(
+        "We're traveling to {destination} our current speed is {currentSpeed}",
+        "Fairpoint station"
+      );
 
-      //await SendReceiveLargeSingleObjects(50_000); // pass in 500k for a 500k vertices mesh. gzipped size: ± 5.4mb, decompressed json: 21.7mb. Works :) 
+      GlobalLogContext.PushProperty("captain", "Picard");
 
-      Console.Clear();
+      using (LogContext.PushProperty("actingEnsign", "Wesley Crusher"))
+      {
+        var bearing = new { bearing = 25, mark = 134 };
+        SpeckleLog.Logger.Information("Picking up an anomaly, bearing {@bearing}", bearing);
+      }
+      try
+      {
+        SpeckleLog.Logger.Warning("Yellow alert, shields up");
+        throw new Exception("Shields are not responding.");
+      }
+      catch (Exception ex)
+      {
+        SpeckleLog.Logger.Error(ex, "Cannot raise shields, {reason}", ex.Message);
+        SpeckleLog.Logger.Fatal(ex, "Cannot raise shields, {reason}", ex.Message);
+      }
 
-      //await SendReceiveManyLargeObjects(); // defaults to 10k meshes with 1k vertices and faces
+      // await Subscriptions.SubscriptionConnection();
+
+      // Console.Clear();
+
+      // //await SendAndReceive(1_000);
+
+      // Console.Clear();
+
+      // //await SendReceiveLargeSingleObjects(50_000); // pass in 500k for a 500k vertices mesh. gzipped size: ± 5.4mb, decompressed json: 21.7mb. Works :)
+
+      // Console.Clear();
+
+      // //await SendReceiveManyLargeObjects(); // defaults to 10k meshes with 1k vertices and faces
+
+
+      // var foo = new Base() { };
+
+      // var chld1 = new ObjectReference();
+      // chld1.referencedId = "f048873d78d8833e1a2c0d7c2391a9bb";
+
+      // foo["Members"] = new[] { chld1 };
+
+      // var ser = Operations.Serialize(foo);
 
       Console.WriteLine("Press any key to exit");
       Console.ReadLine();
@@ -55,11 +112,16 @@ namespace ExampleApp
     /// <param name="numVertices"></param>
     /// <param name="numObjects"></param>
     /// <returns></returns>
-    public static async Task SendReceiveManyLargeObjects(int numVertices = 1000, int numObjects = 10_000)
+    public static async Task SendReceiveManyLargeObjects(
+      int numVertices = 1000,
+      int numObjects = 10_000
+    )
     {
       var objs = new List<Base>();
 
-      Console.WriteLine($"Generating {numObjects} meshes with {numVertices} each. That's like {numVertices * numObjects} points. Might take a while?");
+      Console.WriteLine(
+        $"Generating {numObjects} meshes with {numVertices} each. That's like {numVertices * numObjects} points. Might take a while?"
+      );
 
       for (int i = 1; i <= numObjects; i++)
       {
@@ -78,7 +140,9 @@ namespace ExampleApp
       Console.WriteLine("Done generating objects.");
 
       var myClient = new Client(AccountManager.GetDefaultAccount());
-      var streamId = await myClient.StreamCreate(new StreamCreateInput { name = "test", description = "this is a test" });
+      var streamId = await myClient.StreamCreate(
+        new StreamCreateInput { name = "test", description = "this is a test" }
+      );
       var myServer = new ServerTransport(AccountManager.GetDefaultAccount(), streamId);
 
       var myObject = new Base();
@@ -94,18 +158,23 @@ namespace ExampleApp
 
           foreach (var kvp in dict)
             Console.WriteLine($"<<<< {kvp.Key} progress: {kvp.Value} / {numObjects + 1}");
-        });
+        }
+      );
 
       Console.WriteLine($"Big commit id is {res}");
 
-      var receivedCommit = await Operations.Receive(res, remoteTransport: myServer, onProgressAction: dict =>
-       {
-         Console.CursorLeft = 0;
-         Console.CursorTop = 7;
+      var receivedCommit = await Operations.Receive(
+        res,
+        remoteTransport: myServer,
+        onProgressAction: dict =>
+        {
+          Console.CursorLeft = 0;
+          Console.CursorTop = 7;
 
-         foreach (var kvp in dict)
-           Console.WriteLine($"<<<< {kvp.Key} progress: {kvp.Value} / {numObjects + 1}");
-       });
+          foreach (var kvp in dict)
+            Console.WriteLine($"<<<< {kvp.Key} progress: {kvp.Value} / {numObjects + 1}");
+        }
+      );
 
       Console.Clear();
       Console.WriteLine($"Received big commit {res}");
@@ -119,7 +188,9 @@ namespace ExampleApp
     public static async Task SendReceiveLargeSingleObjects(int numVertices = 100_000)
     {
       Console.Clear();
-      Console.WriteLine($"Big mesh time! ({numVertices} vertices, and some {numVertices * 1.5} faces");
+      Console.WriteLine(
+        $"Big mesh time! ({numVertices} vertices, and some {numVertices * 1.5} faces"
+      );
       var myMesh = new Mesh();
 
       for (int i = 1; i <= numVertices; i++)
@@ -129,12 +200,13 @@ namespace ExampleApp
       }
 
       var myClient = new Client(AccountManager.GetDefaultAccount());
-      var streamId = await myClient.StreamCreate(new StreamCreateInput { name = "test", description = "this is a test" });
+      var streamId = await myClient.StreamCreate(
+        new StreamCreateInput { name = "test", description = "this is a test" }
+      );
       var server = new ServerTransport(AccountManager.GetDefaultAccount(), streamId);
 
-      var res = await Operations.Send(
-        myMesh,
-        transports: new List<ITransport>() { server }); ;
+      var res = await Operations.Send(myMesh, transports: new List<ITransport>() { server });
+      ;
 
       Console.WriteLine($"Big mesh id is {res}");
 
@@ -146,7 +218,7 @@ namespace ExampleApp
     }
 
     /// <summary>
-    /// A more generic version of the above. 
+    /// A more generic version of the above.
     /// </summary>
     /// <param name="numObjects"></param>
     /// <returns></returns>
@@ -166,7 +238,16 @@ namespace ExampleApp
         }
         else
         {
-          objects.Add(new Polyline { Points = new List<Point>() { new Point(i * 3.23, i / 3 * 7, i * 3), new Point(i / 2, i / 2, i / 2) } });
+          objects.Add(
+            new Polyline
+            {
+              Points = new List<Point>()
+              {
+                new Point(i * 3.23, i / 3 * 7, i * 3),
+                new Point(i / 2, i / 2, i / 2)
+              }
+            }
+          );
           for (int j = 0; j < 54; j++)
           {
             ((Polyline)objects[i]).Points.Add(new Point(j + i, 12.2 + j, 42.32 + j));
@@ -179,56 +260,69 @@ namespace ExampleApp
       ((dynamic)myRevision)["@WooTLayer"] = objects.GetRange(30, 100);
       ((dynamic)myRevision)["@FTW"] = objects.GetRange(130, objects.Count - 130 - 1);
 
-
       var step = sw.ElapsedMilliseconds;
-      Console.WriteLine($"Finished generating {numObjects} objs in ${sw.ElapsedMilliseconds / 1000f} seconds.");
+      Console.WriteLine(
+        $"Finished generating {numObjects} objs in ${sw.ElapsedMilliseconds / 1000f} seconds."
+      );
 
       Console.Clear();
 
       // This action will get invoked on progress.
-      var pushProgressAction = new Action<ConcurrentDictionary<string, int>>((progress) =>
-      {
-        Console.CursorLeft = 0;
-        Console.CursorTop = 0;
+      var pushProgressAction = new Action<ConcurrentDictionary<string, int>>(
+        (progress) =>
+        {
+          Console.CursorLeft = 0;
+          Console.CursorTop = 0;
 
-        // The provided dictionary has an individual kvp for each provided transport/process.
-        foreach (var kvp in progress)
-          Console.WriteLine($">>> {kvp.Key} : {kvp.Value} / {numObjects + 1}");
-      });
+          // The provided dictionary has an individual kvp for each provided transport/process.
+          foreach (var kvp in progress)
+            Console.WriteLine($">>> {kvp.Key} : {kvp.Value} / {numObjects + 1}");
+        }
+      );
 
-      // Let's set up some fake server transports. 
+      // Let's set up some fake server transports.
       var myClient = new Client(AccountManager.GetDefaultAccount());
-      var streamId = await myClient.StreamCreate(new StreamCreateInput { name = "test", description = "this is a test" });
+      var streamId = await myClient.StreamCreate(
+        new StreamCreateInput { name = "test", description = "this is a test" }
+      );
       var firstServer = new ServerTransport(AccountManager.GetDefaultAccount(), streamId);
 
       var mySecondClient = new Client(AccountManager.GetDefaultAccount());
-      var secondStreamId = await myClient.StreamCreate(new StreamCreateInput { name = "test2", description = "this is a second test" });
+      var secondStreamId = await myClient.StreamCreate(
+        new StreamCreateInput { name = "test2", description = "this is a second test" }
+      );
       var secondServer = new ServerTransport(AccountManager.GetDefaultAccount(), secondStreamId);
 
       var res = await Operations.Send(
         @object: myRevision,
         transports: new List<ITransport>() { firstServer, secondServer },
         onProgressAction: pushProgressAction
-        );
+      );
 
       Console.Clear();
       Console.CursorLeft = 0;
       Console.CursorTop = 0;
 
-      Console.WriteLine($"Finished sending {numObjects} objs or more in ${(sw.ElapsedMilliseconds - step) / 1000f} seconds.");
+      Console.WriteLine(
+        $"Finished sending {numObjects} objs or more in ${(sw.ElapsedMilliseconds - step) / 1000f} seconds."
+      );
       Console.WriteLine($"Parent object id: {res}");
 
       Console.Clear();
 
       // Time for getting our revision object back.
-      var res2 = await Operations.Receive(res, remoteTransport: firstServer, onProgressAction: dict =>
-      {
-        Console.CursorLeft = 0;
-        Console.CursorTop = 0;
+      var res2 = await Operations.Receive(
+        res,
+        remoteTransport: firstServer,
+        onProgressAction: dict =>
+        {
+          Console.CursorLeft = 0;
+          Console.CursorTop = 0;
 
-        foreach (var kvp in dict)
-          Console.WriteLine($"<<<< {kvp.Key} progress: {kvp.Value} / {numObjects + 1}");
-      });
+          foreach (var kvp in dict)
+            Console.WriteLine($"<<<< {kvp.Key} progress: {kvp.Value} / {numObjects + 1}");
+        }
+      );
 
       Console.Clear();
       Console.WriteLine("Got those objects back");
@@ -253,16 +347,21 @@ namespace ExampleApp
       for (int i = 0; i < numObjects; i++)
       {
         //var hash = Speckle.Core.Models.Utilities.hashString($"hash-{i}-{rand.NextDouble()}");
-        transport.SaveObject($"hash-{i}-{rand.NextDouble()}", $"content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}");
+        transport.SaveObject(
+          $"hash-{i}-{rand.NextDouble()}",
+          $"content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}content-longer-maye-it's-ok-{i}"
+        );
       }
 
-      // waits for the buffer to be empty. 
+      // waits for the buffer to be empty.
       await transport.WriteComplete();
 
       var stopWatchStep = stopWatch.ElapsedMilliseconds;
       var objsPerSecond = (double)numObjects / (stopWatchStep / 1000);
       Console.WriteLine($"-------------------------------------------------");
-      Console.WriteLine($"BufferedWriteTest: Wrote {numObjects} in {stopWatchStep} ms -> {objsPerSecond} objects per second");
+      Console.WriteLine(
+        $"BufferedWriteTest: Wrote {numObjects} in {stopWatchStep} ms -> {objsPerSecond} objects per second"
+      );
       Console.WriteLine($"-------------------------------------------------\n");
     }
   }

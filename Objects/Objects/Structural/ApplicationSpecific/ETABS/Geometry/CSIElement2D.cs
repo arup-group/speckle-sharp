@@ -1,14 +1,14 @@
-﻿using Speckle.Newtonsoft.Json;
-using Speckle.Core.Kits;
-using Speckle.Core.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Objects.Geometry;
-using Objects.Structural.Geometry;
-using Objects.Structural.Properties;
 using Objects.Structural.CSI.Analysis;
 using Objects.Structural.CSI.Geometry;
 using Objects.Structural.CSI.Properties;
+using Objects.Structural.Geometry;
 using Objects.Structural.Materials;
+using Objects.Structural.Properties;
+using Speckle.Core.Kits;
+using Speckle.Core.Models;
+using Speckle.Newtonsoft.Json;
 
 namespace Objects.Structural.CSI.Geometry
 {
@@ -25,11 +25,11 @@ namespace Objects.Structural.CSI.Geometry
     [SchemaInfo("CSIElement2D", "Creates a Speckle CSI 2D element (based on a list of edge ie. external, geometry defining nodes)", "CSI", "Geometry")]
     public CSIElement2D(List<Node> nodes, Property2D property, double offset = 0, double orientationAngle = 0,double[] modifiers = null, CSIAreaSpring CSIAreaSpring = null,CSIDiaphragm CSIDiaphragm = null)
     {
-      this.topology = nodes;
+      topology = nodes;
       this.property = property;
       this.offset = offset;
       this.orientationAngle = orientationAngle;
-      this.DiaphragmAssignment = CSIDiaphragm.name;
+      DiaphragmAssignment = CSIDiaphragm.name;
       this.CSIAreaSpring = CSIAreaSpring;
       this.modifiers = modifiers;
     }

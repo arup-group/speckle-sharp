@@ -3,10 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 using Speckle.Core.Models;
 using Speckle.Core.Transports;
 using Speckle.Newtonsoft.Json;
@@ -57,6 +57,10 @@ namespace Speckle.Core.Serialisation
 
     private HashSet<object> ParentObjects = new HashSet<object>();
 
+    // duration diagnostic stuff
+    public TimeSpan Elapsed => _stopwatch.Elapsed;
+    private Stopwatch _stopwatch = new Stopwatch();
+
     public BaseObjectSerializerV2()
     {
 
@@ -68,6 +72,7 @@ namespace Speckle.Core.Serialisation
         throw new Exception("A serializer instance can serialize only 1 object at a time. Consider creating multiple serializer instances");
       try
       {
+        _stopwatch.Start();
         Busy = true;
         Dictionary<string, object> converted = PreserializeObject(baseObj, true) as Dictionary<string, object>;
         String serialized = Dict2Json(converted);
@@ -79,6 +84,7 @@ namespace Speckle.Core.Serialisation
         ParentClosures = new List<Dictionary<string, int>>(); // cleanup in case of exceptions
         ParentObjects = new HashSet<object>();
         Busy = false;
+        _stopwatch.Stop();
       }
     }
 
@@ -95,17 +101,17 @@ namespace Speckle.Core.Serialisation
       if (type.IsPrimitive || obj is string)
         return obj;
 
-      if (obj is Base)
+      if (obj is Base b)
       {
         // Console.WriteLine($"Serialising base object - {type}");
         // Complex enough to deserve its own function
-        return PreserializeBase((Base)obj, computeClosures, inheritedDetachInfo);
+        return PreserializeBase(b, computeClosures, inheritedDetachInfo);
       }
 
-      if (obj is IDictionary)
+      if (obj is IDictionary d)
       {
-        Dictionary<string, object> ret = new Dictionary<string, object>(((IDictionary)obj).Count);
-        foreach (DictionaryEntry kvp in (IDictionary)obj)
+        Dictionary<string, object> ret = new Dictionary<string, object>(d.Count);
+        foreach (DictionaryEntry kvp in d)
         {
           object converted = PreserializeObject(kvp.Value, inheritedDetachInfo: inheritedDetachInfo);
           if (converted != null)
@@ -114,25 +120,23 @@ namespace Speckle.Core.Serialisation
         return ret;
       }
 
-      if (obj is IEnumerable)
+      if (obj is IEnumerable e)
       {
         List<object> ret;
-        if (obj is IList)
-          ret = new List<object>(((IList)obj).Count);
-        else if (obj is Array)
-          ret = new List<object>(((Array)obj).Length);
+        if (e is IList list)
+          ret = new List<object>(list.Count);
         else
           ret = new List<object>();
-        foreach (object element in ((IEnumerable)obj))
+        foreach (object element in e)
           ret.Add(PreserializeObject(element, inheritedDetachInfo: inheritedDetachInfo));
         return ret;
       }
 
-      if (obj is ObjectReference)
+      if (obj is ObjectReference r)
       {
         Dictionary<string, object> ret = new Dictionary<string, object>();
-        ret["speckle_type"] = ((ObjectReference)obj).speckle_type;
-        ret["referencedId"] = ((ObjectReference)obj).referencedId;
+        ret["speckle_type"] = r.speckle_type;
+        ret["referencedId"] = r.referencedId;
         return ret;
       }
 
@@ -142,17 +146,27 @@ namespace Speckle.Core.Serialisation
       }
 
       // Support for simple types
-      if (obj is Guid)
+      if (obj is Guid g)
       {
-        return ((Guid)obj).ToString();
+        return g.ToString();
       }
-      if (obj is System.Drawing.Color)
+      if (obj is System.Drawing.Color c)
       {
-        return ((System.Drawing.Color)obj).ToArgb();
+        return c.ToArgb();
       }
-      if (obj is DateTime)
+      if (obj is DateTime t)
       {
-        return ((DateTime)obj).ToString("o", System.Globalization.CultureInfo.InvariantCulture);
+        return t.ToString("o", System.Globalization.CultureInfo.InvariantCulture);
+      }
+      if (obj is Matrix4x4 m)
+      {
+        return new List<float>()
+        {
+          m.M11, m.M12, m.M13, m.M14,
+          m.M21, m.M22, m.M23, m.M24,
+          m.M31, m.M32, m.M33, m.M34,
+          m.M41, m.M42, m.M43, m.M44
+        };
       }
 
       throw new Exception("Unsupported value in serialization: " + type.ToString());
@@ -322,11 +336,13 @@ namespace Speckle.Core.Serialisation
     {
       if (WriteTransports == null)
         return;
+      _stopwatch.Stop();
       foreach (var transport in WriteTransports)
       {
         
         transport.SaveObject(objectId, objectJson);
       }
+      _stopwatch.Start();
     }
 
     private void StoreBlob(Blob obj)
@@ -334,6 +350,8 @@ namespace Speckle.Core.Serialisation
       if (WriteTransports == null)
         return;
       bool hasBlobTransport = false;
+
+      _stopwatch.Stop();
 
       foreach (var transport in WriteTransports)
       {
@@ -344,6 +362,7 @@ namespace Speckle.Core.Serialisation
         }
       }
 
+      _stopwatch.Start();
       if (!hasBlobTransport)
         throw new Exception("Object tree contains a Blob (file), but the serialiser has no blob saving capable transports.");
     }

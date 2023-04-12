@@ -8,13 +8,11 @@
 
   <SubKeyinTables>
     <KeyinTable ID="Commands">
-      <Keyword CommandWord="SpeckleOld" />
-      <Keyword CommandWord="Speckle" />
+      <Keyword CommandWord="Start" />
     </KeyinTable>
   </SubKeyinTables>
 
   <KeyinHandlers>
-    <KeyinHandler Keyin="Speckle SpeckleOld" Function="Speckle.ConnectorBentley.Keyins.Start" />
-    <KeyinHandler Keyin="Speckle Speckle" Function="Speckle.ConnectorBentley.Keyins.Start2" />
+    <KeyinHandler Keyin="Speckle Speckle" Function="Speckle.ConnectorBentley.Keyins.Start" />
   </KeyinHandlers>
 </KeyinTree>

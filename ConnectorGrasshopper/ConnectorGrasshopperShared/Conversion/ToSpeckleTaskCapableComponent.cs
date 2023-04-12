@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using ConnectorGrasshopper.Extras;
 using ConnectorGrasshopper.Objects;
+using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using Serilog;
 using Speckle.Core.Logging;
 using Speckle.Core.Models;
 using Speckle.Core.Models.Extensions;
@@ -20,7 +24,7 @@ namespace ConnectorGrasshopper.Conversion
       SpeckleGHSettings.SettingsChanged += (_, args) =>
       {
         if (args.Key != SpeckleGHSettings.SHOW_DEV_COMPONENTS) return;
-        
+
         var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
         if (proxy == null) return;
         proxy.Exposure = internalExposure;
@@ -40,7 +44,7 @@ namespace ConnectorGrasshopper.Conversion
     internal static Guid internalGuid => new Guid("FB88150A-1885-4A77-92EA-9B1378310FDD");
     internal static GH_Exposure internalExposure => SpeckleGHSettings.ShowDevComponents ? GH_Exposure.primary : GH_Exposure.hidden;
     public override Guid ComponentGuid => internalGuid;
-    protected override Bitmap Icon => Properties.Resources.ToNative;
+    protected override Bitmap Icon => Properties.Resources.ToSpeckle;
 
     public override bool CanDisableConversion => false;
 
@@ -57,7 +61,7 @@ namespace ConnectorGrasshopper.Conversion
       //pManager.AddParameter(new SpeckleBaseParam("Base", "B", "Converted Base Speckle objects.", GH_ParamAccess.item));
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    public override void SolveInstanceWithLogContext(IGH_DataAccess DA)
     {
       if (InPreSolve)
       {
@@ -68,7 +72,7 @@ namespace ConnectorGrasshopper.Conversion
 
         object item = null;
         DA.GetData(0, ref item);
-        if(DA.Iteration == 0) Tracker.TrackNodeRun();
+        if (DA.Iteration == 0) Tracker.TrackNodeRun();
         var task = Task.Run(() => DoWork(item, DA), source.Token);
         TaskList.Add(task);
         return;
@@ -93,6 +97,7 @@ namespace ConnectorGrasshopper.Conversion
           DA.AbortComponentSolution();
           return null;
         }
+        Converter.SetConverterSettings(new Dictionary<string, object> { { "preprocessGeometry", preprocessGeometry } });
         var converted = Extras.Utilities.TryConvertItemToSpeckle(item, Converter, true);
 
         if (source.Token.IsCancellationRequested)
@@ -113,13 +118,39 @@ namespace ConnectorGrasshopper.Conversion
 
         return new GH_SpeckleBase { Value = converted as Base };
       }
-      catch (Exception e)
+      catch (Exception ex)
       {
         // If we reach this, something happened that we weren't expecting...
-        Log.CaptureException(e);
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.ToFormattedString());
+        SpeckleLog.Logger.Error(ex, ex.Message);
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ex.ToFormattedString());
         return new GH_SpeckleBase();
       }
+    }
+
+    private bool preprocessGeometry = false;
+
+    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalMenuItems(menu);
+      var item = Menu_AppendItem(menu, "Pre-process geometry", (sender, args) =>
+      {
+        preprocessGeometry = !preprocessGeometry;
+        Converter.SetConverterSettings(new Dictionary<string, object> { { "preprocessGeometry", preprocessGeometry } });
+        ExpireSolution(true);
+      }, null, true, preprocessGeometry);
+
+    }
+
+    public override bool Write(GH_IWriter writer)
+    {
+      writer.SetBoolean("preprocessGeometry", preprocessGeometry);
+      return base.Write(writer);
+    }
+
+    public override bool Read(GH_IReader reader)
+    {
+      reader.TryGetBoolean("preprocessGeometry", ref preprocessGeometry);
+      return base.Read(reader);
     }
   }
 }

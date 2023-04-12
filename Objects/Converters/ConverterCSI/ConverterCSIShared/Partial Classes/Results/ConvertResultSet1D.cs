@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml.Linq;
 
 namespace Objects.Converter.CSI
 {
@@ -21,19 +22,28 @@ namespace Objects.Converter.CSI
       foreach (var frameName in frameNames)
       {
         frameResults = FrameResultSet1dToSpeckle(frameName);
-        combinedResults.AddRange(frameResults.results1D);
+        if (frameResults != null)
+        {
+          combinedResults.AddRange(frameResults.results1D);
+        }
       }
 
       foreach (var pierName in pierNames)
       {
         pierResults = PierResultSet1dToSpeckle(pierName);
-        combinedResults.AddRange(pierResults.results1D);
+        if (pierResults != null)
+        {
+          combinedResults.AddRange(pierResults.results1D);
+        }
       }
 
       foreach (var spandrelName in spandrelNames)
       {
         spandrelResults = SpandrelResultSet1dToSpeckle(spandrelName);
-        combinedResults.AddRange(spandrelResults.results1D);
+        if (spandrelResults != null)
+        {
+          combinedResults.AddRange(spandrelResults.results1D);
+        }
       }
 
       return new ResultSet1D() { results1D = combinedResults };
@@ -42,6 +52,12 @@ namespace Objects.Converter.CSI
     public ResultSet1D FrameResultSet1dToSpeckle(string elementName)
     {
       List<Result1D> results = new List<Result1D>();
+
+      var element = SpeckleModel.elements.Where(o => (string)o["name"] == elementName && o is Element1D).FirstOrDefault() as Element1D;
+
+      // if the element is null, then it was not part of the user's selection, so don't send its results
+      if (element == null)
+        return null;
 
       SetLoadCombinationsForResults();
 
@@ -61,7 +77,7 @@ namespace Objects.Converter.CSI
       {
         Result1D result = new Result1D()
         {
-          element = FrameToSpeckle(elementName),
+          element = element,
           position = (float)(objSta[i] / lengthOf1dElement),
           permutation = loadCase[i],
           dispX = 0, // values eventually populated by element.Node.{displacements}
@@ -214,14 +230,19 @@ namespace Objects.Converter.CSI
 
     public void SetLoadCombinationsForResults()
     {
-      int numberOfLoadCombinations = 0;
-      string[] loadCombinationNames = new string[1];
+      var numberOfLoadCombinations = 0;
+      var loadCombinationNames = new string[1];
 
       Model.RespCombo.GetNameList(ref numberOfLoadCombinations, ref loadCombinationNames);
-
       foreach (var loadCombination in loadCombinationNames)
       {
         Model.Results.Setup.SetComboSelectedForOutput(loadCombination);
+      }
+
+      Model.LoadCases.GetNameList(ref numberOfLoadCombinations, ref loadCombinationNames);
+      foreach (var loadCase in loadCombinationNames)
+      {
+        Model.Results.Setup.SetCaseSelectedForOutput(loadCase);
       }
     }
   }

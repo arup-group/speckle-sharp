@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Serilog;
 using Speckle.Core.Logging;
 
 namespace Speckle.Core.Transports
@@ -23,9 +25,14 @@ namespace Speckle.Core.Transports
 
     public int SavedObjectCount { get; set; } = 0;
 
+    public Dictionary<string, object> TransportContext =>
+      new Dictionary<string, object> { { "name", TransportName }, { "type", this.GetType().Name } };
+
+    public TimeSpan Elapsed { get; set; } = TimeSpan.Zero;
+
     public MemoryTransport()
     {
-      Log.AddBreadcrumb("New Memory Transport");
+      SpeckleLog.Logger.Debug("Creating a new Memory Transport");
 
       Objects = new Dictionary<string, string>();
     }
@@ -39,12 +46,16 @@ namespace Speckle.Core.Transports
 
     public void SaveObject(string hash, string serializedObject)
     {
-      if (CancellationToken.IsCancellationRequested) return; // Check for cancellation
+      var stopwatch = Stopwatch.StartNew();
+      if (CancellationToken.IsCancellationRequested)
+        return; // Check for cancellation
 
       Objects[hash] = serializedObject;
 
       SavedObjectCount++;
       OnProgressAction?.Invoke(TransportName, 1);
+      stopwatch.Stop();
+      Elapsed += stopwatch.Elapsed;
     }
 
     public void SaveObject(string id, ITransport sourceTransport)
@@ -54,14 +65,21 @@ namespace Speckle.Core.Transports
 
     public string GetObject(string hash)
     {
-      if (CancellationToken.IsCancellationRequested) return null; // Check for cancellation
+      if (CancellationToken.IsCancellationRequested)
+        return null; // Check for cancellation
 
-      if (Objects.ContainsKey(hash)) return Objects[hash];
-      else
-        return null;
+      var stopwatch = Stopwatch.StartNew();
+      var ret = Objects.ContainsKey(hash) ? Objects[hash] : null;
+      stopwatch.Stop();
+      Elapsed += stopwatch.Elapsed;
+      return ret;
     }
 
-    public Task<string> CopyObjectAndChildren(string id, ITransport targetTransport, Action<int> onTotalChildrenCountKnown = null)
+    public Task<string> CopyObjectAndChildren(
+      string id,
+      ITransport targetTransport,
+      Action<int> onTotalChildrenCountKnown = null
+    )
     {
       throw new NotImplementedException();
     }
@@ -113,5 +131,4 @@ namespace Speckle.Core.Transports
       };
     }
   }
-
 }

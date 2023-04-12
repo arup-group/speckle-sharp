@@ -159,7 +159,20 @@ namespace Speckle.ConnectorRevit.UI
 
           case "all":
             //add these only for the current doc
-            selection.Add(currentDoc.ProjectInformation);
+            if (!currentDoc.IsFamilyDocument)
+            {
+              selection.Add(currentDoc.ProjectInformation);
+            }
+            else
+            {
+              //add for family document
+              IList<ElementFilter> filters = new List<ElementFilter>()
+              {
+              new ElementClassFilter(typeof(GenericForm)),
+              new ElementClassFilter(typeof(GeomCombination)),
+              };
+              selection.AddRange(new FilteredElementCollector(currentDoc).WherePasses(new LogicalOrFilter(filters)).ToElements());
+            }
             selection.AddRange(currentDoc.Views2D());
             selection.AddRange(currentDoc.Views3D());
 
@@ -298,9 +311,9 @@ namespace Speckle.ConnectorRevit.UI
                 selection.AddRange(query.ToList());
               }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-              Log.CaptureException(e);
+              SpeckleLog.Logger.Error(ex, ex.Message);
             }
             return selection;
         }

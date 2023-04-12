@@ -1,4 +1,5 @@
 ﻿using ReactiveUI;
+using Serilog;
 using Speckle.Core.Logging;
 using Splat;
 using System;
@@ -36,7 +37,7 @@ namespace DesktopUI2.ViewModels
       }
       catch (Exception ex)
       {
-        Log.CaptureException(ex, Sentry.SentryLevel.Error);
+        SpeckleLog.Logger.Fatal(ex, "Failed to construct view model {viewModel} {exceptionMessage}", GetType(), ex.Message);
       }
     }
   }

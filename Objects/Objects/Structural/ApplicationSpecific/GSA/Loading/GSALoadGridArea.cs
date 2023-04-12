@@ -1,7 +1,7 @@
 ﻿using Objects.Geometry;
 using Objects.Structural.Geometry;
-using Objects.Structural.Loading;
 using Objects.Structural.GSA.Geometry;
+using Objects.Structural.Loading;
 using Speckle.Core.Kits;
 
 namespace Objects.Structural.GSA.Loading
@@ -41,7 +41,7 @@ namespace Objects.Structural.GSA.Loading
       this.value = value;
         }
 
-        [SchemaInfo("GSALoadGridArea (whole plane)", "Creates a Speckle structural grid area load for GSA", "GSA", "Loading")]
+    [SchemaInfo("GSALoadGridArea (whole plane)", "Creates a Speckle structural grid area load for GSA", "GSA", "Loading")]
     public GSALoadGridArea(LoadCase loadCase, GSAGridSurface gridSurface, double value, Axis loadAxis = null, LoadDirection2D direction = LoadDirection2D.Z, bool isProjected = false, string name = null, int? nativeId = null)
     {
       this.name = name;

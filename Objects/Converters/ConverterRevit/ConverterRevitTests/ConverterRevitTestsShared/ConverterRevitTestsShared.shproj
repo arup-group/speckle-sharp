@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+<<<<<<<< HEAD:ConnectorBentley/ConnectorBentleyShared/ConnectorBentleyShared.shproj
+    <ProjectGuid>{E037A245-E171-415F-A2AA-32A2D39AD307}</ProjectGuid>
+========
+    <ProjectGuid>1085f4b5-fdad-4ff8-b144-dddbd9454f55</ProjectGuid>
+>>>>>>>> 0ad7ff3f2211f6d54a15ff49eb80d2575b0cce87:Objects/Converters/ConverterRevit/ConverterRevitTests/ConverterRevitTestsShared/ConverterRevitTestsShared.shproj
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\CodeSharing\Microsoft.CodeSharing.Common.Default.props" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\CodeSharing\Microsoft.CodeSharing.Common.props" />
+  <PropertyGroup />
+<<<<<<<< HEAD:ConnectorBentley/ConnectorBentleyShared/ConnectorBentleyShared.shproj
+  <Import Project="ConnectorBentleyShared.projitems" Label="Shared" />
+========
+  <Import Project="ConverterRevitTestsShared.projitems" Label="Shared" />
+>>>>>>>> 0ad7ff3f2211f6d54a15ff49eb80d2575b0cce87:Objects/Converters/ConverterRevit/ConverterRevitTests/ConverterRevitTestsShared/ConverterRevitTestsShared.shproj
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\CodeSharing\Microsoft.CodeSharing.CSharp.targets" />
+</Project>

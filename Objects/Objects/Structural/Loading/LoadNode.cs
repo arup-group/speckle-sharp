@@ -10,9 +10,9 @@ namespace Objects.Structural.Loading
 {
   public class LoadNode : Load
   {
-    //[DetachProperty]
     [Chunkable(250)]
     public List<Node> nodes { get; set; }
+    [DetachProperty]
     public List<string> nodeRefs { get; set; }
     public Axis loadAxis { get; set; }
     public LoadDirection direction { get; set; }

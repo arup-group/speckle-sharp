@@ -2,6 +2,7 @@
 using DesktopUI2.Models;
 using DesktopUI2.Views.Windows.Dialogs;
 using ReactiveUI;
+using Serilog;
 using Speckle.Core.Api;
 using Speckle.Core.Credentials;
 using Speckle.Core.Logging;
@@ -90,7 +91,7 @@ namespace DesktopUI2.ViewModels
       }
       catch (Exception ex)
       {
-        new SpeckleException("Could not initialize one click screen", ex, true, Sentry.SentryLevel.Error);
+        SpeckleLog.Logger.Fatal(ex, "Could not initialize one click screen {excep tionMessage}", ex.Message);
       }
     }
 
@@ -101,15 +102,17 @@ namespace DesktopUI2.ViewModels
       Progress.ProgressTitle = "Sending to Speckle 🚀...";
       Progress.IsProgressing = true;
 
-
+      try
+      {
       string fileName = null;
       try
       {
         fileName = Bindings.GetFileName();
       }
-      catch
+        catch (Exception ex)
       {
         //todo: handle properly in each connector bindings
+          SpeckleLog.Logger.Error(ex, "Swallowing exception in {methodName}: {exceptionMessage}", nameof(Send), ex.Message);
       }
 
       //filename is different, might have been renamed or be a different document
@@ -166,13 +169,14 @@ namespace DesktopUI2.ViewModels
 
       // send to stream
       // TODO: report conversions errors, empty commit etc
-      try
-      {
+
         Id = await Task.Run(() => Bindings.SendStream(_fileStream, Progress));
 
         if (!string.IsNullOrEmpty(Id))
         {
-          var errorsCount = Progress.Report.ReportObjects.Count(x => x.Status == Speckle.Core.Models.ApplicationObject.State.Failed);
+          var errorsCount =
+            Progress.Report.ReportObjects.Values.Count(x =>
+              x.Status == Speckle.Core.Models.ApplicationObject.State.Failed);
           if (errorsCount > 0)
           {
             var s = errorsCount == 1 ? "" : "s";
@@ -192,21 +196,26 @@ namespace DesktopUI2.ViewModels
         }
         else
         {
-          SentText = "Semething went wrong!\nPlease try again or switch to advanced mode.";
+          SentText = "Something went wrong!\nPlease try again or switch to advanced mode.";
           SuccessfulSend = false;
         }
 
-        Progress.IsProgressing = false;
-
-        if (!Progress.CancellationTokenSource.IsCancellationRequested)
+        if (!Progress.CancellationToken.IsCancellationRequested)
         {
-          Analytics.TrackEvent(AccountManager.GetDefaultAccount(), Analytics.Events.Send, new Dictionary<string, object> { { "method", "OneClick" } });
+          Analytics.TrackEvent(AccountManager.GetDefaultAccount(), Analytics.Events.Send,
+            new Dictionary<string, object> { { "method", "OneClick" } });
           _fileStream.LastUsed = DateTime.Now.ToString();
         }
       }
       catch (Exception ex)
       {
-        new SpeckleException("Could not send with one click", ex, true, Sentry.SentryLevel.Error);
+        SpeckleLog.Logger.Error(ex, "Could not send with one click {exceptionMessage}", ex.Message);
+        SentText = "Something went wrong!\nPlease try again or switch to advanced mode.";
+        SuccessfulSend = false;
+      }
+      finally
+      {
+        Progress.IsProgressing = false;
       }
 
       if (HomeViewModel.Instance != null)
@@ -250,7 +259,11 @@ namespace DesktopUI2.ViewModels
         var streams = await client.StreamSearch(_fileName);
         stream = streams.FirstOrDefault(s => s.name == _fileName);
       }
-      catch (Exception) { }
+      catch (Exception ex)
+      {
+        SpeckleLog.Logger.ForContext("fileName", _fileName)
+          .Debug(ex, "Swallowing exception in {methodName}: {exceptionMessage}", nameof(SearchStreams), ex.Message);
+      }
       return stream;
     }
 

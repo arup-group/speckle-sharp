@@ -12,6 +12,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Resources;
 using System.Threading.Tasks;
 using Speckle.Core.Logging;
 
@@ -47,74 +48,15 @@ namespace Speckle.ConnectorCSI.UI
       Exceptions.Clear();
       var previouslyReceivedObjects = state.ReceivedObjects;
 
-      if (converter == null)
-      {
-        progress.Report.LogOperationError(new SpeckleException("Could not find any Kit!"));
-        return null;
-      }
-
-      converter.SetContextDocument(Model);
-      converter.ReceiveMode = state.ReceiveMode;
-      Exceptions.Clear();
-
-      var stream = await state.Client.StreamGet(state.StreamId);
-
-      if (progress.CancellationTokenSource.Token.IsCancellationRequested)
-        return null;
-
-      var transport = new ServerTransport(state.Client.Account, state.StreamId);
+      progress.CancellationToken.ThrowIfCancellationRequested();
 
       Exceptions.Clear();
 
-      Commit commit = null;
-      if (state.CommitId == "latest")
-      {
-        var res = await state.Client.BranchGet(progress.CancellationTokenSource.Token, state.StreamId, state.BranchName, 1);
-        commit = res.commits.items.FirstOrDefault();
-      }
-      else
-      {
-        commit = await state.Client.CommitGet(progress.CancellationTokenSource.Token, state.StreamId, state.CommitId);
-      }
-      string referencedObject = commit.referencedObject;
 
-      state.LastSourceApp = commit.sourceApplication;
-
-      var commitObject = await Operations.Receive(
-                referencedObject,
-                progress.CancellationTokenSource.Token,
-                transport,
-                onProgressAction: dict => progress.Update(dict),
-                onErrorAction: (Action<string, Exception>)((s, e) =>
-                {
-                  progress.Report.LogOperationError(new Core.Logging.SpeckleException(e.Message, true, Sentry.SentryLevel.Error));
-                  Core.Logging.Analytics.TrackEvent(state.Client.Account, Core.Logging.Analytics.Events.Receive, new Dictionary<string, object>() { { "commit_receive_failed", e.Message } });
-                  progress.CancellationTokenSource.Cancel();
-                }),
-                onTotalChildrenCountKnown: count => { progress.Max = count + 1; },
-                disposeTransports: true
-                );
-
-      if (progress.Report.OperationErrorsCount != 0)
-        return state;
-
-      try
-      {
-        await state.Client.CommitReceived(new CommitReceivedInput
-        {
-          streamId = stream?.id,
-          commitId = commit?.id,
-          message = commit?.message,
-          sourceApplication = GetHostAppVersion(Model)
-        });
-      }
-      catch
-      {
-        // Do nothing!
-      }
-
-      var commitObjs = FlattenCommitObject(commitObject, converter);
-      progress.Max = commitObjs.Count();
+      Commit commit = await ConnectorHelpers.GetCommitFromState(progress.CancellationToken, state);
+      state.LastCommit = commit;
+      Base commitObject = await ConnectorHelpers.ReceiveCommit(commit, state, progress);
+      await ConnectorHelpers.TryCommitReceived(progress.CancellationToken, state, commit, GetHostAppVersion(Model));
 
       Preview.Clear();
       StoredObjects.Clear();
@@ -137,18 +79,11 @@ namespace Speckle.ConnectorCSI.UI
       // needs to be set for editing to work 
       converter.SetPreviousContextObjects(previouslyReceivedObjects);
 
-      if (progress.CancellationTokenSource.Token.IsCancellationRequested)
-        return null;
+      progress.CancellationToken.ThrowIfCancellationRequested();
+
       StreamStateManager.SaveBackupFile(Model);
 
       var newPlaceholderObjects = ConvertReceivedObjects(converter, progress);
-
-      // receive was cancelled by user
-      if (newPlaceholderObjects == null)
-      {
-        progress.Report.LogOperationError(new Exception("fatal error: receive cancelled by user"));
-        return null;
-      }
 
       DeleteObjects(previouslyReceivedObjects, newPlaceholderObjects, progress);
 
@@ -179,11 +114,7 @@ namespace Speckle.ConnectorCSI.UI
           continue;
 
         var @base = StoredObjects[obj.OriginalId];
-        if (progress.CancellationTokenSource.Token.IsCancellationRequested)
-        {
-          placeholders = null;
-          break;
-        }
+        progress.CancellationToken.ThrowIfCancellationRequested();
 
       try
       {

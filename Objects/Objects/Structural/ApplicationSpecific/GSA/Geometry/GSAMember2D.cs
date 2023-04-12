@@ -55,7 +55,7 @@ namespace Objects.Structural.GSA.Geometry
           voidCoordinates.AddRange(v[0].basePoint.ToList());
           outline.Add(new Polyline(voidCoordinates, this.units != null ? this.units : v.FirstOrDefault().units));
         }
-      }
+  }
 
       this.outline = outline;
 

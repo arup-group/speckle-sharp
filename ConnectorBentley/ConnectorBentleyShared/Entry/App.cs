@@ -1,22 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-
-using Speckle.DesktopUI;
-using Speckle.DesktopUI.Utils;
-using Stylet.Xaml;
-
-using Bentley.DgnPlatformNET;
+﻿using Bentley.DgnPlatformNET;
 using Bentley.DgnPlatformNET.Elements;
 using Bentley.GeometryNET;
 using Bentley.MstnPlatformNET;
-
+using DesktopUI2;
 using Speckle.ConnectorBentley.UI;
-using System.Reflection;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
 
 namespace Speckle.ConnectorBentley.Entry
 {
@@ -40,19 +35,14 @@ namespace Speckle.ConnectorBentley.Entry
       get { return App; }
     }
 
-    public void Start(string unparsed)
-    {
-      SpeckleBentleyCommand.ShowPanel();
-    }
-
     // for DUI2
-    public void Start2(string unparsed)
+    public void Start(string unparsed)
     {
       AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(OnAssemblyResolve);
 
-      SpeckleBentleyCommand2.InitAvalonia();
-      SpeckleBentleyCommand2.Bindings = new ConnectorBindingsBentley2();
-      SpeckleBentleyCommand2.CreateOrFocusSpeckle();
+      SpeckleBentleyCommand.InitAvalonia();
+      SpeckleBentleyCommand.Bindings = new ConnectorBindingsBentley();
+      SpeckleBentleyCommand.CreateOrFocusSpeckle();
     }
 
     // This is necessary for finding assemblies when building Avalonia 
@@ -70,5 +60,5 @@ namespace Speckle.ConnectorBentley.Entry
       return a;
     }
   }
-  
+
 }

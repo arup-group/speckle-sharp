@@ -13,6 +13,7 @@ using Material.Icons.Avalonia;
 using Material.Styles.Themes;
 using Material.Styles.Themes.Base;
 using ReactiveUI;
+using Serilog;
 using Speckle.Core.Api;
 using Speckle.Core.Credentials;
 using Speckle.Core.Helpers;
@@ -241,7 +242,7 @@ namespace DesktopUI2.ViewModels
       }
       catch (Exception ex)
       {
-        new SpeckleException("Could not initialize the Home Screen", ex, true, Sentry.SentryLevel.Error);
+        SpeckleLog.Logger.Fatal(ex, "Failed to construct view model {viewModel} {exceptionMessage}", GetType(), ex.Message);
       }
     }
 
@@ -268,7 +269,7 @@ namespace DesktopUI2.ViewModels
       }
       catch (Exception ex)
       {
-        new SpeckleException("Could not Update Saved STreams", ex, true, Sentry.SentryLevel.Error);
+        SpeckleLog.Logger.Error(ex, "Could not Update Saved Streams {exceptionMessage}", ex.Message);
       }
     }
 
@@ -291,7 +292,8 @@ namespace DesktopUI2.ViewModels
       }
       catch (Exception ex)
       {
-        Log.CaptureException(ex, Sentry.SentryLevel.Error);
+        //FIXME: This branch can't ever get hit right?
+        SpeckleLog.Logger.Error(ex, "Failed updating selected stream {exceptionMessage}", ex.Message);
       }
     }
 
@@ -322,7 +324,7 @@ namespace DesktopUI2.ViewModels
       }
       catch (Exception ex)
       {
-        Log.CaptureException(ex, Sentry.SentryLevel.Error);
+        SpeckleLog.Logger.Error(ex, "Failed to add saved stream {exceptionMessage}", ex.Message);
       }
     }
 
@@ -375,11 +377,17 @@ namespace DesktopUI2.ViewModels
             streams.AddRange(result.Select(x => new StreamAccountWrapper(x, account.Account)));
 
           }
+          catch (OperationCanceledException)
+          {
+            return;
+          }
           catch (Exception e)
           {
             if (e.InnerException is System.Threading.Tasks.TaskCanceledException)
               return;
-            Log.CaptureException(new Exception("Could not fetch streams", e), Sentry.SentryLevel.Error);
+
+            SpeckleLog.Logger.Error(e, "Could not fetch streams");
+
             Dispatcher.UIThread.Post(() =>
               MainUserControl.NotificationManager.Show(new PopUpNotificationViewModel()
               {
@@ -398,7 +406,7 @@ namespace DesktopUI2.ViewModels
       }
       catch (Exception ex)
       {
-        Log.CaptureException(ex, Sentry.SentryLevel.Error);
+        SpeckleLog.Logger.Fatal(ex, "Unexpected exception while getting streams {exceptionMessage}", ex.Message);
       }
       finally
       {
@@ -434,7 +442,8 @@ namespace DesktopUI2.ViewModels
           {
             if (e.InnerException is System.Threading.Tasks.TaskCanceledException)
               return;
-            Log.CaptureException(new Exception("Could not fetch invites", e), Sentry.SentryLevel.Error);
+
+            SpeckleLog.Logger.Error(e, "Could not fetch invites");
           }
         }
 
@@ -444,7 +453,7 @@ namespace DesktopUI2.ViewModels
       }
       catch (Exception ex)
       {
-        Log.CaptureException(ex, Sentry.SentryLevel.Error);
+        SpeckleLog.Logger.Error(ex, "Swallowing exception in {methodName}: {exceptionMessage}", nameof(GetNotifications), ex.Message);
       }
     }
 
@@ -501,7 +510,10 @@ namespace DesktopUI2.ViewModels
           await AccountManager.UpdateAccounts();
           Accounts = AccountManager.GetAccounts().Select(x => new AccountViewModel(x)).ToList();
         }
-        catch { }
+        catch (Exception ex)
+        {
+          SpeckleLog.Logger.Warning(ex, "Swallowing exception in {methodName}: {exceptionMessage}", nameof(Refresh), ex.Message);
+        }
 
         foreach (var account in Accounts)
         {
@@ -519,7 +531,7 @@ namespace DesktopUI2.ViewModels
       }
       catch (Exception ex)
       {
-        Log.CaptureException(ex, Sentry.SentryLevel.Error);
+        SpeckleLog.Logger.Error(ex, "Failed to refresh {exceptionMessage}", ex.Message);
       }
     }
 
@@ -615,7 +627,7 @@ namespace DesktopUI2.ViewModels
       }
       catch (Exception ex)
       {
-        new SpeckleException("Error generating menu items", ex, true, Sentry.SentryLevel.Error);
+        SpeckleLog.Logger.Error(ex, "Error generating menu items {exceptionMessage}", ex.Message);
       }
     }
 
@@ -638,13 +650,15 @@ namespace DesktopUI2.ViewModels
       }
       catch (Exception ex)
       {
-        Log.CaptureException(ex, Sentry.SentryLevel.Error);
+        SpeckleLog.Logger.Error(ex, "Failed to remove saved stream {exceptionMessage}", ex.Message);
       }
     }
 
     public async void AddAccountCommand()
     {
+      InProgress = true;
       await Utils.AddAccountCommand();
+      InProgress = false;
     }
     public async void RemoveAccountCommand(Account account)
     {
@@ -656,7 +670,7 @@ namespace DesktopUI2.ViewModels
       }
       catch (Exception ex)
       {
-        Log.CaptureException(ex, Sentry.SentryLevel.Error);
+        SpeckleLog.Logger.Error(ex, "Failed to remove account {exceptionMessage}", ex.Message);
       }
     }
 
@@ -706,10 +720,10 @@ namespace DesktopUI2.ViewModels
 
           GetStreams().ConfigureAwait(false); //update streams
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-          Log.CaptureException(e, Sentry.SentryLevel.Error);
-          Dialogs.ShowDialog("Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
+          SpeckleLog.Logger.Fatal(ex, "Failed to create new stream {exceptionMessage}", ex.Message);
+          Dialogs.ShowDialog("Something went wrong...", ex.Message, Material.Dialog.Icons.DialogIconKind.Error);
         }
       }
     }
@@ -759,10 +773,10 @@ namespace DesktopUI2.ViewModels
 
           Analytics.TrackEvent(account, Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Stream Add From URL" } });
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-          Log.CaptureException(e, Sentry.SentryLevel.Error);
-          Dialogs.ShowDialog("Something went wrong...", e.Message, Material.Dialog.Icons.DialogIconKind.Error);
+          SpeckleLog.Logger.Fatal(ex, "Failed to add from url {dialogResult} {exceptionMessage}", result, ex.Message);
+          Dialogs.ShowDialog("Something went wrong...", ex.Message, Material.Dialog.Icons.DialogIconKind.Error);
         }
       }
     }
@@ -832,7 +846,7 @@ namespace DesktopUI2.ViewModels
         }
         catch (Exception ex)
         {
-          Log.CaptureException(ex, Sentry.SentryLevel.Error);
+          SpeckleLog.Logger.Error(ex, "Failed to open saved stream {exceptionMessage}", ex.Message);
         }
       }
     }

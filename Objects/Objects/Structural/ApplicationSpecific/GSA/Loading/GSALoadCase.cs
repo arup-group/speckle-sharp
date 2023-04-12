@@ -1,6 +1,6 @@
-﻿using Speckle.Newtonsoft.Json;
+﻿using Objects.Structural.Loading;
 using Speckle.Core.Kits;
-using Objects.Structural.Loading;
+using Speckle.Newtonsoft.Json;
 
 namespace Objects.Structural.GSA.Loading
 {
@@ -13,7 +13,7 @@ namespace Objects.Structural.GSA.Loading
     public GSALoadCase() { }
 
     [SchemaInfo("GSALoadCase", "Creates a Speckle structural load case for GSA", "GSA", "Loading")]
-    public GSALoadCase(LoadType loadType, string source = null, ActionType actionType = ActionType.None, string description = "notset", string include = "undefined", bool bridge = false, string name = null, int? nativeId = null)
+    public GSALoadCase(LoadType loadType, string source = null, ActionType actionType = ActionType.None, string description = "notset", LoadDirection2D direction = LoadDirection2D.Z, string include = "undefined", bool bridge = false, string name = null, int? nativeId = null)
     {
       this.nativeId = nativeId;
       this.name = name;
@@ -21,6 +21,7 @@ namespace Objects.Structural.GSA.Loading
       this.group = source;
       this.actionType = actionType;
       this.description = description;
+      this.direction = direction;
       this.include = include;
       this.bridge = bridge;
     }

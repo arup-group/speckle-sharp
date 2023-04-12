@@ -20,12 +20,9 @@ using Bentley.CifNET.GeometryModel.SDK.Edit;
 using Bentley.CifNET.SDK.Edit;
 using Bentley.CifNET.GeometryModel;
 using Bentley.CifNET.SDK;
-using LinGeom = Bentley.CifNET.LinearGeometry;
+using Bentley.CifNET.LinearGeometry;
 using Bentley.CifNET.Formatting;
 
-using Bentley.DgnPlatformNET.DgnEC;
-using Bentley.ECObjects.Instance;
-using Bentley.ECObjects.Schema;
 
 namespace Objects.Converter.Bentley
 {
@@ -42,191 +39,80 @@ namespace Objects.Converter.Bentley
       return null;
     }
 
-    
-
-    public List<ICurve> CurveVectorToSpeckle(CurveVector curve, string units = null)
-    {
-      var segments = new List<ICurve>();
-      
-      if (curve != null)
-      {
-        foreach (var primitive in curve)
-        {
-          var curvePrimitiveType = primitive.GetCurvePrimitiveType();
-
-          switch (curvePrimitiveType)
-          {
-            case CurvePrimitive.CurvePrimitiveType.Line:
-              primitive.TryGetLine(out DSegment3d segment);
-              segments.Add(LineToSpeckle(segment, units));
-              break;
-            case CurvePrimitive.CurvePrimitiveType.Arc:
-              primitive.TryGetArc(out DEllipse3d arc);
-              segments.Add(ArcToSpeckle(arc, units));
-              break;
-            case CurvePrimitive.CurvePrimitiveType.LineString:
-              var pointList = new List<DPoint3d>();
-              primitive.TryGetLineString(pointList);
-              segments.Add(PolylineToSpeckle(pointList));
-              break;
-            case CurvePrimitive.CurvePrimitiveType.BsplineCurve:
-              var spline = primitive.GetBsplineCurve();
-              segments.Add(BSplineCurveToSpeckle(spline, units));
-              break;
-            case CurvePrimitive.CurvePrimitiveType.Spiral:
-              var spiralSpline = primitive.GetProxyBsplineCurve();
-              segments.Add(SpiralCurveElementToCurve(spiralSpline));
-              break;
-          }
-        }
-      }
-
-      return segments;
-    }
-
-    
-
     // alignments
     public Alignment AlignmentToSpeckle(CifGM.Alignment alignment)
     {
-      var model = GeomModel;
-      var ent3d = model.LinearEntities3d;
-      foreach(var ent in ent3d)
+      if(alignment.FeatureDefinition is null)
       {
-        if (ent.Alignment != null)
-        {
-          var el = ent.Element;
-        }
+        // An alignment without a feature definition is likely a partial peice of geometry being picked up erroneously upstream.
+        //
+        // This is an assumption and hasn't been tested with larger OpenRoads models so may need to be revisted.
+        //
+        throw new Exception("Skipped undefined alignment");
       }
 
-      var al = model.Alignments;
-
       var _alignment = new Alignment();
+
 
       CifGM.StationFormatSettings settings = CifGM.StationFormatSettings.GetStationFormatSettingsForModel(Model);
       var stationFormatter = new CifGM.StationingFormatter(alignment);
 
-      var curve2d = CurveToSpeckle(alignment.Element as DisplayableElement, ModelUnits);
-      _alignment.curves = new List<ICurve> { curve2d };
-      _alignment["@curves2d"] = curve2d;
+      _alignment.curves = TryCurveToSpeckleCurveList(alignment.Element as DisplayableElement, ModelUnits);
 
-      //var curve = alignment.Geometry;     
-      //var speckleCurves = CurveVectorToSpeckle(curve, ModelUnits);
-      //_alignment.curves = speckleCurves;
+      _alignment.profiles = new List<BuiltElements.Profile> { };
 
-      //_alignment.displayValue = speckleCurves;
-
-      var linearGeometry = alignment.LinearGeometry;
-      double EndPosition = linearGeometry.Length;
-
-      List<ICurve> segments = new List<ICurve> { };
-      if (linearGeometry is LinGeom.LinearComplex)
+      // To match LandXML export behaviour we only export the Active profile
+      // As I understand it other profiles are likely reference and work in progress and are generally not shared
+      // If designer wants to share multiple profiles they can swap active profile and export to a different branch
+      // This behaviour would be best exposed in the editor rather than in the converter.
+      //
+      // This also avoids another issue where other profiles are likely to be a partial piece of the active profile anyway.
+      // Haven't tracked down how to differentiate between partial and complete profiles
+      //
+      if (alignment.ActiveProfile is CifGM.Profile p)
       {
-        LinGeom.LinearComplex lc = (linearGeometry as LinGeom.LinearComplex);
-        foreach (LinGeom.LinearElement le in lc.GetSubLinearElements())
-        {
-          var cv = le.GetCurveVector();
-          segments.AddRange(CurveVectorToSpeckle(cv, ModelUnits));
-        }
+        var activeProfile = ProfileToSpeckle(p, ModelUnits) as BuiltElements.Profile;
+        _alignment.profiles.Add(activeProfile);
       }
-      else if (linearGeometry is LinGeom.LineString)
-      {
-        LinGeom.LineString ls = (linearGeometry as LinGeom.LineString);
-        var cv = ls.GetCurveVector();
-        segments.AddRange(CurveVectorToSpeckle(cv, ModelUnits));
-      }
-      else
-      {
-        var cv = linearGeometry.GetCurveVector();
-        segments.AddRange(CurveVectorToSpeckle(cv, ModelUnits));
-      }
-
-      _alignment["@linearGeometry"] = segments;
-
-      Dictionary<string, object> properties = new Dictionary<string, object>();
-      var instance = alignment.DgnECInstance;
-      foreach (IECPropertyValue propertyValue in instance)
-      {
-        if (propertyValue != null)
-        {
-          properties = GetValue(properties, propertyValue);
-        }
-      }
-      var instanceName = instance.ClassDefinition.Name;
-
-      Base bentleyProperties = new Base();
-      foreach (string propertyName in properties.Keys)
-      {
-        Object value = properties[propertyName];
-
-        if (value.GetType().Name == "DPoint3d")
-        {
-          bentleyProperties[propertyName] = ConvertToSpeckle(value);
-        }
-        else
-        {
-          bentleyProperties[propertyName] = value;
-        }
-      }
-
-      _alignment["@properties"] = bentleyProperties;
 
       if (alignment.Name != null)
         _alignment.name = alignment.Name;
 
-      if (alignment.FeatureName != null)
-        _alignment["featureName"] = alignment.FeatureName;
+      if (alignment.FeatureName is string featureName)
+        _alignment[nameof(featureName)] = alignment.FeatureName;
 
-      if (alignment.FeatureDefinition != null)
-        _alignment["featureDefinitionName"] = alignment.FeatureDefinition.Name;
+      if (alignment.FeatureDefinition?.Name is string featureDefinitionName)
+        _alignment[nameof(featureDefinitionName)] = featureDefinitionName;
 
       var stationing = alignment.Stationing;
       if (stationing != null)
       {
         _alignment.startStation = stationing.StartStation;
-        _alignment.endStation = alignment.LinearGeometry.Length;  // swap for end station
+        _alignment.endStation = alignment.LinearGeometry.Length + stationing.StartStation;  // swap for end station
 
         var region = stationing.GetStationRegionFromDistanceAlong(stationing.StartStation);
 
         // handle station equations
         var equations = new List<double>();
-        var formattedEquation = new List<string>();
+        var formattedStationEquations = new List<string>();
         //var directions = new List<bool>();
         foreach (var stationEquation in stationing.StationEquations)
         {
-          string stnVal = "";
+          var stnVal = "";
           stationFormatter.FormatStation(ref stnVal, stationEquation.DistanceAlong, settings);
-          formattedEquation.Add(stnVal);
+          formattedStationEquations.Add(stnVal);
 
           // DistanceAlong represents Back Station/BackLocation, EquivalentStation represents Ahead Station
           equations.AddRange(new List<double> { stationEquation.DistanceAlong, stationEquation.DistanceAlong, stationEquation.EquivalentStation });
 
         }
         _alignment.stationEquations = equations;
-        _alignment["formattedStationEquations"] = formattedEquation;
+        _alignment[nameof(formattedStationEquations)] = formattedStationEquations;
         //_alignment.stationEquationDirections = directions;
       }
       else
       {
         _alignment.startStation = 0;
-      }
-
-      if(alignment.Profiles != null && alignment.Profiles.Count() > 0)
-      {
-        var _profiles = new List<Base> { };
-        foreach (var profile in alignment.Profiles)
-        {
-          _profiles.Add(ProfileToSpeckle(profile));
-        }
-        _alignment["@profiles"] = _profiles;
-      }
-
-      if(alignment.ActiveLinearEntity3d != null)
-      {
-        var el3d = alignment.ActiveLinearEntity3d.Element;
-        var curve3d = ConvertToSpeckle(el3d);
-        _alignment["@curves3d"] = curve3d;
-        _alignment.curves.Add((ICurve)curve3d);
       }
 
       _alignment.units = ModelUnits;
@@ -236,8 +122,30 @@ namespace Objects.Converter.Bentley
 
     public CifGM.Alignment AlignmentToNative(Alignment alignment)
     {
-      var baseCurve = alignment.baseCurve;
-      var nativeCurve = CurveToNative(baseCurve);
+      ICurve singleBaseCurve;
+
+      if (alignment.baseCurve is ICurve basecurve)
+      {
+        singleBaseCurve = basecurve;
+      }
+      else if (alignment?.curves?.Any() is null)
+      {
+        return null;
+      }
+      else if (alignment.curves?.Count == 1)
+      {
+        singleBaseCurve = alignment.curves.Single();
+      }
+      else
+      {
+        //Not 100% clear on how best to handle the conversion between multiple curves and single element
+        singleBaseCurve = new Polycurve()
+        {
+          segments = alignment.curves
+        };
+      }
+
+      var nativeCurve = CurveToNative(singleBaseCurve);
 
       ConsensusConnectionEdit con = ConsensusConnectionEdit.GetActive();
       con.StartTransientMode();
@@ -263,75 +171,54 @@ namespace Objects.Converter.Bentley
       return null;
     }
 
-    public Base GetProfileGeometry(LinGeom.ProfileElement ele)
-    {
-      Base _profileGeom = new Base();
-      if (ele is LinGeom.ProfileLine)
-      {
-        var line = (LinGeom.ProfileLine)ele;
-        var cv = ele.GetCurveVector();
-        _profileGeom["linearGeometry"] = CurveVectorToSpeckle(cv);
-
-        _profileGeom["tangentGrade"] = line.Slope;
-        _profileGeom["tangentLength"] = line.ProjectedLength;
-      }
-      else if (ele is LinGeom.ProfileParabola)
-      {
-        var parabola = (LinGeom.ProfileParabola)ele;
-        var cv = ele.GetCurveVector();
-        _profileGeom["linearGeometry"] = CurveVectorToSpeckle(cv);
-
-        _profileGeom["PVC"] = Point3dToSpeckle(parabola.StartPoint.Coordinates);
-        _profileGeom["PVI"] = Point3dToSpeckle(parabola.VPIPoint);
-        _profileGeom["PVT"] = Point3dToSpeckle(parabola.EndPoint.Coordinates);
-
-        double projectedLeftLength = parabola.VPIPoint.X - ele.StartPoint.Coordinates.X;
-        double projectedRightLength = parabola.EndPoint.Coordinates.X - parabola.VPIPoint.X;
-
-        LinGeom.LinearPoint summit = parabola.SummitPoint;
-        if (summit != null &&
-            Math.Sign(parabola.StartSlope) != Math.Sign(parabola.EndSlope) &&
-            projectedLeftLength != 0.0 &&
-            projectedRightLength != 0.0 &&
-            (parabola.StartSlope - parabola.EndSlope) != 0.0 &&
-            (parabola.EndSlope - parabola.StartSlope) != 0.0)
-        {
-          if (parabola.EndSlope - parabola.StartSlope > 0.0)
-            _profileGeom["VLOW"] = Point3dToSpeckle(summit.Coordinates);
-          else
-            _profileGeom["VHIGH"] = Point3dToSpeckle(summit.Coordinates);
-        }
-
-        _profileGeom["length"] = parabola.ProjectedLength;
-        _profileGeom["entranceGrade"] = parabola.StartSlope;
-        _profileGeom["exitGrade"] = parabola.EndSlope;
-      }
-
-      _profileGeom["profileType"] = ele.GetType().Name;
-
-      return _profileGeom;
-    }
-
     // profiles
-    public Base ProfileToSpeckle(CifGM.Profile profile)
+    public Base ProfileToSpeckle(CifGM.Profile profile, string modelUnits = "m")
     {
-      var _profile = new Base();
-      _profile["name"] = profile.Name;
-      _profile["length"] = profile.ProfileGeometry.ProjectedLength;
+      var curves = new List<ICurve>();
 
-      var _profileGeom = new List<Base>();
-      if (profile.ProfileGeometry is LinGeom.ProfileComplex)
+
+
+      switch (profile.ProfileGeometry)
       {
-        LinGeom.ProfileComplex complex = profile.ProfileGeometry as LinGeom.ProfileComplex;
-        foreach (LinGeom.ProfileElement ele in complex.GetSubProfileElements())
-          _profileGeom.Add(GetProfileGeometry(ele));
+        case ProfileParabola profileParabola:
+
+          /// This has thrown exceptions in the past, but should be resolved now that only
+          /// the active profile is being exported, as it was throwing on isolated curve
+          /// elements with no assigned feature properties.
+          /// 
+          /// Pulled out as its own case so it's a bit clearer why the failure is happening
+          /// if it reoccurs.
+
+          try
+          {
+            curves.AddRange(TryCurveToSpeckleCurveList(profile.Element as DisplayableElement, modelUnits));
+            break;
+          }
+          catch (Exception ex)
+          {
+            throw new Exception("Failed to import isolated profile Parabola", ex);
+          }
+
+        default:
+          curves.AddRange(TryCurveToSpeckleCurveList(profile.Element as DisplayableElement, modelUnits));
+          break;
       }
-      else
-        _profileGeom.Add(GetProfileGeometry(profile.ProfileGeometry));
 
-      _profile["profileGeometry"] = _profileGeom;
+      var outProfile = new BuiltElements.Profile
+      {
+        curves = curves,
+        name = profile.Name,
+        startStation = profile.ProfileGeometry.StartPoint.Coordinates.X,
+        endStation = profile.ProfileGeometry.EndPoint.Coordinates.X,
+      };
 
-      return _profile;
+      if (profile.FeatureName is string featureName)
+        outProfile[nameof(featureName)] = featureName;
+
+      if (profile.FeatureDefinition?.Name is string featureDefinitionName)
+        outProfile[nameof(featureDefinitionName)] = featureDefinitionName;
+
+      return outProfile;
     }
 
     // corridors
@@ -358,6 +245,14 @@ namespace Objects.Converter.Bentley
 
       return _corridor;
     }
+
+    public Point LinearPointToSpeckle(LinearPoint pt, string units = null)
+    {
+      var u = units ?? ModelUnits;
+      return new Point(ScaleToSpeckle(pt.DistanceAlong, UoR), ScaleToSpeckle(pt.Offset, UoR), 0, u);
+    }
   }
+
+
 }
 #endif
