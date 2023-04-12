@@ -249,7 +249,7 @@ Source: "ConnectionManager\SpeckleConnectionManagerUI\bin\Release\net6.0\win10-x
 Source: "Analytics\bin\Release\net48\*"; DestDir: "{#AnalyticsFolder}"; Flags: ignoreversion recursesubdirs;
 
 ;updater
-Source: "Updater\bin\Release\net48\*"; DestDir: "{#SpeckleFolder}"; Flags: ignoreversion recursesubdirs;
+Source: "Updater\bin\Release\*"; DestDir: "{#SpeckleFolder}"; Flags: ignoreversion recursesubdirs;
 
 [InstallDelete]
 Type: filesandordirs; Name: "{userappdata}\McNeel\Rhinoceros\6.0\Plug-ins\SpeckleRhino2 (8dd5f30b-a13d-4a24-abdc-3e05c8c87143)"; Components: rhinogh6
