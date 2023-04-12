@@ -217,7 +217,7 @@ namespace Objects.Converter.Revit
       }
 
       speckleElement2D.topology = edgeNodes;
-      speckleElement2D["displayValue"] = displayLine;
+      speckleElement2D.displayValue = GetElementDisplayMesh(revitSurface, new Options() { DetailLevel = ViewDetailLevel.Fine, ComputeReferences = false });
 
       var outline = new List<ICurve> { };
       outline.Add(displayLine);
@@ -246,14 +246,6 @@ namespace Objects.Converter.Revit
 
       speckleElement2D.voids = voidNodes;
       speckleElement2D.outline = outline;
-
-      //var mesh = new Geometry.Mesh();
-      //var solidGeom = GetElementSolids(structuralElement);
-      //(mesh.faces, mesh.vertices) = GetFaceVertexArrFromSolids(solidGeom);
-      //speckleElement2D.baseMesh = mesh;	  
-
-      //speckleElement2D.displayMesh = GetElementDisplayMesh(Doc.GetElement(revitSurface.GetElementId()),
-      // new Options() { DetailLevel = ViewDetailLevel.Fine, ComputeReferences = false });
 
       var prop = new Property2D();
 
@@ -312,8 +304,6 @@ namespace Objects.Converter.Revit
       var displayLine = new Polycurve();
       foreach (var loop in loops)
       {
-        var coor = new List<double>();
-
         var points = loop.Tessellate();
 
         foreach (var p in points.Skip(1))
@@ -327,19 +317,16 @@ namespace Objects.Converter.Revit
       }
 
       speckleElement2D.topology = edgeNodes;
-      //var analyticalToPhysicalManager = AnalyticalToPhysicalAssociationManager.GetAnalyticalToPhysicalAssociationManager(Doc);
-      //if (analyticalToPhysicalManager.HasAssociation(revitSurface.Id))
-      //{
-      //  var physicalElementId = analyticalToPhysicalManager.GetAssociatedElementId(revitSurface.Id);
-      //  var physicalElement = Doc.GetElement(physicalElementId);
-      //  speckleElement2D.displayValue = GetElementDisplayMesh(physicalElement, new Options() { DetailLevel = ViewDetailLevel.Fine, ComputeReferences = false });
-      //}
-      speckleElement2D["displayValue"] = displayLine;
+      var analyticalToPhysicalManager = AnalyticalToPhysicalAssociationManager.GetAnalyticalToPhysicalAssociationManager(Doc);
+      if (analyticalToPhysicalManager.HasAssociation(revitSurface.Id))
+      {
+        var physicalElementId = analyticalToPhysicalManager.GetAssociatedElementId(revitSurface.Id);
+        var physicalElement = Doc.GetElement(physicalElementId);
+        speckleElement2D.displayValue = GetElementDisplayMesh(physicalElement, new Options() { DetailLevel = ViewDetailLevel.Fine, ComputeReferences = false });
+      }
 
-      //var mesh = new Geometry.Mesh();
-      //var solidGeom = GetElementSolids(structuralElement);
-      //(mesh.faces, mesh.vertices) = GetFaceVertexArrFromSolids(solidGeom);
-      //speckleElement2D.baseMesh = mesh;	  
+      var outline = new List<ICurve> { };
+      outline.Add(displayLine);
 
       var prop = new Property2D();
 
