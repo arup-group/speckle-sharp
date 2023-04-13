@@ -29,8 +29,7 @@ namespace ConnectorGrasshopper.Streams
     protected override void RegisterOutputParams(GH_OutputParamManager pManager)
     {
       pManager.AddTextParameter("Stream ID", "ID", "Unique ID of the stream to be updated.", GH_ParamAccess.item);
-      pManager.AddTextParameter("Name", "N", "Name of the stream.", GH_ParamAccess.item);      
-      pManager.AddTextParameter("Description", "D", "Description of the stream", GH_ParamAccess.item);
+      pManager.AddTextParameter("Name", "N", "Name of the stream.", GH_ParamAccess.item);
       pManager.AddTextParameter("Description", "D", "Description of the stream", GH_ParamAccess.item);
       pManager.AddTextParameter("Created At", "C", "Date of creation", GH_ParamAccess.item);
       pManager.AddTextParameter("Updated At", "U", "Date when it was last modified", GH_ParamAccess.item);
@@ -80,7 +79,7 @@ namespace ConnectorGrasshopper.Streams
       DA.SetData(5, stream.isPublic);
       DA.SetDataList(6, stream.collaborators);
       DA.SetDataList(7, stream.branches.items);
-      DA.SetDataList(8, stream.jobNumber ?? null);
+      DA.SetData(8, stream.jobNumber);
     }
   }
 }
