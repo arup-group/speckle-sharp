@@ -26,7 +26,7 @@ namespace Speckle.Core.Logging
         if (_initialized)
           return;
 
-      var dsn = "https://77622965196240e6b5c7e607c1397a68@o141124.ingest.sentry.io/5567027";
+        var dsn = "https://77622965196240e6b5c7e607c1397a68@o141124.ingest.sentry.io/5567027";
         var env = "production";
         var debug = false;
 #if DEBUG
@@ -43,6 +43,8 @@ namespace Speckle.Core.Logging
           o.Release = "SpeckleCore@" + Assembly.GetExecutingAssembly().GetName().Version.ToString();
           o.StackTraceMode = StackTraceMode.Enhanced;
           o.AttachStacktrace = true;
+          o.SampleRate = 0.1f;
+          o.TracesSampleRate = 0.1;
           o.AddExceptionFilterForType<HttpRequestException>();
           o.AddExceptionFilterForType<TaskCanceledException>();
         });
