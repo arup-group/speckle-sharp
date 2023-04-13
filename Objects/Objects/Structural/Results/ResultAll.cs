@@ -20,7 +20,7 @@ namespace Objects.Structural.Results
     public ResultSet3D results3D { get; set; } //3d elements results
 
     [DetachProperty]
-    public ResultSetGlobal resultsGlobal { get; set; } //global results
+    public ResultGlobal resultsGlobal { get; set; } //global results
 
     [DetachProperty]
     public ResultSetNode resultsNode { get; set; } //nodal results
@@ -28,7 +28,7 @@ namespace Objects.Structural.Results
     public ResultSetAll() { }
 
     [SchemaInfo("ResultSetAll", "Creates a Speckle result set object for 1d element, 2d element, 3d element global and nodal results", "Structural", "Results")]
-    public ResultSetAll(ResultSet1D results1D, ResultSet2D results2D, ResultSet3D results3D, ResultSetGlobal resultsGlobal, ResultSetNode resultsNode)
+    public ResultSetAll(ResultSet1D results1D, ResultSet2D results2D, ResultSet3D results3D, ResultGlobal resultsGlobal, ResultSetNode resultsNode)
     {
       this.results1D = results1D;
       this.results2D = results2D;
