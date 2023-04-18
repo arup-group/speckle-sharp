@@ -12,6 +12,7 @@ namespace Objects.Structural.ApplicationSpecific.GSA.GeneralData
     public int? nativeId { get; set; }
     public string name { get; set; }
     public GSAListType listType { get; set; }
+    public List<Base> definition { get; set; }
     public List<string> definitionRefs { get; set; }
 
     public GSAList()
@@ -25,6 +26,7 @@ namespace Objects.Structural.ApplicationSpecific.GSA.GeneralData
       this.nativeId = nativeId;
       this.name = name;
       this.listType = listType;
+      this.definition = definition;
       this.definitionRefs = definition.Select(i => i.applicationId).ToList();
     }
   }
