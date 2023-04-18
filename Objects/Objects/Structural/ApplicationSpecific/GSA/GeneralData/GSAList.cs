@@ -12,6 +12,8 @@ namespace Objects.Structural.ApplicationSpecific.GSA.GeneralData
     public int? nativeId { get; set; }
     public string name { get; set; }
     public GSAListType listType { get; set; }
+
+    [DetachProperty]
     public List<Base> definition { get; set; }
     public List<string> definitionRefs { get; set; }
 
