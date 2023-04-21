@@ -3080,37 +3080,34 @@ namespace ConverterGSA
     {
       var gsaRecords = new List<GsaRecord>();
 
-      var list = (GSAList)speckleObject;
+      var speckleGsaList = (GSAList)speckleObject;
 
       var gsaList = new GsaList()
       {
-        ApplicationId = list.applicationId,
-        Index = list.GetIndex<GsaList>(),
-        Name = list.name,
+        ApplicationId = speckleGsaList.applicationId,
+        Index = speckleGsaList.GetIndex<GsaList>(),
+        Name = speckleGsaList.name,
+        Type = speckleGsaList.listType.ToNative(),
         Definition = new List<int>()
       };
 
-      var listType = gsaList.Type = list.listType.ToNative();
-
-      if (string.IsNullOrEmpty(listType))
-        return new List<GsaRecord>();
-
-      gsaList.Type = listType;
-
       // Definition objects needed in cache prior to converting lists
-      switch (list.listType)
+      switch (speckleGsaList.listType)
       {
         case GSAListType.Node:
-          gsaList.Definition = Instance.GsaModel.Cache.LookupIndices<GsaNode>(list.definitionRefs);
+          gsaList.Definition = Instance.GsaModel.Cache.LookupIndices<GsaNode>(speckleGsaList.definitionRefs);
           break;
         case GSAListType.Member:
-          gsaList.Definition = Instance.GsaModel.Cache.LookupIndices<GsaMemb>(list.definitionRefs);
+          gsaList.Definition = Instance.GsaModel.Cache.LookupIndices<GsaMemb>(speckleGsaList.definitionRefs);
           break;
         case GSAListType.Element:
-          gsaList.Definition = Instance.GsaModel.Cache.LookupIndices<GsaEl>(list.definitionRefs);
+          gsaList.Definition = Instance.GsaModel.Cache.LookupIndices<GsaEl>(speckleGsaList.definitionRefs);
           break;
         case GSAListType.Case:
-          gsaList.Definition = Instance.GsaModel.Cache.LookupIndices<GsaLoadCase>(list.definitionRefs);
+          gsaList.Definition = Instance.GsaModel.Cache.LookupIndices<GsaLoadCase>(speckleGsaList.definitionRefs);
+          break;
+        default:
+          gsaList.Definition = new List<int>();
           break;
       }
 

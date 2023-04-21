@@ -377,7 +377,7 @@ namespace ConnectorGSATests
 
       // Equal checks on first list only
       Assert.Equal("sampleOne", gsaLists[0].Name);
-      Assert.Equal("MEMBER", gsaLists[0].Type);
+      Assert.Equal(ListType.Member, gsaLists[0].Type);
       Assert.True(new List<int>() { 1, 2, 4, 5, 6, 7, 8 }.SequenceEqual(gsaLists[0].Definition));
     }
 
@@ -3122,12 +3122,45 @@ namespace ConnectorGSATests
     #endregion
 
     [Fact]
+    public void GsaListGwa_WithEmptyDefinition_ReturnsTrue()
+    {
+      var listGwas = new List<string>()
+      {
+        "LIST.1\t3\tmemb list\tMEMBER\t"
+      };
+
+      var parser = new GsaListParser();
+
+      Assert.True(parser.FromGwa(listGwas[0]));
+
+      var record = (GsaList)parser.Record;
+
+      Assert.Equal("memb list", record.Name);
+      Assert.Equal(ListType.Member, record.Type);
+      Assert.Equal(new List<int>(), record.Definition);
+    }
+
+    // Unspecified lists are currently unsupported and will have null definition
+    [Fact]
+    public void GsaListGwa_WithNullDefinition_ReturnsFalse()
+    {
+      var listGwas = new List<string>()
+      {
+        "LIST.1\t3\tunspec list\tUNDEF\t1 2 3 4"
+      };
+
+      var parser = new GsaListParser();
+
+      Assert.False(parser.FromGwa(listGwas[0]));
+    }
+
+    [Fact]
     public void GsaList_WithValidParameters_CreatesValidGwa()
     {
       var gsaList = new GsaList();
       gsaList.Index = 1;
       gsaList.Name = "TestList";
-      gsaList.Type = "NODE";
+      gsaList.Type = ListType.Node;
       gsaList.Definition = new List<int>() { 1, 3, 4, 5, 2, 20 };
 
       var listParser = new GsaListParser(gsaList);
@@ -3146,23 +3179,7 @@ namespace ConnectorGSATests
     {
       var gsaList = new GsaList();
       gsaList.Index = 1;
-      gsaList.Type = "NODE";
-      gsaList.Definition = new List<int>() { 1, 3, 4, 5, 2, 20 };
-
-      var listParser = new GsaListParser(gsaList);
-
-      var isParsed = listParser.Gwa(out var gwas);
-
-      Assert.False(isParsed);
-      Assert.Empty(gwas);
-    }
-
-    [Fact]
-    public void GsaList_WithEmptyListType_DoesNotParse()
-    {
-      var gsaList = new GsaList();
-      gsaList.Index = 1;
-      gsaList.Name = "TestList";
+      gsaList.Type = ListType.Node;
       gsaList.Definition = new List<int>() { 1, 3, 4, 5, 2, 20 };
 
       var listParser = new GsaListParser(gsaList);

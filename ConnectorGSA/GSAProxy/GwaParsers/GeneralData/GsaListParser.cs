@@ -1,4 +1,5 @@
-﻿using Speckle.GSA.API.GwaSchema;
+﻿using Speckle.GSA.API;
+using Speckle.GSA.API.GwaSchema;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,35 +23,37 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
 
       var items = remainingItems;
 
-      if (items[1] == "MEMBER")
-        FromGwaByFuncs(items, out remainingItems, AddName, AddType, (v) => AddEntities(v, GSA.API.GSALayer.Design, out record.Definition));
-      
-      else if (items[1] == "NODE") // Add nodes currently gets all nodes only.
-        FromGwaByFuncs(items, out remainingItems, AddName, AddType, (v) => AddNodes(v, out record.Definition));
+      if (items[1].ToUpper() == "NODE") // Add nodes currently gets all nodes only.
+        FromGwaByFuncs(items, out remainingItems, AddName, (v) => v.TryParseStringValue(out record.Type), (v) => AddNodes(v, out record.Definition));
 
-      // Element, Case
       else
-        FromGwaByFuncs(items, out remainingItems, AddName, AddType, (v) => AddEntities(v, GSA.API.GSALayer.Analysis, out record.Definition));
+      {
+        // Element/case come from analysis
+        var gsaLayer = items[1].ToUpper() == "MEMBER" ? GSALayer.Design : GSALayer.Analysis;
+        FromGwaByFuncs(items, out remainingItems, AddName, (v) => v.TryParseStringValue(out record.Type), (v) => AddEntities(v, gsaLayer, out record.Definition));
+      }
 
-        return true;
+      // Record with null definition determined invalid. Record will still be valid and converted if definition is empty.
+      return record.Definition != null;
     }
 
     public override bool Gwa(out List<string> gwa, bool includeSet = false)
     {
       gwa = new List<string>();
 
-      if (!InitialiseGwa(includeSet, out var items) || string.IsNullOrEmpty(record.Name) || string.IsNullOrEmpty(record.Type))
+      if (!InitialiseGwa(includeSet, out var items) || string.IsNullOrEmpty(record.Name))
         return false;
 
       // LIST.1 | num | name | type | list (definition)
-      var allItemsAdded = AddItems(ref items, record.Name, record.Type, string.Join(" ", record.Definition));
+      var allItemsAdded = AddItems(ref items, record.Name, record.Type.GetStringValue(), string.Join(" ", record.Definition));
 
       if (!allItemsAdded)
         return false;
 
-      gwa = (Join(items, out var gwaLine)) ? new List<string>() { gwaLine } : new List<string>();
+      if (Join(items, out var gwaLine))
+        gwa.Add(gwaLine);
 
-      return true;
+      return gwa.Count > 0;
     }
 
     #region From GWA
@@ -60,13 +63,23 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
       return true;
     }
 
-    protected bool AddType(string v)
-    {
-      record.Type = (string.IsNullOrEmpty(v)) ? null : v;
-      return true;
-    }
+    //protected bool AddType(string v)
+    //{
+    //  if (Enum.TryParse(v, true, out ListType type))
+    //  {
+    //    record.Type = type;
+    //    return true;
+    //  }
+
+    //  else if (string.Equals(v, "UNDEF", StringComparison.OrdinalIgnoreCase))
+    //  {
+    //    record.Type = ListType.Unspecified;
+    //    return true;
+    //  }
+
+    //  return false;
+    //}
 
     #endregion
-
   }
 }
