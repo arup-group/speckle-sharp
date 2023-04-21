@@ -2711,7 +2711,7 @@ namespace ConverterGSATests
       var gsaList = (GsaList)castedRecords[0];
 
       Assert.Equal("Test List", gsaList.Name);
-      Assert.Equal("NODE", gsaList.Type);
+      Assert.Equal(ListType.Node, gsaList.Type);
       Assert.Equal(1, gsaList.Definition[0]);
       Assert.Equal(2, gsaList.Definition[1]);
       Assert.Equal(4, gsaList.Definition[2]);
@@ -2739,7 +2739,7 @@ namespace ConverterGSATests
       var gsaList = (GsaList)castedRecords[0];
 
       Assert.Equal("Test List", gsaList.Name);
-      Assert.Equal("ELEMENT", gsaList.Type);
+      Assert.Equal(ListType.Element, gsaList.Type);
       Assert.Empty(gsaList.Definition);
     }
 
@@ -2769,7 +2769,7 @@ namespace ConverterGSATests
       var gsaList = (GsaList)castedRecords[0];
 
       Assert.Equal("Test List", gsaList.Name);
-      Assert.Equal("MEMBER", gsaList.Type);
+      Assert.Equal(ListType.Member, gsaList.Type);
       Assert.Equal(2, gsaList.Definition.Count);
     }
 

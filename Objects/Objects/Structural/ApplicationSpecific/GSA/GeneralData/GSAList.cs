@@ -38,6 +38,7 @@ namespace Objects.Structural.ApplicationSpecific.GSA.GeneralData
     Node,
     Element,
     Member,
-    Case
+    Case,
+    //Unspecified
   }
 }

@@ -936,20 +936,20 @@ namespace ConverterGSA
       }
     }
 
-    public static string ToNative(this GSAListType listType)
+    public static ListType ToNative(this GSAListType listType)
     {
       switch (listType)
       {
-        case GSAListType.Case:
-          return "CASE";
-        case GSAListType.Member:
-          return "MEMBER";
         case GSAListType.Node:
-          return "NODE";
+          return ListType.Node;
         case GSAListType.Element:
-          return "ELEMENT";
+          return ListType.Element;
+        case GSAListType.Member:
+          return ListType.Member;
         default:
-          return string.Empty;
+          return ListType.Case;
+        //default:
+        //  return ListType.Unspecified;
       }
     }
 

@@ -4419,18 +4419,20 @@ namespace ConverterGSA
 
     #region General Data
 
-    private GSAListType GetListType(string listType)
+    private GSAListType GetListType(ListType type)
     {
-      switch (listType.ToUpper())
+      switch (type)
       {
-        case "NODE":
+        case ListType.Node:
           return GSAListType.Node;
-        case "ELEMENT":
+        case ListType.Element:
           return GSAListType.Element;
-        case "CASE":
-          return GSAListType.Case;
-        default:
+        case ListType.Member:
           return GSAListType.Member;
+        default:
+          return GSAListType.Case;
+        //default:
+        //  return GSAListType.Unspecified;
       }
     }
 
