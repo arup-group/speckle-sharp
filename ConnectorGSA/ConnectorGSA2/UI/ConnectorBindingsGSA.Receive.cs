@@ -127,58 +127,15 @@ namespace ConnectorGSA.UI
 
       progress.Report.Log("Accessing stream");
 
-      var transport = new ServerTransport(account, state.StreamId);
-      var stream = await state.Client.StreamGet(state.StreamId);
-
       if (progress.CancellationTokenSource.Token.IsCancellationRequested)
       {
         return null;
       }
 
-      Commit myCommit = null;
-      //if "latest", always make sure we get the latest commit when the user clicks "receive"
-      if (state.CommitId == "latest")
-      {
-        var res = await state.Client.BranchGet(progress.CancellationTokenSource.Token, state.StreamId, state.BranchName, 1);
-        myCommit = res.commits.items.FirstOrDefault();
-      }
-      else
-      {
-        myCommit = await state.Client.CommitGet(progress.CancellationTokenSource.Token, state.StreamId, state.CommitId);
-      }
-
-      //state.LastSourceApp = myCommit.sourceApplication;
-      string referencedObject = myCommit.referencedObject;
-
-      var commitObject = await Operations.Receive(
-          referencedObject,
-          progress.CancellationTokenSource.Token,
-          transport,
-          onProgressAction: dict => progress.Update(dict),
-          onErrorAction: (s, e) =>
-          {
-            progress.Report.LogOperationError(new SpeckleException(e.Message, true, Sentry.SentryLevel.Error));
-            Analytics.TrackEvent(account, Analytics.Events.Receive, new Dictionary<string, object>() { { "commit_receive_failed", e.Message } });
-            progress.CancellationTokenSource.Cancel();
-          },
-          onTotalChildrenCountKnown: count => { progress.Max = count; },
-          disposeTransports: true
-          );
-
-      try
-      {
-        await state.Client.CommitReceived(new CommitReceivedInput
-        {
-          streamId = stream?.id,
-          commitId = myCommit?.id,
-          message = myCommit?.message,
-          sourceApplication = HostApplications.GSA.Name
-        });
-      }
-      catch
-      {
-        // Do nothing!
-      }
+      Commit myCommit = await ConnectorHelpers.GetCommitFromState(progress.CancellationToken, state);
+      state.LastCommit = myCommit;
+      Base commitObject = await ConnectorHelpers.ReceiveCommit(myCommit, state, progress);
+      await ConnectorHelpers.TryCommitReceived(progress.CancellationToken, state, myCommit, HostApplications.GSA.Name);
 
       if (progress.Report.OperationErrorsCount != 0)
       {
