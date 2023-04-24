@@ -2654,8 +2654,8 @@ namespace ConverterGSA
         listType = GetListType(gsaList.Type),
       };
 
-      //speckleList.definition = GetListDefinition(gsaList.Definition, speckleList.listType);
-      speckleList.definitionRefs = GetListDefinition(gsaList.Definition, speckleList.listType).Select(l => l.applicationId).Distinct().ToList();
+      speckleList.definition = GetListDefinition(gsaList.Definition, speckleList.listType);
+      speckleList.definitionRefs = speckleList.definition.Select(l => l.applicationId).Distinct().ToList();
 
       return new ToSpeckleResult(speckleList);
     }
