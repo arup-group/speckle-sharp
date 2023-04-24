@@ -2692,14 +2692,14 @@ namespace ConverterGSATests
     [Fact]
     public void GSAListToNative_WithValidParameters_HasPopulatedDefinition()
     {
-      var mockListDefinition = GsaNodeExamples(4, "node1", "node3", "node4", "node5");
+      var mockListDefinition = GsaElement1dExamples(2, "ele1", "ele3");
       Instance.GsaModel.Cache.Upsert(mockListDefinition);
 
       var speckleGsaList = new GSAList()
       {
         name = "Test List",
-        listType = GSAListType.Node,
-        definitionRefs = new List<string>() { "node1", "node3", "node5"}
+        listType = GSAListType.Element,
+        definitionRefs = new List<string>() { "ele1", "ele3" }
       };
 
       var convertedGsaList = converter.ConvertToNative(speckleGsaList);
@@ -2711,10 +2711,9 @@ namespace ConverterGSATests
       var gsaList = (GsaList)castedRecords[0];
 
       Assert.Equal("Test List", gsaList.Name);
-      Assert.Equal(ListType.Node, gsaList.Type);
+      Assert.Equal(ListType.Element, gsaList.Type);
       Assert.Equal(1, gsaList.Definition[0]);
       Assert.Equal(2, gsaList.Definition[1]);
-      Assert.Equal(4, gsaList.Definition[2]);
     }
 
     [Fact]
