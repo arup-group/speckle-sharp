@@ -63,24 +63,6 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
       record.Name = (string.IsNullOrEmpty(v)) ? null : v;
       return true;
     }
-
-    //protected bool AddType(string v)
-    //{
-    //  if (Enum.TryParse(v, true, out ListType type))
-    //  {
-    //    record.Type = type;
-    //    return true;
-    //  }
-
-    //  else if (string.Equals(v, "UNDEF", StringComparison.OrdinalIgnoreCase))
-    //  {
-    //    record.Type = ListType.Unspecified;
-    //    return true;
-    //  }
-
-    //  return false;
-    //}
-
     #endregion
   }
 }
