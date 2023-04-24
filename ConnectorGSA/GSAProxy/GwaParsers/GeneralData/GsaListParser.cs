@@ -21,16 +21,17 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
         return false;
       }
 
-      var items = remainingItems;
+      // Ensure record.Type correctly set
+      FromGwaByFuncs(remainingItems, out remainingItems, AddName, (v) => v.TryParseStringValue(out record.Type)); 
 
-      if (items[1].ToUpper() == "NODE") // Add nodes currently gets all nodes only.
-        FromGwaByFuncs(items, out remainingItems, AddName, (v) => v.TryParseStringValue(out record.Type), (v) => AddNodes(v, out record.Definition));
-
+      if (record.Type == ListType.Node)
+      {
+        FromGwaByFuncs(remainingItems, out remainingItems, (v) => AddNodes(v, out record.Definition));
+      }
       else
       {
-        // Element/case come from analysis
-        var gsaLayer = items[1].ToUpper() == "MEMBER" ? GSALayer.Design : GSALayer.Analysis;
-        FromGwaByFuncs(items, out remainingItems, AddName, (v) => v.TryParseStringValue(out record.Type), (v) => AddEntities(v, gsaLayer, out record.Definition));
+        var gsaLayer = record.Type == ListType.Member ? GSALayer.Design : GSALayer.Analysis;
+        FromGwaByFuncs(remainingItems, out remainingItems, (v) => AddEntities(v, gsaLayer, out record.Definition));
       }
 
       // Record with null definition determined invalid. Record will still be valid and converted if definition is empty.
