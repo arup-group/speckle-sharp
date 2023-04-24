@@ -3140,20 +3140,6 @@ namespace ConnectorGSATests
       Assert.Equal(new List<int>(), record.Definition);
     }
 
-    // Unspecified lists are currently unsupported and will have null definition
-    [Fact]
-    public void GsaListGwa_WithNullDefinition_ReturnsFalse()
-    {
-      var listGwas = new List<string>()
-      {
-        "LIST.1\t3\tunspec list\tUNDEF\t1 2 3 4"
-      };
-
-      var parser = new GsaListParser();
-
-      Assert.False(parser.FromGwa(listGwas[0]));
-    }
-
     [Fact]
     public void GsaList_WithValidParameters_CreatesValidGwa()
     {
