@@ -3095,7 +3095,8 @@ namespace ConverterGSA
       switch (speckleGsaList.listType)
       {
         case GSAListType.Node:
-          gsaList.Definition = Instance.GsaModel.Cache.LookupIndices<GsaNode>(speckleGsaList.definitionRefs);
+          var speckleNodes = speckleGsaList.definition.OfType<Node>().ToList();
+          gsaList.Definition = speckleNodes.NodeAt(conversionFactors);
           break;
         case GSAListType.Member:
           gsaList.Definition = Instance.GsaModel.Cache.LookupIndices<GsaMemb>(speckleGsaList.definitionRefs);
