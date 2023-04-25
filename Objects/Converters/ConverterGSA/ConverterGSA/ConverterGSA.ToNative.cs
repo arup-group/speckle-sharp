@@ -3091,42 +3091,33 @@ namespace ConverterGSA
         Definition = new List<int>()
       };
 
-      switch (speckleGsaList.listType)
+      var definitionRecords = new List<GsaRecord>();
+
+      if (speckleGsaList.definition != null)
       {
-        case GSAListType.Node:
-          var speckleNodes = speckleGsaList.definition.OfType<Node>().ToList();
-          gsaList.Definition = speckleNodes.NodeAt(conversionFactors);
-          break;
-        case GSAListType.Member:
-          ListDefinitionLookup<GsaMemb>();
-          break;
-        case GSAListType.Element:
-          ListDefinitionLookup<GsaEl>();
-          break;
-        case GSAListType.Case:
-          ListDefinitionLookup<GsaLoadCase>();
-          break;
-        default:
-          break;
+        switch (speckleGsaList.listType)
+        {
+          case GSAListType.Node:
+            var speckleNodes = speckleGsaList.definition.OfType<Node>().ToList();
+            gsaList.Definition = speckleNodes.NodeAt(conversionFactors);
+            break;
+          case GSAListType.Member:
+            gsaList.Definition = IndexByConversionOrLookup<GsaMemb>(speckleGsaList.definition.FindAll(o => o is GSAMember1D), ref definitionRecords) ?? new List<int>();
+            break;
+          case GSAListType.Element:
+            gsaList.Definition = IndexByConversionOrLookup<GsaEl>(speckleGsaList.definition.FindAll(o => o is Element1D), ref definitionRecords) ?? new List<int>();
+            break;
+          case GSAListType.Case:
+            gsaList.Definition = IndexByConversionOrLookup<GsaLoadCase>(speckleGsaList.definition.FindAll(o => o is LoadCase || o is GSALoadCase), ref definitionRecords) ?? new List<int>();
+            break;
+          default:
+            break;
+        }
       }
 
       gsaRecords.Add(gsaList);
 
       return gsaRecords;
-
-
-      void ListDefinitionLookup<T>()
-      {
-        var recordList = new List<GsaRecord>();
-
-        foreach (var obj in speckleGsaList.definition)
-        {
-          var index = IndexByConversionOrLookup<T>(obj, ref recordList);
-
-          if (index.HasValue)
-            gsaList.Definition.Add(index.Value);
-        }
-      }
     }
 
     #endregion
