@@ -3091,7 +3091,6 @@ namespace ConverterGSA
         Definition = new List<int>()
       };
 
-      // Definition objects needed in cache prior to converting lists
       switch (speckleGsaList.listType)
       {
         case GSAListType.Node:
@@ -3099,22 +3098,36 @@ namespace ConverterGSA
           gsaList.Definition = speckleNodes.NodeAt(conversionFactors);
           break;
         case GSAListType.Member:
-          gsaList.Definition = Instance.GsaModel.Cache.LookupIndices<GsaMemb>(speckleGsaList.definitionRefs);
+          ListDefinitionLookup<GsaMemb>();
           break;
         case GSAListType.Element:
-          gsaList.Definition = Instance.GsaModel.Cache.LookupIndices<GsaEl>(speckleGsaList.definitionRefs);
+          ListDefinitionLookup<GsaEl>();
           break;
         case GSAListType.Case:
-          gsaList.Definition = Instance.GsaModel.Cache.LookupIndices<GsaLoadCase>(speckleGsaList.definitionRefs);
+          ListDefinitionLookup<GsaLoadCase>();
           break;
         default:
-          gsaList.Definition = new List<int>();
           break;
       }
 
       gsaRecords.Add(gsaList);
 
       return gsaRecords;
+
+
+      void ListDefinitionLookup<T>()
+      {
+        var recordList = new List<GsaRecord>();
+
+        foreach (var obj in speckleGsaList.definition)
+        {
+
+          var index = IndexByConversionOrLookup<T>(obj, ref recordList);
+
+          if (index.HasValue)
+            gsaList.Definition.Add(index.Value);
+        }
+      }
     }
 
     #endregion
