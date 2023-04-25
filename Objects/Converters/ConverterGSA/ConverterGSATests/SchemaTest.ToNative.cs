@@ -2692,14 +2692,13 @@ namespace ConverterGSATests
     [Fact]
     public void GSAListToNative_WithValidParameters_HasPopulatedDefinition()
     {
-      var mockListDefinition = GsaElement1dExamples(2, "ele1", "ele3");
-      Instance.GsaModel.Cache.Upsert(mockListDefinition);
+      var speckleEle1Ds = SpeckleElement1dExamples(2, "ele1", "ele3");
 
       var speckleGsaList = new GSAList()
       {
         name = "Test List",
         listType = GSAListType.Element,
-        definitionRefs = new List<string>() { "ele1", "ele3" }
+        definition = new List<Base>() { speckleEle1Ds[0], speckleEle1Ds[1] }
       };
 
       var convertedGsaList = converter.ConvertToNative(speckleGsaList);
@@ -2746,17 +2745,21 @@ namespace ConverterGSATests
     public void GSAListToNative_WithMultipleDefinitionTypes_HasIndicesOfListTypeOnly()
     {
       var mockNodes = GsaNodeExamples(4, "node1", "node3", "node4", "node5");
+      var speckleNodes = SpeckleNodeExamples(4, "node1", "node3", "node4", "node5");
       var mockMembers = GsaMemberExamples(2, "mem1", "mem2");
-      Instance.GsaModel.Cache.Upsert(mockNodes);
-      Instance.GsaModel.Cache.Upsert(mockMembers);
+      var speckleEles = SpeckleElement1dExamples(2, "ele1", "ele2");
+      //Instance.GsaModel.Cache.Upsert(mockNodes);
+      //Instance.GsaModel.Cache.Upsert(mockMembers);
 
       var speckleGsaList = new GSAList()
       {
         name = "Test List",
-        listType = GSAListType.Member,
-        definitionRefs = new List<string>() 
-        { "node1", "node3", "node4", 
-          "node5", "mem1", "mem2"}
+        listType = GSAListType.Element,
+        definition = new List<Base>()
+        {
+          speckleNodes[0], speckleNodes[1], speckleNodes[2],
+          speckleEles[0], speckleEles[1]
+        },
       };
 
       var convertedGsaList = converter.ConvertToNative(speckleGsaList);
@@ -2768,7 +2771,7 @@ namespace ConverterGSATests
       var gsaList = (GsaList)castedRecords[0];
 
       Assert.Equal("Test List", gsaList.Name);
-      Assert.Equal(ListType.Member, gsaList.Type);
+      Assert.Equal(ListType.Element, gsaList.Type);
       Assert.Equal(2, gsaList.Definition.Count);
     }
 
