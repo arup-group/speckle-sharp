@@ -3108,7 +3108,7 @@ namespace ConverterGSA
             gsaList.Definition = IndexByConversionOrLookup<GsaEl>(speckleGsaList.definition.FindAll(o => o is Element1D), ref definitionRecords) ?? new List<int>();
             break;
           case GSAListType.Case:
-            gsaList.Definition = IndexByConversionOrLookup<GsaLoadCase>(speckleGsaList.definition.FindAll(o => o is LoadCase || o is GSALoadCase), ref definitionRecords) ?? new List<int>();
+            gsaList.Definition = IndexByConversionOrLookup<GsaLoadCase>(speckleGsaList.definition.FindAll(o => o is LoadCase), ref definitionRecords) ?? new List<int>();
             break;
           default:
             break;
