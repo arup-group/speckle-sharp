@@ -3121,7 +3121,6 @@ namespace ConverterGSA
 
         foreach (var obj in speckleGsaList.definition)
         {
-
           var index = IndexByConversionOrLookup<T>(obj, ref recordList);
 
           if (index.HasValue)
