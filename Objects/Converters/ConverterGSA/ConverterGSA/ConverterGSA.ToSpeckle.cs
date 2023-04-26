@@ -2654,6 +2654,9 @@ namespace ConverterGSA
         listType = GetListType(gsaList.Type),
       };
 
+      if (gsaList.Index.IsIndex())
+        speckleList.applicationId = Instance.GsaModel.Cache.GetApplicationId<GsaList>(gsaList.Index.Value);
+
       speckleList.definition = GetListDefinition(gsaList.Definition, speckleList.listType);
       speckleList.definitionRefs = speckleList.definition.Select(l => l.applicationId).Distinct().ToList();
 
