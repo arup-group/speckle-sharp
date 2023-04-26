@@ -1067,7 +1067,7 @@
     Member,
     [StringValue("CASE")]
     Case,
-    //[StringValue("UNDEF")]
-    //Unspecified
+    [StringValue("UNDEF")]
+    Unspecified
   }
 }
