@@ -3093,31 +3093,51 @@ namespace ConverterGSA
 
       var definitionRecords = new List<GsaRecord>();
 
-      if (speckleGsaList.definition != null)
+      switch (speckleGsaList.listType)
       {
-        switch (speckleGsaList.listType)
-        {
-          case GSAListType.Node:
+        case GSAListType.Node:
+          if (speckleGsaList.definition != null)
+          {
             var speckleNodes = speckleGsaList.definition.OfType<Node>().ToList();
-            gsaList.Definition = speckleNodes.NodeAt(conversionFactors);
-            break;
-          case GSAListType.Member:
-            gsaList.Definition = IndexByConversionOrLookup<GsaMemb>(speckleGsaList.definition.FindAll(o => o is GSAMember1D), ref definitionRecords) ?? new List<int>();
-            break;
-          case GSAListType.Element:
-            gsaList.Definition = IndexByConversionOrLookup<GsaEl>(speckleGsaList.definition.FindAll(o => o is Element1D), ref definitionRecords) ?? new List<int>();
-            break;
-          case GSAListType.Case:
-            gsaList.Definition = IndexByConversionOrLookup<GsaLoadCase>(speckleGsaList.definition.FindAll(o => o is LoadCase), ref definitionRecords) ?? new List<int>();
-            break;
-          default:
-            break;
-        }
+            gsaList.Definition = speckleNodes.NodeAt(conversionFactors) ?? new List<int>();
+          }
+
+          else if (speckleGsaList.definitionRefs != null)
+          {
+            var speckleNodes = ContextObjects.Where(o => speckleGsaList.definitionRefs.Contains(o.applicationId)).Select(n => (Node)n).ToList();
+            gsaList.Definition = speckleNodes.NodeAt(conversionFactors) ?? new List<int>();
+          }
+          break;
+        case GSAListType.Member:
+          ListDefinitionLookup<GsaMemb, GSAMember1D>();
+          break;
+        case GSAListType.Element:
+          ListDefinitionLookup<GsaEl, Element1D>();
+          break;
+        case GSAListType.Case:
+          ListDefinitionLookup<GsaLoadCase, LoadCase>();
+          break;
+        default:
+          break;
       }
 
       gsaRecords.Add(gsaList);
 
       return gsaRecords;
+
+      
+      void ListDefinitionLookup<T, U>()
+      {
+        if (speckleGsaList.definition != null)
+        {
+          gsaList.Definition = IndexByConversionOrLookup<T>(speckleGsaList.definition.FindAll(o => o is U), ref definitionRecords) ?? new List<int>();
+        }
+        else if (speckleGsaList.definitionRefs != null)
+        {
+          var speckleCases = ContextObjects.Where(o => speckleGsaList.definitionRefs.Contains(o.applicationId)).ToList().FindAll(o => o is U);
+          gsaList.Definition = IndexByConversionOrLookup<T>(speckleCases, ref definitionRecords) ?? new List<int>();
+        }
+      }
     }
 
     #endregion
