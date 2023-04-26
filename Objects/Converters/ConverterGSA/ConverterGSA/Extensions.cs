@@ -946,10 +946,10 @@ namespace ConverterGSA
           return ListType.Element;
         case GSAListType.Member:
           return ListType.Member;
-        default:
+        case GSAListType.Case:
           return ListType.Case;
-        //default:
-        //  return ListType.Unspecified;
+        default:
+          throw new ArgumentException($"Unsupported GSA list type: {listType}", nameof(listType));
       }
     }
 
