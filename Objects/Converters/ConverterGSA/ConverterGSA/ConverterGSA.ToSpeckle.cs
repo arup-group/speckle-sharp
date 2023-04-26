@@ -4429,10 +4429,10 @@ namespace ConverterGSA
           return GSAListType.Element;
         case ListType.Member:
           return GSAListType.Member;
-        default:
+        case ListType.Case:
           return GSAListType.Case;
-        //default:
-        //  return GSAListType.Unspecified;
+        default:
+          throw new ArgumentException($"Unsupported GSA list type: {type}", nameof(type));
       }
     }
 
