@@ -4,6 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using Objects.Structural.Geometry;
+using Objects.Structural.GSA.Geometry;
+using Objects.Structural.Loading;
 
 namespace Objects.Structural.ApplicationSpecific.GSA.GeneralData
 {
@@ -25,6 +28,14 @@ namespace Objects.Structural.ApplicationSpecific.GSA.GeneralData
     [SchemaInfo("GSAList", "Creates a Speckle object for a GSA List", "GSA", "General Data")]
     public GSAList(string name, GSAListType listType, List<Base> definition, int? nativeId = null)
     {
+      if ((listType == GSAListType.Node && !definition.All(o => o is Node)) ||
+        (listType == GSAListType.Member && !definition.All(o => o is GSAMember1D)) ||
+        (listType == GSAListType.Element && (!definition.All(o => o is Element1D) || definition.Any(o => o is GSAMember1D))) ||
+        (listType == GSAListType.Case && !definition.All(o => o is LoadCase)))
+      {
+        throw new Exception($"Definition contains objects that do not match list of type {listType}");
+      }
+
       this.nativeId = nativeId;
       this.name = name;
       this.listType = listType;
