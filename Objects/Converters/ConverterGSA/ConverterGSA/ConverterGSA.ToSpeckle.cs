@@ -1069,7 +1069,7 @@ namespace ConverterGSA
       GSALoadCase loadCase = null;
 
       //local variables
-      var nodes = gsaLoad.Nodes.Select(i => (Base)GetNodeFromIndex(i)).ToList();      
+      var nodes = gsaLoad.Nodes.Select(i => (Base)GetNodeFromIndex(i)).ToList();
       var gravityFactors = GetGravityFactors(gsaLoad);
       if (gsaLoad.Index.IsIndex()) applicationId = Instance.GsaModel.Cache.GetApplicationId<GsaLoadGravity>(gsaLoad.Index.Value);
       if (gsaLoad.LoadCaseIndex.IsIndex()) loadCase = GetLoadCaseFromIndex(gsaLoad.LoadCaseIndex.Value);
@@ -2658,7 +2658,13 @@ namespace ConverterGSA
         speckleList.applicationId = Instance.GsaModel.Cache.GetApplicationId<GsaList>(gsaList.Index.Value);
 
       //speckleList.definition = GetListDefinition(gsaList.Definition, speckleList.listType);
-      speckleList.definitionRefs = GetListDefinition(gsaList.Definition, speckleList.listType).Select(l => l.applicationId).Distinct().ToList();
+      speckleList.definitionRefs = GetListDefinition(gsaList.Definition, speckleList.listType, layer).Select(l => l.applicationId).Distinct().ToList();
+
+      if ((gsaList.Type == ListType.Member && layer == GSALayer.Analysis) || (gsaList.Type == ListType.Element && layer == GSALayer.Design))
+        Report.Log($"Warning: {layer} layer doesn't include objects of type {gsaList.Type} - list won't include them.");
+
+      else if (gsaList.Type == ListType.Node && layer == GSALayer.Design)
+        Report.Log($"Warning: Only nodes associated with {layer} layer will be included in list {gsaList.Name}");
 
       return new ToSpeckleResult(speckleList);
     }
@@ -4439,7 +4445,7 @@ namespace ConverterGSA
       }
     }
 
-    private List<Base> GetListDefinition(List<int> definition, GSAListType listType)
+    private List<Base> GetListDefinition(List<int> definition, GSAListType listType, GSALayer gsaLayer)
     {
       var speckleDefinitions = new List<Base>();
 
@@ -4459,7 +4465,10 @@ namespace ConverterGSA
 
         else if (listType == GSAListType.Node)
         {
-          Instance.GsaModel.Cache.GetSpeckleObjects<GsaNode, Base>(index, out speckleObjects, GSALayer.Analysis);
+          if (Instance.GsaModel.Cache.LayerContainsNode(index, gsaLayer))
+          {
+            Instance.GsaModel.Cache.GetSpeckleObjects<GsaNode, Base>(index, out speckleObjects, gsaLayer);
+          }
         }
 
         else if (listType == GSAListType.Case)
