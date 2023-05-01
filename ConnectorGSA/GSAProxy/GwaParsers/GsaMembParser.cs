@@ -267,7 +267,7 @@ namespace Speckle.ConnectorGSA.Proxy.GwaParsers
     }
     private bool AddTopology(string v)
     {
-      var bracketPieces = v.Split(new[] { '(', ')' }).Select(s => s.Trim()).ToList();
+      var bracketPieces = v.Split(new[] { '(', ')' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList();
       if (bracketPieces.Count() > 1)
       {
         var listTypes = bracketPieces.Take(bracketPieces.Count() - 1).Select(bp => bp.Last()).ToList();
