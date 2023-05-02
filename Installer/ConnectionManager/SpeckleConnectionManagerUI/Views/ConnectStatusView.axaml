@@ -12,14 +12,14 @@
   <Design.DataContext>
     <vm:ConnectStatusViewModel />
   </Design.DataContext>
-  <Grid Margin="15" RowDefinitions="auto,auto,auto,auto, *, auto">
+  <Grid Margin="10" RowDefinitions="auto,auto,auto,auto, *, auto">
     <styles:Card Grid.Row="4" Padding="0,4">
-      <ItemsControl Margin="10 0 0 0" Items="{Binding Items}">
+      <ItemsControl Margin="10 0 5 0" Items="{Binding Items}">
         <ItemsControl.ItemTemplate>
           <DataTemplate>
-            <Grid ShowGridLines="False" ColumnDefinitions="1.2*,3*,1.5*,1.2*" RowDefinitions="Auto,Auto">
-              <Button FontSize="20"
-                      Margin="0 5 10 5"
+            <Grid ShowGridLines="False" ColumnDefinitions="1.2*,3.6*,1.4*,0.9*,1.2*" RowDefinitions="Auto,Auto">
+              <Button Padding="5"
+                      Margin="0 5 5 5"
                       Grid.Row="0"
                       Grid.Column="0"
                       Foreground="White"
@@ -34,14 +34,14 @@
                   Text="{Binding ConnectText}"/>
               </Button>
               <TextBlock VerticalAlignment="Center"
-                         Margin="10 0 0 0"
-                         FontSize="20"
+                         Margin="5 0 0 0"
+                         FontSize="18"
                          Grid.Row="0"
                          Grid.Column="1"
                          Text="{Binding ServerUrl}"
                          Foreground="{Binding Colour}" />
-              <Button FontSize="20"
-                      Margin="0 5 10 5"
+              <Button Padding="5"
+                      Margin="0 5 5 5"
                       Grid.Row="0"
                       Grid.Column="2"
                       IsVisible="{Binding Default}"
@@ -55,8 +55,8 @@
                   Foreground="White"
                   Text="{Binding DefaultServerLabel}"/>  
               </Button>
-              <Button FontSize="20"
-                      Margin="0 5 10 5"
+              <Button Padding="5"
+                      Margin="0 5 5 5"
                       Grid.Row="0"
                       Grid.Column="2"
                       Background="Gray"
@@ -71,8 +71,8 @@
                   Foreground="White"
                   Text="{Binding DefaultServerLabel}"/>
               </Button>
-              <Button FontSize="10"
-                      Margin="0 5 10 5"
+              <Button Padding="5"
+                      Margin="0 5 5 5"
                       Grid.Row="0"
                       Grid.Column="3"
                       Background="Red"
@@ -86,6 +86,21 @@
                   Foreground="White"
                   Text="REMOVE"/>
               </Button>
+			  <Button Padding="5"
+					Margin="0 5 5 5"
+					Grid.Row="0"
+					Grid.Column="4"
+					Background="Gray"
+					assists:ShadowAssist.ShadowDepth="0"
+					Command="{Binding $parent[Window].DataContext.CopyTokenToClipboardAsync}"
+					CommandParameter="{Binding Identifier}">
+				<TextBlock
+				  VerticalAlignment="Center"
+				  FontSize="14"
+				  Classes="ButtonText"
+				  Foreground="White"
+				  Text="COPY TOKEN"/>
+			  </Button>
             </Grid>
           </DataTemplate>
         </ItemsControl.ItemTemplate>

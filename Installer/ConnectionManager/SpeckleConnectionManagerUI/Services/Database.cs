@@ -25,6 +25,7 @@ namespace SpeckleConnectionManagerUI.Services
         connectStatus.Default = savedConnection.isDefault;
         connectStatus.DefaultServerLabel = connectStatus.Default ? "DEFAULT" : "SET AS DEFAULT";
         connectStatus.Colour = connectStatus.Disconnected ? "Red" : "Green";
+        connectStatus.Id = savedConnection.id;
 
         if (!connectStatuses.Contains(connectStatus)) connectStatuses.Add(connectStatus);
         identifier++;
@@ -63,6 +64,27 @@ namespace SpeckleConnectionManagerUI.Services
       }
 
       return connectStatuses.ToArray();
+    }
+
+    //If Token is added to the ConnectStatusItem class and assigned in the GetItems method above,
+    //it will be outdated by the scheduled TimedRefreshToken - hence a new connection to the DB is
+    //created here so that it can obtain the latest token from the DB when it's triggered by the
+    //COPY TOKEN button
+    public string GetToken(string id)
+    {
+      if (!string.IsNullOrEmpty(id))
+      {
+        var savedConnections = Sqlite.GetData();
+
+        foreach (var savedConnection in savedConnections)
+        {
+          if (!string.IsNullOrEmpty(savedConnection.id) && savedConnection.id.Equals(id))
+          {
+            return savedConnection.token;
+          }
+        }
+      }
+      return "";
     }
   }
 }
