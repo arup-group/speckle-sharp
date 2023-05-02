@@ -6,6 +6,7 @@
 #include "RealNumber.h"
 #include "FieldNames.hpp"
 #include "TypeNameTables.hpp"
+using namespace FieldNames;
 
 namespace AddOnCommands
 {
@@ -14,39 +15,52 @@ static GS::ObjectState SerializeColumnType (const API_Element& elem, const API_E
 {
 	GS::ObjectState os;
 
-	os.Add (ApplicationIdFieldName, APIGuidToString (elem.column.head.guid));
-	os.Add (FloorIndexFieldName, elem.column.head.floorInd);
+	// The identifier of the column
+	os.Add (ApplicationId, APIGuidToString (elem.column.head.guid));
+
+	// Positioning - geometry
+	os.Add (FloorIndex, elem.column.head.floorInd);
 
 	double z = Utility::GetStoryLevel (elem.column.head.floorInd) + elem.column.bottomOffset;
 	os.Add (Column::origoPos, Objects::Point3D (elem.column.origoPos.x, elem.column.origoPos.y, z));
-
 	os.Add (Column::height, elem.column.height);
-	os.Add (Column::aboveViewLinePen, elem.column.aboveViewLinePen);
-	os.Add (Column::isAutoOnStoryVisibility, elem.column.isAutoOnStoryVisibility);
-	os.Add (Column::hiddenLinePen, elem.column.hiddenLinePen);
-	os.Add (Column::belowViewLinePen, elem.column.belowViewLinePen);
-	os.Add (Column::isFlipped, elem.column.isFlipped);
-	os.Add (Column::isSlanted, elem.column.isSlanted);
-	os.Add (Column::slantAngle, elem.column.slantAngle);
-	os.Add (Column::nSegments, elem.column.nSegments);
-	os.Add (Column::nCuts, elem.column.nCuts);
-	os.Add (Column::nSchemes, elem.column.nSchemes);
-	os.Add (Column::nProfiles, elem.column.nProfiles);
-	os.Add (Column::useCoverFill, elem.column.useCoverFill);
-	os.Add (Column::useCoverFillFromSurface, elem.column.useCoverFillFromSurface);
-	os.Add (Column::coverFillOrientationComesFrom3D, elem.column.coverFillOrientationComesFrom3D);
-	os.Add (Column::coverFillForegroundPen, elem.column.coverFillForegroundPen);
-	os.Add (Column::corePen, elem.column.corePen);
-	os.Add (Column::coreAnchor, elem.column.coreAnchor);
+
+	// Positioning - story relation
 	os.Add (Column::bottomOffset, elem.column.bottomOffset);
 	os.Add (Column::topOffset, elem.column.topOffset);
-	os.Add (Column::coreSymbolPar1, elem.column.coreSymbolPar1);
-	os.Add (Column::coreSymbolPar2, elem.column.coreSymbolPar2);
-	os.Add (Column::slantDirectionAngle, elem.column.slantDirectionAngle);
-	os.Add (Column::axisRotationAngle, elem.column.axisRotationAngle);
 	os.Add (Column::relativeTopStory, elem.column.relativeTopStory);
 
+	// Positioning - slanted column
+	os.Add (Column::isSlanted, elem.column.isSlanted);
+	os.Add (Column::slantAngle, elem.column.slantAngle);
+	os.Add (Column::slantDirectionAngle, elem.column.slantDirectionAngle);
+
+	os.Add (Column::isFlipped, elem.column.isFlipped);
+
+	// Positioning - wrapping
+	os.Add (Column::Wrapping, elem.column.wrapping);
+
+	// Positioning - Defines the relation of column to zones (Zone Boundary, Reduce Zone Area Only, No Effect on Zones)
+	os.Add (Column::ColumnRelationToZoneName, relationToZoneNames.Get (elem.column.zoneRel));
+
+	// End Cuts
+	os.Add (Column::nCuts, elem.column.nCuts);
+	if (memo.assemblySegmentCuts != nullptr) {
+		GS::ObjectState allCuts;
+		Utility::GetAllCutData (memo.assemblySegmentCuts, allCuts);
+		os.Add (AssemblySegment::CutData, allCuts);
+	}
+	
+	// Reference Axis
+	os.Add (Column::coreAnchor, elem.column.coreAnchor);
+	os.Add (Column::axisRotationAngle, elem.column.axisRotationAngle);
+
 	// Segment
+	API_Attribute attrib;
+	os.Add (Column::nSegments, elem.column.nSegments);
+	os.Add (Column::nProfiles, elem.column.nProfiles);
+
+	bool NotOnlyProfileSegment = false;
 	if (memo.columnSegments != nullptr) {
 		GS::ObjectState allSegments;
 
@@ -54,88 +68,198 @@ static GS::ObjectState SerializeColumnType (const API_Element& elem, const API_E
 		DBASSERT (segmentsCount == elem.column.nSegments);
 
 		for (GSSize idx = 0; idx < segmentsCount; ++idx) {
-			GS::ObjectState currentSegment;
 			API_ColumnSegmentType columnSegment = memo.columnSegments[idx];
+			GS::ObjectState currentSegment;
 
-			currentSegment.Add (Column::circleBased, columnSegment.assemblySegmentData.circleBased);
-			currentSegment.Add (Column::modelElemStructureType, structureTypeNames.Get (columnSegment.assemblySegmentData.modelElemStructureType));
-			currentSegment.Add (Column::nominalHeight, columnSegment.assemblySegmentData.nominalHeight);
-			currentSegment.Add (Column::nominalWidth, columnSegment.assemblySegmentData.nominalWidth);
-			currentSegment.Add (Column::isWidthAndHeightLinked, columnSegment.assemblySegmentData.isWidthAndHeightLinked);
-			currentSegment.Add (Column::isHomogeneous, columnSegment.assemblySegmentData.isHomogeneous);
-			currentSegment.Add (Column::endWidth, columnSegment.assemblySegmentData.endWidth);
-			currentSegment.Add (Column::endHeight, columnSegment.assemblySegmentData.endHeight);
-			currentSegment.Add (Column::isEndWidthAndHeightLinked, columnSegment.assemblySegmentData.isEndWidthAndHeightLinked);
+			GS::ObjectState assemblySegment;
+			Utility::GetSegmentData (columnSegment.assemblySegmentData, assemblySegment);
+			currentSegment.Add (Column::ColumnSegment::segmentData, assemblySegment);
 
-			API_Attribute attrib;
-			switch (columnSegment.assemblySegmentData.modelElemStructureType) {
-			case API_CompositeStructure:
-				DBASSERT (columnSegment.assemblySegmentData.modelElemStructureType != API_CompositeStructure)
-					break;
-			case API_BasicStructure:
+			if (columnSegment.assemblySegmentData.modelElemStructureType != API_ProfileStructure)
+				NotOnlyProfileSegment = true;
+
+			// Veneer attributes
+			if (abs (columnSegment.venThick) > EPS) {
+				// Veneer type
+				currentSegment.Add (Column::ColumnSegment::VenType, venTypeNames.Get (columnSegment.venType));
+
+				// Veneer building material
 				BNZeroMemory (&attrib, sizeof (API_Attribute));
 				attrib.header.typeID = API_BuildingMaterialID;
-				attrib.header.index = columnSegment.assemblySegmentData.buildingMaterial;
+				attrib.header.index = columnSegment.venBuildingMaterial;
 				ACAPI_Attribute_Get (&attrib);
 
-				currentSegment.Add (Column::buildingMaterial, GS::UniString{attrib.header.name});
-				break;
-			case API_ProfileStructure:
-				BNZeroMemory (&attrib, sizeof (API_Attribute));
-				attrib.header.typeID = API_ProfileID;
-				attrib.header.index = columnSegment.assemblySegmentData.profileAttr;
-				ACAPI_Attribute_Get (&attrib);
+				currentSegment.Add (Column::ColumnSegment::VenBuildingMaterial, GS::UniString{attrib.header.name});
 
-				currentSegment.Add (Column::profileAttrName, GS::UniString{attrib.header.name});
-				break;
-			default:
-				break;
+				// Veneer thick
+				currentSegment.Add (Column::ColumnSegment::VenThick, columnSegment.venThick);
 			}
-			allSegments.Add (GS::String::SPrintf (Column::ColumnSegmentName, idx + 1), currentSegment);
+
+			// The extrusion overridden material name
+			int countOverriddenMaterial = 0;
+			if (columnSegment.extrusionSurfaceMaterial.overridden) {
+				BNZeroMemory (&attrib, sizeof (API_Attribute));
+				attrib.header.typeID = API_MaterialID;
+				attrib.header.index = columnSegment.extrusionSurfaceMaterial.attributeIndex;
+
+				if (NoError == ACAPI_Attribute_Get (&attrib))
+					countOverriddenMaterial = countOverriddenMaterial + 1;
+				currentSegment.Add (Column::ColumnSegment::ExtrusionSurfaceMaterial, GS::UniString{attrib.header.name});
+			}
+
+			// The ends overridden material name
+			if (columnSegment.endsMaterial.overridden) {
+				BNZeroMemory (&attrib, sizeof (API_Attribute));
+				attrib.header.typeID = API_MaterialID;
+				attrib.header.index = columnSegment.endsMaterial.attributeIndex;
+
+				if (NoError == ACAPI_Attribute_Get (&attrib))
+					countOverriddenMaterial = countOverriddenMaterial + 1;
+				currentSegment.Add (Column::ColumnSegment::EndsSurfaceMaterial, GS::UniString{attrib.header.name});
+			}
+
+			// The overridden materials are chained
+			if (countOverriddenMaterial > 1) {
+				currentSegment.Add (Column::ColumnSegment::MaterialsChained, columnSegment.materialsChained);
+			}
+
+			allSegments.Add (GS::String::SPrintf (AssemblySegment::SegmentName, idx + 1), currentSegment);
 		}
 
-		os.Add (Column::segmentData, allSegments);
+		os.Add (Column::segments, allSegments);
 	}
 
 	// Scheme
+	os.Add (Column::nSchemes, elem.column.nSchemes);
+
 	if (memo.assemblySegmentSchemes != nullptr) {
 		GS::ObjectState allSchemes;
-
-		GSSize schemesCount = BMGetPtrSize (reinterpret_cast<GSPtr>(memo.assemblySegmentSchemes)) / sizeof (API_AssemblySegmentSchemeData);
-		DBASSERT (schemesCount == elem.column.nSchemes)
-
-			for (GSSize idx = 0; idx < schemesCount; ++idx) {
-				GS::ObjectState currentScheme;
-				API_AssemblySegmentSchemeData columnAssemblySegmentScheme = memo.assemblySegmentSchemes[idx];
-
-				currentScheme.Add (Column::lengthType, segmentLengthTypeNames.Get (columnAssemblySegmentScheme.lengthType));
-				currentScheme.Add (Column::fixedLength, columnAssemblySegmentScheme.fixedLength);
-				currentScheme.Add (Column::lengthProportion, columnAssemblySegmentScheme.lengthProportion);
-
-				allSchemes.Add (GS::String::SPrintf (Column::SchemeName, idx + 1), currentScheme);
-			}
-
-		os.Add (Column::schemeData, allSchemes);
+		Utility::GetAllSchemeData (memo.assemblySegmentSchemes, allSchemes);
+		os.Add (AssemblySegment::SchemeData, allSchemes);
 	}
 
-	// Cut
-	if (memo.assemblySegmentCuts != nullptr) {
-		GS::ObjectState allCuts;
+	// Floor Plan and Section - Floor Plan Display
 
-		GSSize cutsCount = BMGetPtrSize (reinterpret_cast<GSPtr>(memo.assemblySegmentCuts)) / sizeof (API_AssemblySegmentCutData);
-		DBASSERT (cutsCount == elem.column.nCuts)
+	// Show on Stories - Story visibility
+	Utility::ExportVisibility (elem.column.isAutoOnStoryVisibility, elem.column.visibility, os, ShowOnStories);
 
-			for (GSSize idx = 0; idx < cutsCount; ++idx) {
-				GS::ObjectState currentCut;
-				API_AssemblySegmentCutData assemblySegmentCuts = memo.assemblySegmentCuts[idx];
+	// The display options (Projected, Projected with Overhead, Cut Only, Outlines Only, Overhead All or Symbolic Cut)
+	os.Add (Column::DisplayOptionName, displayOptionNames.Get (elem.column.displayOption));
 
-				currentCut.Add (Column::cutType, assemblySegmentCutTypeNames.Get (assemblySegmentCuts.cutType));
-				currentCut.Add (Column::customAngle, assemblySegmentCuts.customAngle);
+	// Show projection (To Floor Plan Range, To Absolute Display Limit, Entire Element)
+	os.Add (Column::ViewDepthLimitationName, viewDepthLimitationNames.Get (elem.column.viewDepthLimitation));
 
-				allCuts.Add (GS::String::SPrintf (Column::CutName, idx + 1), currentCut);
-			}
+	// Floor Plan and Section - Cut Surfaces
 
-		os.Add (Column::cutData, allCuts);
+	// The pen index and linetype name of column core and veneer contour line
+	if (NotOnlyProfileSegment) {
+		// Core
+		os.Add (Column::corePen, elem.column.corePen);
+
+		BNZeroMemory (&attrib, sizeof (API_Attribute));
+		attrib.header.typeID = API_LinetypeID;
+		attrib.header.index = elem.column.contLtype;
+
+		if (NoError == ACAPI_Attribute_Get (&attrib))
+			os.Add (Column::CoreLinetypeName, GS::UniString{attrib.header.name});
+
+		// Veneer
+		os.Add (Column::VeneerPenIndex, elem.column.venLinePen);
+
+		BNZeroMemory (&attrib, sizeof (API_Attribute));
+		attrib.header.typeID = API_LinetypeID;
+		attrib.header.index = elem.column.venLineType;
+
+		if (NoError == ACAPI_Attribute_Get (&attrib))
+			os.Add (Column::VeneerLinetypeName, GS::UniString{attrib.header.name});
+	}
+
+	// Override cut fill pen
+	if (elem.column.penOverride.overrideCutFillPen) {
+		os.Add (Column::OverrideCutFillPenIndex, elem.column.penOverride.cutFillPen);
+	}
+
+	// Override cut fill backgound pen
+	if (elem.column.penOverride.overrideCutFillBackgroundPen) {
+		os.Add (Column::OverrideCutFillBackgroundPenIndex, elem.column.penOverride.cutFillBackgroundPen);
+	}
+
+	// Floor Plan and Section - Outlines
+;
+	// The pen index of column uncut contour line
+	os.Add (Column::UncutLinePenIndex, elem.column.belowViewLinePen);
+
+	// The linetype name of column uncut contour line
+	BNZeroMemory (&attrib, sizeof (API_Attribute));
+	attrib.header.typeID = API_LinetypeID;
+	attrib.header.index = elem.column.belowViewLineType;
+
+	if (NoError == ACAPI_Attribute_Get (&attrib))
+		os.Add (Column::UncutLinetypeName, GS::UniString{attrib.header.name});
+
+	// The pen index of column overhead contour line
+	os.Add (Column::OverheadLinePenIndex, elem.column.aboveViewLinePen);
+
+	// The linetype name of column overhead contour line
+	BNZeroMemory (&attrib, sizeof (API_Attribute));
+	attrib.header.typeID = API_LinetypeID;
+	attrib.header.index = elem.column.aboveViewLineType;
+
+	if (NoError == ACAPI_Attribute_Get (&attrib))
+		os.Add (Column::OverheadLinetypeName, GS::UniString{attrib.header.name});
+
+	// The pen index of column hidden contour line
+	os.Add (Column::HiddenLinePenIndex, elem.column.hiddenLinePen);
+
+	// The linetype name of column hidden contour line
+	BNZeroMemory (&attrib, sizeof (API_Attribute));
+	attrib.header.typeID = API_LinetypeID;
+	attrib.header.index = elem.column.hiddenLineType;
+
+	if (NoError == ACAPI_Attribute_Get (&attrib))
+		os.Add (Column::HiddenLinetypeName, GS::UniString{attrib.header.name});
+
+	// Floor Plan and Section - Floor Plan Symbol
+
+	// Core Symbol Type (Plain, Slash, X, Crosshair)
+	os.Add (Column::CoreSymbolTypeName, coreSymbolTypeNames.Get (elem.column.coreSymbolType));
+
+	// Core Symbol Lengths
+	os.Add (Column::coreSymbolPar1, elem.column.coreSymbolPar1);
+	os.Add (Column::coreSymbolPar2, elem.column.coreSymbolPar2);
+
+	// Core Symbol Pen
+	os.Add (Column::CoreSymbolPenIndex, elem.column.coreSymbolPen);
+
+	// Floor Plan and Section - Cover Fills
+	os.Add (Column::useCoverFill, elem.column.useCoverFill);
+	if (elem.column.useCoverFill) {
+		os.Add (Column::useCoverFillFromSurface, elem.column.useCoverFillFromSurface);
+		os.Add (Column::coverFillForegroundPen, elem.column.coverFillForegroundPen);
+		os.Add (Column::coverFillBackgroundPen, elem.column.coverFillBackgroundPen);
+
+		// Cover fill type
+		if (!elem.column.useCoverFillFromSurface) {
+			
+			BNZeroMemory (&attrib, sizeof (API_Attribute));
+			attrib.header.typeID = API_FilltypeID;
+			attrib.header.index = elem.column.coverFillType;
+
+			if (NoError == ACAPI_Attribute_Get (&attrib))
+				os.Add (Column::coverFillType, GS::UniString{attrib.header.name});
+		}
+
+		// Cover Fill Transformation
+		Utility::ExportCoverFillTransformation (elem.column.coverFillOrientationComesFrom3D, elem.column.coverFillTransformationType, os);
+
+		if ((elem.column.coverFillTransformationType == API_CoverFillTransformationType_Rotated || elem.column.coverFillTransformationType == API_CoverFillTransformationType_Distorted) && !elem.column.coverFillOrientationComesFrom3D) {
+			os.Add (Column::CoverFillTransformationOrigoX, elem.column.coverFillTransformation.origo.x);
+			os.Add (Column::CoverFillTransformationOrigoY, elem.column.coverFillTransformation.origo.y);
+			os.Add (Column::CoverFillTransformationXAxisX, elem.column.coverFillTransformation.xAxis.x);
+			os.Add (Column::CoverFillTransformationXAxisY, elem.column.coverFillTransformation.xAxis.y);
+			os.Add (Column::CoverFillTransformationYAxisX, elem.column.coverFillTransformation.yAxis.x);
+			os.Add (Column::CoverFillTransformationYAxisY, elem.column.coverFillTransformation.yAxis.y);
+		}
 	}
 
 	return os;
@@ -153,10 +277,10 @@ GS::ObjectState GetColumnData::Execute (const GS::ObjectState& parameters, GS::P
 	/*BASED ON THE GIVEN (SELECTED) OBJECTS, READ THEIR GUIDS AND EXECUTE SERIALIZATION ON THEM*/
 	GS::ObjectState result;
 	GS::Array<GS::UniString> ids;
-	parameters.Get (ApplicationIdsFieldName, ids);
+	parameters.Get (ApplicationIds, ids);
 	GS::Array<API_Guid> elementGuids = ids.Transform<API_Guid> ([] (const GS::UniString& idStr) { return APIGuidFromString (idStr.ToCStr ()); });
 
-	const auto& listAdder = result.AddList<GS::ObjectState> (ColumnsFieldName);
+	const auto& listAdder = result.AddList<GS::ObjectState> (Columns);
 	for (const API_Guid& guid : elementGuids) {
 		API_Element element{};
 		element.header.guid = guid;

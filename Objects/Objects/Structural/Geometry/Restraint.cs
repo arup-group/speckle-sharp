@@ -1,8 +1,8 @@
-﻿using Speckle.Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Objects.Geometry;
 using Speckle.Core.Kits;
 using Speckle.Core.Models;
-using System.Collections.Generic;
-using Objects.Geometry;
+using Speckle.Newtonsoft.Json;
 
 namespace Objects.Structural.Geometry
 {
@@ -46,13 +46,13 @@ namespace Objects.Structural.Geometry
     public Restraint(RestraintType restraintType)
     {
       if (restraintType == RestraintType.Free)
-        this.code = "RRRRRR";
+        code = "RRRRRR";
       if (restraintType == RestraintType.Pinned)
-        this.code = "FFFRRR";
+        code = "FFFRRR";
       if (restraintType == RestraintType.Fixed)
-        this.code = "FFFFFF";
+        code = "FFFFFF";
       if (restraintType == RestraintType.Roller)
-        this.code = "RRFRRR";
+        code = "RRFRRR";
     }
   }
 }

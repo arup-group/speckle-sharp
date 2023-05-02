@@ -15,9 +15,5 @@ namespace Speckle.ConnectorBentley
     {
       SpeckleBentleyApp.Instance.Start(unparsed);
     }
-    public static void Start2(string unparsed)
-    {
-      SpeckleBentleyApp.Instance.Start2(unparsed);
-    }
   }
 }

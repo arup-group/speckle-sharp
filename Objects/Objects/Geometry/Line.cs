@@ -49,8 +49,8 @@ namespace Objects.Geometry
 
     public Line(double x, double y, double z = 0, string units = Units.Meters, string applicationId = null)
     {
-      this.start = new Point(x, y, z);
-      this.end = null;
+      start = new Point(x, y, z);
+      end = null;
       this.applicationId = applicationId;
       this.units = units;
     }
@@ -103,15 +103,18 @@ namespace Objects.Geometry
 
     public bool TransformTo(Transform transform, out Line transformed)
     {
+      start.TransformTo(transform, out Point transformedStart);
+      end.TransformTo(transform, out Point transformedEnd);
       transformed = new Line
       {
-        start = transform.ApplyToPoint(start),
-        end = transform.ApplyToPoint(end),
+        start = transformedStart,
+        end = transformedEnd,
         applicationId = applicationId,
         units = units,
         domain = domain == null ? null : new Interval { start= domain.start, end= domain.end }
       };
-      return true;    }
+      return true;
+    }
 
     public bool TransformTo(Transform transform, out ITransformable transformed)
     {

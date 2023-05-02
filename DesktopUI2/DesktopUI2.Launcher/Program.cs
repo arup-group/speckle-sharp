@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.ReactiveUI;
+using Speckle.Core.Logging;
 using System.Diagnostics;
 using System.IO;
 using System;
@@ -36,7 +37,6 @@ namespace DesktopUI2.Launcher
 
       return;
     }
-      
 
     public static Window MainWindow { get; private set; }
 
@@ -44,11 +44,13 @@ namespace DesktopUI2.Launcher
 
     public static AppBuilder BuildAvaloniaApp()
     {
-      string path = Path.GetDirectoryName(typeof(App).Assembly.Location);
+      SpeckleLog.Initialize("dui", "2");
+
+      string path = Path.GetDirectoryName(typeof(DesktopUI2.App).Assembly.Location);
 
       string nativeLib = Path.Combine(path, "Native", "libAvalonia.Native.OSX.dylib");
 
-      return AppBuilder.Configure<App>()
+      return AppBuilder.Configure<DesktopUI2.App>()
       .UsePlatformDetect()
       .With(new X11PlatformOptions { UseGpu = false })
       .With(new MacOSPlatformOptions { ShowInDock = false })
@@ -61,6 +63,7 @@ namespace DesktopUI2.Launcher
       .LogToTrace()
       .UseReactiveUI();
     }
+
 
     public static void CreateOrFocusSpeckle()
     {

@@ -1,6 +1,6 @@
 ﻿using Objects.Structural.Geometry;
-using Objects.Structural.Loading;
 using Objects.Structural.GSA.Geometry;
+using Objects.Structural.Loading;
 using Speckle.Core.Kits;
 
 namespace Objects.Structural.GSA.Loading

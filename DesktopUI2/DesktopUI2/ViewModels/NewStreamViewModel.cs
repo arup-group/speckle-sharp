@@ -19,6 +19,7 @@ using GraphQL;
 using GraphQL.Client.Http;
 using System.Threading.Tasks;
 using Avalonia.Metadata;
+using System;
 
 namespace DesktopUI2.ViewModels
 {
@@ -276,7 +277,7 @@ namespace DesktopUI2.ViewModels
             result = streamReader.ReadToEnd();
           }
 
-          var searchOptions = Newtonsoft.Json.JsonConvert.DeserializeObject<JobSearchOptions>(result);
+          var searchOptions = Speckle.Newtonsoft.Json.JsonConvert.DeserializeObject<JobSearchOptions>(result);
 
           Jobs = searchOptions.jobs;
 

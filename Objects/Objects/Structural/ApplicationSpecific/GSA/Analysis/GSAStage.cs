@@ -1,7 +1,7 @@
-﻿using Speckle.Newtonsoft.Json;
+﻿using System.Collections.Generic;
 using Speckle.Core.Kits;
 using Speckle.Core.Models;
-using System.Collections.Generic;
+using Speckle.Newtonsoft.Json;
 
 namespace Objects.Structural.GSA.Analysis
 {

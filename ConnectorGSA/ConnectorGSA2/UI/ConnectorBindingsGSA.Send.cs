@@ -17,7 +17,6 @@ using Speckle.Newtonsoft.Json;
 using ConnectorGSA.Models;
 using ConnectorGSA.Utilities;
 using Microsoft.Win32;
-using Newtonsoft.Json;
 using Speckle.ConnectorGSA.Proxy;
 using Speckle.ConnectorGSA.Proxy.Cache;
 using Speckle.Core.Credentials;

@@ -1,8 +1,8 @@
-﻿using Speckle.Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Objects.Geometry;
 using Speckle.Core.Kits;
 using Speckle.Core.Models;
-using System.Collections.Generic;
-using Objects.Geometry;
+using Speckle.Newtonsoft.Json;
 
 namespace Objects.Structural.Materials
 {
@@ -31,7 +31,7 @@ namespace Objects.Structural.Materials
     public StructuralMaterial(string name, MaterialType type, string grade = null, string designCode = null, string codeYear = null)
     {
       this.name = name;
-      this.materialType = type;
+      materialType = type;
       this.grade = grade;
       this.designCode = designCode;
       this.codeYear = codeYear;
@@ -42,15 +42,15 @@ namespace Objects.Structural.Materials
     {
       this.name = name;
       this.grade = grade;
-      this.materialType = type;
+      materialType = type;
       this.designCode = designCode;
       this.codeYear = codeYear;
       this.strength = strength;
       this.elasticModulus = elasticModulus;
       this.poissonsRatio = poissonsRatio;
       this.shearModulus = shearModulus;
-      this.density = rho;
-      this.thermalExpansivity = alpha;
+      density = rho;
+      thermalExpansivity = alpha;
       this.dampingRatio = dampingRatio;
       this.materialSafetyFactor = materialSafetyFactor;
       this.cost = cost;

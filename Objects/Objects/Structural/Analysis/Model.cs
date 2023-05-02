@@ -1,6 +1,6 @@
-﻿using Speckle.Core.Kits;
+﻿using System.Collections.Generic;
+using Speckle.Core.Kits;
 using Speckle.Core.Models;
-using System.Collections.Generic;
 
 
 namespace Objects.Structural.Analysis
@@ -45,7 +45,7 @@ namespace Objects.Structural.Analysis
     /// <summary>
     /// SchemaBuilder constructor for a structural model object
     /// </summary>
-    /// <param name="modelInfo"></param>
+    /// <param name="specs"></param>
     /// <param name="nodes"></param>
     /// <param name="elements"></param>
     /// <param name="loads"></param>

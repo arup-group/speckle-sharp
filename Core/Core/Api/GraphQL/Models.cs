@@ -398,6 +398,22 @@ namespace Speckle.Core.Api
     public string description { get; set; }
   }
 
+  public class ServerInfoWithJobNumberResponse
+  {
+    // TODO: server and user models are duplicated here and in Core.Credentials.Responses
+    // a bit weird and unnecessary - shouldn't both Credentials and Api share the same models since they're
+    // all server models that should be consistent? am creating a new obj here as to not reference Credentials in
+    // this file but it should prob be refactored in the futrue
+    public ServerInfoWithJobNumber serverInfo { get; set; }
+  }
+
+  public class ServerInfoWithJobNumber
+  {
+    public bool requireJobNumberToCreateStreams { get; set; }
+    //public bool requireJobNumberToCreateCommits { get; set; }
+  }
+
+
   public class StreamData
   {
     public Stream stream { get; set; }

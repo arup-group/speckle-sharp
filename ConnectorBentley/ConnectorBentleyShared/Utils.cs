@@ -8,12 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using Speckle.Core.Kits;
-
-using Bentley.DgnPlatformNET;
-using Bentley.GeometryNET;
-using Bentley.MstnPlatformNET;
-
 namespace Speckle.ConnectorBentley
 {
   public static class Utils
@@ -40,13 +34,13 @@ namespace Speckle.ConnectorBentley
     public static string Slug = HostApplications.OpenBridge.Slug;
 #endif
 
-        /// <summary>
-        /// Gets the ids of all visible model objects that can be converted to Speckle
-        /// </summary>
-        /// <param name="model"></param>
-        /// <param name="converter"></param>
-        /// <returns></returns>
-        public static List<string> ConvertibleObjects(this DgnModel model, ISpeckleConverter converter)
+    /// <summary>
+    /// Gets the ids of all visible model objects that can be converted to Speckle
+    /// </summary>
+    /// <param name="model"></param>
+    /// <param name="converter"></param>
+    /// <returns></returns>
+    public static List<string> ConvertibleObjects(this DgnModel model, ISpeckleConverter converter)
     {
       var objs = new List<string>();
 

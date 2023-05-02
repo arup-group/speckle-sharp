@@ -10,6 +10,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
+using Serilog;
 using Speckle.Core.Models;
 using Speckle.Core.Models.Extensions;
 using Logging = Speckle.Core.Logging;
@@ -31,9 +32,9 @@ namespace ConnectorGrasshopper.Objects
       var priorParam = upgradedComponent.Params.Input[0];
       var newParam = new Param_GenericObject
       {
-        Name = "Speckle Object", 
+        Name = "Speckle Object",
         NickName = "O",
-        Description = "Speckle object to deconstruct into it's properties.", 
+        Description = "Speckle object to deconstruct into it's properties.",
         Access = GH_ParamAccess.item,
       };
       foreach (var priorParamSource in priorParam.Sources)
@@ -41,13 +42,13 @@ namespace ConnectorGrasshopper.Objects
       newParam.DataMapping = priorParam.DataMapping;
       newParam.Simplify = priorParam.Simplify;
       newParam.Reverse = priorParam.Reverse;
-      
+
       //GH_UpgradeUtil.MigrateInputParameters(component, upgradedComponent);
       upgradedComponent.Params.RegisterInputParam(newParam);
       upgradedComponent.Params.UnregisterInputParameter(upgradedComponent.Params.Input[0]);
       upgradedComponent.Params.OnParametersChanged();
       UpgradeUtils.SwapGroups(document, component, upgradedComponent);
-      return upgradedComponent;    
+      return upgradedComponent;
     }
 
     public DateTime Version => new DateTime(2022, 6, 15);
@@ -79,7 +80,7 @@ namespace ConnectorGrasshopper.Objects
       // INFO -> All output params are dynamically generated!
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    public override void SolveInstanceWithLogContext(IGH_DataAccess DA)
     {
 
       if (InPreSolve)
@@ -314,11 +315,11 @@ namespace ConnectorGrasshopper.Objects
       {
         return CreateOutputDictionary(@base);
       }
-      catch (Exception e)
+      catch (Exception ex)
       {
         // If we reach this, something happened that we weren't expecting...
-        Logging.Log.CaptureException(e);
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Something went terribly wrong... " + e.ToFormattedString());
+        Logging.SpeckleLog.Logger.Error(ex, ex.Message);
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Something went terribly wrong... " + ex.ToFormattedString());
         return null;
       }
     }

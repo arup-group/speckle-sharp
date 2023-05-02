@@ -37,7 +37,7 @@ namespace Objects.Structural.GSA.Geometry
       this.massProperty = massProperty;
       this.damperProperty = damperProperty;
       this.localElementSize = localElementSize;
-      this.colour = colour;      
+      this.colour = colour;
     }
   }
 }

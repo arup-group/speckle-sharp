@@ -40,6 +40,6 @@ namespace Objects.Structural.GSA.Loading
       this.polyline = polyline;
       this.isProjected = isProjected;
       this.values = values;
-      }
+    }
     }
 }

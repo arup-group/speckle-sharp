@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using Serilog;
 using Speckle.Core.Credentials;
 using Speckle.Core.Helpers;
 using Speckle.Newtonsoft.Json;
@@ -215,9 +216,11 @@ namespace Speckle.Core.Logging
             var result = streamReader.ReadToEnd();
           }
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-          // POKEMON: Gotta catch 'em all!
+          SpeckleLog.Logger.ForContext("eventName", eventName.ToString())
+            .ForContext("isAction", isAction)
+            .Warning(ex, "Analytics event failed {exceptionMessage}", ex.Message);
         }
 
       });

@@ -1,8 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-	<LangVersion>8.0</LangVersion>
+    <LangVersion>8.0</LangVersion>
     <AssemblyName>Objects.Converter.MicroStation</AssemblyName>
     <RootNamespace>Objects.Converter.MicroStation</RootNamespace>
     <PackageId>Speckle.Objects.Converter.MicroStation</PackageId>
@@ -22,9 +22,17 @@
     <DefineConstants>TRACE;MICROSTATION</DefineConstants>
   </PropertyGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /Y /S &quot;$(TargetDir)$(AssemblyName).dll&quot; &quot;$(AppData)\Speckle\Kits\Objects\&quot;" />
+  <PropertyGroup>
+    <IsDesktopBuild Condition="'$(IsDesktopBuild)' == ''">true</IsDesktopBuild>
+  </PropertyGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent"  Condition="'$(IsDesktopBuild)' == true">
+    <Exec Condition="$([MSBuild]::IsOsPlatform('Windows'))" Command="xcopy /Y /S &quot;$(TargetDir)$(AssemblyName).dll&quot; &quot;$(AppData)\Speckle\Kits\Objects\&quot;" />
   </Target>
+
+  <ItemGroup>
+    <PackageReference Include="Speckle.MicroStation.API" Version="0.0.0" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Core\Core\Core.csproj" />
@@ -32,7 +40,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU' OR '$(IsDesktopBuild)' == false">
-	<PackageReference Include="Speckle.Bentley.API" Version="1.0.0" IncludeAssets="compile" PrivateAssets="all" />
+    <PackageReference Include="Speckle.Bentley.API" Version="1.0.0" IncludeAssets="compile" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(IsDesktopBuild)' == true OR  $(IsDesktopBuild) == ''">
@@ -40,7 +48,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(ProgramW6432)\Bentley\MicroStation CONNECT Edition\MicroStation\Bentley.DgnDisplayNet.dll</HintPath>
       <Private>False</Private>
-    </Reference>  
+    </Reference>
     <Reference Include="Bentley.DgnPlatformNET, Version=1.0.0.0, Culture=neutral, PublicKeyToken=4bf6c96a266e58d4, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(ProgramW6432)\Bentley\MicroStation CONNECT Edition\MicroStation\Bentley.DgnPlatformNET.dll</HintPath>
@@ -91,7 +99,7 @@
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
-	<Reference Include="Bentley.MicroStation.General, Version=1.0.0.0, Culture=neutral, PublicKeyToken=4bf6c96a266e58d4, processorArchitecture=AMD64">
+    <Reference Include="Bentley.MicroStation.General, Version=1.0.0.0, Culture=neutral, PublicKeyToken=4bf6c96a266e58d4, processorArchitecture=AMD64">
       <SpecificVersion>false</SpecificVersion>
       <HintPath>$(ProgramW6432)\Bentley\MicroStation CONNECT Edition\MicroStation\Assemblies\Bentley.MicroStation.General.dll</HintPath>
       <Private>false</Private>

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Objects.Other;
 using Speckle.Core.Kits;
@@ -211,9 +211,14 @@ namespace Objects.Geometry
       return new Vector(x, y, z);
     }
 
+    public static double Angle(Vector u, Vector v)
+    {
+      return Math.Acos(DotProduct(u, v) / (u.Length * v.Length));
+    }
+
     [Obsolete("Renamed to " + nameof(Vector.Normalize))]
     public void Unitize() => Normalize();
-    
+
     /// <summary>
     /// Compute and return a unit vector from this vector
     /// </summary>
@@ -250,14 +255,19 @@ namespace Objects.Geometry
     /// <inheritdoc/>
     public bool TransformTo(Transform transform, out Vector vector)
     {
-      vector = transform.ApplyToVector(this);
+      var m = transform.matrix;
+      var tX = x * m.M11 + y * m.M12 + z * m.M13;
+      var tY = x * m.M21 + y * m.M22 + z * m.M23;
+      var tZ = x * m.M31 + y * m.M32 + z * m.M33;
+      vector = new Vector(tX, tY, tZ, units = units, applicationId = applicationId);
       return true;
     }
 
     /// <inheritdoc/>
     public bool TransformTo(Transform transform, out ITransformable transformed)
     {
-      transformed = transform.ApplyToVector(this);
+      var res = TransformTo(transform, out Vector vec);
+      transformed = vec;
       return true;
     }
   }

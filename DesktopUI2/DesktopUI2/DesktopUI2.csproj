@@ -76,6 +76,8 @@
     <None Remove="Views\Settings\CheckBoxSettingView.xaml" />
 	  <None Remove="Views\Settings\ListBoxSettingView.xaml" />
     <None Remove="Views\Settings\MultiSelectBoxSettingView.xaml" />
+    <None Remove="Views\Settings\NumericSettingView.xaml" />
+    <None Remove="Views\Settings\TextBoxSettingView.xaml" />
     <None Remove="Views\Share.xaml" />
     <None Remove="Views\Windows\Dialogs\AddAccountDialog.xaml" />
     <None Remove="Views\Windows\Dialogs\AddFromUrlDialog.xaml" />
@@ -183,6 +185,12 @@
     <AvaloniaXaml Include="Views\Pages\OneClickView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </AvaloniaXaml>
+    <AvaloniaXaml Include="Views\Settings\NumericSettingView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaXaml>
+    <AvaloniaXaml Include="Views\Settings\TextBoxSettingView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaXaml>
     <AvaloniaXaml Include="Views\Windows\Dialogs\ChangeRoleDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
     </AvaloniaXaml>
@@ -270,8 +278,8 @@
     <PackageReference Include="Avalonia.Desktop" Version="0.10.18" />
     <PackageReference Include="Avalonia.Diagnostics" Version="0.10.18" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.18" />
-    <PackageReference Include="Material.Avalonia" Version="3.0.0-rc0.98-nightly" />
-    <PackageReference Include="Material.Icons.Avalonia" Version="1.1.10" />
+    <PackageReference Include="Speckle.Material.Avalonia" Version="3.0.4" />
+    <PackageReference Include="Speckle.Material.Icons.Avalonia" Version="1.2.0" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Native\" />

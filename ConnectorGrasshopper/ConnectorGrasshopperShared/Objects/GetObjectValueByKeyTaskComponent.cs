@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ConnectorGrasshopper.Extras;
 using Grasshopper.Kernel;
+using Serilog;
 using Speckle.Core.Models;
 using Speckle.Core.Models.Extensions;
 using Logging = Speckle.Core.Logging;
@@ -17,7 +18,7 @@ namespace ConnectorGrasshopper.Objects
   public class GetObjectValueByKeyTaskComponent : SelectKitTaskCapableComponentBase<object>
   {
     public override Guid ComponentGuid => new Guid("BA787569-36E6-4522-AC76-B09983E0A40D");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override Bitmap Icon => Properties.Resources.GetObjectValueByKey;
 
     public GetObjectValueByKeyTaskComponent() : base("Speckle Object Value by Key", "Object K/V",
@@ -36,7 +37,7 @@ namespace ConnectorGrasshopper.Objects
       pManager.AddGenericParameter("Value", "V", "Speckle object", GH_ParamAccess.list);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    public override void SolveInstanceWithLogContext(IGH_DataAccess DA)
     {
       if (InPreSolve)
       {
@@ -45,10 +46,10 @@ namespace ConnectorGrasshopper.Objects
         var key = "";
         DA.GetData(0, ref speckleObj);
         DA.GetData(1, ref key);
-        
+
         if (DA.Iteration == 0)
           Tracker.TrackNodeRun("Object Value by Key");
-        
+
         var @base = speckleObj?.Value;
         var task = Task.Run(() => DoWork(@base, key, CancelToken));
         TaskList.Add(task);
@@ -119,11 +120,11 @@ namespace ConnectorGrasshopper.Objects
             break;
         }
       }
-      catch (Exception e)
+      catch (Exception ex)
       {
         // If we reach this, something happened that we weren't expecting...
-        Logging.Log.CaptureException(e);
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Something went terribly wrong... " + e.ToFormattedString());
+        Logging.SpeckleLog.Logger.Error(ex, ex.Message);
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Something went terribly wrong... " + ex.ToFormattedString());
 
       }
       return value;
