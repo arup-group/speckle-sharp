@@ -28,6 +28,7 @@ using AutoMapper;
 using Objects.Structural.Materials;
 using Speckle.Core.Kits;
 using Objects.Structural.ApplicationSpecific.GSA.GeneralData;
+using System.ComponentModel;
 
 namespace ConverterGSATests
 {
@@ -2678,6 +2679,13 @@ namespace ConverterGSATests
     #endregion
 
     #region General Data
+    [Fact]
+    public void GSAList_WithInvalidType_ThrowsInvalidEnumException()
+    {
+      var invalidEnum = (GSAListType)99;
+
+      Assert.Throws<InvalidEnumArgumentException>(() => invalidEnum.ToNative());
+    }
     
     [Fact]
     public void GSAListCanConvertToNative_ReturnsTrue()
