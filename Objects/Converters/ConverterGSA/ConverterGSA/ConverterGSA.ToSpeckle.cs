@@ -4438,8 +4438,8 @@ namespace ConverterGSA
           return GSAListType.Element;
         case ListType.Member:
           return GSAListType.Member;
-        case ListType.Case:
-          return GSAListType.Case;
+        //case ListType.Case:
+        //  return GSAListType.Case;
         default:
           throw new ArgumentException($"Unsupported GSA list type: {type}", nameof(type));
       }
@@ -4471,10 +4471,10 @@ namespace ConverterGSA
           }
         }
 
-        else if (listType == GSAListType.Case)
-        {
-          Instance.GsaModel.Cache.GetSpeckleObjects<GsaLoadCase, Base>(index, out speckleObjects, GSALayer.Analysis);
-        }
+        //else if (listType == GSAListType.Case)
+        //{
+        //  Instance.GsaModel.Cache.GetSpeckleObjects<GsaLoadCase, Base>(index, out speckleObjects, GSALayer.Analysis);
+        //}
 
         if (speckleObjects != null)
           speckleDefinitions.AddRange(speckleObjects);

@@ -30,8 +30,7 @@ namespace Objects.Structural.ApplicationSpecific.GSA.GeneralData
     {
       if ((listType == GSAListType.Node && !definition.All(o => o is Node)) ||
         (listType == GSAListType.Member && !definition.All(o => o is GSAMember1D)) ||
-        (listType == GSAListType.Element && (!definition.All(o => o is Element1D) || definition.Any(o => o is GSAMember1D))) ||
-        (listType == GSAListType.Case && !definition.All(o => o is LoadCase)))
+        (listType == GSAListType.Element && (!definition.All(o => o is Element1D) || definition.Any(o => o is GSAMember1D))))
       {
         throw new ArgumentException($"GSA list contains objects that do not match type: {listType}", nameof(definition));
       }
@@ -49,7 +48,7 @@ namespace Objects.Structural.ApplicationSpecific.GSA.GeneralData
     Node,
     Element,
     Member,
-    Case,
+    //Case,
     //Unspecified
   }
 }

@@ -3114,9 +3114,9 @@ namespace ConverterGSA
         case GSAListType.Element:
           ListDefinitionLookup<GsaEl, Element1D>();
           break;
-        case GSAListType.Case:
-          ListDefinitionLookup<GsaLoadCase, LoadCase>();
-          break;
+        //case GSAListType.Case:
+        //  ListDefinitionLookup<GsaLoadCase, LoadCase>();
+        //  break;
         default:
           break;
       }

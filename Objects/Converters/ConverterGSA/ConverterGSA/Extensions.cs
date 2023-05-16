@@ -946,8 +946,8 @@ namespace ConverterGSA
           return ListType.Element;
         case GSAListType.Member:
           return ListType.Member;
-        case GSAListType.Case:
-          return ListType.Case;
+        //case GSAListType.Case:
+        //  return ListType.Case;
         default:
           throw new ArgumentException($"Unsupported GSA list type: {listType}", nameof(listType));
       }
