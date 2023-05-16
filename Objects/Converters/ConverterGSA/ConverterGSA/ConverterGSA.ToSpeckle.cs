@@ -27,6 +27,7 @@ using StructuralUtilities.PolygonMesher;
 using Speckle.GSA.API.GwaSchema.Loading.Beam;
 using Objects.Structural.ApplicationSpecific.GSA.GeneralData;
 using MemberType = Objects.Structural.Geometry.MemberType;
+using System.ComponentModel;
 
 namespace ConverterGSA
 {
@@ -4438,10 +4439,11 @@ namespace ConverterGSA
           return GSAListType.Element;
         case ListType.Member:
           return GSAListType.Member;
-        //case ListType.Case:
-        //  return GSAListType.Case;
+        case ListType.Case:
+        case ListType.Unspecified:
+          throw new NotImplementedException($"GSA lists of type {type} are currently unsupported");
         default:
-          throw new ArgumentException($"Unsupported GSA list type: {type}", nameof(type));
+          throw new InvalidEnumArgumentException(nameof(type), (int)type, type.GetType());
       }
     }
 
