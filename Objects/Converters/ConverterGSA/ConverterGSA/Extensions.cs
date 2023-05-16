@@ -28,6 +28,7 @@ using Objects.Structural.Properties;
 using Objects.Structural.Materials;
 using Objects.Structural.Properties.Profiles;
 using Objects.Structural.ApplicationSpecific.GSA.GeneralData;
+using System.ComponentModel;
 
 namespace ConverterGSA
 {
@@ -949,7 +950,7 @@ namespace ConverterGSA
         //case GSAListType.Case:
         //  return ListType.Case;
         default:
-          throw new ArgumentException($"Unsupported GSA list type: {listType}", nameof(listType));
+          throw new InvalidEnumArgumentException(nameof(listType), (int)listType, listType.GetType());
       }
     }
 
