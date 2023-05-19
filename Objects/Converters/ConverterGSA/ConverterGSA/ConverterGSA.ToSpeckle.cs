@@ -2661,6 +2661,8 @@ namespace ConverterGSA
       //speckleList.definition = GetListDefinition(gsaList.Definition, speckleList.listType);
       speckleList.definitionRefs = GetListDefinition(gsaList.Definition, speckleList.listType, layer).Select(l => l.applicationId).Distinct().ToList();
 
+      Report.Log($"Warning converting list {gsaList.Name}: current support for GSA list definitions has some limitations - see docs for more info");
+
       if ((gsaList.Type == ListType.Member && layer == GSALayer.Analysis) || (gsaList.Type == ListType.Element && layer == GSALayer.Design))
         Report.Log($"Warning: {layer} layer doesn't include objects of type {gsaList.Type} - list won't include them.");
 
