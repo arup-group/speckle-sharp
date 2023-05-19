@@ -25,8 +25,12 @@ namespace Objects.Structural.ApplicationSpecific.GSA.GeneralData
 
     }
 
-    [SchemaInfo("GSAList", "Creates a Speckle object for a GSA List", "GSA", "General Data")]
-    public GSAList(string name, GSAListType listType, List<Base> definition, int? nativeId = null)
+    [SchemaInfo("GSAList", "Creates a Speckle object for a GSA List (to be used for defining GSA lists and receiving into GSA only, not as input to other objects/components)", "GSA", "General Data")]
+    public GSAList(
+      string name, 
+      GSAListType listType, 
+      [SchemaParamInfo("NOTE: only objects matching specified list type are supported. Passing GSAList objects of this type as input is NOT currently supported.")]List<Base> definition, 
+      int? nativeId = null)
     {
       if ((listType == GSAListType.Node && !definition.All(o => o is Node)) ||
         (listType == GSAListType.Member && !definition.All(o => o is GSAMember1D)) ||
