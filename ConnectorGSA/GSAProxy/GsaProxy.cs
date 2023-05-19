@@ -1119,7 +1119,7 @@ namespace Speckle.ConnectorGSA.Proxy
                 }
                 else if (progress != null)
                 {
-                  progress.Report.LogOperationError(new Exception(FormulateParsingErrorContext(parser.Record, schemaType.Name)));
+                  progress.Report.LogConversionError(new Exception(FormulateParsingErrorContext(parser.Record, schemaType.Name)));
                 }
               }
             }
@@ -1249,7 +1249,7 @@ namespace Speckle.ConnectorGSA.Proxy
                     }
                     else if (progress != null)
                     {
-                      progress.Report.LogOperationError(new Exception(FormulateParsingErrorContext(parser.Record, schemaType.Name)));
+                      progress.Report.LogConversionError(new Exception(FormulateParsingErrorContext(parser.Record, schemaType.Name)));
                     }
                   }
                 }
@@ -1370,7 +1370,7 @@ namespace Speckle.ConnectorGSA.Proxy
                 }
                 else if (progress != null)
                 {
-                  progress.Report.LogOperationError(new Exception(FormulateParsingErrorContext(parser.Record, schemaType.Name)));
+                  progress.Report.LogConversionError(new Exception(FormulateParsingErrorContext(parser.Record, schemaType.Name)));
                 }
               }
             }
