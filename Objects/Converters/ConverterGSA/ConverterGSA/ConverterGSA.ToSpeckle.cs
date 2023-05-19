@@ -4441,9 +4441,13 @@ namespace ConverterGSA
           return GSAListType.Member;
         case ListType.Case:
         case ListType.Unspecified:
-          throw new NotImplementedException($"GSA lists of type {type} are currently unsupported");
+          var exception = new NotImplementedException($"GSA lists of type {type} are currently unsupported");
+          Report.LogConversionError(exception);
+          throw exception;
         default:
-          throw new InvalidEnumArgumentException(nameof(type), (int)type, type.GetType());
+          var invalidEnumEx = new InvalidEnumArgumentException(nameof(type), (int)type, type.GetType());
+          Report.LogConversionError(invalidEnumEx);
+          throw invalidEnumEx;
       }
     }
 
