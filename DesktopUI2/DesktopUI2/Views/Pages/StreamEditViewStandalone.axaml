@@ -271,13 +271,27 @@
                         ColumnDefinitions="*,auto"
                         RowDefinitions="auto,auto,auto,*">
 
-                          <!--  SUMMARY AND OPERATION ERRORS  -->
-                          <TextBlock
-                            Grid.Row="0"
-                            Margin="20,0"
-                            VerticalAlignment="Center"
-                            Text="{Binding Log}"
-                            TextWrapping="Wrap" />
+                      <!--  SUMMARY AND OPERATION ERRORS  -->
+                      <!--<TextBlock
+                        Grid.Row="0"
+                        Margin="20,0"
+                        VerticalAlignment="Center"
+                        Text="{Binding Log}"
+                        TextWrapping="Wrap" />-->
+
+												  <!--Logging items bound in code behind-->
+										      <ItemsRepeater 
+											      Grid.Row="0" 
+												    Name="ReportLog"  
+												    Margin="20,0">
+											      <ItemsRepeater.ItemTemplate>
+												      <DataTemplate>
+														      <TextBlock 
+																    Text="{Binding}" 
+																    TextWrapping="Wrap"/>
+												      </DataTemplate>
+											      </ItemsRepeater.ItemTemplate>
+										      </ItemsRepeater>
 
                           <!--  SEARCH AND FILTER  -->
                           <m:Card
