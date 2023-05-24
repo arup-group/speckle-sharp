@@ -2664,10 +2664,10 @@ namespace ConverterGSA
       Report.Log($"Warning converting list {gsaList.Name}: current support for GSA list definitions has some limitations - see docs for more info");
 
       if ((gsaList.Type == ListType.Member && layer == GSALayer.Analysis) || (gsaList.Type == ListType.Element && layer == GSALayer.Design))
-        Report.Log($"Warning: {layer} layer doesn't include objects of type {gsaList.Type} - list won't include them.");
+        Report.Log($"Warning converting list {gsaList.Name}: {layer} layer doesn't include objects of type {gsaList.Type} - list will not include them.");
 
       else if (gsaList.Type == ListType.Node && layer == GSALayer.Design)
-        Report.Log($"Warning: Only nodes associated with {layer} layer will be included in list {gsaList.Name}");
+        Report.Log($"Warning converting list {gsaList.Name}: Only nodes associated with {layer} layer will be included in list {gsaList.Name}");
 
       return new ToSpeckleResult(speckleList);
     }
