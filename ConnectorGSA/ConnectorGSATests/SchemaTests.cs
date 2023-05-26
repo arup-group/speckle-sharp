@@ -377,7 +377,7 @@ namespace ConnectorGSATests
 
       // Equal checks on first list only
       Assert.Equal("sampleOne", gsaLists[0].Name);
-      Assert.Equal("MEMBER", gsaLists[0].Type);
+      Assert.Equal(ListType.Member, gsaLists[0].Type);
       Assert.True(new List<int>() { 1, 2, 4, 5, 6, 7, 8 }.SequenceEqual(gsaLists[0].Definition));
     }
 
@@ -3120,6 +3120,62 @@ namespace ConnectorGSATests
       }
     }
     #endregion
+
+    [Fact]
+    public void GsaListGwa_WithEmptyDefinition_ReturnsTrue()
+    {
+      var listGwas = new List<string>()
+      {
+        "LIST.1\t3\tmemb list\tMEMBER\t"
+      };
+
+      var parser = new GsaListParser();
+
+      Assert.True(parser.FromGwa(listGwas[0]));
+
+      var record = (GsaList)parser.Record;
+
+      Assert.Equal("memb list", record.Name);
+      Assert.Equal(ListType.Member, record.Type);
+      Assert.Equal(new List<int>(), record.Definition);
+    }
+
+    [Fact]
+    public void GsaList_WithValidParameters_CreatesValidGwa()
+    {
+      var gsaList = new GsaList();
+      gsaList.Index = 1;
+      gsaList.Name = "TestList";
+      gsaList.Type = ListType.Node;
+      gsaList.Definition = new List<int>() { 1, 3, 4, 5, 2, 20 };
+
+      var listParser = new GsaListParser(gsaList);
+
+      var isParsed = listParser.Gwa(out var gwas);
+
+      var expectedResult = $"LIST.1\t1\tTestList\tNODE\t1 3 4 5 2 20";
+
+      Assert.True(isParsed);
+      Assert.NotEmpty(gwas);
+      Assert.Equal(expectedResult, gwas[0]);
+    }
+
+    [Fact]
+    public void GsaList_WithEmptyName_DoesNotParse()
+    {
+      var gsaList = new GsaList();
+      gsaList.Index = 1;
+      gsaList.Type = ListType.Node;
+      gsaList.Definition = new List<int>() { 1, 3, 4, 5, 2, 20 };
+
+      var listParser = new GsaListParser(gsaList);
+
+      var isParsed = listParser.Gwa(out var gwas);
+
+      Assert.False(isParsed);
+      Assert.Empty(gwas);
+    }
+
     #endregion
 
     #region data_gen_fns

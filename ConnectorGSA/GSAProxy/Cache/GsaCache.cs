@@ -380,18 +380,18 @@ namespace Speckle.ConnectorGSA.Proxy.Cache
         {
           var precendentRecords = new List<GsaRecord>();
 
-          switch (listRecord.Type.ToUpper())
+          switch (listRecord.Type)
           {
-            case "MEMBER":
+            case ListType.Member:
               GetPrecedentNatives<GsaMemb>(listRecord.Definition, out precendentRecords);
               break;
-            case "ELEMENT":
+            case ListType.Element:
               GetPrecedentNatives<GsaEl>(listRecord.Definition, out precendentRecords);
               break;
-            case "NODE":
+            case ListType.Node:
               GetPrecedentNatives<GsaNode>(listRecord.Definition, out precendentRecords);
               break;
-            case "CASE":
+            case ListType.Case:
               GetPrecedentNatives<GsaLoadCase>(listRecord.Definition, out precendentRecords);
               break;
             default:

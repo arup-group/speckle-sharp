@@ -9,7 +9,7 @@ namespace Speckle.GSA.API.GwaSchema
   public class GsaList : GsaRecord
   {
     public string Name { get => name; set { name = value; } }
-    public string Type;
+    public ListType Type;
     public List<int> Definition;
 
     public GsaList() : base()

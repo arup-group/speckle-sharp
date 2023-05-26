@@ -27,6 +27,8 @@ using Objects.Structural.Properties;
 using AutoMapper;
 using Objects.Structural.Materials;
 using Speckle.Core.Kits;
+using Objects.Structural.ApplicationSpecific.GSA.GeneralData;
+using System.ComponentModel;
 
 namespace ConverterGSATests
 {
@@ -2674,6 +2676,113 @@ namespace ConverterGSATests
     #endregion
 
     #region Results
+    #endregion
+
+    #region General Data
+    [Fact]
+    public void GSAList_WithInvalidType_ThrowsInvalidEnumException()
+    {
+      var invalidEnum = (GSAListType)99;
+
+      Assert.Throws<InvalidEnumArgumentException>(() => invalidEnum.ToNative());
+    }
+    
+    [Fact]
+    public void GSAListCanConvertToNative_ReturnsTrue()
+    {
+      var gsaList = new GSAList();
+
+      var isConvertable = converter.CanConvertToNative(gsaList);
+
+      Assert.True(isConvertable);
+    }
+
+    [Fact]
+    public void GSAListToNative_WithValidParameters_HasPopulatedDefinition()
+    {
+      var speckleEle1Ds = SpeckleElement1dExamples(2, "ele1", "ele3");
+
+      var speckleGsaList = new GSAList()
+      {
+        name = "Test List",
+        listType = GSAListType.Element,
+        definition = new List<Base>() { speckleEle1Ds[0], speckleEle1Ds[1] }
+      };
+
+      var convertedGsaList = converter.ConvertToNative(speckleGsaList);
+
+      var castedRecords = (List<GsaRecord>)convertedGsaList;
+
+      Assert.NotEmpty(castedRecords);
+
+      var gsaList = (GsaList)castedRecords[0];
+
+      Assert.Equal("Test List", gsaList.Name);
+      Assert.Equal(ListType.Element, gsaList.Type);
+      Assert.Equal(1, gsaList.Definition[0]);
+      Assert.Equal(2, gsaList.Definition[1]);
+    }
+
+    [Fact]
+    public void GSAListToNative_WithListTypeDefinitionMismatch_HasEmptyDefinition()
+    {
+      var mockListDefinition = GsaNodeExamples(4, "node1", "node3", "node4", "node5");
+      Instance.GsaModel.Cache.Upsert(mockListDefinition);
+
+      var speckleGsaList = new GSAList()
+      {
+        name = "Test List",
+        listType = GSAListType.Element,
+        definitionRefs = new List<string>() { "node1", "node3", "node5" }
+      };
+
+      var convertedGsaList = converter.ConvertToNative(speckleGsaList);
+
+      var castedRecords = (List<GsaRecord>)convertedGsaList;
+
+      Assert.NotEmpty(castedRecords);
+
+      var gsaList = (GsaList)castedRecords[0];
+
+      Assert.Equal("Test List", gsaList.Name);
+      Assert.Equal(ListType.Element, gsaList.Type);
+      Assert.Empty(gsaList.Definition);
+    }
+
+    [Fact]
+    public void GSAListToNative_WithMultipleDefinitionTypes_HasIndicesOfListTypeOnly()
+    {
+      var mockNodes = GsaNodeExamples(4, "node1", "node3", "node4", "node5");
+      var speckleNodes = SpeckleNodeExamples(4, "node1", "node3", "node4", "node5");
+      var mockMembers = GsaMemberExamples(2, "mem1", "mem2");
+      var speckleEles = SpeckleElement1dExamples(2, "ele1", "ele2");
+      //Instance.GsaModel.Cache.Upsert(mockNodes);
+      //Instance.GsaModel.Cache.Upsert(mockMembers);
+
+      var speckleGsaList = new GSAList()
+      {
+        name = "Test List",
+        listType = GSAListType.Element,
+        definition = new List<Base>()
+        {
+          speckleNodes[0], speckleNodes[1], speckleNodes[2],
+          speckleEles[0], speckleEles[1]
+        },
+      };
+
+      var convertedGsaList = converter.ConvertToNative(speckleGsaList);
+
+      var castedRecords = (List<GsaRecord>)convertedGsaList;
+
+      Assert.NotEmpty(castedRecords);
+
+      var gsaList = (GsaList)castedRecords[0];
+
+      Assert.Equal("Test List", gsaList.Name);
+      Assert.Equal(ListType.Element, gsaList.Type);
+      Assert.Equal(2, gsaList.Definition.Count);
+    }
+
     #endregion
 
     #region Helper

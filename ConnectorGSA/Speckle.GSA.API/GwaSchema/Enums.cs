@@ -1056,4 +1056,18 @@
     [StringValue("STRAIN")]
     Strain
   }
+
+  public enum ListType
+  {
+    [StringValue("NODE")]
+    Node,
+    [StringValue("ELEMENT")]
+    Element,
+    [StringValue("MEMBER")]
+    Member,
+    [StringValue("CASE")]
+    Case,
+    [StringValue("UNDEF")]
+    Unspecified
+  }
 }
