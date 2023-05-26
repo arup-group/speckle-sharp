@@ -2834,7 +2834,7 @@ public class GSAListSchemaComponent: CreateSchemaObjectBase {
             proxy.Exposure = internalExposure;
           };
     }
-    public GSAListSchemaComponent(): base("GSAList", "GSAList", "Creates a Speckle object for a GSA List", "Speckle 2 GSA", "General Data") { }
+    public GSAListSchemaComponent(): base("GSAList", "GSAList", "Creates a Speckle object for a GSA List (to be used for defining GSA lists and receiving into GSA only, not as input to other objects/components)", "Speckle 2 GSA", "General Data") { }
     
     internal static string internalCategory { get; }  = "Speckle 2 GSA";
 
@@ -6073,7 +6073,7 @@ public class ResultSetAllSchemaComponent: CreateSchemaObjectBase {
       : GH_Exposure.hidden;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Results.ResultSetAll.ctor(Objects.Structural.Results.ResultSet1D,Objects.Structural.Results.ResultSet2D,Objects.Structural.Results.ResultSet3D,Objects.Structural.Results.ResultGlobal,Objects.Structural.Results.ResultSetNode)","Objects.Structural.Results.ResultSetAll");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Results.ResultSetAll.ctor(Objects.Structural.Results.ResultSet1D,Objects.Structural.Results.ResultSet2D,Objects.Structural.Results.ResultSet3D,Objects.Structural.Results.ResultSetGlobal,Objects.Structural.Results.ResultSetNode)","Objects.Structural.Results.ResultSetAll");
         base.AddedToDocument(document);
     }
 }
