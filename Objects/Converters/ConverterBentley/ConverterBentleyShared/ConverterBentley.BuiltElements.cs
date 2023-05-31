@@ -509,6 +509,31 @@ namespace Objects.Converter.Bentley
       {
         basePoint = Point3dToSpeckle(ToInternalCoordinates(end));
       }
+
+      // parameters specific to Arup families
+      Parameter dimensionsFoundationPileEmbedment = new Parameter("d90836d1-1bce-43ec-8d9e-d7063e3a22ab", 75);
+      dimensionsFoundationPileEmbedment.name = "Dimensions_Foundation_Pile_Embedment";
+      dimensionsFoundationPileEmbedment.isReadOnly = false;
+      dimensionsFoundationPileEmbedment.isShared = true;
+      dimensionsFoundationPileEmbedment.applicationUnit = "DUT_MILLIMETERS";
+      dimensionsFoundationPileEmbedment.applicationUnitType = "UT_Length";
+
+      //Parameter dimensionsFoundationDepth = new Parameter("bcf6b803-46bb-4402-ae52-939579385bcc", 0);
+      //dimensionsFoundationDepth.name = "Dimensions_Foundation_Depth";
+      //dimensionsFoundationDepth.isReadOnly = false;
+      //dimensionsFoundationDepth.isShared = true;
+      //dimensionsFoundationDepth.applicationUnit = "DUT_MILLIMETERS";
+      //dimensionsFoundationDepth.applicationUnitType = "UT_Length";
+
+
+      double length = Math.Abs(start.Z - end.Z);
+      Parameter dimensionsFoundationPileLength = new Parameter("ad8d0f48-d77a-4ad0-9986-6393242f30f4", length * 1000);
+      dimensionsFoundationPileLength.name = "Dimensions_Foundation_Pile_Length";
+      dimensionsFoundationPileLength.isReadOnly = false;
+      dimensionsFoundationPileLength.isShared = true;
+      dimensionsFoundationPileLength.applicationUnit = "DUT_MILLIMETERS";
+      dimensionsFoundationPileLength.applicationUnitType = "UT_Length";
+
       string type = part;
 
       Level level = CreateLevel(basePoint.z, u);
@@ -516,7 +541,7 @@ namespace Objects.Converter.Bentley
 
       bool facingFlipped = false;
       bool handFlipped = false;
-      FamilyInstance familyInstance = new FamilyInstance(basePoint, family, type, level, rotationZ, facingFlipped, handFlipped, new List<Parameter>())
+      FamilyInstance familyInstance = new FamilyInstance(basePoint, family, type, level, rotationZ, facingFlipped, handFlipped, new List<Parameter>() { dimensionsFoundationPileEmbedment, dimensionsFoundationPileLength })
       {
         category = "Structural Foundations",
         elementId = elementId.ToString()
@@ -525,7 +550,7 @@ namespace Objects.Converter.Bentley
 
       return familyInstance;
     }
-    
+
     public Element RevitWallToNative(RevitWall wall)
     {
       if (wall.baseLine is Line baseLine)
