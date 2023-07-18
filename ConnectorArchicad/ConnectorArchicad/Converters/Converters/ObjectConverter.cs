@@ -39,7 +39,7 @@ namespace Archicad.Converters
     {
       // calculate commulative transforms
       Transform commulativeTansform = baseTransform * transform;
-      commulativeTansform.id = Utilities.hashString(baseTransform.id + transform.id);
+      commulativeTansform.id = Utilities.HashString(baseTransform.id + transform.id);
       transformMatrixById.TryAdd(commulativeTansform.id, commulativeTansform);
       
       // get the geometry
@@ -59,9 +59,9 @@ namespace Archicad.Converters
       }
 
       // transform meshes
-      var meshesIds = meshes?.ConvertAll(mesh => Utilities.hashString(commulativeTansform.id + mesh.id));
+      var meshesIds = meshes?.ConvertAll(mesh => Utilities.HashString(commulativeTansform.id + mesh.id));
       meshes = meshes?.Select(mesh => {
-        var transformedMeshId = Utilities.hashString(commulativeTansform.id + mesh.id);
+        var transformedMeshId = Utilities.HashString(commulativeTansform.id + mesh.id);
         if (!transformedMeshById.TryGetValue(transformedMeshId, out Mesh transformedMesh))
         {
           transformedMesh = (Mesh)mesh.ShallowCopy();
@@ -143,7 +143,10 @@ namespace Archicad.Converters
       return result is null ? new List<ApplicationObject>() : result.ToList();
     }
 
-    public async Task<List<Base>> ConvertToSpeckle(IEnumerable<Model.ElementModelData> elements, CancellationToken token)
+    public async Task<List<Base>> ConvertToSpeckle(
+      IEnumerable<Model.ElementModelData> elements,
+      CancellationToken token
+    )
     {
       // Objects not stored on the server
       return new List<Base>();

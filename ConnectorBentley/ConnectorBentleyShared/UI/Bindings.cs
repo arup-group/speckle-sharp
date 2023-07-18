@@ -34,7 +34,6 @@ using Bentley.CifNET.LinearGeometry;
 using Bentley.CifNET.SDK;
 #endif
 
-
 namespace Speckle.ConnectorBentley.UI
 {
   public partial class ConnectorBindingsBentley : ConnectorBindings
@@ -58,10 +57,15 @@ namespace Speckle.ConnectorBentley.UI
     // As in the AutoCAD/Civil3D connectors, we therefore creating a control in the ConnectorBindings constructor (since it's called on main thread) that allows for invoking worker threads on the main thread - thank you Claire!!
     public System.Windows.Forms.Control Control;
     delegate void SetContextDelegate(object session);
-    delegate List<string> GetObjectsFromFilterDelegate(ISelectionFilter filter, ISpeckleConverter converter, ProgressViewModel progress);
+    delegate List<string> GetObjectsFromFilterDelegate(
+      ISelectionFilter filter,
+      ISpeckleConverter converter,
+      ProgressViewModel progress
+    );
     delegate Base SpeckleConversionDelegate(object commitObject);
 
-    public ConnectorBindingsBentley() : base()
+    public ConnectorBindingsBentley()
+      : base()
     {
       Control = new System.Windows.Forms.Control();
       Control.CreateControl();
@@ -94,11 +98,13 @@ namespace Speckle.ConnectorBentley.UI
 
     public override string GetHostAppName() => Utils.Slug;
 
-
     public override string GetDocumentId()
     {
       string path = GetDocumentLocation();
-      return Core.Models.Utilities.hashString(path + File.GetFileName(), Speckle.Core.Models.Utilities.HashingFuctions.MD5);
+      return Core.Models.Utilities.HashString(
+        path + File.GetFileName(),
+        Speckle.Core.Models.Utilities.HashingFunctions.MD5
+      );
     }
 
     public override string GetDocumentLocation() => Path.GetDirectoryName(File.GetFileName());
@@ -158,12 +164,49 @@ namespace Speckle.ConnectorBentley.UI
         levels.Add(level.Name);
       levels.Sort();
 
-      var elementTypes = new List<string> { "Arc", "Ellipse", "Line", "Spline", "Line String", "Complex Chain", "Shape", "Complex Shape", "Mesh" };
+      var elementTypes = new List<string>
+      {
+        "Arc",
+        "Ellipse",
+        "Line",
+        "Spline",
+        "Line String",
+        "Complex Chain",
+        "Shape",
+        "Complex Shape",
+        "Mesh"
+      };
 
       var filterList = new List<ISelectionFilter>();
-      filterList.Add(new AllSelectionFilter { Slug = "all", Name = "Everything", Icon = "CubeScan", Description = "Selects all document objects." });
-      filterList.Add(new ListSelectionFilter { Slug = "level", Name = "Levels", Icon = "LayersTriple", Description = "Selects objects based on their level.", Values = levels });
-      filterList.Add(new ListSelectionFilter { Slug = "elementType", Name = "Element Types", Icon = "Category", Description = "Selects objects based on their element type.", Values = elementTypes });
+      filterList.Add(
+        new AllSelectionFilter
+        {
+          Slug = "all",
+          Name = "Everything",
+          Icon = "CubeScan",
+          Description = "Selects all document objects."
+        }
+      );
+      filterList.Add(
+        new ListSelectionFilter
+        {
+          Slug = "level",
+          Name = "Levels",
+          Icon = "LayersTriple",
+          Description = "Selects objects based on their level.",
+          Values = levels
+        }
+      );
+      filterList.Add(
+        new ListSelectionFilter
+        {
+          Slug = "elementType",
+          Name = "Element Types",
+          Icon = "Category",
+          Description = "Selects objects based on their element type.",
+          Values = elementTypes
+        }
+      );
 
 #if (OPENROADS || OPENRAIL || OPENBRIDGE)
       var civilElementTypes = new List<string> { "Alignment" };
@@ -203,6 +246,7 @@ namespace Speckle.ConnectorBentley.UI
 
     #region receiving
     public override bool CanPreviewReceive => false;
+
     public override Task<StreamState> PreviewReceive(StreamState state, ProgressViewModel progress)
     {
       return null;
@@ -239,7 +283,12 @@ namespace Speckle.ConnectorBentley.UI
       var flattenedObjects = FlattenCommitObject(commitObject, converter, ref count);
       List<ApplicationObject> newPlaceholderObjects;
       if (Control.InvokeRequired)
-        newPlaceholderObjects = (List<ApplicationObject>)Control.Invoke(new NativeConversionAndBakeDelegate(ConvertAndBakeReceivedObjects), new object[] { flattenedObjects, converter, state, progress });
+        newPlaceholderObjects =
+          (List<ApplicationObject>)
+            Control.Invoke(
+              new NativeConversionAndBakeDelegate(ConvertAndBakeReceivedObjects),
+              new object[] { flattenedObjects, converter, state, progress }
+            );
       else
         newPlaceholderObjects = ConvertAndBakeReceivedObjects(flattenedObjects, converter, state, progress);
 
@@ -265,8 +314,19 @@ namespace Speckle.ConnectorBentley.UI
       return state;
     }
 
-    delegate List<ApplicationObject> NativeConversionAndBakeDelegate(List<Base> objects, ISpeckleConverter converter, StreamState state, ProgressViewModel progress);
-    private List<ApplicationObject> ConvertAndBakeReceivedObjects(List<Base> objects, ISpeckleConverter converter, StreamState state, ProgressViewModel progress)
+    delegate List<ApplicationObject> NativeConversionAndBakeDelegate(
+      List<Base> objects,
+      ISpeckleConverter converter,
+      StreamState state,
+      ProgressViewModel progress
+    );
+
+    private List<ApplicationObject> ConvertAndBakeReceivedObjects(
+      List<Base> objects,
+      ISpeckleConverter converter,
+      StreamState state,
+      ProgressViewModel progress
+    )
     {
       var placeholders = new List<ApplicationObject>();
       var conversionProgressDict = new ConcurrentDictionary<string, int>();
@@ -297,11 +357,15 @@ namespace Speckle.ConnectorBentley.UI
           {
             var status = convertedElement.AddToModel();
             if (status == StatusInt.Error)
-              converter.Report.LogConversionError(new Exception($"Failed to bake object {@base.id} of type {@base.speckle_type}."));
+              converter.Report.LogConversionError(
+                new Exception($"Failed to bake object {@base.id} of type {@base.speckle_type}.")
+              );
           }
           else
           {
-            converter.Report.LogConversionError(new Exception($"Failed to convert object {@base.id} of type {@base.speckle_type}."));
+            converter.Report.LogConversionError(
+              new Exception($"Failed to convert object {@base.id} of type {@base.speckle_type}.")
+            );
           }
         }
         catch (Exception e)
@@ -321,7 +385,12 @@ namespace Speckle.ConnectorBentley.UI
     /// <param name="count"></param>
     /// <param name="foundConvertibleMember"></param>
     /// <returns></returns>
-    private List<Base> FlattenCommitObject(object obj, ISpeckleConverter converter, ref int count, bool foundConvertibleMember = false)
+    private List<Base> FlattenCommitObject(
+      object obj,
+      ISpeckleConverter converter,
+      ref int count,
+      bool foundConvertibleMember = false
+    )
     {
       List<Base> objects = new List<Base>();
 
@@ -380,14 +449,17 @@ namespace Speckle.ConnectorBentley.UI
     }
 
     //delete previously sent object that are no longer in this stream
-    private void DeleteObjects(List<ApplicationObject> previouslyReceiveObjects, List<ApplicationObject> newPlaceholderObjects)
+    private void DeleteObjects(
+      List<ApplicationObject> previouslyReceiveObjects,
+      List<ApplicationObject> newPlaceholderObjects
+    )
     {
       foreach (var obj in previouslyReceiveObjects)
       {
         if (newPlaceholderObjects.Any(x => x.applicationId == obj.applicationId))
           continue;
 
-        // get the model object from id               
+        // get the model object from id
         ulong id = Convert.ToUInt64(obj.CreatedIds.FirstOrDefault());
         var element = Model.FindElementById((ElementId)id);
         if (element != null)
@@ -398,6 +470,7 @@ namespace Speckle.ConnectorBentley.UI
 
     #region sending
     public override bool CanPreviewSend => false;
+
     public override void PreviewSend(StreamState state, ProgressViewModel progress)
     {
       return;
@@ -420,14 +493,21 @@ namespace Speckle.ConnectorBentley.UI
       if (state.Filter != null)
       {
         if (Control.InvokeRequired)
-          state.SelectedObjectIds = (List<string>)Control.Invoke(new GetObjectsFromFilterDelegate(GetObjectsFromFilter), new object[] { state.Filter, converter, progress });
+          state.SelectedObjectIds =
+            (List<string>)
+              Control.Invoke(
+                new GetObjectsFromFilterDelegate(GetObjectsFromFilter),
+                new object[] { state.Filter, converter, progress }
+              );
         else
           state.SelectedObjectIds = GetObjectsFromFilter(state.Filter, converter, progress);
       }
 
       if (state.SelectedObjectIds.Count == 0 && !ExportGridLines)
       {
-        throw new InvalidOperationException("Zero objects selected; send stopped. Please select some objects, or check that your filter can actually select something.");
+        throw new InvalidOperationException(
+          "Zero objects selected; send stopped. Please select some objects, or check that your filter can actually select something."
+        );
       }
 
       var commitObj = new Base();
@@ -440,7 +520,7 @@ namespace Speckle.ConnectorBentley.UI
       progress.Max = state.SelectedObjectIds.Count();
       int convertedCount = 0;
 
-      // grab elements from active model           
+      // grab elements from active model
       var objs = new List<Element>();
 #if (OPENROADS || OPENRAIL || OPENBRIDGE)
       bool convertCivilObject = false;
@@ -551,7 +631,8 @@ namespace Speckle.ConnectorBentley.UI
           }
 #else
           if (Control.InvokeRequired)
-            converted = (Base)Control.Invoke(new SpeckleConversionDelegate(converter.ConvertToSpeckle), new object[] { obj });
+            converted = (Base)
+              Control.Invoke(new SpeckleConversionDelegate(converter.ConvertToSpeckle), new object[] { obj });
           else
             converted = converter.ConvertToSpeckle(obj);
 
@@ -569,7 +650,7 @@ namespace Speckle.ConnectorBentley.UI
           continue;
         }
 
-        /* TODO: adding the feature data and properties per object 
+        /* TODO: adding the feature data and properties per object
         foreach (var key in obj.ExtensionDictionary)
         {
           converted[key] = obj.ExtensionDictionary.GetUserString(key);
@@ -615,17 +696,21 @@ namespace Speckle.ConnectorBentley.UI
         onProgressAction: dict => progress.Update(dict),
         onErrorAction: ConnectorHelpers.DefaultSendErrorHandler,
         disposeTransports: true
-        );
+      );
       var actualCommit = new CommitCreateInput
       {
         streamId = streamId,
         objectId = commitObjId,
         branchName = state.BranchName,
-        message = state.CommitMessage != null ? state.CommitMessage : $"Pushed {convertedCount} elements from {Utils.AppName}.",
+        message =
+          state.CommitMessage != null ? state.CommitMessage : $"Pushed {convertedCount} elements from {Utils.AppName}.",
         sourceApplication = Utils.VersionedAppName
       };
 
-      if (state.PreviousCommitId != null) { actualCommit.parents = new List<string>() { state.PreviousCommitId }; }
+      if (state.PreviousCommitId != null)
+      {
+        actualCommit.parents = new List<string>() { state.PreviousCommitId };
+      }
 
       var commitId = await ConnectorHelpers.CreateCommit(progress.CancellationToken, client, actualCommit);
       return commitId;
@@ -687,7 +772,11 @@ namespace Speckle.ConnectorBentley.UI
     }
 #endif
 
-    private List<string> GetObjectsFromFilter(ISelectionFilter filter, ISpeckleConverter converter, ProgressViewModel progress)
+    private List<string> GetObjectsFromFilter(
+      ISelectionFilter filter,
+      ISpeckleConverter converter,
+      ProgressViewModel progress
+    )
     {
       var selection = new List<string>();
       switch (filter.Slug)
@@ -703,7 +792,10 @@ namespace Speckle.ConnectorBentley.UI
 
             var graphicElements = Model.GetGraphicElements();
             var elementEnumerator = (ModelElementsEnumerator)graphicElements.GetEnumerator();
-            var objs = graphicElements.Where(el => el.LevelId == levelId).Select(el => el.ElementId.ToString()).ToList();
+            var objs = graphicElements
+              .Where(el => el.LevelId == levelId)
+              .Select(el => el.ElementId.ToString())
+              .ToList();
             selection.AddRange(objs);
           }
           return selection;
@@ -748,7 +840,10 @@ namespace Speckle.ConnectorBentley.UI
             }
             var graphicElements = Model.GetGraphicElements();
             var elementEnumerator = (ModelElementsEnumerator)graphicElements.GetEnumerator();
-            var objs = graphicElements.Where(el => el.ElementType == selectedType).Select(el => el.ElementId.ToString()).ToList();
+            var objs = graphicElements
+              .Where(el => el.ElementType == selectedType)
+              .Select(el => el.ElementId.ToString())
+              .ToList();
             selection.AddRange(objs);
           }
           return selection;
@@ -777,7 +872,11 @@ namespace Speckle.ConnectorBentley.UI
           return selection;
 #endif
         default:
-          progress.Report.LogConversionError(new Exception("Filter type is not supported in this app. Why did the developer implement it in the first place?"));
+          progress.Report.LogConversionError(
+            new Exception(
+              "Filter type is not supported in this app. Why did the developer implement it in the first place?"
+            )
+          );
           return selection;
       }
     }
@@ -792,7 +891,10 @@ namespace Speckle.ConnectorBentley.UI
     private void WriteStateToFile()
     {
       if (Control.InvokeRequired)
-        Control.Invoke(new WriteStateDelegate(StreamStateManager.WriteStreamStateList), new object[] { File, DocumentStreams });
+        Control.Invoke(
+          new WriteStateDelegate(StreamStateManager.WriteStreamStateList),
+          new object[] { File, DocumentStreams }
+        );
       else
         StreamStateManager.WriteStreamStateList(File, DocumentStreams);
     }
