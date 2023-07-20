@@ -2,6 +2,7 @@
 #include "ResourceIds.hpp"
 #include "ObjectState.hpp"
 #include "Utility.hpp"
+#include "Objects/Level.hpp"
 #include "Objects/Point.hpp"
 #include "Objects/Polyline.hpp"
 #include "RealNumber.h"
@@ -13,63 +14,65 @@ using namespace FieldNames;
 
 namespace AddOnCommands
 {
-static GSErrCode CreateNewWall (API_Element& wall, API_ElementMemo& wallMemo)
+
+
+GS::String CreateWall::GetFieldName () const
 {
-	return ACAPI_Element_Create (&wall, &wallMemo);
+	return FieldNames::Walls;
 }
 
-static GSErrCode ModifyExistingWall (API_Element& wall, API_Element& mask, API_ElementMemo& wallMemo, GS::UInt64 memoMask)
+
+GS::UniString CreateWall::GetUndoableCommandName () const
 {
-	return ACAPI_Element_Change (&wall, &mask, &wallMemo, memoMask, true);
+	return "CreateSpeckleWall";
 }
 
-static GSErrCode GetWallFromObjectState (const GS::ObjectState& os, API_Element& element, API_Element& wallMask, API_ElementMemo& wallMemo, GS::UInt64& memoMask)
+
+GSErrCode CreateWall::GetElementFromObjectState (const GS::ObjectState& os,
+	API_Element& element,
+	API_Element& elementMask,
+	API_ElementMemo& memo,
+	GS::UInt64& memoMask,
+	API_SubElement** /*marker*/,
+	AttributeManager& /*attributeManager*/,
+	LibpartImportManager& /*libpartImportManager*/,
+	GS::Array<GS::UniString>& log) const
 {
 	GSErrCode err;
 
-	GS::UniString guidString;
-	os.Get (ApplicationId, guidString);
-	element.header.guid = APIGuidFromString (guidString.ToCStr ());
-#ifdef ServerMainVers_2600
-	element.header.type.typeID = API_WallID;
-#else
-	element.header.typeID = API_WallID;
-#endif
-
-	err = Utility::GetBaseElementData (element, &wallMemo);
+	Utility::SetElementType (element.header, API_WallID);
+	err = Utility::GetBaseElementData (element, &memo, nullptr, log);
 	if (err != NoError)
 		return err;
 
 	memoMask = APIMemoMask_Polygon;
 
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, poly.nSubPolys);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, poly.nCoords);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, poly.nArcs);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, begC);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, endC);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_Elem_Head, floorInd);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, bottomOffset);
-
 	// Wall geometry
 
 	// The start and end points of the wall
 	Objects::Point3D startPoint;
-	if (os.Contains (Wall::StartPoint))
+	if (os.Contains (Wall::StartPoint)) {
 		os.Get (Wall::StartPoint, startPoint);
-	element.wall.begC = startPoint.ToAPI_Coord ();
+		element.wall.begC = startPoint.ToAPI_Coord ();
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, begC);
+	}
 
 	Objects::Point3D endPoint;
-	if (os.Contains (Wall::EndPoint))
+	if (os.Contains (Wall::EndPoint)) {
 		os.Get (Wall::EndPoint, endPoint);
-	element.wall.endC = endPoint.ToAPI_Coord ();
+		element.wall.endC = endPoint.ToAPI_Coord ();
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, endC);
+	}
 
 	// The floor index and bottom offset of the wall
-	if (os.Contains (FloorIndex)) {
-		os.Get (FloorIndex, element.header.floorInd);
-		Utility::SetStoryLevel (startPoint.Z, element.header.floorInd, element.wall.bottomOffset);
-	} else {
-		Utility::SetStoryLevelAndFloor (startPoint.Z, element.header.floorInd, element.wall.bottomOffset);
+	if (os.Contains (ElementBase::Level)) {
+		GetStoryFromObjectState (os, startPoint.z, element.header.floorInd, element.wall.bottomOffset);
 	}
+	else {
+		Utility::SetStoryLevelAndFloor (startPoint.z, element.header.floorInd, element.wall.bottomOffset);
+	}
+	ACAPI_ELEMENT_MASK_SET (elementMask, API_Elem_Head, floorInd);
+	ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, bottomOffset);
 
 	// The profile type of the wall
 	short profileType = 0;
@@ -81,7 +84,7 @@ static GSErrCode GetWallFromObjectState (const GS::ObjectState& os, API_Element&
 			profileType = type.Get ();
 
 		element.wall.profileType = profileType;
-		ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, profileType);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, profileType);
 	}
 
 	// The structure of the wall
@@ -96,8 +99,8 @@ static GSErrCode GetWallFromObjectState (const GS::ObjectState& os, API_Element&
 
 		element.wall.modelElemStructureType = structureType;
 
-		ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, profileType);
-		ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, modelElemStructureType);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, profileType);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, modelElemStructureType);
 	}
 
 	// The geometry method of the wall
@@ -111,10 +114,10 @@ static GSErrCode GetWallFromObjectState (const GS::ObjectState& os, API_Element&
 
 		if (element.wall.type == APIWtyp_Trapez || element.wall.type == APIWtyp_Poly) {
 			element.wall.profileType = APISect_Normal;
-			ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, profileType);
+			ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, profileType);
 		}
 
-		ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, type);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, type);
 	}
 
 	// The building material name of the wall
@@ -133,7 +136,7 @@ static GSErrCode GetWallFromObjectState (const GS::ObjectState& os, API_Element&
 			if (NoError == ACAPI_Attribute_Get (&attribute))
 				element.wall.buildingMaterial = attribute.header.index;
 		}
-		ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, buildingMaterial);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, buildingMaterial);
 	}
 
 	// The composite name of the wall
@@ -151,8 +154,8 @@ static GSErrCode GetWallFromObjectState (const GS::ObjectState& os, API_Element&
 			if (NoError == ACAPI_Attribute_Get (&attribute))
 				element.wall.composite = attribute.header.index;
 		}
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, composite);
 	}
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, composite);
 
 	// The profile name of the wall
 	if (os.Contains (Wall::ProfileName) &&
@@ -169,74 +172,88 @@ static GSErrCode GetWallFromObjectState (const GS::ObjectState& os, API_Element&
 			if (NoError == ACAPI_Attribute_Get (&attribute))
 				element.wall.profileAttr = attribute.header.index;
 		}
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, profileAttr);
 	}
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, profileAttr);
 
 	// The arc angle of the wall
-	if (os.Contains (Wall::ArcAngle))
+	if (os.Contains (Wall::ArcAngle)) {
 		os.Get (Wall::ArcAngle, element.wall.angle);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, angle);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, angle);
+	}
 
 	// The shape of the wall
 	Objects::ElementShape wallShape;
 
-	if (os.Contains (Shape)) {
-		os.Get (Shape, wallShape);
+	if (os.Contains (ElementBase::Shape)) {
+		os.Get (ElementBase::Shape, wallShape);
 		element.wall.poly.nSubPolys = wallShape.SubpolyCount ();
 		element.wall.poly.nCoords = wallShape.VertexCount ();
 		element.wall.poly.nArcs = wallShape.ArcCount ();
 
-		wallShape.SetToMemo (wallMemo);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, poly.nSubPolys);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, poly.nCoords);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, poly.nArcs);
+
+		wallShape.SetToMemo (memo, Objects::ElementShape::MemoMainPolygon);
 	}
 
 	// The thickness of the wall
-	if (os.Contains (Wall::Thickness))
+	if (os.Contains (Wall::Thickness)) {
 		os.Get (Wall::Thickness, element.wall.thickness);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, thickness);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, thickness);
+	}
 
 	// The first thickness of the trapezoid wall
-	if (os.Contains (Wall::FirstThickness))
+	if (os.Contains (Wall::FirstThickness)) {
 		os.Get (Wall::FirstThickness, element.wall.thickness);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, thickness);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, thickness);
+	}
 
 	// The second thickness of the trapezoid wall
-	if (os.Contains (Wall::SecondThickness))
+	if (os.Contains (Wall::SecondThickness)) {
 		os.Get (Wall::SecondThickness, element.wall.thickness1);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, thickness1);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, thickness1);
+	}
 
 	// The outside slant angle of the wall
-	if (os.Contains (Wall::OutsideSlantAngle))
+	if (os.Contains (Wall::OutsideSlantAngle)) {
 		os.Get (Wall::OutsideSlantAngle, element.wall.slantAlpha);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, slantAlpha);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, slantAlpha);
+	}
 
 	// The inside slant angle of the wall
-	if (os.Contains (Wall::InsideSlantAngle))
+	if (os.Contains (Wall::InsideSlantAngle)) {
 		os.Get (Wall::InsideSlantAngle, element.wall.slantBeta);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, slantBeta);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, slantBeta);
+	}
 
 	// The height of the wall
-	if (os.Contains (Wall::Height))
-		if (!os.Contains (FloorIndex)) // TODO: rethink a better way to check for this 
+	if (os.Contains (Wall::Height)) {
+		if (!os.Contains (ElementBase::Level)) // TODO: rethink a better way to check for this 
 			element.wall.relativeTopStory = 0; // unlink top story
-	os.Get (Wall::Height, element.wall.height);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, height);
+		os.Get (Wall::Height, element.wall.height);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, height);
+	}
 
 	// PolyWall Corners Can Change
-	if (os.Contains (Wall::PolyCanChange))
+	if (os.Contains (Wall::PolyCanChange)) {
 		os.Get (Wall::PolyCanChange, element.wall.polyCanChange);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, polyCanChange);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, polyCanChange);
+	}
 
 	// Wall and stories relation
 
 	// The top offset of the wall
-	if (os.Contains (Wall::TopOffset))
+	if (os.Contains (Wall::TopOffset)) {
 		os.Get (Wall::TopOffset, element.wall.topOffset);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, topOffset);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, topOffset);
+	}
 
 	// The top linked story
-	if (os.Contains (Wall::RelativeTopStoryIndex))
+	if (os.Contains (Wall::RelativeTopStoryIndex)) {
 		os.Get (Wall::RelativeTopStoryIndex, element.wall.relativeTopStory);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, relativeTopStory);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, relativeTopStory);
+	}
 
 	// Reference line parameters
 
@@ -249,43 +266,48 @@ static GSErrCode GetWallFromObjectState (const GS::ObjectState& os, API_Element&
 		if (type.HasValue ())
 			element.wall.referenceLineLocation = type.Get ();
 
-		ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, type);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, referenceLineLocation);
 	}
 
 	// The offset of the wall’s base line from reference line
-	if (os.Contains (Wall::ReferenceLineOffset))
+	if (os.Contains (Wall::ReferenceLineOffset)) {
 		os.Get (Wall::ReferenceLineOffset, element.wall.offset);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, offset);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, offset);
+	}
 
 	// Distance between reference line and outside face of the wall
-	if (os.Contains (Wall::OffsetFromOutside))
+	if (os.Contains (Wall::OffsetFromOutside)) {
 		os.Get (Wall::OffsetFromOutside, element.wall.offsetFromOutside);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, offsetFromOutside);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, offsetFromOutside);
+	}
 
 	// The index of the reference line beginning and end edge
-	if (os.Contains (Wall::ReferenceLineStartIndex))
+	if (os.Contains (Wall::ReferenceLineStartIndex)) {
 		os.Get (Wall::ReferenceLineStartIndex, element.wall.rLinInd);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, rLinInd);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, rLinInd);
+	}
 
-	if (os.Contains (Wall::ReferenceLineEndIndex))
+	if (os.Contains (Wall::ReferenceLineEndIndex)) {
 		os.Get (Wall::ReferenceLineEndIndex, element.wall.rLinEndInd);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, rLinEndInd);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, rLinEndInd);
+	}
 
-	if (os.Contains (Wall::Flipped))
+	if (os.Contains (Wall::Flipped)) {
 		os.Get (Wall::Flipped, element.wall.flipped);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, flipped);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, flipped);
+	}
 
 	// Floor Plan and Section - Floor Plan Display
 
 	// Story visibility
-	Utility::ImportVisibility (os, "", element.wall.isAutoOnStoryVisibility, element.wall.visibility);
+	Utility::CreateVisibility (os, "", element.wall.isAutoOnStoryVisibility, element.wall.visibility);
 
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, isAutoOnStoryVisibility);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, visibility.showOnHome);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, visibility.showAllAbove);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, visibility.showAllBelow);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, visibility.showRelAbove);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, visibility.showRelBelow);
+	ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, isAutoOnStoryVisibility);
+	ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, visibility.showOnHome);
+	ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, visibility.showAllAbove);
+	ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, visibility.showAllBelow);
+	ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, visibility.showRelAbove);
+	ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, visibility.showRelBelow);
 
 	// The display options (Projected, Projected with Overhead, Cut Only, Outlines Only, Overhead All or Symbolic Cut)
 	if (os.Contains (Wall::DisplayOptionName)) {
@@ -295,7 +317,7 @@ static GSErrCode GetWallFromObjectState (const GS::ObjectState& os, API_Element&
 		GS::Optional<API_ElemDisplayOptionsID> type = displayOptionNames.FindValue (displayOptionName);
 		if (type.HasValue ()) {
 			element.wall.displayOption = type.Get ();
-			ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, displayOption);
+			ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, displayOption);
 		}
 	}
 
@@ -307,16 +329,17 @@ static GSErrCode GetWallFromObjectState (const GS::ObjectState& os, API_Element&
 		GS::Optional<API_ElemViewDepthLimitationsID> type = viewDepthLimitationNames.FindValue (viewDepthLimitationName);
 		if (type.HasValue ()) {
 			element.wall.viewDepthLimitation = type.Get ();
-			ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, viewDepthLimitation);
+			ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, viewDepthLimitation);
 		}
 	}
 
 	// Floor Plan and Section - Cut Surfaces parameters
 
 	// The pen index of wall’s cut contour line
-	if (os.Contains (Wall::CutLinePenIndex))
+	if (os.Contains (Wall::CutLinePenIndex)) {
 		os.Get (Wall::CutLinePenIndex, element.wall.contPen);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, contPen);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, contPen);
+	}
 
 	// The linetype name of wall’s cut contour line
 	if (os.Contains (Wall::CutLinetypeName)) {
@@ -332,31 +355,32 @@ static GSErrCode GetWallFromObjectState (const GS::ObjectState& os, API_Element&
 			if (NoError == ACAPI_Attribute_Get (&attribute))
 				element.wall.contLtype = attribute.header.index;
 		}
-		ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, contLtype);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, contLtype);
 	}
 
 	// Override cut fill pen
 	if (os.Contains (Wall::OverrideCutFillPenIndex)) {
 		element.wall.penOverride.overrideCutFillPen = true;
 		os.Get (Wall::OverrideCutFillPenIndex, element.wall.penOverride.cutFillPen);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, penOverride.overrideCutFillPen);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, penOverride.cutFillPen);
 	}
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, penOverride.overrideCutFillPen);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, penOverride.cutFillPen);
 
 	// Override cut fill background pen
 	if (os.Contains (Wall::OverrideCutFillBackgroundPenIndex)) {
 		element.wall.penOverride.overrideCutFillBackgroundPen = true;
 		os.Get (Wall::OverrideCutFillBackgroundPenIndex, element.wall.penOverride.cutFillBackgroundPen);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, penOverride.overrideCutFillBackgroundPen);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, penOverride.cutFillBackgroundPen);
 	}
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, penOverride.overrideCutFillBackgroundPen);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, penOverride.cutFillBackgroundPen);
 
 	// Floor Plan and Section - Outlines parameters
 
 	// The pen index of wall’s uncut contour line
-	if (os.Contains (Wall::UncutLinePenIndex))
+	if (os.Contains (Wall::UncutLinePenIndex)) {
 		os.Get (Wall::UncutLinePenIndex, element.wall.contPen3D);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, contPen3D);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, contPen3D);
+	}
 
 	// The linetype name of wall’s uncut contour line
 	if (os.Contains (Wall::UncutLinetypeName)) {
@@ -372,13 +396,14 @@ static GSErrCode GetWallFromObjectState (const GS::ObjectState& os, API_Element&
 			if (NoError == ACAPI_Attribute_Get (&attribute))
 				element.wall.belowViewLineType = attribute.header.index;
 		}
-		ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, belowViewLineType);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, belowViewLineType);
 	}
 
 	// The pen index of wall’s overhead contour line
-	if (os.Contains (Wall::OverheadLinePenIndex))
+	if (os.Contains (Wall::OverheadLinePenIndex)) {
 		os.Get (Wall::OverheadLinePenIndex, element.wall.aboveViewLinePen);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, aboveViewLinePen);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, aboveViewLinePen);
+	}
 
 	// The linetype name of wall’s overhead contour line
 	if (os.Contains (Wall::OverheadLinetypeName)) {
@@ -394,7 +419,7 @@ static GSErrCode GetWallFromObjectState (const GS::ObjectState& os, API_Element&
 			if (NoError == ACAPI_Attribute_Get (&attribute))
 				element.wall.aboveViewLineType = attribute.header.index;
 		}
-		ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, aboveViewLineType);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, aboveViewLineType);
 	}
 
 	// Model - Override Surfaces
@@ -413,18 +438,20 @@ static GSErrCode GetWallFromObjectState (const GS::ObjectState& os, API_Element&
 			if (NoError == ACAPI_Attribute_Get (&attribute))
 				element.wall.refMat.attributeIndex = attribute.header.index;
 		}
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, refMat.overridden);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, refMat.attributeIndex);
 	}
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, refMat.overridden);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, refMat.attributeIndex);
 
 	// The index of the reference material start and end edge index
-	if (os.Contains (Wall::ReferenceMaterialStartIndex))
+	if (os.Contains (Wall::ReferenceMaterialStartIndex)) {
 		os.Get (Wall::ReferenceMaterialStartIndex, element.wall.refInd);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, refInd);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, refInd);
+	}
 
-	if (os.Contains (Wall::ReferenceMaterialEndIndex))
+	if (os.Contains (Wall::ReferenceMaterialEndIndex)) {
 		os.Get (Wall::ReferenceMaterialEndIndex, element.wall.refEndInd);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, refEndInd);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, refEndInd);
+	}
 
 	// The opposite overridden material name
 	if (os.Contains (Wall::OppositeMaterialName)) {
@@ -440,18 +467,20 @@ static GSErrCode GetWallFromObjectState (const GS::ObjectState& os, API_Element&
 			if (NoError == ACAPI_Attribute_Get (&attribute))
 				element.wall.oppMat.attributeIndex = attribute.header.index;
 		}
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, oppMat.overridden);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, oppMat.attributeIndex);
 	}
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, oppMat.overridden);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, oppMat.attributeIndex);
 
 	// The index of the opposite material start and end edge index
-	if (os.Contains (Wall::OppositeMaterialStartIndex))
+	if (os.Contains (Wall::OppositeMaterialStartIndex)) {
 		os.Get (Wall::OppositeMaterialStartIndex, element.wall.oppInd);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, oppInd);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, oppInd);
+	}
 
-	if (os.Contains (Wall::OppositeMaterialEndIndex))
+	if (os.Contains (Wall::OppositeMaterialEndIndex)) {
 		os.Get (Wall::OppositeMaterialEndIndex, element.wall.oppEndInd);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, oppEndInd);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, oppEndInd);
+	}
 
 	// The side overridden material name
 	if (os.Contains (Wall::SideMaterialName)) {
@@ -467,29 +496,33 @@ static GSErrCode GetWallFromObjectState (const GS::ObjectState& os, API_Element&
 			if (NoError == ACAPI_Attribute_Get (&attribute))
 				element.wall.sidMat.attributeIndex = attribute.header.index;
 		}
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, sidMat.overridden);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, sidMat.attributeIndex);
 	}
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, sidMat.overridden);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, sidMat.attributeIndex);
 
 	// The overridden materials are chained
-	if (os.Contains (Wall::MaterialsChained))
+	if (os.Contains (Wall::MaterialsChained)) {
 		os.Get (Wall::MaterialsChained, element.wall.materialsChained);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, materialsChained);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, materialsChained);
+	}
 
 	// The end surface of the wall is inherited from the adjoining wall
-	if (os.Contains (Wall::InheritEndSurface))
+	if (os.Contains (Wall::InheritEndSurface)) {
 		os.Get (Wall::InheritEndSurface, element.wall.inheritEndSurface);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, inheritEndSurface);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, inheritEndSurface);
+	}
 
 	// Align texture mapping to wall edges
-	if (os.Contains (Wall::AlignTexture))
+	if (os.Contains (Wall::AlignTexture)) {
 		os.Get (Wall::AlignTexture, element.wall.alignTexture);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, alignTexture);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, alignTexture);
+	}
 
 	// Sequence
-	if (os.Contains (Wall::Sequence))
+	if (os.Contains (Wall::Sequence)) {
 		os.Get (Wall::Sequence, element.wall.sequence);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, sequence);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, sequence);
+	}
 
 	// Model - Log Details (log height, start with half log, surface of horizontal edges, log shape)
 	Int32 beamFlag = 0;
@@ -523,8 +556,8 @@ static GSErrCode GetWallFromObjectState (const GS::ObjectState& os, API_Element&
 		}
 
 		element.wall.beamFlags = beamFlag;
-		ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, logHeight);
-		ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, beamFlags);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, logHeight);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, beamFlags);
 	}
 
 	// Model - Defines the relation of wall to zones (Zone Boundary, Reduce Zone Area Only, No Effect on Zones)
@@ -536,63 +569,28 @@ static GSErrCode GetWallFromObjectState (const GS::ObjectState& os, API_Element&
 		if (type.HasValue ())
 			element.wall.zoneRel = type.Get ();
 
-		ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, type);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, type);
 	}
 
 	// Door & window
-	if (os.Contains (Wall::HasDoor))
+	if (os.Contains (Wall::HasDoor)) {
 		os.Get (Wall::HasDoor, element.wall.hasDoor);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, hasDoor);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, hasDoor);
+	}
 
-	if (os.Contains (Wall::HasWindow))
+	if (os.Contains (Wall::HasWindow)) {
 		os.Get (Wall::HasWindow, element.wall.hasWindow);
-	ACAPI_ELEMENT_MASK_SET (wallMask, API_WallType, hasWindow);
+		ACAPI_ELEMENT_MASK_SET (elementMask, API_WallType, hasWindow);
+	}
 
 	return NoError;
 }
+
 
 GS::String CreateWall::GetName () const
 {
 	return CreateWallCommandName;
 }
 
-GS::ObjectState CreateWall::Execute (const GS::ObjectState& parameters, GS::ProcessControl& /*processControl*/) const
-{
-	GS::ObjectState result;
 
-	GS::Array<GS::ObjectState> walls;
-	parameters.Get (Walls, walls);
-
-	const auto& listAdder = result.AddList<GS::UniString> (ApplicationIds);
-
-	ACAPI_CallUndoableCommand ("CreateSpeckleWall", [&] () -> GSErrCode {
-		for (const GS::ObjectState& wallOs : walls) {
-			API_Element wall{};
-			API_Element wallMask{};
-			API_ElementMemo wallMemo{};
-			GS::UInt64 memoMask = 0;
-			GS::OnExit memoDisposer ([&wallMemo] { ACAPI_DisposeElemMemoHdls (&wallMemo); });
-
-			GSErrCode err = GetWallFromObjectState (wallOs, wall, wallMask, wallMemo, memoMask);
-			if (err != NoError)
-				continue;
-
-			bool wallExists = Utility::ElementExists (wall.header.guid);
-			if (wallExists) {
-				err = ModifyExistingWall (wall, wallMask, wallMemo, memoMask);
-			} else {
-				err = CreateNewWall (wall, wallMemo);
-			}
-
-			if (err == NoError) {
-				GS::UniString elemId = APIGuidToString (wall.header.guid);
-				listAdder (elemId);
-			}
-		}
-
-		return NoError;
-	});
-
-	return result;
-}
-}
+} // namespace AddOnCommands

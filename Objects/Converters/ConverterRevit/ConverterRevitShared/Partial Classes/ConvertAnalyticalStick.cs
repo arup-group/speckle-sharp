@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -36,7 +36,7 @@ namespace Objects.Converter.Revit
       appObj = new ApplicationObject(speckleStick.id, speckleStick.speckle_type) { applicationId = speckleStick.applicationId };
 
       // skip if element already exists in doc & receive mode is set to ignore
-      if (IsIgnore(docObj, appObj, out appObj))
+      if (IsIgnore(docObj, appObj))
         return appObj;
 
       if (speckleStick.baseLine == null)
@@ -51,7 +51,8 @@ namespace Objects.Converter.Revit
       level ??= ConvertLevelToRevit(LevelFromCurve(baseLine), out ApplicationObject.State levelState);
       var isUpdate = false;
 
-      if (!GetElementType<FamilySymbol>(speckleStick, appObj, out DB.FamilySymbol familySymbol))
+      var familySymbol = GetElementType<FamilySymbol>(speckleStick, appObj, out bool isExactMatch);
+      if (familySymbol == null)
       {
         appObj.Update(status: ApplicationObject.State.Failed);
         return appObj;
@@ -71,17 +72,20 @@ namespace Objects.Converter.Revit
         else
         analyticalMember.SetCurve(baseLine);
 
-        //update type
-        analyticalMember.SectionTypeId = familySymbol.Id;
-        isUpdate = true;
-        revitMember = analyticalMember;
-
-        if (analyticalToPhysicalManager.HasAssociation(revitMember.Id))
+        if (isExactMatch)
         {
-          var physicalMemberId = analyticalToPhysicalManager.GetAssociatedElementId(revitMember.Id);
-          physicalMember = (DB.FamilyInstance)Doc.GetElement(physicalMemberId);
-          if (physicalMember.Symbol != familySymbol)
-            physicalMember.Symbol = familySymbol;
+          //update type
+          analyticalMember.SectionTypeId = familySymbol.Id;
+          isUpdate = true;
+          revitMember = analyticalMember;
+
+          if (analyticalToPhysicalManager.HasAssociation(revitMember.Id))
+          {
+            var physicalMemberId = analyticalToPhysicalManager.GetAssociatedElementId(revitMember.Id);
+            physicalMember = (DB.FamilyInstance)Doc.GetElement(physicalMemberId);
+            if (physicalMember.Symbol != familySymbol)
+              physicalMember.Symbol = familySymbol;
+          }
         }
       }
 
@@ -118,12 +122,17 @@ namespace Objects.Converter.Revit
       XYZ offset1 = VectorToNative(speckleStick.end1Offset ?? new Geometry.Vector(0, 0, 0));
       XYZ offset2 = VectorToNative(speckleStick.end2Offset ?? new Geometry.Vector(0, 0, 0));
 
+      var propertyName = speckleStick.property?.name;
+
+      //This only works for CSIC sections now for sure. Need to test on other sections
+      if (!string.IsNullOrEmpty(propertyName))
+        propertyName = propertyName.Replace('X', 'x');
+
       switch (speckleStick.type)
       {
         case ElementType1D.Beam:
           RevitBeam revitBeam = new RevitBeam();
-          //This only works for CSIC sections now for sure. Need to test on other sections
-          revitBeam.type = speckleStick.property.name.Replace('X', 'x');
+          revitBeam.type = propertyName;
           revitBeam.baseLine = speckleStick.baseLine;
 #if REVIT2020 || REVIT2021 || REVIT2022
           revitBeam.applicationId = speckleStick.applicationId;
@@ -134,7 +143,7 @@ namespace Objects.Converter.Revit
 
         case ElementType1D.Brace:
           RevitBrace revitBrace = new RevitBrace();
-          revitBrace.type = speckleStick.property.name.Replace('X', 'x');
+          revitBrace.type = propertyName;
           revitBrace.baseLine = speckleStick.baseLine;
 #if REVIT2020 || REVIT2021 || REVIT2022
           revitBrace.applicationId = speckleStick.applicationId;
@@ -145,7 +154,7 @@ namespace Objects.Converter.Revit
 
         case ElementType1D.Column:
           RevitColumn revitColumn = new RevitColumn();
-          revitColumn.type = speckleStick.property.name.Replace('X', 'x');
+          revitColumn.type = propertyName;
           revitColumn.baseLine = speckleStick.baseLine;
           revitColumn.units = speckleStick.units;
 #if REVIT2020 || REVIT2021 || REVIT2022
@@ -303,7 +312,7 @@ namespace Objects.Converter.Revit
       SetEndReleases(revitStick, ref speckleElement1D);
 
       var prop = new Property1D();
-
+  
       var stickFamily = (Autodesk.Revit.DB.FamilySymbol)revitStick.Document.GetElement(revitStick.SectionTypeId);
 
       var speckleSection = GetSectionProfile(stickFamily);
@@ -574,7 +583,11 @@ namespace Objects.Converter.Revit
       }
       var materialName = material.MaterialClass;
       var materialType = GetMaterialType(materialName);
-      return GetStructuralMaterial(materialType, materialAsset, name);
+
+      var speckleMaterial = GetStructuralMaterial(materialType, materialAsset, name);
+      speckleMaterial.applicationId = material.UniqueId;
+
+      return speckleMaterial;
     }
 
     private StructuralMaterial GetStructuralMaterial(StructuralMaterialType materialType, StructuralAsset materialAsset, string name)

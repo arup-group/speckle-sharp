@@ -24,7 +24,7 @@ namespace Objects.Converter.Revit
       var appObj = new ApplicationObject(instance.id, instance.speckle_type) { applicationId = instance.applicationId };
 
       // skip if element already exists in doc & receive mode is set to ignore
-      if (IsIgnore(docObj, appObj, out appObj))
+      if (IsIgnore(docObj, appObj))
         return appObj;
 
       var isUpdate = false;
@@ -97,7 +97,7 @@ namespace Objects.Converter.Revit
       int skippedBreps = breps.Count;
       breps.ForEach(o =>
       {
-        var ds = DirectShapeToNative(o).Converted.FirstOrDefault() as DB.DirectShape;
+        var ds = TryDirectShapeToNative(o, ToNativeMeshSettingEnum.Default).Converted.FirstOrDefault() as DB.DirectShape;
         if (ds != null)
         {
           ids.Add(ds.Id);
@@ -108,7 +108,7 @@ namespace Objects.Converter.Revit
       int skippedMeshes = meshes.Count;
       meshes.ForEach(o =>
       {
-        var ds = DirectShapeToNative(o).Converted.FirstOrDefault() as DB.DirectShape;
+        var ds = TryDirectShapeToNative(o, ToNativeMeshSettingEnum.Default).Converted.FirstOrDefault() as DB.DirectShape;
         if (ds != null)
         {
           ids.Add(ds.Id);

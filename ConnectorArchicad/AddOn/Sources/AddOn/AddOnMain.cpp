@@ -17,6 +17,9 @@
 #include "Commands/GetObjectData.hpp"
 #include "Commands/GetSlabData.hpp"
 #include "Commands/GetRoomData.hpp"
+#include "Commands/GetRoofData.hpp"
+#include "Commands/GetShellData.hpp"
+#include "Commands/GetSkylightData.hpp"
 #include "Commands/GetProjectInfo.hpp"
 #include "Commands/GetSubElementInfo.hpp"
 #include "Commands/CreateWall.hpp"
@@ -25,9 +28,14 @@
 #include "Commands/CreateBeam.hpp"
 #include "Commands/CreateColumn.hpp"
 #include "Commands/CreateObject.hpp"
+#include "Commands/CreateRoof.hpp"
+#include "Commands/CreateSkylight.hpp"
 #include "Commands/CreateSlab.hpp"
+#include "Commands/CreateShell.hpp"
 #include "Commands/CreateZone.hpp"
 #include "Commands/CreateDirectShape.hpp"
+#include "Commands/SelectElements.hpp"
+#include "Commands/FinishReceiveTransaction.hpp"
 
 
 #define CHECKERROR(f) { GSErrCode err = (f); if (err != NoError) { return err; } }
@@ -59,6 +67,7 @@ public:
 		}
 	}
 
+
 	void Stop ()
 	{
 		if (!IsRunning ()) {
@@ -68,10 +77,12 @@ public:
 		avaloniaProcess->Kill ();
 	}
 
+
 	bool IsRunning ()
 	{
 		return avaloniaProcess.HasValue () && !avaloniaProcess->IsTerminated ();
 	}
+
 
 private:
 	GS::UniString GetPlatformSpecificExecutablePath ()
@@ -120,6 +131,7 @@ private:
 		return executableStr;
 	}
 
+
 	GS::Array<GS::UniString> GetExecutableArguments ()
 	{
 		UShort portNumber = 0;
@@ -141,6 +153,7 @@ private:
 
 		return GS::Array<GS::UniString> { GS::ValueToUniString (portNumber), GS::ValueToUniString (archicadVersion) };
 	}
+
 
 	GS::Optional<GS::Process> avaloniaProcess;
 
@@ -166,6 +179,7 @@ static GSErrCode MenuCommandHandler (const API_MenuParams* menuParams)
 	return NoError;
 }
 
+
 static GSErrCode RegisterAddOnCommands ()
 {
 	CHECKERROR (ACAPI_Install_AddOnCommandHandler (NewOwned<AddOnCommands::GetModelForElements> ()));
@@ -179,6 +193,9 @@ static GSErrCode RegisterAddOnCommands ()
 	CHECKERROR (ACAPI_Install_AddOnCommandHandler (NewOwned<AddOnCommands::GetColumnData> ()));
 	CHECKERROR (ACAPI_Install_AddOnCommandHandler (NewOwned<AddOnCommands::GetObjectData> ()));
 	CHECKERROR (ACAPI_Install_AddOnCommandHandler (NewOwned<AddOnCommands::GetRoomData> ()));
+	CHECKERROR (ACAPI_Install_AddOnCommandHandler (NewOwned<AddOnCommands::GetRoofData> ()));
+	CHECKERROR (ACAPI_Install_AddOnCommandHandler (NewOwned<AddOnCommands::GetShellData> ()));
+	CHECKERROR (ACAPI_Install_AddOnCommandHandler (NewOwned<AddOnCommands::GetSkylightData> ()));
 	CHECKERROR (ACAPI_Install_AddOnCommandHandler (NewOwned<AddOnCommands::GetSlabData> ()));
 	CHECKERROR (ACAPI_Install_AddOnCommandHandler (NewOwned<AddOnCommands::GetProjectInfo> ()));
 	CHECKERROR (ACAPI_Install_AddOnCommandHandler (NewOwned<AddOnCommands::CreateWall> ()));
@@ -187,12 +204,18 @@ static GSErrCode RegisterAddOnCommands ()
 	CHECKERROR (ACAPI_Install_AddOnCommandHandler (NewOwned<AddOnCommands::CreateBeam> ()));
 	CHECKERROR (ACAPI_Install_AddOnCommandHandler (NewOwned<AddOnCommands::CreateColumn> ()));
 	CHECKERROR (ACAPI_Install_AddOnCommandHandler (NewOwned<AddOnCommands::CreateObject> ()));
+	CHECKERROR (ACAPI_Install_AddOnCommandHandler (NewOwned<AddOnCommands::CreateRoof> ()));
+	CHECKERROR (ACAPI_Install_AddOnCommandHandler (NewOwned<AddOnCommands::CreateShell> ()));
+	CHECKERROR (ACAPI_Install_AddOnCommandHandler (NewOwned<AddOnCommands::CreateSkylight> ()));
 	CHECKERROR (ACAPI_Install_AddOnCommandHandler (NewOwned<AddOnCommands::CreateSlab> ()));
 	CHECKERROR (ACAPI_Install_AddOnCommandHandler (NewOwned<AddOnCommands::CreateZone> ()));
 	CHECKERROR (ACAPI_Install_AddOnCommandHandler (NewOwned<AddOnCommands::CreateDirectShape> ()));
+	CHECKERROR (ACAPI_Install_AddOnCommandHandler (NewOwned<AddOnCommands::SelectElements> ()));
+	CHECKERROR (ACAPI_Install_AddOnCommandHandler (NewOwned<AddOnCommands::FinishReceiveTransaction> ()));
 
 	return NoError;
 }
+
 
 API_AddonType __ACDLL_CALL CheckEnvironment (API_EnvirParams* envir)
 {
@@ -202,10 +225,12 @@ API_AddonType __ACDLL_CALL CheckEnvironment (API_EnvirParams* envir)
 	return APIAddon_Normal;
 }
 
+
 GSErrCode __ACDLL_CALL RegisterInterface (void)
 {
 	return ACAPI_Register_Menu (AddOnMenuID, 0, MenuCode_Interoperability, MenuFlag_Default);
 }
+
 
 GSErrCode __ACENV_CALL Initialize (void)
 {
@@ -213,6 +238,7 @@ GSErrCode __ACENV_CALL Initialize (void)
 
 	return ACAPI_Install_MenuHandler (AddOnMenuID, MenuCommandHandler);
 }
+
 
 GSErrCode __ACENV_CALL FreeData (void)
 {

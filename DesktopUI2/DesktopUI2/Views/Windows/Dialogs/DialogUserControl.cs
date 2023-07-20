@@ -1,47 +1,52 @@
-﻿using Avalonia.Controls;
-using Avalonia.Input;
-using DesktopUI2.ViewModels;
+#nullable enable
 using System;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Avalonia.Controls;
+using Avalonia.Input;
+using DesktopUI2.ViewModels;
 
-namespace DesktopUI2.Views.Windows.Dialogs
+namespace DesktopUI2.Views.Windows.Dialogs;
+
+public class DialogUserControl : UserControl, ICloseable
 {
-  public class DialogUserControl : UserControl, ICloseable
+  private object? _dialogResult;
+
+  public event EventHandler Closed;
+
+  private IDialogHost _host;
+
+  public Task ShowDialog(IDialogHost host = null)
   {
-    private object? _dialogResult;
+    return ShowDialog<object>(host);
+  }
 
-    public event EventHandler Closed;
+  public Task<TResult> ShowDialog<TResult>(IDialogHost host = null)
+  {
+    _host = host;
 
+    if (_host == null && MainViewModel.Instance != null)
+      _host = MainViewModel.Instance;
 
-    public Task ShowDialog()
-    {
-      return ShowDialog<object>();
-    }
+    _host.DialogBody = this;
 
-    public Task<TResult> ShowDialog<TResult>()
-    {
-      MainViewModel.Instance.DialogBody = this;
+    var result = new TaskCompletionSource<TResult>();
 
-      var result = new TaskCompletionSource<TResult>();
+    Observable
+      .FromEventPattern<EventHandler, EventArgs>(x => Closed += x, x => Closed -= x)
+      .Take(1)
+      .Subscribe(_ =>
+      {
+        result.SetResult((TResult)(_dialogResult ?? default(TResult)!));
+      });
 
-      Observable.FromEventPattern<EventHandler, EventArgs>(
-                    x => Closed += x,
-                    x => Closed -= x)
-                .Take(1)
-                .Subscribe(_ =>
-                {
-                  result.SetResult((TResult)(_dialogResult ?? default(TResult)!));
-                });
+    return result.Task;
+  }
 
-      return result.Task;
-    }
-
-    public void Close(object dialogResult)
-    {
-      _dialogResult = dialogResult;
-      MainViewModel.Instance.DialogBody = null;
-      Closed?.Invoke(this, null);
-    }
+  public void Close(object dialogResult)
+  {
+    _dialogResult = dialogResult;
+    _host.DialogBody = null;
+    Closed?.Invoke(this, null);
   }
 }

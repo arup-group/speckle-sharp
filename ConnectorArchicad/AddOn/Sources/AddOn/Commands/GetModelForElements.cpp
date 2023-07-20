@@ -3,6 +3,7 @@
 #include "Sight.hpp"
 #include "ModelInfo.hpp"
 #include "FieldNames.hpp"
+#include "Utility.hpp"
 using namespace FieldNames;
 
 
@@ -12,7 +13,10 @@ namespace AddOnCommands {
 static UInt32 MaximumSupportedPolygonPoints = 4;
 
 
-static GS::Array<Int32> GetPolygonFromBody (const Modeler::MeshBody& body, Int32 polygonIdx, Int32 convexPolygonIdx, UInt32 vetrexOffset)
+static GS::Array<Int32> GetPolygonFromBody (const Modeler::MeshBody& body,
+	Int32 polygonIdx,
+	Int32 convexPolygonIdx,
+	UInt32 vetrexOffset)
 {
 	GS::Array<Int32> polygonPoints;
 	for (Int32 convexPolygonVertexIdx = 0; convexPolygonVertexIdx < body.GetConvexPolygonVertexCount (polygonIdx, convexPolygonIdx); ++convexPolygonVertexIdx) {
@@ -23,7 +27,10 @@ static GS::Array<Int32> GetPolygonFromBody (const Modeler::MeshBody& body, Int32
 }
 
 
-static void CollectPolygonsFromBody (const Modeler::MeshBody& body, const Modeler::Attributes::Viewer& attributes, UInt32 vetrexOffset, ModelInfo& modelInfo)
+static void CollectPolygonsFromBody (const Modeler::MeshBody& body,
+	const Modeler::Attributes::Viewer& attributes,
+	UInt32 vetrexOffset,
+	ModelInfo& modelInfo)
 {
 	for (UInt32 polygonIdx = 0; polygonIdx < body.GetPolygonCount (); ++polygonIdx) {
 
@@ -55,7 +62,9 @@ static void CollectPolygonsFromBody (const Modeler::MeshBody& body, const Modele
 }
 
 
-static void GetModelInfoForElement (const Modeler::Elem& elem, const Modeler::Attributes::Viewer& attributes, ModelInfo& modelInfo)
+static void GetModelInfoForElement (const Modeler::Elem& elem,
+	const Modeler::Attributes::Viewer& attributes,
+	ModelInfo& modelInfo)
 {
 	const auto& transformation = elem.GetConstTrafo ();
 	for (const auto& body : elem.TessellatedBodies ()) {
@@ -104,7 +113,7 @@ static GS::Array<API_Guid> GetStairSubElements (const API_Guid& applicationId)
 	GS::Array<API_Guid> applicationIds;
 
 	API_ElementMemo memo{};
-	ACAPI_Element_GetMemo (applicationId, &memo, APIMemoMask_StairRiser | APIMemoMask_StairTread | APIMemoMask_StairStructure );
+	ACAPI_Element_GetMemo (applicationId, &memo, APIMemoMask_StairRiser | APIMemoMask_StairTread | APIMemoMask_StairStructure);
 
 	GetSubElements<API_StairRiserType> (memo.stairRisers, applicationIds);
 	GetSubElements<API_StairTreadType> (memo.stairTreads, applicationIds);
@@ -119,7 +128,7 @@ static GS::Array<API_Guid> GetRailingSubElements (const API_Guid& applicationId)
 	GS::Array<API_Guid> applicationIds;
 
 	API_ElementMemo memo{};
-	ACAPI_Element_GetMemo (applicationId, &memo, APIMemoMask_RailingToprail | APIMemoMask_RailingHandrail | APIMemoMask_RailingRail | APIMemoMask_RailingPost | APIMemoMask_RailingInnerPost | APIMemoMask_RailingBaluster | APIMemoMask_RailingPanel );
+	ACAPI_Element_GetMemo (applicationId, &memo, APIMemoMask_RailingToprail | APIMemoMask_RailingHandrail | APIMemoMask_RailingRail | APIMemoMask_RailingPost | APIMemoMask_RailingInnerPost | APIMemoMask_RailingBaluster | APIMemoMask_RailingPanel);
 
 	GetSubElements<API_RailingToprailType> (memo.railingToprails, applicationIds);
 	GetSubElements<API_RailingHandrailType> (memo.railingHandrails, applicationIds);
@@ -169,22 +178,18 @@ static GS::Array<API_Guid> CheckForSubelements (const API_Guid& applicationId)
 		return GS::Array<API_Guid> ();
 	}
 
-#ifdef ServerMainVers_2600
-	switch (header.type.typeID) {
-#else
-	switch (header.typeID) {
-#endif
-	case API_CurtainWallID:					return GetCurtainWallSubElements (applicationId);
-	case API_StairID:						return GetStairSubElements (applicationId);
-	case API_RailingID:						return GetRailingSubElements (applicationId);
-	case API_BeamID:						return GetBeamSubElements (applicationId);
-	case API_ColumnID:						return GetColumnSubElements (applicationId);
-	default:								return GS::Array<API_Guid> { applicationId };
+	switch (Utility::GetElementType (header)) {
+		case API_CurtainWallID:					return GetCurtainWallSubElements (applicationId);
+		case API_StairID:						return GetStairSubElements (applicationId);
+		case API_RailingID:						return GetRailingSubElements (applicationId);
+		case API_BeamID:						return GetBeamSubElements (applicationId);
+		case API_ColumnID:						return GetColumnSubElements (applicationId);
+		default:								return GS::Array<API_Guid> { applicationId };
 	}
 }
 
 
-static ModelInfo CalculateModelOfElement (const Modeler::Model3DViewer & modelViewer, const API_Guid & applicationId)
+static ModelInfo CalculateModelOfElement (const Modeler::Model3DViewer& modelViewer, const API_Guid& applicationId)
 {
 	ModelInfo modelInfo;
 	const Modeler::Attributes::Viewer& attributes (modelViewer.GetConstAttributesPtr ());
@@ -226,7 +231,7 @@ static GS::ObjectState StoreModelOfElements (const GS::Array<API_Guid>&applicati
 	GS::ObjectState result;
 	const auto modelInserter = result.AddList<GS::ObjectState> (Models);
 	for (const auto& applicationId : applicationIds) {
-		modelInserter (GS::ObjectState{ApplicationId, APIGuidToString (applicationId), Model::Model, CalculateModelOfElement (modelViewer, applicationId)});
+		modelInserter (GS::ObjectState{ElementBase::ApplicationId, APIGuidToString (applicationId), Model::Model, CalculateModelOfElement (modelViewer, applicationId)});
 	}
 
 	return result;
@@ -239,10 +244,10 @@ GS::String GetModelForElements::GetName () const
 }
 
 
-GS::ObjectState GetModelForElements::Execute (const GS::ObjectState & parameters, GS::ProcessControl& /*processControl*/) const
+GS::ObjectState GetModelForElements::Execute (const GS::ObjectState& parameters, GS::ProcessControl& /*processControl*/) const
 {
 	GS::Array<GS::UniString> ids;
-	parameters.Get (ApplicationIds, ids);
+	parameters.Get (ElementBase::ApplicationIds, ids);
 
 	return StoreModelOfElements (ids.Transform<API_Guid> ([] (const GS::UniString& idStr) { return APIGuidFromString (idStr.ToCStr ()); }));
 }
