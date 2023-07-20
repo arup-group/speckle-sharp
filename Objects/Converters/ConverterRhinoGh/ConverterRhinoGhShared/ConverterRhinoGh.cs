@@ -491,7 +491,7 @@ public partial class ConverterRhinoGh : ISpeckleConverter
           {
             var block = BlockInstanceToSpeckle(@object as InstanceObject);
             o.basePoint = block.GetInsertionPlane().origin;
-            block.transform.Decompose(out Vector3 scale, out Quaternion rotation, out Vector4 translation);
+            block.transform.Decompose(out Vector3 scale, out System.Numerics.Quaternion rotation, out Vector4 translation);
             o.rotation = Math.Acos(rotation.W) * 2;
           }
 
@@ -847,7 +847,7 @@ public partial class ConverterRhinoGh : ISpeckleConverter
           break;
 
         case Element1D o:
-          rhinoObj = element1DToNative(o);
+          rhinoObj = Element1DToNative(o);
           break;
 
         case Collection o:
