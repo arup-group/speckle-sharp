@@ -13,8 +13,6 @@
     <DefineConstants>$(DefineConstants);REVIT2021</DefineConstants>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
-  
-  <Import Project="..\ConnectorRevit\ConnectorRevit.projitems" Label="Shared" />
 
   <ItemGroup>
     <Reference Include="PresentationCore" />
@@ -29,7 +27,7 @@
     <PackageReference Include="Avalonia" Version="0.10.18" />
     <PackageReference Include="Avalonia.Desktop" Version="0.10.18" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.18" />
-    <PackageReference Include="ModPlus.Revit.API.2021" Version="1.0.0" IncludeAssets="compile;build" PrivateAssets="all"/>
+    <PackageReference Include="ModPlus.Revit.API.2021" Version="1.0.0" IncludeAssets="compile;build" PrivateAssets="all" />
     <PackageReference Include="Revit.Async" Version="2.0.1" />
   </ItemGroup>
   
@@ -63,5 +61,6 @@
     <Copy DestinationFolder="$(SolutionDir)\Release\Release$(RevitVersion)\$(RevitFolderName)\%(RecursiveDir)" SourceFiles="@(SourceDLLs)" />
     <Copy DestinationFolder="$(SolutionDir)\Release\Release$(RevitVersion)\" SourceFiles="@(SourceManifest)" />
   </Target>
+  <Import Project="..\ConnectorRevit\ConnectorRevit.projitems" Label="Shared" />
   
 </Project>

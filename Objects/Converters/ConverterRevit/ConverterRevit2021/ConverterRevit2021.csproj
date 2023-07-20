@@ -11,8 +11,6 @@
     <CopyToKitFolder>true</CopyToKitFolder>
   </PropertyGroup>
 
-  <Import Project="..\ConverterRevitShared\ConverterRevitShared.projitems" Label="Shared" />
-
   <ItemGroup>
     <PackageReference Include="ModPlus.Revit.API.2021" Version="1.0.0" ExcludeAssets="runtime" />
   </ItemGroup>
@@ -27,4 +25,6 @@
     <Message Text="Copying templates to kit folder" />
     <Exec Condition="$([MSBuild]::IsOsPlatform('Windows'))" Command="xcopy /Y /S &quot;$(MSBuildProjectDirectory)\..\Templates\2021&quot; &quot;$(AppData)\Speckle\Kits\Objects\Templates\Revit\2021\&quot;" />
   </Target>
+
+  <Import Project="..\ConverterRevitShared\ConverterRevitShared.projitems" Label="Shared" />
 </Project>
