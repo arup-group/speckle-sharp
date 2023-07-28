@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Threading.Tasks;
 using ConnectorGrasshopper.Extras;
@@ -77,7 +77,7 @@ public class StreamUpdateComponentV2 : GH_SpeckleTaskCapableComponent<bool>
       if (DA.Iteration == 0)
         Tracker.TrackNodeRun();
 
-      TaskList.Add(Task.Run(()=> UpdateStream(streamWrapper, name, description, isPublic), CancelToken));
+      TaskList.Add(Task.Run(()=> UpdateStream(streamWrapper, name, description, isPublic, jobNumber), CancelToken));
     }
 
     if (!GetSolveResults(DA, out var success))
