@@ -142,5 +142,5 @@ namespace Objects.Converter.Revit
 
       return speckleBeam;
     }
-}
   }
+}
