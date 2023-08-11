@@ -270,6 +270,15 @@ namespace Objects.Converter.Revit
       speckleElement["isRevitLinkedModel"] = revitElement.Document.IsLinked;
       speckleElement["revitLinkedModelPath"] = revitElement.Document.PathName;
 
+#if !REVIT2023
+      if (revitElement.CanHaveAnalyticalModel())
+      {
+        var analyticalElement = revitElement.GetAnalyticalModel();
+
+        speckleElement["analyticalElementId"] = analyticalElement.UniqueId;
+      }
+#endif
+
       Phase phaseCreated = Doc.GetElement(revitElement.CreatedPhaseId) as Phase;
       if (phaseCreated != null)
         speckleElement["phaseCreated"] = phaseCreated.Name;
