@@ -275,7 +275,8 @@ namespace Objects.Converter.Revit
       {
         var analyticalElement = revitElement.GetAnalyticalModel();
 
-        speckleElement["analyticalElementId"] = analyticalElement.UniqueId;
+        if (analyticalElement != null)
+          speckleElement["analyticalElementId"] = analyticalElement.UniqueId;
       }
 #endif
 
