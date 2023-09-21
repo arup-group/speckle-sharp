@@ -239,9 +239,12 @@ public class Point : Base, IHasBoundingBox, ITransformable<Point>
     if (ReferenceEquals(this, obj))
       return true;
 
-    if (ReferenceEquals(obj, null))
-      return false;
+    //if (ReferenceEquals(obj, null))
+    //  return false;
 
-    throw new NotImplementedException();
+    //throw new NotImplementedException();
+
+    else 
+      return false;
   }
 }
