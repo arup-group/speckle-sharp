@@ -40,9 +40,9 @@
 
   <PropertyGroup Label="Package Config">
     <!-- Version info -->
-    <Version Condition="$(Version) == ''">1.0.0-local</Version>
+    <Version Condition="$(Version) == ''">1.0.0</Version>
     <FileVersion Condition="$(FileVersion) == ''">1.0.0.0000</FileVersion>
-    <AssemblyVersion Condition="$(AssemblyVersion) == ''">$(FileVersion)</AssemblyVersion>
+    <AssemblyVersion Condition="$(AssemblyVersion) == ''">$(Version)</AssemblyVersion>
     
     <!-- Package info -->
     <PackageVersion Condition="$(PackageVersion) == ''">$(Version)</PackageVersion>
