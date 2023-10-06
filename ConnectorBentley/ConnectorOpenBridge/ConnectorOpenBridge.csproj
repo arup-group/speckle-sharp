@@ -35,7 +35,7 @@
   <PropertyGroup>
     <IsDesktopBuild Condition="'$(IsDesktopBuild)' == ''">true</IsDesktopBuild>
   </PropertyGroup>
-  <ItemGroup Condition="'$(Configuration)' == 'Release' AND '$(IsDesktopBuild)' == false">
+  <ItemGroup>
     <PackageReference Include="Speckle.Bentley.API">
       <Version>1.0.0</Version>
       <IncludeAssets>compile</IncludeAssets>
