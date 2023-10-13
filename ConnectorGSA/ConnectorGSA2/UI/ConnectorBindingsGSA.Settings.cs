@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,7 +27,7 @@ namespace ConnectorGSA.UI
     public override List<ISetting> GetSettings()
     {
       List<string> mappingStream = new List<string>() { MappingStream };
-
+      
       return new List<ISetting>
       {
         new ListBoxSetting {Slug = "layer", Name = "Layer to send", Icon ="mdiLayers", Values = Layers, Description = "Which layer to send", Selection = "Design"},

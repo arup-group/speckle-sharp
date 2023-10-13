@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.DB;
@@ -60,7 +60,8 @@ namespace Objects.Converter.Revit
       var convertedMEPCurves = convertedElements.Where(e => e.Value is MEPCurve).ToArray();
       foreach (var networkElement in connectorBasedCreationElements)
       {
-        if (!GetElementType(networkElement.elements, appObj, out FamilySymbol familySymbol))
+        var familySymbol = GetElementType<FamilySymbol>(networkElement.elements, appObj, out bool _);
+        if (familySymbol == null)
         {
           appObj.Update(status: ApplicationObject.State.Failed);
           continue;
@@ -179,7 +180,7 @@ namespace Objects.Converter.Revit
     /// <param name="mepElement"></param>
     private void GetNetworkElements(Network @network, Element initialElement, out List<string> notes)
     {
-      CachedContextObjects = ContextObjects.ToList();
+      CachedContextObjects = ContextObjects;
       notes = new List<string>();
       var networkConnections = new List<ConnectionPair>();
       GetNetworkConnections(initialElement, ref networkConnections);
@@ -188,10 +189,9 @@ namespace Objects.Converter.Revit
       foreach (var group in groups)
       {
         var element = Doc.GetElement(group.Key);
-        var elementIndex = ContextObjects.FindIndex(obj => obj.applicationId == element.UniqueId);
 
-        if (elementIndex != -1)
-          ContextObjects.RemoveAt(elementIndex);
+        if (ContextObjects.ContainsKey(element.UniqueId))
+          ContextObjects.Remove(element.UniqueId);
         else
           continue;
 
@@ -253,7 +253,7 @@ namespace Objects.Converter.Revit
           isConnectorBased = connectorBasedCreation,
           isCurveBased = element is MEPCurve
         });
-        ConvertedObjectsList.Add(obj.applicationId);
+        ConvertedObjects.Add(obj.applicationId);
 
         Report.Log(reportObj);
       }
@@ -331,11 +331,11 @@ namespace Objects.Converter.Revit
       (c1.Domain == Domain.DomainCableTrayConduit)));
     }
 
-    private static List<ApplicationObject> CachedContextObjects = null;
+    private static Dictionary<string, ApplicationObject> CachedContextObjects = null;
 
     private bool IsWithinContext(Element element)
     {
-      return CachedContextObjects.Any(obj => obj.applicationId.Equals(element?.UniqueId));
+      return CachedContextObjects.ContainsKey(element?.UniqueId);
     }
 
     private void GetConnectionPairs(Element element, ref List<Tuple<Connector, Connector, Element>> connectionPairs, ref List<Element> elements)
@@ -349,14 +349,14 @@ namespace Objects.Converter.Revit
       }
       var refs = GetRefConnectionPairs(element);
       var refConnectionPairs = GetRefConnectionPairs(element).
-        Where(e => e.Item2 == null || ContextObjects.Any(obj => obj.applicationId.Equals(e.Item2.Owner.UniqueId))).ToList();
+        Where(e => e.Item2 == null || ContextObjects.ContainsKey(e.Item2.Owner.UniqueId)).ToList();
       elements.Add(element);
       foreach (var refConnectionPair in refs)
       {
         var connectedElement = refConnectionPair.Item2?.Owner;
         if (connectedElement != null
           && !elements.Any(e => e.UniqueId.Equals(connectedElement.UniqueId))
-          && ContextObjects.Any(obj => obj.applicationId.Equals(connectedElement.UniqueId)))
+          && ContextObjects.ContainsKey(connectedElement.UniqueId))
         {
           connectionPairs.Add(Tuple.Create(refConnectionPair.Item1, refConnectionPair.Item2, element));
           GetConnectionPairs(connectedElement, ref connectionPairs, ref elements);

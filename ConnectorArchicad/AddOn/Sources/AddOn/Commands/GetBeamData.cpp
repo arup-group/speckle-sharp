@@ -2,24 +2,50 @@
 #include "ResourceIds.hpp"
 #include "ObjectState.hpp"
 #include "Utility.hpp"
+#include "Objects/Level.hpp"
 #include "Objects/Point.hpp"
 #include "RealNumber.h"
 #include "FieldNames.hpp"
 #include "TypeNameTables.hpp"
+
 using namespace FieldNames;
+
 
 namespace AddOnCommands
 {
 
-static GS::ObjectState SerializeBeamType (const API_Element& elem, const API_ElementMemo& memo)
-{
-	GS::ObjectState os;
 
+GS::String GetBeamData::GetFieldName () const
+{
+	return Beams;
+}
+
+
+API_ElemTypeID GetBeamData::GetElemTypeID () const
+{
+	return API_BeamID;
+}
+
+
+GS::UInt64 GetBeamData::GetMemoMask () const
+{
+	return APIMemoMask_BeamSegment |
+		APIMemoMask_AssemblySegmentScheme |
+		APIMemoMask_AssemblySegmentCut |
+		APIMemoMask_BeamHole;
+}
+
+
+GS::ErrCode GetBeamData::SerializeElementType (const API_Element& elem,
+	const API_ElementMemo& memo,
+	GS::ObjectState& os) const
+{
 	// The identifier of the beam
-	os.Add (ApplicationId, APIGuidToString (elem.beam.head.guid));
+	os.Add (ElementBase::ApplicationId, APIGuidToString (elem.beam.head.guid));
 
 	// Positioning
-	os.Add (FloorIndex, elem.beam.head.floorInd);
+	API_StoryType story = Utility::GetStory (elem.beam.head.floorInd);
+	os.Add (ElementBase::Level, Objects::Level (story));
 
 	double z = Utility::GetStoryLevel (elem.beam.head.floorInd) + elem.beam.level;
 	os.Add (Beam::begC, Objects::Point3D (elem.beam.begC.x, elem.beam.begC.y, z));
@@ -171,7 +197,7 @@ static GS::ObjectState SerializeBeamType (const API_Element& elem, const API_Ele
 	// Floor Plan and Section - Floor Plan Display
 
 	// Show on Stories - Story visibility
-	Utility::ExportVisibility (elem.beam.isAutoOnStoryVisibility, elem.beam.visibility, os, ShowOnStories);
+	Utility::GetVisibility (elem.beam.isAutoOnStoryVisibility, elem.beam.visibility, os, ShowOnStories);
 
 	// The display options (Projected, Projected with Overhead, Cut Only, Outlines Only, Overhead All or Symbolic Cut)
 	os.Add (Beam::DisplayOptionName, displayOptionNames.Get (elem.beam.displayOption));
@@ -198,7 +224,7 @@ static GS::ObjectState SerializeBeamType (const API_Element& elem, const API_Ele
 		if (NoError == ACAPI_Attribute_Get (&attrib))
 			os.Add (Beam::CutContourLinetypeName, GS::UniString{attrib.header.name});
 	}
-	
+
 	// Override cut fill pen
 	if (elem.beam.penOverride.overrideCutFillPen) {
 		os.Add (Beam::OverrideCutFillPenIndex, elem.beam.penOverride.cutFillPen);
@@ -262,7 +288,7 @@ static GS::ObjectState SerializeBeamType (const API_Element& elem, const API_Ele
 
 	if (NoError == ACAPI_Attribute_Get (&attrib))
 		os.Add (Beam::refLtype, GS::UniString{attrib.header.name});
-	
+
 	// Floor Plan and Section - Cover Fills
 	os.Add (Beam::useCoverFill, elem.beam.useCoverFill);
 	if (elem.beam.useCoverFill) {
@@ -282,7 +308,7 @@ static GS::ObjectState SerializeBeamType (const API_Element& elem, const API_Ele
 		}
 
 		// Cover Fill Transformation
-		Utility::ExportCoverFillTransformation (elem.beam.coverFillOrientationComesFrom3D, elem.beam.coverFillTransformationType, os);
+		Utility::GetCoverFillTransformation (elem.beam.coverFillOrientationComesFrom3D, elem.beam.coverFillTransformationType, os);
 
 		if ((elem.beam.coverFillTransformationType == API_CoverFillTransformationType_Rotated || elem.beam.coverFillTransformationType == API_CoverFillTransformationType_Distorted) && !elem.beam.coverFillOrientationComesFrom3D) {
 			os.Add (Beam::CoverFillTransformationOrigoX, elem.beam.coverFillTransformation.origo.x);
@@ -294,54 +320,13 @@ static GS::ObjectState SerializeBeamType (const API_Element& elem, const API_Ele
 		}
 	}
 
-	return os;
+	return NoError;
 }
 
 
 GS::String GetBeamData::GetName () const
 {
 	return GetBeamDataCommandName;
-}
-
-
-GS::ObjectState GetBeamData::Execute (const GS::ObjectState& parameters, GS::ProcessControl& /*processControl*/) const
-{
-	GS::Array<GS::UniString> ids;
-	parameters.Get (ApplicationIds, ids);
-	GS::Array<API_Guid> elementGuids = ids.Transform<API_Guid> ([] (const GS::UniString& idStr) { return APIGuidFromString (idStr.ToCStr ()); });
-
-	GS::ObjectState result;
-	const auto& listAdder = result.AddList<GS::ObjectState> (Beams);
-	for (const API_Guid& guid : elementGuids) {
-		API_Element element{};
-		element.header.guid = guid;
-
-		GSErrCode err = ACAPI_Element_Get (&element);
-		if (err != NoError)
-			continue;
-
-		API_ElementMemo memo{};
-		ACAPI_Element_GetMemo (guid, &memo,
-			APIMemoMask_BeamSegment |
-			APIMemoMask_AssemblySegmentScheme |
-			APIMemoMask_AssemblySegmentCut |
-			APIMemoMask_BeamHole);
-		if (err != NoError)
-			continue;
-
-#ifdef ServerMainVers_2600
-		if (element.header.type.typeID != API_BeamID)
-#else
-		if (element.header.typeID != API_BeamID)
-#endif
-		{
-			continue;
-		}
-
-		listAdder (SerializeBeamType (element, memo));
-	}
-
-	return result;
 }
 
 

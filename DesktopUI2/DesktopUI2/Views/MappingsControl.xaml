@@ -4,15 +4,11 @@
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
   xmlns:c="clr-namespace:DesktopUI2.Views.Controls"
-  xmlns:conv="clr-namespace:DesktopUI2.Views.Converters"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-  xmlns:dvm="clr-namespace:DesktopUI2.ViewModels.DesignViewModels"
   xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-  xmlns:local="clr-namespace:DesktopUI2.Views.Pages"
   xmlns:m="clr-namespace:Material.Styles;assembly=Material.Styles"
   xmlns:map="clr-namespace:DesktopUI2.Views.Mappings.Controls"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-  xmlns:ripple="clr-namespace:Material.Ripple;assembly=Material.Ripple"
   xmlns:s="clr-namespace:DesktopUI2.ViewModels.MappingTool"
   d:DesignHeight="650"
   d:DesignWidth="500"
@@ -29,6 +25,8 @@
   </UserControl.Styles>
   <ContentControl x:Name="MappingsUserControl">
     <Grid>
+
+      <!--  MAPPER  -->
       <Grid RowDefinitions="auto, *">
         <!--  HEADER  -->
         <Border
@@ -267,6 +265,7 @@
                         <ContentControl.DataTemplates>
                           <!--  Default = empty  -->
                           <DataTemplate DataType="{x:Type s:RevitDefaultWallViewModel}" />
+                          <DataTemplate DataType="{x:Type s:RevitDefaultFloorViewModel}" />
                           <DataTemplate DataType="{x:Type s:RevitDefaultBeamViewModel}" />
                           <DataTemplate DataType="{x:Type s:RevitDefaultBraceViewModel}" />
                           <DataTemplate DataType="{x:Type s:RevitDefaultColumnViewModel}" />
@@ -275,6 +274,14 @@
                           <!--  DATA TEMPLATES FOR OUR SCHEMAS  -->
                           <!--  WALL  -->
                           <DataTemplate DataType="{x:Type s:RevitWallViewModel}">
+                            <map:RevitBasic />
+                          </DataTemplate>
+                          <!--  PROFILE WALL  -->
+                          <DataTemplate DataType="{x:Type s:RevitProfileWallViewModel}">
+                            <map:RevitBasic />
+                          </DataTemplate>
+                          <!--  FACE WALL  -->
+                          <DataTemplate DataType="{x:Type s:RevitFaceWallViewModel}">
                             <map:RevitBasic />
                           </DataTemplate>
                           <!--  FLOOR  -->
@@ -470,6 +477,23 @@
 
       <!--  STREAM SELECTOR  -->
       <c:StreamSelector DataContext="{Binding StreamSelector}" IsVisible="{Binding IsVisible, FallbackValue=False}" />
+      <!--  DIALOG  -->
+      <Grid IsVisible="{Binding DialogVisible}" Opacity="{Binding DialogOpacity}">
+        <Grid.Transitions>
+          <Transitions>
+            <DoubleTransition Property="Opacity" Duration="0:0:0.3" />
+          </Transitions>
+        </Grid.Transitions>
+        <Border Background="{DynamicResource MaterialDesignCardBackground}" Opacity="0.8" />
+        <m:Card
+          MinHeight="100"
+          Margin="40"
+          Padding="0"
+          VerticalAlignment="Center"
+          assists:ShadowAssist.ShadowDepth="10">
+          <ContentControl Content="{Binding DialogBody}" />
+        </m:Card>
+      </Grid>
     </Grid>
   </ContentControl>
 </UserControl>

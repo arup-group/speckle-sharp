@@ -1,11 +1,11 @@
-﻿using Autodesk.Revit.DB;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Autodesk.Revit.DB;
 using Objects.Organization;
 using Objects.Structural.Properties.Profiles;
 using Speckle.Core.Kits;
 using Speckle.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using BE = Objects.BuiltElements;
 using BER = Objects.BuiltElements.Revit;
 using BERC = Objects.BuiltElements.Revit.Curve;
@@ -48,13 +48,13 @@ namespace Objects.Converter.Revit
     /// <para>To know which other objects are being converted, in order to sort relationships between them.
     /// For example, elements that have children use this to determine whether they should send their children out or not.</para>
     /// </summary>
-    public List<ApplicationObject> ContextObjects { get; set; } = new List<ApplicationObject>();
+    public Dictionary<string, ApplicationObject> ContextObjects { get; set; } = new Dictionary<string, ApplicationObject>();
 
     /// <summary>
     /// <para>To keep track of previously received objects from a given stream in here. If possible, conversions routines
     /// will edit an existing object, otherwise they will delete the old one and create the new one.</para>
     /// </summary>
-    public List<ApplicationObject> PreviousContextObjects { get; set; } = new List<ApplicationObject>();
+    public Dictionary<string, ApplicationObject> PreviousContextObjects { get; set; } = new Dictionary<string, ApplicationObject>();
 
     /// <summary>
     /// Keeps track of the current host element that is creating any sub-objects it may have.
@@ -64,7 +64,7 @@ namespace Objects.Converter.Revit
     /// <summary>
     /// Used when sending; keeps track of all the converted objects so far. Child elements first check in here if they should convert themselves again (they may have been converted as part of a parent's hosted elements).
     /// </summary>
-    public List<string> ConvertedObjectsList { get; set; } = new List<string>();
+    public ISet<string> ConvertedObjects { get; private set; } = new HashSet<string>();
 
     public ProgressReport Report { get; private set; } = new ProgressReport();
 
@@ -79,17 +79,19 @@ namespace Objects.Converter.Revit
     /// <summary>
     /// Used to cache already converted family instance FamilyType deifnitions
     /// </summary>
-    public Dictionary<string, Objects.BuiltElements.Revit.RevitSymbolElementType> Symbols { get; private set; } = new Dictionary<string, Objects.BuiltElements.Revit.RevitSymbolElementType>();
-    
-    public Dictionary<string, SectionProfile> SectionProfiles { get; private set; } = new Dictionary<string, SectionProfile>();
+    public Dictionary<string, Objects.BuiltElements.Revit.RevitSymbolElementType> Symbols { get; private set; } =
+      new Dictionary<string, Objects.BuiltElements.Revit.RevitSymbolElementType>();
+
+    public Dictionary<string, SectionProfile> SectionProfiles { get; private set; } =
+      new Dictionary<string, SectionProfile>();
 
     public ReceiveMode ReceiveMode { get; set; }
-
 
     /// <summary>
     /// Contains all materials in the model
     /// </summary>
-    public Dictionary<string, Objects.Other.Material> Materials { get; private set; } = new Dictionary<string, Objects.Other.Material>();
+    public Dictionary<string, Objects.Other.Material> Materials { get; private set; } =
+      new Dictionary<string, Objects.Other.Material>();
 
     public ConverterRevit()
     {
@@ -109,8 +111,32 @@ namespace Objects.Converter.Revit
       }
     }
 
-    public void SetContextObjects(List<ApplicationObject> objects) => ContextObjects = objects;
-    public void SetPreviousContextObjects(List<ApplicationObject> objects) => PreviousContextObjects = objects;
+    //NOTE: not all objects come from Revit, so their applicationId might be null, in this case we fall back on the Id
+    //this fallback is only needed for a couple of ToNative conversions such as Floor, Ceiling, and Roof
+    public void SetContextObjects(List<ApplicationObject> objects)
+    {
+      ContextObjects = new(objects.Count);
+      foreach (var ao in objects)
+      {
+        var key = ao.applicationId ?? ao.OriginalId;
+        if (ContextObjects.ContainsKey(key))
+          continue;
+        ContextObjects.Add(key, ao);
+      }
+    }
+
+    public void SetPreviousContextObjects(List<ApplicationObject> objects)
+    {
+      PreviousContextObjects = new(objects.Count);
+      foreach (var ao in objects)
+      {
+        var key = ao.applicationId ?? ao.OriginalId;
+        if (PreviousContextObjects.ContainsKey(key))
+          continue;
+        PreviousContextObjects.Add(key, ao);
+      }
+    }
+
     public void SetConverterSettings(object settings)
     {
       Settings = settings as Dictionary<string, string>;
@@ -133,7 +159,10 @@ namespace Objects.Converter.Revit
           returnObject = DirectShapeToSpeckle(o);
           break;
         case DB.FamilyInstance o:
-          returnObject = o.MEPModel?.ConnectorManager?.Connectors?.Size > 0 ? NetworkToSpeckle(o, out notes) : FamilyInstanceToSpeckle(o, out notes);
+          returnObject =
+            o.MEPModel?.ConnectorManager?.Connectors?.Size > 0
+              ? NetworkToSpeckle(o, out notes)
+              : FamilyInstanceToSpeckle(o, out notes);
           break;
         case DB.Floor o:
           returnObject = FloorToSpeckle(o, out notes);
@@ -269,7 +298,7 @@ namespace Objects.Converter.Revit
           returnObject = AnalyticalSurfaceToSpeckle(o);
           break;
 #else
-         case DB.Structure.AnalyticalMember o:
+        case DB.Structure.AnalyticalMember o:
           returnObject = AnalyticalStickToSpeckle(o);
           break;
         case DB.Structure.AnalyticalPanel o:
@@ -290,10 +319,12 @@ namespace Objects.Converter.Revit
 
       // NOTE: Only try generic method assignment if there is no existing render material from conversions;
       // we might want to try later on to capture it more intelligently from inside conversion routines.
-      if (returnObject != null
-          && returnObject["renderMaterial"] == null
-          && returnObject["displayValue"] == null
-          && !(returnObject is Model))
+      if (
+        returnObject != null
+        && returnObject["renderMaterial"] == null
+        && returnObject["displayValue"] == null
+        && !(returnObject is Model)
+      )
       {
         try
         {
@@ -306,7 +337,7 @@ namespace Objects.Converter.Revit
         }
       }
 
-      // log 
+      // log
       if (Report.ReportObjects.TryGetValue(id, out var reportObj) && notes.Count > 0)
         reportObj.Update(log: notes);
 
@@ -320,6 +351,7 @@ namespace Objects.Converter.Revit
 
       return "";
     }
+
     private BuiltInCategory GetObjectCategory(Base @object)
     {
       switch (@object)
@@ -357,6 +389,38 @@ namespace Objects.Converter.Revit
       }
     }
 
+    private Base SwapGeometrySchemaObject(Base @object)
+    {
+      // schema check
+      var speckleSchema = @object["@SpeckleSchema"] as Base;
+      if (speckleSchema == null || !CanConvertToNative(speckleSchema))
+        return @object; // Skip if no schema, or schema is non-convertible.
+
+      // Invert the "Geometry->SpeckleSchema" to be the logical "SpeckleSchema -> Geometry" order.
+      // This is caused by RhinoBIM, the MappingTool in rhino, and any Grasshopper Schema node with the option active.
+      if (speckleSchema is BER.DirectShape ds)
+      {
+        // HACK: This is an explicit exception for DirectShapes. This is the only object class that does not have a
+        // `SchemaMainParam`, which means the swap performed below would not work.
+        // In this case, we cast directly and "unwrap" the schema object manually, setting the Brep as the only
+        // item in the list.
+        ds.baseGeometries = new List<Base> { @object };
+      }
+      else
+      {
+        // find self referential prop and set value to @object if it is null (happens when sent from gh)
+        // if you can find a "MainParamProperty" get that
+        // HACK: The results of this can be inconsistent as we don't really know which is the `MainParamProperty`, that is info that is attached to the constructor input. Hence the hack above ☝🏼
+        var prop = speckleSchema
+          .GetInstanceMembers()
+          .Where(o => speckleSchema[o.Name] == null)
+          .FirstOrDefault(o => o.PropertyType.IsInstanceOfType(@object));
+        if (prop != null)
+          speckleSchema[prop.Name] = @object;
+      }
+      return speckleSchema;
+    }
+
     public object ConvertToNative(Base @object)
     {
       // Get setting for if the user is only trying to preview the geometry
@@ -364,7 +428,7 @@ namespace Objects.Converter.Revit
       if (bool.Parse(isPreview ?? "false") == true)
         return PreviewGeometry(@object);
 
-      // Get settings for receive direct meshes , assumes objects aren't nested like in Tekla Structures 
+      // Get settings for receive direct meshes , assumes objects aren't nested like in Tekla Structures
       Settings.TryGetValue("recieve-objects-mesh", out string recieveModelMesh);
       if (bool.Parse(recieveModelMesh ?? "false") == true)
       {
@@ -375,12 +439,15 @@ namespace Objects.Converter.Revit
           //dynamic property = propInfo;
           //List<GE.Mesh> meshes = (List<GE.Mesh>)property;
           var cat = GetObjectCategory(@object);
-          return DirectShapeToNative(new ApplicationObject(@object.id, @object.speckle_type), meshes, cat);
+          var speckleCat = Categories.GetSchemaBuilderCategoryFromBuiltIn(cat.ToString());
+          return TryDirectShapeToNative(
+            new ApplicationObject(@object.id, @object.speckle_type),
+            meshes,
+            ToNativeMeshSetting,
+            speckleCat
+          );
         }
-        catch
-        {
-
-        }
+        catch { }
       }
       //Family Document
       if (Doc.IsFamilyDocument)
@@ -400,29 +467,16 @@ namespace Objects.Converter.Revit
         }
       }
 
-      //Project Document
-      // schema check
-      var speckleSchema = @object["@SpeckleSchema"] as Base;
-      if (speckleSchema != null)
-      {
-        // find self referential prop and set value to @object if it is null (happens when sent from gh)
-        if (CanConvertToNative(speckleSchema))
-        {
-          var prop = speckleSchema.GetInstanceMembers().Where(o => speckleSchema[o.Name] == null)?.Where(o => o.PropertyType.IsAssignableFrom(@object.GetType()))?.FirstOrDefault();
-          if (prop != null)
-            speckleSchema[prop.Name] = @object;
-          @object = speckleSchema;
-        }
-      }
+      // Check if object has inner `SpeckleSchema` prop and swap if appropriate
+      @object = SwapGeometrySchemaObject(@object);
 
       switch (@object)
       {
         //geometry
         case ICurve o:
           return ModelCurveToNative(o);
-
         case Geometry.Brep o:
-          return DirectShapeToNative(o);
+          return TryDirectShapeToNative(o, ToNativeMeshSetting);
         case Geometry.Mesh mesh:
           switch (ToNativeMeshSetting)
           {
@@ -432,7 +486,7 @@ namespace Objects.Converter.Revit
               return MeshToDxfImportFamily(mesh, Doc);
             case ToNativeMeshSettingEnum.Default:
             default:
-              return DirectShapeToNative(new ApplicationObject(mesh.id, mesh.speckle_type), new[] { mesh }, BuiltInCategory.OST_GenericModel, mesh.applicationId ?? mesh.id);
+              return TryDirectShapeToNative(mesh, ToNativeMeshSettingEnum.Default);
           }
         // non revit built elems
         case BE.Alignment o:
@@ -442,7 +496,7 @@ namespace Objects.Converter.Revit
           return AlignmentToNative(o);
 
         case BE.Structure o:
-          return DirectShapeToNative(new ApplicationObject(o.id, o.speckle_type), o.displayValue, applicationId: o.applicationId);
+          return TryDirectShapeToNative(new ApplicationObject(o.id, o.speckle_type) { applicationId = o.applicationId }, o.displayValue, ToNativeMeshSetting);
         //built elems
         case BER.AdaptiveComponent o:
           return AdaptiveComponentToNative(o);
@@ -566,10 +620,12 @@ namespace Objects.Converter.Revit
         case BE.GridLine o:
           return GridLineToNative(o);
 
+        case DataTable o:
+          return DataTableToNative(o);
+
         case BE.Space o:
           return SpaceToNative(o);
-
-        //Structural 
+        //Structural
         case STR.Geometry.Element1D o:
           return AnalyticalStickToNative(o);
 
@@ -594,7 +650,6 @@ namespace Objects.Converter.Revit
             return ViewOrientation3DToNative(b);
           return null;
 
-
         default:
           return null;
       }
@@ -606,8 +661,7 @@ namespace Objects.Converter.Revit
 
     public bool CanConvertToSpeckle(object @object)
     {
-      return @object
-      switch
+      return @object switch
       {
         DB.DetailCurve _ => true,
         DB.Material _ => true,
@@ -664,8 +718,7 @@ namespace Objects.Converter.Revit
       //Family Document
       if (Doc.IsFamilyDocument)
       {
-        return @object
-        switch
+        return @object switch
         {
           ICurve _ => true,
           Geometry.Brep _ => true,
@@ -680,8 +733,7 @@ namespace Objects.Converter.Revit
       if (schema != null)
         return CanConvertToNative(schema);
 
-      return @object
-      switch
+      return @object switch
       {
         //geometry
         ICurve _ => true,
@@ -730,6 +782,7 @@ namespace Objects.Converter.Revit
         STR.Geometry.Element1D _ => true,
         STR.Geometry.Element2D _ => true,
         Other.BlockInstance _ => true,
+        Organization.DataTable _ => true,
         _ => false,
       };
     }

@@ -1,44 +1,43 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Objects.Geometry;
 using Objects.Structural.Loading;
 using Speckle.Core.Kits;
 using Speckle.Core.Models;
 
-namespace Objects.Structural.GSA.Loading
+namespace Objects.Structural.GSA.Loading;
+
+public class GSALoadGravity : LoadGravity
 {
-  public class GSALoadGravity : LoadGravity
+  public int? nativeId { get; set; }
+  public GSALoadGravity() { }
+
+  [SchemaInfo("GSALoadGravity", "Creates a Speckle structural gravity load (applied to all nodes and elements) for GSA", "GSA", "Loading")]
+  public GSALoadGravity(LoadCase loadCase, Vector gravityFactors = null, string name = null, int? nativeId = null)
   {
-    public int? nativeId { get; set; }
-    public GSALoadGravity() { }
+    this.nativeId = nativeId;
+    this.name = name;
+    this.loadCase = loadCase;
+    this.gravityFactors = gravityFactors == null ? new Vector(0, 0, -1) : gravityFactors;
+  }
 
-    [SchemaInfo("GSALoadGravity", "Creates a Speckle structural gravity load (applied to all nodes and elements) for GSA", "GSA", "Loading")]
-    public GSALoadGravity(LoadCase loadCase, Vector gravityFactors = null, string name = null, int? nativeId = null)
-    {
-      this.nativeId = nativeId;
-      this.name = name;
-      this.loadCase = loadCase;
-      this.gravityFactors = gravityFactors == null ? new Vector(0, 0, -1) : gravityFactors;
-    }
+  [SchemaInfo("GSALoadGravity (specified elements)", "Creates a Speckle structural gravity load (applied to specified elements) for GSA", "GSA", "Loading")]
+  public GSALoadGravity(LoadCase loadCase, List<Base> elements, Vector gravityFactors = null, string name = null, int? nativeId = null)
+  {
+    this.nativeId = nativeId;
+    this.name = name;
+    this.elements = elements;
+    this.loadCase = loadCase;
+    this.gravityFactors = gravityFactors == null ? new Vector(0, 0, -1) : gravityFactors;
+  }
 
-    [SchemaInfo("GSALoadGravity (specified elements)", "Creates a Speckle structural gravity load (applied to specified elements) for GSA", "GSA", "Loading")]
-    public GSALoadGravity(LoadCase loadCase, List<Base> elements, Vector gravityFactors = null, string name = null, int? nativeId = null)
-    {
-      this.nativeId = nativeId;
-      this.name = name;
-      this.elements = elements;
-      this.loadCase = loadCase;
-      this.gravityFactors = gravityFactors == null ? new Vector(0, 0, -1) : gravityFactors;
-    }
-
-    [SchemaInfo("GSALoadGravity (specified elements and nodes)", "Creates a Speckle structural gravity load (applied to specified nodes and elements) for GSA", "GSA", "Loading")]
-    public GSALoadGravity(LoadCase loadCase, List<Base> elements, List<Base> nodes, Vector gravityFactors = null, string name = null, int? nativeId = null)
-    {
-      this.nativeId = nativeId;
-      this.name = name;
-      this.elements = elements;
-      this.nodes = nodes;
-      this.loadCase = loadCase;
-      this.gravityFactors = gravityFactors == null ? new Vector(0, 0, -1) : gravityFactors;
-    }
+  [SchemaInfo("GSALoadGravity (specified elements and nodes)", "Creates a Speckle structural gravity load (applied to specified nodes and elements) for GSA", "GSA", "Loading")]
+  public GSALoadGravity(LoadCase loadCase, List<Base> elements, List<Base> nodes, Vector gravityFactors = null, string name = null, int? nativeId = null)
+  {
+    this.nativeId = nativeId;
+    this.name = name;
+    this.elements = elements;
+    this.nodes = nodes;
+    this.loadCase = loadCase;
+    this.gravityFactors = gravityFactors == null ? new Vector(0, 0, -1) : gravityFactors;
   }
 }

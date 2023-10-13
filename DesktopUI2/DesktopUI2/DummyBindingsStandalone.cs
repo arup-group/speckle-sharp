@@ -1,4 +1,4 @@
-﻿using DesktopUI2.Models;
+using DesktopUI2.Models;
 using DesktopUI2.Models.Filters;
 using DesktopUI2.Models.Settings;
 using DesktopUI2.ViewModels;
@@ -9,6 +9,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Threading.Tasks;
 using static DesktopUI2.ViewModels.MappingViewModel;
 
@@ -173,14 +174,14 @@ namespace DesktopUI2
                   authorName = "izzy 2.0",
                   id = "commit123",
                   message = "a totally real commit 💫",
-                  createdAt = "sometime"
+                  createdAt = DateTime.UtcNow
                 },
                 new Commit()
                 {
                   authorName = "izzy bot",
                   id = "commit321",
                   message = "look @ all these changes 👩‍🎤",
-                  createdAt = "03/05/2030"
+                  createdAt = DateTime.Parse("03/05/2030", CultureInfo.InvariantCulture)
                 }
               }
             }
@@ -207,14 +208,14 @@ namespace DesktopUI2
                   authorName = "izzy 2.0",
                   id = "commit123",
                   message = "a totally real commit 💫",
-                  createdAt = "sometime"
+                  createdAt = DateTime.UtcNow
                 },
                 new Commit()
                 {
                   authorName = "izzy bot",
                   id = "commit321",
                   message = "look @ all these changes 👩‍🎤",
-                  createdAt = "03/05/2030"
+                  createdAt = DateTime.Parse("03/05/2030", CultureInfo.InvariantCulture)
                 }
               }
             }

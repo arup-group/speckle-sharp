@@ -1,28 +1,33 @@
-﻿using Objects.Geometry;
-using Speckle.Core.Kits;
-using Speckle.Core.Models;
 using System;
-using Speckle.Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Text;
+using Objects.Geometry;
+using Speckle.Core.Models;
+using Speckle.Newtonsoft.Json;
 
-namespace Objects.BuiltElements
+namespace Objects.BuiltElements;
+
+public class Featureline : Base, IDisplayValue<List<Polyline>>
 {
-  public class Featureline : Base
-  {
-    [JsonIgnore, Obsolete("Use curve property")]
-    public ICurve baseCurve { get; set; }
+  /// <summary>
+  /// The base curve of the featureline
+  /// </summary>
+  public ICurve curve { get; set; }
 
-    public ICurve curve { get; set; }
+  /// <summary>
+  /// The points constructing the Featureline
+  /// </summary>
+  /// <remarks>
+  /// Can include both intersection and elevation points
+  /// </remarks>
+  public List<Point> points { get; set; }
 
-    public string name { get; set; }
+  public string name { get; set; }
 
-    public string units { get; set; }
+  public string units { get; set; }
 
-    [DetachProperty]
-    public Polyline displayValue { get; set; }
-
-    public Featureline() { }
-
-  }
+  /// <summary>
+  /// The 3D curves generated from the curve and points of the featureline
+  /// </summary>
+  [DetachProperty]
+  public List<Polyline> displayValue { get; set; }
 }

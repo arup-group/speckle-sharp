@@ -1,4 +1,4 @@
-﻿using Autodesk.Revit.DB.Structure;
+using Autodesk.Revit.DB.Structure;
 using Objects.BuiltElements;
 using Objects.BuiltElements.Revit;
 using Speckle.Core.Models;
@@ -50,6 +50,16 @@ namespace Objects.Converter.Revit
         parameters = myBeam.parameters,
         displayValue = myBeam.displayValue,
       };
+
+      var dynamicProps = myBeam.GetMembers(DynamicBaseMemberType.Dynamic);
+
+      var analyticalIdKey = "analyticalElementId";
+
+      var analyticalExists = dynamicProps.TryGetValue(analyticalIdKey, out var analyticalElementId);
+    
+      if (analyticalExists)
+        myBrace[analyticalIdKey] = analyticalElementId;
+
       return myBrace;
     }
   }

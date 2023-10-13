@@ -5,7 +5,6 @@
   xmlns:conv="clr-namespace:DesktopUI2.Views.Converters"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-  xmlns:m="clr-namespace:Material.Styles;assembly=Material.Styles"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   d:DesignHeight="150"
   d:DesignWidth="400"
@@ -38,7 +37,7 @@
       VerticalAlignment="Center"
       Classes="StreamCard"
       Kind="Users"
-      ToolTip.Tip="Number of collaborators on this stream" />
+      ToolTip.Tip="Number of collaborators" />
     <TextBlock
       Grid.Column="4"
       Classes="Overline"
@@ -49,7 +48,7 @@
       VerticalAlignment="Center"
       Classes="StreamCard"
       Kind="Comments"
-      ToolTip.Tip="Number of comments on this stream" />
+      ToolTip.Tip="Number of comments" />
     <TextBlock
       Grid.Column="6"
       Classes="Overline"
@@ -60,7 +59,7 @@
       VerticalAlignment="Center"
       Classes="StreamCard"
       Kind="Hearts"
-      ToolTip.Tip="Number of people who favorited this stream" />
+      ToolTip.Tip="Number of people who favorited" />
     <TextBlock
       Grid.Column="8"
       Classes="Overline"

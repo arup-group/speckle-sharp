@@ -371,6 +371,10 @@ speckle-sharp-ci-tools
 .circleci/continuation-config.yml
 .circleci/contiuation-config.yml
 ConnectorNavisworks/ConnectorNavisworks/Sample Models
+ConnectorArchicad/AddOn/Build*
+ConnectorArchicad/ConnectorArchicad/Properties
+**/dist/
+
 
 # GSA files
 GPUCache/

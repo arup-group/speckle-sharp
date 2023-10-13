@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Architecture;
@@ -15,7 +15,7 @@ namespace Objects.Converter.Revit
       var appObj = new ApplicationObject(speckleRailing.id, speckleRailing.speckle_type) { applicationId = speckleRailing.applicationId };
 
       // skip if element already exists in doc & receive mode is set to ignore
-      if (IsIgnore(revitRailing, appObj, out appObj))
+      if (IsIgnore(revitRailing, appObj))
         return appObj;
 
       if (speckleRailing.path == null)
@@ -24,7 +24,8 @@ namespace Objects.Converter.Revit
         return appObj;
       }
 
-      if (!GetElementType<RailingType>(speckleRailing, appObj, out RailingType railingType))
+      var railingType = GetElementType<RailingType>(speckleRailing, appObj, out bool isExactMatch);
+      if (railingType == null)
       {
         appObj.Update(status: ApplicationObject.State.Failed);
         return appObj;
@@ -52,17 +53,19 @@ namespace Objects.Converter.Revit
         return appObj;
       }
 
-      if (revitRailing.GetTypeId() != railingType.Id)
+      if (isExactMatch && revitRailing.GetTypeId() != railingType.Id)
+      {
         revitRailing.ChangeTypeId(railingType.Id);
+      }
 
       if (speckleRailing.topRail != null)
       {
-        GetElementType<TopRailType>(speckleRailing.topRail, appObj, out TopRailType topRailType);
+        var topRailType = GetElementType<TopRailType>(speckleRailing.topRail, appObj, out bool isTopRailExactMatch);
 
         if (GetParamValue<int>(railingType, BuiltInParameter.RAILING_SYSTEM_HAS_TOP_RAIL) == 0)
           TrySetParam(railingType, BuiltInParameter.RAILING_SYSTEM_HAS_TOP_RAIL, 1);
 
-        if (railingType.TopRailType != topRailType.Id && topRailType != null)
+        if (topRailType != null && isTopRailExactMatch)
           railingType.TopRailType = topRailType.Id;
 
       }
@@ -108,25 +111,24 @@ namespace Objects.Converter.Revit
 
       GetAllRevitParamsAndIds(speckleRailing, revitRailing, new List<string> { "STAIRS_RAILING_BASE_LEVEL_PARAM" });
 
-      speckleRailing.displayValue = GetElementDisplayMesh(revitRailing, new Options() { DetailLevel = ViewDetailLevel.Fine, ComputeReferences = false });
+      speckleRailing.displayValue = GetElementDisplayValue(
+        revitRailing,
+        new Options() { DetailLevel = ViewDetailLevel.Fine }
+      );
 
       if (revitRailing.TopRail != ElementId.InvalidElementId)
       {
 
-        var railingIndex = ContextObjects.FindIndex(obj => obj.applicationId == revitRailing.UniqueId);
-        if (railingIndex != -1)
+        if (ContextObjects.ContainsKey(revitRailing.UniqueId))
         {
-          ContextObjects.RemoveAt(railingIndex);
+          ContextObjects.Remove(revitRailing.UniqueId);
         }
 
         var revitTopRail = revitRailing.Document.GetElement(revitRailing.TopRail) as TopRail;
 
-        var isSelectedInContextObjects = ContextObjects
-              .FindIndex(x => x.applicationId == revitTopRail.UniqueId);
-
-        if (isSelectedInContextObjects != -1)
+        if (ContextObjects.ContainsKey(revitTopRail.UniqueId))
         {
-          ContextObjects.RemoveAt(isSelectedInContextObjects);
+          ContextObjects.Remove(revitTopRail.UniqueId);
         }
 
         if (CanConvertToSpeckle(revitTopRail))
@@ -137,7 +139,7 @@ namespace Objects.Converter.Revit
           //currently only the top level displayValue is visualized (or anything under 'elements')
           //if this leads to duplicated meshes in some cases, we might need to remove the display mesh form the TopRail element
           speckleRailing.displayValue.AddRange(speckleRailing.topRail.displayValue);
-          ConvertedObjectsList.Add(speckleRailing.topRail.applicationId);
+          ConvertedObjects.Add(speckleRailing.topRail.applicationId);
         }
       }
       return speckleRailing;

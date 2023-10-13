@@ -1,4 +1,4 @@
-﻿using Objects.Geometry;
+using Objects.Geometry;
 using Objects.Structural.Materials;
 using Objects.Structural.Properties.Profiles;
 using Objects.Utils;
@@ -16,11 +16,13 @@ namespace Archicad
 {
   public class ArchicadObject
   {
+    public string id { get; set; }
     public string applicationId { get; set; }
 
     public Point pos { get; set; }
+    public Objects.Other.Transform transform { get; set; }
 
-    public Archicad.Model.MeshModel model { get; set; }
+    public List<string> modelIds { get; set; }
 
     public string units { get; set; }
 
@@ -28,11 +30,12 @@ namespace Archicad
 
     [SchemaInfo("ArchicadObject", "Creates an Archicad object.", "Archicad", "Structure")]
 
-    public ArchicadObject(string applicationId, Point basePoint, Archicad.Model.MeshModel model)
+    public ArchicadObject(string id, string applicationId, Point basePoint, List<string> modelIds)
     {
+      this.id = id;
       this.applicationId = applicationId;
       this.pos = basePoint;
-      this.model = model;
+      this.modelIds = modelIds;
     }
   }
 }

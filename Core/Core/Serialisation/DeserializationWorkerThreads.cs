@@ -1,109 +1,93 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading;
+#nullable enable
+using System;
 using System.Threading.Tasks;
 
-namespace Speckle.Core.Serialisation
+namespace Speckle.Core.Serialisation;
+
+internal enum WorkerThreadTaskType
 {
-  internal enum WorkerThreadTaskType
+  _NoOp = default,
+  Deserialize,
+}
+
+internal class DeserializationWorkerThreads : ParallelOperationExecutor<WorkerThreadTaskType>
+{
+  private int FreeThreadCount;
+
+  private object LockFreeThreads = new();
+  private BaseObjectDeserializerV2 Serializer;
+
+  public DeserializationWorkerThreads(BaseObjectDeserializerV2 serializer)
   {
-    Deserialize,
+    Serializer = serializer;
+    this.NumThreads = Environment.ProcessorCount;
   }
 
-  internal class DeserializationWorkerThreads : IDisposable
+  public override void Dispose()
   {
-    public int ThreadCount { get; set; } = Environment.ProcessorCount;
+    lock (LockFreeThreads)
+      FreeThreadCount -= NumThreads;
+    base.Dispose();
+  }
 
-    private List<Thread> Threads = new List<Thread>();
-    private BaseObjectDeserializerV2 Serializer;
-
-    private object LockFreeThreads = new object();
-    private int FreeThreadCount = 0;
-    private BlockingCollection<(WorkerThreadTaskType, object, TaskCompletionSource<object>)> Tasks = new BlockingCollection<(WorkerThreadTaskType, object, TaskCompletionSource<object>)>();
-
-    public DeserializationWorkerThreads(BaseObjectDeserializerV2 serializer)
-    {
-      Serializer = serializer;
-    }
-
-    public void Start()
-    {
-      for (int i = 0; i < ThreadCount; i++)
-      {
-        Thread t = new Thread(new ThreadStart(ThreadMain));
-        t.IsBackground = true;
-        Threads.Add(t);
-        t.Start();
-      }
-
-    }
-
-    private void ThreadMain()
-    {
-      while (true)
-      {
-        lock (LockFreeThreads)
-        {
-          FreeThreadCount++;
-        }
-        (WorkerThreadTaskType taskType, object inputValue, TaskCompletionSource<object> tcs) = Tasks.Take();
-        if (tcs == null)
-        {
-          return;
-        }
-
-        try
-        {
-          object converted = null;
-          if (taskType == WorkerThreadTaskType.Deserialize)
-            converted = Serializer.DeserializeTransportObject(inputValue as String);
-          tcs.SetResult(converted);
-        }
-        catch (Exception e)
-        {
-          tcs.SetException(e);
-        }
-      }
-    }
-
-    public void Dispose()
+  protected override void ThreadMain()
+  {
+    while (true)
     {
       lock (LockFreeThreads)
-      {
-        FreeThreadCount -= ThreadCount;
-      }
-      foreach (Thread t in Threads)
-        Tasks.Add((WorkerThreadTaskType.Deserialize, null, null));
-      foreach (Thread t in Threads)
-        t.Join();
-      Threads = null;
-      Tasks.Dispose();
-    }
+        FreeThreadCount++;
+      var (taskType, inputValue, tcs) = Tasks.Take();
+      if (taskType == WorkerThreadTaskType._NoOp || tcs == null)
+        return;
 
-    internal Task<object> TryStartTask(WorkerThreadTaskType taskType, object inputValue)
+      try
+      {
+        var result = RunOperation(taskType, inputValue!, Serializer);
+        tcs.SetResult(result);
+      }
+      catch (Exception ex)
+      {
+        tcs.SetException(ex);
+      }
+    }
+  }
+
+  private static object RunOperation(
+    WorkerThreadTaskType taskType,
+    object inputValue,
+    BaseObjectDeserializerV2 serializer
+  )
+  {
+    switch (taskType)
     {
-      bool canStartTask = false;
-      lock (LockFreeThreads)
-      {
-        if (FreeThreadCount > 0)
-        {
-          canStartTask = true;
-          FreeThreadCount--;
-        }
-      }
-
-      if (canStartTask)
-      {
-        TaskCompletionSource<object> tcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
-        Tasks.Add((taskType, inputValue, tcs));
-        return tcs.Task;
-      }
-      else
-      {
-        return null;
-      }
-
+      case WorkerThreadTaskType.Deserialize:
+        var converted = serializer.DeserializeTransportObject(inputValue as string);
+        return converted;
+      default:
+        throw new ArgumentException(
+          $"No implementation for {nameof(WorkerThreadTaskType)} with value {taskType}",
+          nameof(taskType)
+        );
     }
+  }
+
+  internal Task<object?>? TryStartTask(WorkerThreadTaskType taskType, object inputValue)
+  {
+    bool canStartTask = false;
+    lock (LockFreeThreads)
+    {
+      if (FreeThreadCount > 0)
+      {
+        canStartTask = true;
+        FreeThreadCount--;
+      }
+    }
+
+    if (!canStartTask)
+      return null;
+
+    TaskCompletionSource<object?> tcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    Tasks.Add(new(taskType, inputValue, tcs));
+    return tcs.Task;
   }
 }

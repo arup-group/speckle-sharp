@@ -1,5 +1,3 @@
-
-
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
@@ -720,68 +718,6 @@ public class AdSecZSectionSchemaComponent: CreateSchemaObjectBase {
 }
 
 // This is generated code:
-public class AdvanceSteelBeamSchemaComponent: CreateSchemaObjectBase {
-    static AdvanceSteelBeamSchemaComponent() {
-       SpeckleGHSettings.SettingsChanged += (_, args) =>
-          {
-            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
-            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
-            if (proxy == null) return;
-            proxy.Exposure = internalExposure;
-          };
-    }
-    public AdvanceSteelBeamSchemaComponent(): base("AdvanceSteelBeam", "AdvanceSteelBeam", "Creates a Advance Steel beam by curve.", "Speckle 2 Advance Steel", "Structure") { }
-    
-    internal static string internalCategory { get; }  = "Speckle 2 Advance Steel";
-
-    internal static Guid internalGuid => new Guid("bc7e258d-7e41-97cf-86d4-59bf3312ea52");
-
-
-    public override GH_Exposure Exposure => internalExposure;
-
-    public override Guid ComponentGuid => internalGuid;
-    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
-      ? GH_Exposure.tertiary
-      : GH_Exposure.hidden;
-    
-    public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.BuiltElements.AdvanceSteel.AdvanceSteelBeam.ctor(Objects.ICurve,Objects.Structural.Properties.Profiles.SectionProfile,Objects.Structural.Materials.StructuralMaterial)","Objects.BuiltElements.AdvanceSteel.AdvanceSteelBeam");
-        base.AddedToDocument(document);
-    }
-}
-
-// This is generated code:
-public class AdvanceSteelPlateSchemaComponent: CreateSchemaObjectBase {
-    static AdvanceSteelPlateSchemaComponent() {
-       SpeckleGHSettings.SettingsChanged += (_, args) =>
-          {
-            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
-            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
-            if (proxy == null) return;
-            proxy.Exposure = internalExposure;
-          };
-    }
-    public AdvanceSteelPlateSchemaComponent(): base("AdvanceSteelPlate", "AdvanceSteelPlate", "Creates a Advance Steel plate.", "Speckle 2 Advance Steel", "Structure") { }
-    
-    internal static string internalCategory { get; }  = "Speckle 2 Advance Steel";
-
-    internal static Guid internalGuid => new Guid("6cf1d0a8-d647-1ccc-f5b5-51e2f185eaee");
-
-
-    public override GH_Exposure Exposure => internalExposure;
-
-    public override Guid ComponentGuid => internalGuid;
-    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
-      ? GH_Exposure.tertiary
-      : GH_Exposure.hidden;
-    
-    public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.BuiltElements.AdvanceSteel.AdvanceSteelPlate.ctor(Objects.Structural.Properties.Profiles.SectionProfile,Objects.Geometry.Polyline,System.String,Objects.Structural.Materials.StructuralMaterial)","Objects.BuiltElements.AdvanceSteel.AdvanceSteelPlate");
-        base.AddedToDocument(document);
-    }
-}
-
-// This is generated code:
 public class AngleSchemaComponent: CreateSchemaObjectBase {
     static AngleSchemaComponent() {
        SpeckleGHSettings.SettingsChanged += (_, args) =>
@@ -838,7 +774,7 @@ public class ArchicadBeamSchemaComponent: CreateSchemaObjectBase {
       : GH_Exposure.hidden;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.BuiltElements.Archicad.ArchicadBeam.ctor(Objects.Geometry.Point,Objects.Geometry.Point)","Objects.BuiltElements.Archicad.ArchicadBeam");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.BuiltElements.Archicad.ArchicadBeam.ctor","Objects.BuiltElements.Archicad.ArchicadBeam");
         base.AddedToDocument(document);
     }
 }
@@ -869,7 +805,38 @@ public class ArchicadColumnSchemaComponent: CreateSchemaObjectBase {
       : GH_Exposure.hidden;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.BuiltElements.Archicad.ArchicadColumn.ctor(Objects.Geometry.Point,System.Double)","Objects.BuiltElements.Archicad.ArchicadColumn");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.BuiltElements.Archicad.ArchicadColumn.ctor","Objects.BuiltElements.Archicad.ArchicadColumn");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class ArchicadWallSchemaComponent: CreateSchemaObjectBase {
+    static ArchicadWallSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public ArchicadWallSchemaComponent(): base("ArchicadWall", "ArchicadWall", "Creates an Archicad wall.", "Speckle 2 Archicad", "Structure") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 Archicad";
+
+    internal static Guid internalGuid => new Guid("241e7c68-a688-47f3-c541-d2585517fd71");
+
+
+    public override GH_Exposure Exposure => internalExposure;
+
+    public override Guid ComponentGuid => internalGuid;
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.BuiltElements.Archicad.ArchicadWall.ctor","Objects.BuiltElements.Archicad.ArchicadWall");
         base.AddedToDocument(document);
     }
 }
@@ -901,6 +868,130 @@ public class AreaSchemaComponent: CreateSchemaObjectBase {
     
     public override void AddedToDocument(GH_Document document){
         SelectedConstructor = CSOUtils.FindConstructor("Objects.BuiltElements.Area.ctor(System.String,System.String,Objects.BuiltElements.Level,Objects.Geometry.Point)","Objects.BuiltElements.Area");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AsteelBeamSchemaComponent: CreateSchemaObjectBase {
+    static AsteelBeamSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AsteelBeamSchemaComponent(): base("AsteelBeam", "AsteelBeam", "Creates a Advance Steel beam by curve.", "Speckle 2 Advance Steel", "Structure") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 Advance Steel";
+
+    internal static Guid internalGuid => new Guid("74818c4c-2d7a-c317-2333-4c051a091c84");
+
+
+    public override GH_Exposure Exposure => internalExposure;
+
+    public override Guid ComponentGuid => internalGuid;
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.BuiltElements.AdvanceSteel.AsteelBeam.ctor(Objects.ICurve,Objects.Structural.Properties.Profiles.SectionProfile,Objects.Structural.Materials.StructuralMaterial)","Objects.BuiltElements.AdvanceSteel.AsteelBeam");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AsteelPlateSchemaComponent: CreateSchemaObjectBase {
+    static AsteelPlateSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AsteelPlateSchemaComponent(): base("AsteelPlate", "AsteelPlate", "Creates a Advance Steel plate.", "Speckle 2 Advance Steel", "Structure") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 Advance Steel";
+
+    internal static Guid internalGuid => new Guid("0ee1f665-ad53-c1d8-c25b-a6108141358a");
+
+
+    public override GH_Exposure Exposure => internalExposure;
+
+    public override Guid ComponentGuid => internalGuid;
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.BuiltElements.AdvanceSteel.AsteelPlate.ctor(Objects.Structural.Properties.Profiles.SectionProfile,Objects.Geometry.Polyline,System.String,Objects.Structural.Materials.StructuralMaterial)","Objects.BuiltElements.AdvanceSteel.AsteelPlate");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AsteelPlate1SchemaComponent: CreateSchemaObjectBase {
+    static AsteelPlate1SchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AsteelPlate1SchemaComponent(): base("AsteelPlate", "AsteelPlate", "Creates a Advance Steel plate.", "Speckle 2 Advance Steel", "Structure") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 Advance Steel";
+
+    internal static Guid internalGuid => new Guid("34b9f591-379a-065f-17e8-8f9c5c972cb5");
+
+
+    public override GH_Exposure Exposure => internalExposure;
+
+    public override Guid ComponentGuid => internalGuid;
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.BuiltElements.AdvanceSteel.AsteelPlate.ctor(Objects.Geometry.Polyline,System.String,Objects.Structural.Materials.StructuralMaterial)","Objects.BuiltElements.AdvanceSteel.AsteelPlate");
+        base.AddedToDocument(document);
+    }
+}
+
+// This is generated code:
+public class AsteelSlabSchemaComponent: CreateSchemaObjectBase {
+    static AsteelSlabSchemaComponent() {
+       SpeckleGHSettings.SettingsChanged += (_, args) =>
+          {
+            if (!args.Key.StartsWith("Speckle2:tabs.")) return;
+            var proxy = Grasshopper.Instances.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == internalGuid);
+            if (proxy == null) return;
+            proxy.Exposure = internalExposure;
+          };
+    }
+    public AsteelSlabSchemaComponent(): base("AsteelSlab", "AsteelSlab", "Creates a Advance Steel slab.", "Speckle 2 Advance Steel", "Structure") { }
+    
+    internal static string internalCategory { get; }  = "Speckle 2 Advance Steel";
+
+    internal static Guid internalGuid => new Guid("c3ce3b39-83ba-6541-d9d7-b3db39157cd0");
+
+
+    public override GH_Exposure Exposure => internalExposure;
+
+    public override Guid ComponentGuid => internalGuid;
+    internal static GH_Exposure internalExposure => SpeckleGHSettings.GetTabVisibility(internalCategory)
+      ? GH_Exposure.tertiary
+      : GH_Exposure.hidden;
+    
+    public override void AddedToDocument(GH_Document document){
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.BuiltElements.AdvanceSteel.AsteelSlab.ctor(Objects.Geometry.Polyline,System.String,Objects.Structural.Materials.StructuralMaterial)","Objects.BuiltElements.AdvanceSteel.AsteelSlab");
         base.AddedToDocument(document);
     }
 }
@@ -1350,7 +1441,7 @@ public class CSIElement1DSchemaComponent: CreateSchemaObjectBase {
             proxy.Exposure = internalExposure;
           };
     }
-    public CSIElement1DSchemaComponent(): base("CSIElement1D (from local axis)", "CSIElement1D (from local axis)", "Creates a Speckle CSI 1D element (from local axis)", "Speckle 2 CSI", "Geometry") { }
+    public CSIElement1DSchemaComponent(): base("Element1D (from local axis)", "Element1D (from local axis)", "Creates a Speckle CSI 1D element (from local axis)", "Speckle 2 CSI", "Geometry") { }
     
     internal static string internalCategory { get; }  = "Speckle 2 CSI";
 
@@ -1381,7 +1472,7 @@ public class CSIElement1D1SchemaComponent: CreateSchemaObjectBase {
             proxy.Exposure = internalExposure;
           };
     }
-    public CSIElement1D1SchemaComponent(): base("CSIElement1D (from orientation node and angle)", "CSIElement1D (from orientation node and angle)", "Creates a Speckle CSI 1D element (from orientation node and angle)", "Speckle 2 CSI", "Geometry") { }
+    public CSIElement1D1SchemaComponent(): base("Element1D (from orientation node and angle)", "Element1D (from orientation node and angle)", "Creates a Speckle CSI 1D element (from orientation node and angle)", "Speckle 2 CSI", "Geometry") { }
     
     internal static string internalCategory { get; }  = "Speckle 2 CSI";
 
@@ -1412,7 +1503,7 @@ public class CSIElement2DSchemaComponent: CreateSchemaObjectBase {
             proxy.Exposure = internalExposure;
           };
     }
-    public CSIElement2DSchemaComponent(): base("CSIElement2D", "CSIElement2D", "Creates a Speckle CSI 2D element (based on a list of edge ie. external, geometry defining nodes)", "Speckle 2 CSI", "Geometry") { }
+    public CSIElement2DSchemaComponent(): base("Element2D", "Element2D", "Creates a Speckle CSI 2D element (based on a list of edge ie. external, geometry defining nodes)", "Speckle 2 CSI", "Geometry") { }
     
     internal static string internalCategory { get; }  = "Speckle 2 CSI";
 
@@ -2803,7 +2894,7 @@ public class GSAInfluenceNodeSchemaComponent: CreateSchemaObjectBase {
             proxy.Exposure = internalExposure;
           };
     }
-    public GSAInfluenceNodeSchemaComponent(): base("GSAInfluenceNode", "GSAInfluenceNode", "Creates a Speckle structural node influence effect for GSA (for an influence analysis)", "Speckle 2 GSA", "Bridge") { }
+    public GSAInfluenceNodeSchemaComponent(): base("GSAInfluenceBeam", "GSAInfluenceBeam", "Creates a Speckle structural node influence effect for GSA (for an influence analysis)", "Speckle 2 GSA", "Bridge") { }
     
     internal static string internalCategory { get; }  = "Speckle 2 GSA";
 
@@ -6073,7 +6164,7 @@ public class ResultSetAllSchemaComponent: CreateSchemaObjectBase {
       : GH_Exposure.hidden;
     
     public override void AddedToDocument(GH_Document document){
-        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Results.ResultSetAll.ctor(Objects.Structural.Results.ResultSet1D,Objects.Structural.Results.ResultSet2D,Objects.Structural.Results.ResultSet3D,Objects.Structural.Results.ResultGlobal,Objects.Structural.Results.ResultSetNode)","Objects.Structural.Results.ResultSetAll");
+        SelectedConstructor = CSOUtils.FindConstructor("Objects.Structural.Results.ResultSetAll.ctor(Objects.Structural.Results.ResultSet1D,Objects.Structural.Results.ResultSet2D,Objects.Structural.Results.ResultSet3D,Objects.Structural.Results.ResultSetGlobal,Objects.Structural.Results.ResultSetNode)","Objects.Structural.Results.ResultSetAll");
         base.AddedToDocument(document);
     }
 }
