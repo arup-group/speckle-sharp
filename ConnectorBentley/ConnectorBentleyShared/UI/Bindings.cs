@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -164,6 +164,8 @@ namespace Speckle.ConnectorBentley.UI
       filterList.Add(new AllSelectionFilter { Slug = "all", Name = "Everything", Icon = "CubeScan", Description = "Selects all document objects." });
       filterList.Add(new ListSelectionFilter { Slug = "level", Name = "Levels", Icon = "LayersTriple", Description = "Selects objects based on their level.", Values = levels });
       filterList.Add(new ListSelectionFilter { Slug = "elementType", Name = "Element Types", Icon = "Category", Description = "Selects objects based on their element type.", Values = elementTypes });
+      filterList.Add(new ManualSelectionFilter());
+
 
 #if (OPENROADS || OPENRAIL || OPENBRIDGE)
       var civilElementTypes = new List<string> { "Alignment" };
@@ -692,6 +694,8 @@ namespace Speckle.ConnectorBentley.UI
       var selection = new List<string>();
       switch (filter.Slug)
       {
+        case "manual":
+          return filter.Selection;
         case "all":
           return Model.ConvertibleObjects(converter);
         case "level":
