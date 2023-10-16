@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ConnectorMicroStation": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Program Files\\Bentley\\MicroStation CONNECT Edition\\MicroStation\\microstation.exe"
+    }
+  }
+}
