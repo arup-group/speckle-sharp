@@ -10,7 +10,7 @@
     <PackageTags>$(PackageTags) objects converter revit</PackageTags>
     <CopyToKitFolder>true</CopyToKitFolder>
   </PropertyGroup>
-
+  <Import Project="..\ConverterRevitShared\ConverterRevitShared.projitems" Label="Shared" />
   <ItemGroup>
     <PackageReference Include="ModPlus.Revit.API.2020" Version="1.0.0" ExcludeAssets="runtime" />
   </ItemGroup>

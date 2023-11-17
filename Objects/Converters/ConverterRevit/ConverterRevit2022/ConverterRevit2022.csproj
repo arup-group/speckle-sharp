@@ -11,7 +11,7 @@
     <PackageTags>$(PackageTags) objects converter revit</PackageTags>
     <CopyToKitFolder>true</CopyToKitFolder>
   </PropertyGroup>
-
+  <Import Project="..\ConverterRevitShared\ConverterRevitShared.projitems" Label="Shared" />
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\ConnectorRevit\RevitSharedResources2022\RevitSharedResources2022.csproj" />
     <ProjectReference Include="..\..\..\..\Core\Core\Core.csproj" />
