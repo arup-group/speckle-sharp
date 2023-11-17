@@ -1,8 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Mechanical;
+using ConverterRevitShared.Extensions;
 using Objects.BuiltElements.Revit;
 using Speckle.Core.Models;
 using DB = Autodesk.Revit.DB;
@@ -36,7 +36,7 @@ namespace Objects.Converter.Revit
       Element duct = null;
       if (speckleDuct.baseCurve == null || speckleDuct.baseCurve is Line)
       {
-        var ductType = GetElementType<FlexDuctType>(speckleDuct, appObj, out bool _);
+        var ductType = GetElementType<DuctType>(speckleDuct, appObj, out bool _);
         if (ductType == null)
         {
           appObj.Update(status: ApplicationObject.State.Failed);
@@ -89,6 +89,8 @@ namespace Objects.Converter.Revit
         SetInstanceParameters(duct, speckleRevitDuct);
       }
 
+      CreateSystemConnections(speckleRevitDuct.Connectors, duct, receivedObjectsCache);
+
       appObj.Update(status: ApplicationObject.State.Created, createdId: duct.UniqueId, convertedItem: duct);
       return appObj;
     }
@@ -115,7 +117,7 @@ namespace Objects.Converter.Revit
         length = GetParamValue<double>(revitDuct, BuiltInParameter.CURVE_ELEM_LENGTH),
         velocity = GetParamValue<double>(revitDuct, BuiltInParameter.RBS_VELOCITY),
         level = ConvertAndCacheLevel(revitDuct, BuiltInParameter.RBS_START_LEVEL_PARAM),
-        displayValue = GetElementDisplayValue(revitDuct, SolidDisplayValueOptions)
+        displayValue = GetElementDisplayValue(revitDuct)
       };
 
       if (revitDuct.MEPSystem != null)
@@ -135,6 +137,11 @@ namespace Objects.Converter.Revit
           "RBS_CURVE_HEIGHT_PARAM", "RBS_CURVE_WIDTH_PARAM", "RBS_CURVE_DIAMETER_PARAM", "CURVE_ELEM_LENGTH",
           "RBS_START_LEVEL_PARAM", "RBS_VELOCITY"
         });
+
+      foreach (var connector in revitDuct.GetConnectorSet())
+      {
+        speckleDuct.Connectors.Add(ConnectorToSpeckle(connector));
+      }
 
       return speckleDuct;
     }
@@ -161,7 +168,7 @@ namespace Objects.Converter.Revit
         endTangent = VectorToSpeckle(revitDuct.EndTangent, revitDuct.Document),
         velocity = GetParamValue<double>(revitDuct, BuiltInParameter.RBS_VELOCITY),
         level = ConvertAndCacheLevel(revitDuct, BuiltInParameter.RBS_START_LEVEL_PARAM),
-        displayValue = GetElementDisplayValue(revitDuct, SolidDisplayValueOptions)
+        displayValue = GetElementDisplayValue(revitDuct)
       };
 
       if (revitDuct.MEPSystem != null)
@@ -173,6 +180,11 @@ namespace Objects.Converter.Revit
 
         var typeElem = revitDuct.Document.GetElement(revitDuct.MEPSystem.GetTypeId());
         speckleDuct.systemName = typeElem.Name;
+      }
+
+      foreach (var connector in revitDuct.GetConnectorSet())
+      {
+        speckleDuct.Connectors.Add(ConnectorToSpeckle(connector));
       }
 
       GetAllRevitParamsAndIds(speckleDuct, revitDuct,

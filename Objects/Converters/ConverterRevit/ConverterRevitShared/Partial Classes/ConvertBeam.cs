@@ -48,7 +48,15 @@ namespace Objects.Converter.Revit
         if (level != null)
           level = GetLevelByName(speckleRevitBeam.level.name);
 
-      level ??= ConvertLevelToRevit(speckleRevitBeam?.level ?? LevelFromCurve(baseLine), out ApplicationObject.State levelState);
+      double baseOffset = 0.0;
+      if (speckleRevitBeam != null && speckleRevitBeam.level != null)
+      {
+        level = ConvertLevelToRevit(speckleRevitBeam.level, out ApplicationObject.State levelState);
+      }
+      else
+      {
+        level = ConvertLevelToRevit(baseLine, out ApplicationObject.State levelState, out baseOffset);
+      }
       var isUpdate = false;
 
       if (docObj != null)
@@ -65,7 +73,13 @@ namespace Objects.Converter.Revit
           else
           {
             revitBeam = (DB.FamilyInstance)docObj;
-            (revitBeam.Location as LocationCurve).Curve = baseLine;
+
+            // if we combine the following two statements, it results in an error that the beam is unable to be
+            // bent into position. For some reason separating the curve variable declaration and the curve setting
+            // fixes this issue. I'm not sure if this is a permanent fix. If not, then I think the solution is to 
+            // disassociate the beam from the current workplane and then setting the new curve
+            var existingCurve = (revitBeam.Location as LocationCurve).Curve;
+            existingCurve = baseLine;
 
             // check for a type change
             if (isExactMatch && revitType.Id.IntegerValue != familySymbol.Id.IntegerValue)
@@ -104,11 +118,13 @@ namespace Objects.Converter.Revit
 
       if (speckleRevitBeam != null)
         SetInstanceParameters(revitBeam, speckleRevitBeam);
+      else
+        TrySetParam(revitBeam, BuiltInParameter.INSTANCE_FREE_HOST_OFFSET_PARAM, -baseOffset);
 
       // TODO: get sub families, it's a family! 
       var state = isUpdate ? ApplicationObject.State.Updated : ApplicationObject.State.Created;
       appObj.Update(status: state, createdId: revitBeam.UniqueId, convertedItem: revitBeam);
-      appObj = SetHostedElements(speckleBeam, revitBeam, appObj);
+      //appObj = SetHostedElements(speckleBeam, revitBeam, appObj);
       return appObj;
     }
 
@@ -130,13 +146,7 @@ namespace Objects.Converter.Revit
       speckleBeam.baseLine = baseLine;
       speckleBeam.level = ConvertAndCacheLevel(revitBeam, BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM);
 
-      // structural connection modifiers alter family instance geometry, but the modifiers are view specific
-      // so we need to pass in the view we want in order to get the correct geometry
-      // TODO: we need to make sure we are passing in the correct view
-      var connectionHandlerFilter = new ElementClassFilter(typeof(DB.Structure.StructuralConnectionHandler));
-      var options = revitBeam.GetSubelements().Where(o => (BuiltInCategory)o.Category.Id.IntegerValue == DB.BuiltInCategory.OST_StructConnectionModifiers).Any() || revitBeam.GetDependentElements(connectionHandlerFilter).Any() ?
-        new Options() { View = Doc.ActiveView, ComputeReferences = true } : SolidDisplayValueOptions;
-      speckleBeam.displayValue = GetElementDisplayValue(revitBeam, options);
+      speckleBeam.displayValue = GetElementDisplayValue(revitBeam);
 
       GetAllRevitParamsAndIds(speckleBeam, revitBeam);
 

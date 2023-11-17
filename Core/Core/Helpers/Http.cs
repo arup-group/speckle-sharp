@@ -176,12 +176,34 @@ public static class Http
     }
   }
 
-  public static HttpClient GetHttpProxyClient(SpeckleHttpClientHandler? handler = null)
+  public static HttpClient GetHttpProxyClient(SpeckleHttpClientHandler? handler = null, TimeSpan? timeout = null)
   {
     IWebProxy proxy = WebRequest.GetSystemWebProxy();
     proxy.Credentials = CredentialCache.DefaultCredentials;
 
-    return new HttpClient(handler ?? new SpeckleHttpClientHandler());
+    var client = new HttpClient(handler ?? new SpeckleHttpClientHandler());
+    client.Timeout = timeout ?? TimeSpan.FromSeconds(100);
+    return client;
+  }
+
+  public static bool CanAddAuth(string? authToken, out string? bearerHeader)
+  {
+    if (!string.IsNullOrEmpty(authToken))
+    {
+      bearerHeader = authToken.ToLowerInvariant().Contains("bearer") ? authToken : $"Bearer {authToken}";
+      return true;
+    }
+
+    bearerHeader = null;
+    return false;
+  }
+
+  public static void AddAuthHeader(HttpClient client, string? authToken)
+  {
+    if (CanAddAuth(authToken, out string? value))
+    {
+      client.DefaultRequestHeaders.Add("Authorization", value);
+    }
   }
 }
 

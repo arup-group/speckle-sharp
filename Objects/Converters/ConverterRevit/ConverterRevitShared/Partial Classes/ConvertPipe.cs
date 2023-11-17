@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Plumbing;
+using ConverterRevitShared.Extensions;
 using Objects.BuiltElements.Revit;
 using Speckle.Core.Models;
 using Curve = Objects.Geometry.Curve;
@@ -27,7 +28,7 @@ namespace Objects.Converter.Revit
         return appObj;
 
       // get system info
-      var pipeType = GetElementType<DB.Plumbing.PipeType>(specklePipe, appObj, out bool _);
+      var pipeType = GetElementType<DB.MEPCurveType>(specklePipe, appObj, out bool _);
       if (pipeType == null)
       {
         appObj.Update(status: ApplicationObject.State.Failed);
@@ -117,6 +118,8 @@ namespace Objects.Converter.Revit
 
       TrySetParam(pipe, BuiltInParameter.RBS_PIPE_DIAMETER_PARAM, specklePipe.diameter, specklePipe.units);
 
+      CreateSystemConnections(speckleRevitPipe.Connectors, pipe, receivedObjectsCache);
+
       appObj.Update(status: ApplicationObject.State.Created, createdId: pipe.UniqueId, convertedItem: pipe);
       return appObj;
     }
@@ -139,7 +142,7 @@ namespace Objects.Converter.Revit
         diameter = GetParamValue<double>(revitPipe, BuiltInParameter.RBS_PIPE_DIAMETER_PARAM),
         length = GetParamValue<double>(revitPipe, BuiltInParameter.CURVE_ELEM_LENGTH),
         level = ConvertAndCacheLevel(revitPipe, BuiltInParameter.RBS_START_LEVEL_PARAM),
-        displayValue = GetElementDisplayValue(revitPipe, SolidDisplayValueOptions)
+        displayValue = GetElementDisplayValue(revitPipe)
       };
 
       var material = ConverterRevit.GetMEPSystemMaterial(revitPipe);
@@ -160,6 +163,12 @@ namespace Objects.Converter.Revit
         "RBS_PIPE_BOTTOM_ELEVATION",
         "RBS_PIPE_TOP_ELEVATION"
       });
+
+      foreach (var connector in revitPipe.GetConnectorSet())
+      {
+        specklePipe.Connectors.Add(ConnectorToSpeckle(connector));
+      }
+
       return specklePipe;
     }
     public BuiltElements.Pipe PipeToSpeckle(DB.Plumbing.FlexPipe revitPipe)
@@ -183,7 +192,7 @@ namespace Objects.Converter.Revit
         startTangent = VectorToSpeckle(revitPipe.StartTangent, revitPipe.Document),
         endTangent = VectorToSpeckle(revitPipe.EndTangent, revitPipe.Document),
         level = ConvertAndCacheLevel(revitPipe, BuiltInParameter.RBS_START_LEVEL_PARAM),
-        displayValue = GetElementDisplayValue(revitPipe, SolidDisplayValueOptions)
+        displayValue = GetElementDisplayValue(revitPipe)
       };
 
       var material = ConverterRevit.GetMEPSystemMaterial(revitPipe);
@@ -201,6 +210,11 @@ namespace Objects.Converter.Revit
         "CURVE_ELEM_LENGTH",
         "RBS_START_LEVEL_PARAM",
       });
+
+      foreach (var connector in revitPipe.GetConnectorSet())
+      {
+        specklePipe.Connectors.Add(ConnectorToSpeckle(connector));
+      }
 
       return specklePipe;
     }

@@ -51,7 +51,10 @@ namespace Objects.Converter.Revit
         displayValue = myBeam.displayValue,
       };
 
-      var dynamicProps = myBeam.GetMembers(DynamicBaseMemberType.Dynamic);
+      var dynamicProps = myBeam.GetMembers(DynamicBaseMemberType.Dynamic);  
+      
+      foreach (var dp in dynamicProps)
+        myBrace[dp.Key] = dp.Value;
 
       var analyticalIdKey = "analyticalElementId";
 
