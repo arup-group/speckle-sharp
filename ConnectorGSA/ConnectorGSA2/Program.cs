@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.ReactiveUI;
 using System.IO;
 using System;
@@ -38,7 +38,7 @@ namespace ConnectorGSA.Launcher
       }
       catch (Exception e)
       {
-        throw e;
+        //throw e;
       }
 
       return;

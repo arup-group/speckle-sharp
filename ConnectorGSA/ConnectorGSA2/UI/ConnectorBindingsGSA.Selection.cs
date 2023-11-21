@@ -17,7 +17,6 @@ using Speckle.Core.Transports;
 using Speckle.GSA.API;
 using Speckle.GSA.API.GwaSchema;
 using Speckle.Newtonsoft.Json;
-using static DesktopUI2.ViewModels.MappingViewModel;
 
 
 namespace ConnectorGSA.UI
@@ -95,11 +94,6 @@ namespace ConnectorGSA.UI
     public override void SelectClientObjects(List<string> objs, bool deselect = false)
     {
       throw new NotImplementedException();
-    }
-
-    public override async Task<Dictionary<string, List<MappingValue>>> ImportFamilyCommand(Dictionary<string, List<MappingValue>> Mapping)
-    {
-      return new Dictionary<string, List<MappingValue>>();
     }
   }
 }

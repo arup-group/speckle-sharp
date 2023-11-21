@@ -1,4 +1,4 @@
-﻿using Speckle.Core.Api;
+using Speckle.Core.Api;
 using Speckle.Core.Credentials;
 using Speckle.Core.Kits;
 using Speckle.Core.Transports;
@@ -491,11 +491,11 @@ namespace ConnectorGSA
     }
 
     #region Log
-    [DllImport("Kernel32.dll")]
-    public static extern bool AttachConsole(int processId);
+    //[DllImport("Kernel32.dll")]
+    //public static extern bool AttachConsole(int processId);
 
-    [DllImport("Kernel32.dll")]
-    public static extern bool FreeConsole();
+    //[DllImport("Kernel32.dll")]
+    //public static extern bool FreeConsole();
 
     /// <summary>
     /// Message handler.

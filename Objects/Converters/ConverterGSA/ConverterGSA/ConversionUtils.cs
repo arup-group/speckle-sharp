@@ -1,4 +1,4 @@
-﻿using Objects.Structural.Geometry;
+using Objects.Structural.Geometry;
 using Objects.Structural.Materials;
 using Objects.Structural.Properties;
 using Objects.Structural.Properties.Profiles;
@@ -135,6 +135,16 @@ namespace ConverterGSA
       Report.Log($"Using section mapping data from stream: {key}");
 
       return mappingData;
+    }
+
+    public object ConvertToNativeDisplayable(Base @object)
+    {
+      throw new NotImplementedException();
+    }
+
+    public bool CanConvertToNativeDisplayable(Base @object)
+    {
+      throw new NotImplementedException();
     }
 
     #endregion
