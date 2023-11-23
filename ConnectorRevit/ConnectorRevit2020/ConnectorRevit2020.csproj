@@ -13,7 +13,7 @@
     <DefineConstants>$(DefineConstants);REVIT2020</DefineConstants>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
-  
+  <Import Project="..\ConnectorRevit\ConnectorRevit.projitems" Label="Shared" />
   <ItemGroup>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
