@@ -506,9 +506,11 @@ namespace ConnectorGSA
 
     #region Log
     [DllImport("Kernel32.dll")]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     public static extern bool AttachConsole(int processId);
 
     [DllImport("Kernel32.dll")]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     public static extern bool FreeConsole();
 
     /// <summary>
