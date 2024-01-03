@@ -1,8 +1,10 @@
-﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Structure;
 using Objects.BuiltElements;
 using Objects.BuiltElements.Revit;
 using Speckle.Core.Models;
+using Speckle.Core.Models.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -110,7 +112,19 @@ namespace Objects.Converter.Revit
             StructuralFramingUtils.DisallowJoinAtEnd(revitBeam, 0);
             StructuralFramingUtils.DisallowJoinAtEnd(revitBeam, 1);
           }
-        }      
+        }
+        // Param only applicable for when beam allows join
+        else
+        {
+          var cutbackParams = speckleBeam.TryGetParameters<BuiltElements.Revit.Parameter>()
+            .Where(p => string.Equals(p.applicationInternalName, "START_JOIN_CUTBACK") || string.Equals(p.applicationInternalName, "END_JOIN_CUTBACK"));
+
+          foreach (var param in cutbackParams)
+          {
+            if (Enum.TryParse<BuiltInParameter>(param.applicationInternalName, out var paramEnum))
+              TrySetParam(revitBeam, paramEnum, param.value, param.units);
+          }
+        }
       }
 
       //reference level, only for beams
