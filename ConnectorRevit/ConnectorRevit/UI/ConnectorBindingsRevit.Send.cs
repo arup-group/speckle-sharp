@@ -171,7 +171,7 @@ namespace Speckle.ConnectorRevit.UI
 
       commitObjectBuilder.BuildCommitObject(commitObject);
 
-      var transports = new List<ITransport>() { new ServerTransport(client.Account, streamId) };
+      var transports = new List<ITransport>() { new ServerTransport(client.Account, streamId, numThreads: 1) };
 
       var objectId = await Operations
         .Send(

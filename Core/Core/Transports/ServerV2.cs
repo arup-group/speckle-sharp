@@ -18,8 +18,8 @@ namespace Speckle.Core.Transports;
 
 public class ServerTransport : ServerTransportV2
 {
-  public ServerTransport(Account account, string streamId, int timeoutSeconds = 60, string? blobStorageFolder = null)
-    : base(account, streamId, timeoutSeconds, blobStorageFolder) { }
+  public ServerTransport(Account account, string streamId, int timeoutSeconds = 60, string? blobStorageFolder = null, int numThreads = 4)
+    : base(account, streamId, timeoutSeconds, blobStorageFolder, numThreads) { }
 }
 
 public class ServerTransportV2 : IDisposable, ICloneable, ITransport, IBlobCapableTransport
@@ -37,10 +37,10 @@ public class ServerTransportV2 : IDisposable, ICloneable, ITransport, IBlobCapab
 
   private bool _shouldSendThreadRun;
 
-  public ServerTransportV2(Account account, string streamId, int timeoutSeconds = 60, string? blobStorageFolder = null)
+  public ServerTransportV2(Account account, string streamId, int timeoutSeconds = 60, string? blobStorageFolder = null, int numThreads = 4)
   {
     Account = account;
-    Initialize(account.serverInfo.url, streamId, account.token, timeoutSeconds);
+    Initialize(account.serverInfo.url, streamId, account.token, timeoutSeconds, numThreads);
     BlobStorageFolder = blobStorageFolder ?? SpecklePathProvider.BlobStoragePath();
 
     Directory.CreateDirectory(BlobStorageFolder);
@@ -282,7 +282,7 @@ public class ServerTransportV2 : IDisposable, ICloneable, ITransport, IBlobCapab
     _sendingThread = null;
   }
 
-  private void Initialize(string baseUri, string streamId, string authorizationToken, int timeoutSeconds = 60)
+  private void Initialize(string baseUri, string streamId, string authorizationToken, int timeoutSeconds = 60, int numThreads = 4)
   {
     SpeckleLog.Logger.Information("Initializing a new Remote Transport for {baseUri}", baseUri);
 
@@ -291,7 +291,7 @@ public class ServerTransportV2 : IDisposable, ICloneable, ITransport, IBlobCapab
     AuthorizationToken = authorizationToken;
     TimeoutSeconds = timeoutSeconds;
 
-    Api = new ParallelServerApi(BaseUri, AuthorizationToken, BlobStorageFolder, TimeoutSeconds);
+    Api = new ParallelServerApi(BaseUri, AuthorizationToken, BlobStorageFolder, TimeoutSeconds, numThreads);
     Api.OnBatchSent = (num, size) =>
     {
       OnProgressAction?.Invoke(TransportName, num);
