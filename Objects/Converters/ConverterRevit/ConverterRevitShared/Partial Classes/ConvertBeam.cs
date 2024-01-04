@@ -116,8 +116,14 @@ namespace Objects.Converter.Revit
         // Param only applicable for when beam allows join
         else
         {
+          var paramNames = new HashSet<string>()
+          {
+            "START_JOIN_CUTBACK",
+            "END_JOIN_CUTBACK"
+          };
+
           var cutbackParams = speckleBeam.TryGetParameters<BuiltElements.Revit.Parameter>()
-            .Where(p => string.Equals(p.applicationInternalName, "START_JOIN_CUTBACK") || string.Equals(p.applicationInternalName, "END_JOIN_CUTBACK"));
+            .Where(p => paramNames.Contains(p.applicationInternalName));
 
           foreach (var param in cutbackParams)
           {
