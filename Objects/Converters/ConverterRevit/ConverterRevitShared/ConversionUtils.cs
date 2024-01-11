@@ -478,7 +478,7 @@ namespace Objects.Converter.Revit
 
         var rp = revitParameterById.ContainsKey(spk.Key) ? revitParameterById[spk.Key] : revitParameterByName[spk.Key];
 
-        TrySetParam(rp, sp.value, applicationUnit: sp.applicationUnit);
+        TrySetParam(rp, sp.value, !string.IsNullOrEmpty(sp.units) ? sp.units : string.Empty ,applicationUnit: sp.applicationUnit);
       }
     }
 
