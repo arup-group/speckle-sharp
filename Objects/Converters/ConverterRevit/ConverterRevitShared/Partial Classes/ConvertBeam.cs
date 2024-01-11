@@ -122,13 +122,17 @@ namespace Objects.Converter.Revit
             "END_JOIN_CUTBACK"
           };
 
-          var cutbackParams = speckleBeam.TryGetParameters<BuiltElements.Revit.Parameter>()
-            .Where(p => paramNames.Contains(p.applicationInternalName));
-
-          foreach (var param in cutbackParams)
+          // This should really be handle by TryGetParameters which should return a bool with out var.
+          if (speckleBeam["parameters"] != null || speckleBeam["@parameters"] != null)
           {
-            if (Enum.TryParse<BuiltInParameter>(param.applicationInternalName, out var paramEnum))
-              TrySetParam(revitBeam, paramEnum, param.value, param.units);
+            var cutbackParams = speckleBeam.TryGetParameters<BuiltElements.Revit.Parameter>()
+              .Where(p => paramNames.Contains(p.applicationInternalName));
+
+            foreach (var param in cutbackParams)
+            {
+              if (Enum.TryParse<BuiltInParameter>(param.applicationInternalName, out var paramEnum))
+                TrySetParam(revitBeam, paramEnum, param.value, param.units);
+            }
           }
         }
       }
