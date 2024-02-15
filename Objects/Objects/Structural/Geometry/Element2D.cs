@@ -34,6 +34,7 @@ public class Element2D : Base, IDisplayValue<List<Mesh>>
   //[DetachProperty]
   public List<List<Node>> voids { get; set; }
   public List<List<string>> voidRefs { get; set; }
+  public List<Polycurve> openings { get; set; }
 
   [DetachProperty]
   public List<Mesh> displayValue { get; set; }

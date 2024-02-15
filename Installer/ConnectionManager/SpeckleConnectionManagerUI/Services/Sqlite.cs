@@ -279,10 +279,13 @@ namespace SpeckleConnectionManagerUI.Services
             {
                 db.Open();
 
-                SqliteCommand selectCommand = new SqliteCommand
+        // Not concerned about injection for context which this method/app is used.
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
+        SqliteCommand selectCommand = new SqliteCommand
                     ($"SELECT * from objects WHERE instr(content, '{serverUrl}') > 0", db);
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
 
-                SqliteDataReader query = selectCommand.ExecuteReader();
+        SqliteDataReader query = selectCommand.ExecuteReader();
 
                 while (query.Read())
                 {
@@ -319,9 +322,12 @@ namespace SpeckleConnectionManagerUI.Services
             {
                 db.Open();
 
-                SqliteCommand deleteCommand = new SqliteCommand($"DELETE from objects WHERE instr(content, '{serverUrl}') > 0", db);
+        // Not concerned about injection for context which this method/app is used.
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
+        SqliteCommand deleteCommand = new SqliteCommand($"DELETE from objects WHERE instr(content, '{serverUrl}') > 0", db);
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
 
-                deleteCommand.ExecuteNonQuery();
+        deleteCommand.ExecuteNonQuery();
             }
         }
     }

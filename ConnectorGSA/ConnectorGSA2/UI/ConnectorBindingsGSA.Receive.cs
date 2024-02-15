@@ -88,7 +88,7 @@ namespace ConnectorGSA.UI
           if (Enum.TryParse(setting.Selection, out Models.GsaUnit units))
           {
             Instance.GsaModel.Units = Commands.UnitEnumToString(units);
-          }            
+          }
         }
         settings.Add(setting.Slug, setting.Selection);
       }
@@ -132,10 +132,10 @@ namespace ConnectorGSA.UI
         return null;
       }
 
-      Commit myCommit = await ConnectorHelpers.GetCommitFromState(progress.CancellationToken, state);
+      Commit myCommit = await ConnectorHelpers.GetCommitFromState(state, progress.CancellationToken);
       state.LastCommit = myCommit;
       Base commitObject = await ConnectorHelpers.ReceiveCommit(myCommit, state, progress);
-      await ConnectorHelpers.TryCommitReceived(progress.CancellationToken, state, myCommit, HostApplications.GSA.Name);
+      await ConnectorHelpers.TryCommitReceived(state, myCommit, HostApplications.GSA.Name, progress.CancellationToken);
 
       if (progress.Report.OperationErrorsCount != 0)
       {

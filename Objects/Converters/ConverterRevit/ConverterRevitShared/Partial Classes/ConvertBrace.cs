@@ -43,6 +43,7 @@ namespace Objects.Converter.Revit
       var myBrace = new RevitBrace()
       {
         applicationId = myBeam.applicationId,
+        elementId = myBeam.elementId,
         type = myBeam.type,
         baseLine = myBeam.baseLine,
         level = myBeam.level,
@@ -51,7 +52,10 @@ namespace Objects.Converter.Revit
         displayValue = myBeam.displayValue,
       };
 
-      var dynamicProps = myBeam.GetMembers(DynamicBaseMemberType.Dynamic);
+      var dynamicProps = myBeam.GetMembers(DynamicBaseMemberType.Dynamic);  
+      
+      foreach (var dp in dynamicProps)
+        myBrace[dp.Key] = dp.Value;
 
       var analyticalIdKey = "analyticalElementId";
 

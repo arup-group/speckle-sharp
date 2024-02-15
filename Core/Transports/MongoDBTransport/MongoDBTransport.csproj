@@ -6,14 +6,15 @@
     <Description>A MongoDB transport for Speckle</Description>
     <PackageTags>$(PackageTags) mongodb transport</PackageTags>
     <IsPackable>true</IsPackable>
+    <Nullable>disable</Nullable>
 
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" Version="2.19.0"/>
+    <PackageReference Include="MongoDB.Driver" Version="2.19.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\Core.csproj"/>
+    <ProjectReference Include="..\..\Core\Core.csproj" />
   </ItemGroup>
 </Project>

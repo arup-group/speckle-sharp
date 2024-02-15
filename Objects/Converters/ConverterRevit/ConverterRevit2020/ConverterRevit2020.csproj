@@ -10,12 +10,13 @@
     <PackageTags>$(PackageTags) objects converter revit</PackageTags>
     <CopyToKitFolder>true</CopyToKitFolder>
   </PropertyGroup>
-
+  <Import Project="..\ConverterRevitShared\ConverterRevitShared.projitems" Label="Shared" />
   <ItemGroup>
     <PackageReference Include="ModPlus.Revit.API.2020" Version="1.0.0" ExcludeAssets="runtime" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\ConnectorRevit\RevitSharedResources2020\RevitSharedResources2020.csproj" />
     <ProjectReference Include="..\..\..\..\Core\Core\Core.csproj" />
     <ProjectReference Include="..\..\..\Objects\Objects.csproj" />
     <ProjectReference Include="..\..\ConverterDxf\ConverterDxf\ConverterDxf.csproj" />
@@ -25,6 +26,4 @@
     <Message Text="Copying templates to kit folder" />
     <Exec Condition="$([MSBuild]::IsOsPlatform('Windows'))" Command="xcopy /Y /S &quot;$(MSBuildProjectDirectory)\..\Templates\2020&quot; &quot;$(AppData)\Speckle\Kits\Objects\Templates\Revit\2020\&quot;" />
   </Target>
-
-  <Import Project="..\ConverterRevitShared\ConverterRevitShared.projitems" Label="Shared" />
 </Project>

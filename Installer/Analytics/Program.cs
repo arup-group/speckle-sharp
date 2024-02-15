@@ -1,4 +1,4 @@
-﻿using Piwik.Tracker;
+using Piwik.Tracker;
 using System;
 using System.Globalization;
 using System.IO;
@@ -51,7 +51,6 @@ namespace analytics
         httpWebRequest.Accept = "text/plain";
         httpWebRequest.Method = "POST";
         httpWebRequest.UseDefaultCredentials = true;
-        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
         string _posthogToken = args[2];
         var properties = new Dictionary<string, object>()

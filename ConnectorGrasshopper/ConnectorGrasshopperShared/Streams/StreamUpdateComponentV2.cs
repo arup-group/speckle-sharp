@@ -86,19 +86,25 @@ public class StreamUpdateComponentV2 : GH_SpeckleTaskCapableComponent<bool>
     DA.SetData(0, success);
   }
 
-  private async Task<bool> UpdateStream(StreamWrapper streamWrapper, string name, string description, bool isPublic, string jobNumber = null)
+  private static async Task<bool> UpdateStream(
+    StreamWrapper streamWrapper,
+    string name,
+    string description,
+    bool isPublic,
+    string jobNumber = null
+  )
   {
-    var account = streamWrapper.GetAccount().Result;
-    var client = new Client(account);
-    var stream = client.StreamGet(streamWrapper.StreamId).Result;
+    var account = await streamWrapper.GetAccount().ConfigureAwait(false);
+    using var client = new Client(account);
+    var stream = await client.StreamGet(streamWrapper.StreamId).ConfigureAwait(false);
 
     StreamUpdateInput input;
     if (!string.IsNullOrEmpty(jobNumber)) input = new StreamWithJobNumberUpdateInput { id = streamWrapper.StreamId, name = name ?? stream.name, description = description ?? stream.description, jobNumber = jobNumber ?? stream.jobNumber };
     else input = new StreamUpdateInput { id = streamWrapper.StreamId, name = name ?? stream.name, description = description ?? stream.description };
     
-    if (stream.isPublic != isPublic) input.isPublic = isPublic;
+    if (stream.isPublic != isPublic)
       input.isPublic = isPublic;
 
-    return await client.StreamUpdate(input);
+    return await client.StreamUpdate(input).ConfigureAwait(false);
   }
 }

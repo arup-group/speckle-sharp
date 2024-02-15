@@ -176,12 +176,12 @@ namespace Objects.Converter.Revit
         default:
           var polycurve = PolycurveFromTopology(speckleElement.topology);
           var level = LevelFromPoint(PointToNative(speckleElement.topology[0].basePoint));
-          var revitFloor = new RevitFloor(speckleElement.property.name, speckleElement.property.name, polycurve, level, true);
+          var speckleFloor = new BuiltElements.Floor(polycurve);
+          SetElementType(speckleFloor, speckleElement.property.name);
 #if REVIT2020 || REVIT2021 || REVIT2022
-          revitFloor.applicationId = speckleElement.applicationId;
+          speckleFloor.applicationId = speckleElement.applicationId;
 #endif
-          revitFloor.structural = true;
-          return FloorToNative(revitFloor);
+          return FloorToNative(speckleFloor);
       }
     }
 
@@ -219,7 +219,7 @@ namespace Objects.Converter.Revit
       }
 
       speckleElement2D.topology = edgeNodes;
-      speckleElement2D.displayValue = GetElementDisplayValue(revitSurface, new Options() { DetailLevel = ViewDetailLevel.Fine });
+      speckleElement2D.displayValue = GetElementDisplayValue(revitSurface);
 
       var outline = new List<ICurve> { };
       outline.Add(displayLine);
@@ -324,7 +324,7 @@ namespace Objects.Converter.Revit
       {
         var physicalElementId = analyticalToPhysicalManager.GetAssociatedElementId(revitSurface.Id);
         var physicalElement = Doc.GetElement(physicalElementId);
-        speckleElement2D.displayValue = GetElementDisplayValue(physicalElement, new Options() { DetailLevel = ViewDetailLevel.Fine });
+        speckleElement2D.displayValue = GetElementDisplayValue(physicalElement);
       }
 
       var outline = new List<ICurve> { };
@@ -366,9 +366,6 @@ namespace Objects.Converter.Revit
       speckleElement2D.property = prop;
 
       GetAllRevitParamsAndIds(speckleElement2D, revitSurface);
-
-      //speckleElement2D.displayMesh = GetElementDisplayMesh(Doc.GetElement(revitSurface.GetElementId()),
-      // new Options() { DetailLevel = ViewDetailLevel.Fine, ComputeReferences = false });
 
       return speckleElement2D;
     }

@@ -40,7 +40,7 @@ namespace ConnectorGSA.UI
     public override string GetHostAppNameVersion() => HostApplications.GSA.GetVersion(HostAppVersion.v);
     public override string GetHostAppName() => HostApplications.GSA.Slug;
     public override string GetDocumentId() => GetDocHash();
-    private string GetDocHash() => Speckle.Core.Models.Utilities.hashString(((GsaProxy)Model?.Proxy).FilePath, Speckle.Core.Models.Utilities.HashingFuctions.MD5);
+    private string GetDocHash() => Speckle.Core.Models.Utilities.HashString(((GsaProxy)Model?.Proxy).FilePath, Speckle.Core.Models.Utilities.HashingFunctions.MD5);
     public override string GetDocumentLocation() => Path.GetDirectoryName(((GsaProxy)Model?.Proxy).FilePath);
     public override string GetFileName() => Path.GetFileName(((GsaProxy)Model?.Proxy).FilePath); 
     public override string GetActiveViewName()

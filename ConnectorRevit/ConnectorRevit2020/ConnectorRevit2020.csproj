@@ -13,7 +13,7 @@
     <DefineConstants>$(DefineConstants);REVIT2020</DefineConstants>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
-  
+  <Import Project="..\ConnectorRevit\ConnectorRevit.projitems" Label="Shared" />
   <ItemGroup>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -23,16 +23,13 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="0.10.18" />
-    <PackageReference Include="Avalonia.Desktop" Version="0.10.18" />
-    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.18" />
     <PackageReference Include="ModPlus.Revit.API.2020" Version="1.0.0" ExcludeAssets="runtime" IncludeAssets="compile;build" PrivateAssets="all" />
-    <PackageReference Include="Revit.Async" Version="2.0.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Core\Core.csproj" />
     <ProjectReference Include="..\..\DesktopUI2\AvaloniaHwndHost\AvaloniaHwndHost.csproj" />
     <ProjectReference Include="..\..\DesktopUI2\DesktopUI2\DesktopUI2.csproj" />
+    <ProjectReference Include="..\RevitSharedResources2020\RevitSharedResources2020.csproj" />
   </ItemGroup>
 
 
@@ -60,5 +57,4 @@
     <Copy DestinationFolder="$(SolutionDir)\Release\Release$(RevitVersion)\$(RevitFolderName)\%(RecursiveDir)" SourceFiles="@(SourceDLLs)" />
     <Copy DestinationFolder="$(SolutionDir)\Release\Release$(RevitVersion)\" SourceFiles="@(SourceManifest)" />
   </Target>
-  <Import Project="..\ConnectorRevit\ConnectorRevit.projitems" Label="Shared" />
 </Project>

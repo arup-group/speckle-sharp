@@ -30,7 +30,7 @@ namespace Objects.Converter.Revit
       GetHostedElements(speckleCeiling, revitCeiling, out List<string> hostedNotes);
       if (hostedNotes.Any()) notes.AddRange(hostedNotes); //TODO: what are we doing here?
 
-      speckleCeiling.displayValue = GetElementDisplayValue(revitCeiling, new Options() { DetailLevel = ViewDetailLevel.Fine });
+      speckleCeiling.displayValue = GetElementDisplayValue(revitCeiling);
 
       return speckleCeiling;
     }
@@ -103,7 +103,7 @@ namespace Objects.Converter.Revit
       SetInstanceParameters(revitCeiling, speckleCeiling);
 
       appObj.Update(status: ApplicationObject.State.Created, createdId: revitCeiling.UniqueId, convertedItem: revitCeiling);
-      appObj = SetHostedElements(speckleCeiling, revitCeiling, appObj);
+      //appObj = SetHostedElements(speckleCeiling, revitCeiling, appObj);
       return appObj;
     }
 #endif

@@ -36,7 +36,7 @@ internal class Program
 
     catch (Exception e)
     {
-      throw e;
+      //throw e;
     }
 
     return;

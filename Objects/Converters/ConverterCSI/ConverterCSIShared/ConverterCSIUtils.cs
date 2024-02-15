@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Objects.Structural.Geometry;
 using CSiAPIv1;
@@ -304,7 +304,7 @@ namespace Objects.Converter.CSI
       {
         for (int i = 0; i < releases.Length; i++)
         {
-          if (releases[i]) code[i] = "F";
+          if (!releases[i]) code[i] = "F";
         }
       }
 
