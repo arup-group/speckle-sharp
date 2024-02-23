@@ -91,7 +91,7 @@ jobs:
     - name: Build all Solutions
       shell: cmd
       run: |
-        SET _version=${{ github.event.inputs.version }}
+        SET _version=${{ steps.calculateTagVersion.outputs.tag }}
         for %%x in (Objects, ConnectorAutocadCivil, ConnectorDynamo, ConnectorRevit, ConnectorRhino, ConnectorCSI, ConnectorGSA, ConnectorBentley) do (
           cd %%x && msbuild %%x.sln /p:Configuration=Release /p:WarningLevel=0 /p:IsDesktopBuild=false /p:AssemblyVersionNumber=%_version% /p:AssemblyInformationalVersion=%_version% /p:Version=%_version% /p:FileVersion=%_version% && cd ../ 
         )            
