@@ -790,6 +790,8 @@ namespace ConnectorGSA
     {
       ((GsaProxy)Instance.GsaModel.Proxy).NewFile(true);
 
+      ((GsaCache)Instance.GsaModel.Cache).Clear();
+
       return true;
     }
 
