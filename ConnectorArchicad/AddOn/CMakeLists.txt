@@ -1,12 +1,18 @@
 cmake_minimum_required (VERSION 3.16)
 
-function (SetCompilerOptions target)
-	target_compile_features (${target} PUBLIC cxx_std_14)
+function (SetCompilerOptions target ac_version)
+	if (${ac_version} LESS "27")
+		target_compile_features (${target} PUBLIC cxx_std_14)
+	else ()
+		target_compile_features (${target} PUBLIC cxx_std_17)
+	endif ()
 	target_compile_options (${target} PUBLIC "$<$<CONFIG:Debug>:-DDEBUG>")
 	if (WIN32)
 		target_compile_options (${target} PUBLIC /W4 /WX
 			/Zc:wchar_t-
 			/wd4499
+			/wd4996
+			/wd4390
 		)
 	else ()
 		target_compile_options (${target} PUBLIC -Wall -Wextra -Werror
@@ -17,11 +23,13 @@ function (SetCompilerOptions target)
 			-Wno-ignored-qualifiers
 			-Wno-reorder
 			-Wno-overloaded-virtual
-			-Wno-unused-parameter
-			-Wno-deprecated-copy
-			-Wno-unknown-pragmas
 			-Wno-missing-braces
-			-Wno-unused-private-field)
+			-Wno-unused-parameter
+			-Wno-deprecated				# HashTable.hpp:1752 error: 'sprintf' is deprecated
+			-Wno-unknown-pragmas
+			-Wno-shorten-64-to-32		# BrepExternalBufferArray.hpp:34: error: implicit conversion loses integer precision: 'long long' to 'const GS::USize' (aka 'const unsigned int')
+			-Wno-unused-private-field
+			)
 	endif ()
 endfunction ()
 
@@ -46,12 +54,12 @@ set_property (GLOBAL PROPERTY USE_FOLDERS ON)
 
 set (CMAKE_SUPPRESS_REGENERATION 1)
 set (CMAKE_CONFIGURATION_TYPES Debug;Release;RelWithDebInfo)
+set (CMAKE_OSX_DEPLOYMENT_TARGET 10.15)
 set (AC_API_DEVKIT_DIR $ENV{AC_API_DEVKIT_DIR} CACHE PATH "API DevKit directory.")
 set (AC_ADDON_NAME "Speckle Connector" CACHE STRING "Add-On name.")
 set (AC_ADDON_LANGUAGE "INT" CACHE STRING "Add-On language code.")
 set (AC_MDID_DEV "1" CACHE STRING "Your Developer ID")
 set (AC_MDID_LOC "1" CACHE STRING "Add-On Local ID")
-
 
 set (ACAPINC_FILE_LOCATION ${AC_API_DEVKIT_DIR}/Support/Inc/ACAPinc.h)
 if (EXISTS ${ACAPINC_FILE_LOCATION})
@@ -67,6 +75,9 @@ if (WIN32)
 	add_definitions (-DUNICODE -D_UNICODE)
 else ()
 	add_definitions (-Dmacintosh=1)
+	if (${ARCHICAD_VERSION} GREATER_EQUAL "26")
+		set (CMAKE_OSX_ARCHITECTURES "x86_64;arm64" PARENT_SCOPE CACHE STRING "" FORCE)
+	endif ()
 endif ()
 add_definitions (-DACExtension)
 
@@ -122,11 +133,11 @@ if (WIN32)
 	)
 else ()
 	add_custom_command (
-		OUTPUT "${ResourceObjectsDir}/AddOnResources.stamp"
-		DEPENDS ${AddOnResourceFiles} ${AddOnImageFiles}
+		OUTPUT "${ResourceObjectsDir}/AddOnResources.stamp" "${CMAKE_BINARY_DIR}/$CONFIGURATION/${AC_ADDON_NAME}.bundle/Contents/Resources/English.lproj/Localizable.strings"
+		DEPENDS ${AddOnResourceFiles} ${AddOnImageFiles} 
 		COMMENT "Compiling resources..."
 		COMMAND ${CMAKE_COMMAND} -E make_directory "${ResourceObjectsDir}"
-		COMMAND python "${AddOnResourcesFolderAbsolute}/Tools/CompileResources.py" "${AC_ADDON_LANGUAGE}" "${AC_API_DEVKIT_DIR}" "${AddOnSourcesFolderAbsolute}" "${AddOnResourcesFolderAbsolute}" "${ResourceObjectsDir}" "${CMAKE_BINARY_DIR}/$<CONFIG>/${AC_ADDON_NAME}.bundle/Contents/Resources"
+		COMMAND python3 "${AddOnResourcesFolderAbsolute}/Tools/CompileResources.py" "${AC_ADDON_LANGUAGE}" "${AC_API_DEVKIT_DIR}" "${AddOnSourcesFolderAbsolute}" "${AddOnResourcesFolderAbsolute}" "${ResourceObjectsDir}" "${CMAKE_BINARY_DIR}/$<CONFIG>/${AC_ADDON_NAME}.bundle/Contents/Resources"
 		COMMAND ${CMAKE_COMMAND} -E copy "${AC_API_DEVKIT_DIR}/Support/Inc/PkgInfo" "${CMAKE_BINARY_DIR}/$<CONFIG>/${AC_ADDON_NAME}.bundle/Contents/PkgInfo"
 		COMMAND ${CMAKE_COMMAND} -E touch "${ResourceObjectsDir}/AddOnResources.stamp"
 	)
@@ -157,10 +168,16 @@ endif ()
 set_target_properties (AddOn PROPERTIES OUTPUT_NAME ${AC_ADDON_NAME})
 if (WIN32)
 	set_target_properties (AddOn PROPERTIES SUFFIX ".apx")
+	if (DEFINED AC_EXECUTABLE_PATH)
+		set_target_properties (AddOn PROPERTIES VS_DEBUGGER_COMMAND "${AC_EXECUTABLE_PATH}")
+	endif ()
 else ()
 	set_target_properties (AddOn PROPERTIES BUNDLE TRUE)
 	set_target_properties (AddOn PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/${AddOnResourcesFolder}/RFIX.mac/Info.plist")
 	set_target_properties (AddOn PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>")
+	if (DEFINED AC_EXECUTABLE_PATH)
+		set_target_properties (AddOn PROPERTIES XCODE_SCHEME_EXECUTABLE "${AC_EXECUTABLE_PATH}")
+	endif ()
 endif ()
 
 if (WIN32)
@@ -176,20 +193,35 @@ target_include_directories (AddOn PUBLIC
 )
 
 if (WIN32)
-	target_link_libraries (AddOn
-		"$<$<CONFIG:Debug>:${AC_API_DEVKIT_DIR}/Support/Lib/Win/ACAP_STATD.lib>"
-		"$<$<CONFIG:Release>:${AC_API_DEVKIT_DIR}/Support/Lib/Win/ACAP_STAT.lib>"
-		"$<$<CONFIG:RelWithDebInfo>:${AC_API_DEVKIT_DIR}/Support/Lib/Win/ACAP_STAT.lib>"
-	)
+	if (${ARCHICAD_VERSION} LESS "27")
+		target_link_libraries (AddOn
+			"$<$<CONFIG:Debug>:${AC_API_DEVKIT_DIR}/Support/Lib/Win/ACAP_STATD.lib>"
+			"$<$<CONFIG:Release>:${AC_API_DEVKIT_DIR}/Support/Lib/Win/ACAP_STAT.lib>"
+			"$<$<CONFIG:RelWithDebInfo>:${AC_API_DEVKIT_DIR}/Support/Lib/Win/ACAP_STAT.lib>"
+		)
+	else ()
+		target_link_libraries (AddOn
+			"$<$<CONFIG:Debug>:${AC_API_DEVKIT_DIR}/Support/Lib/ACAP_STATD.lib>"
+			"$<$<CONFIG:Release>:${AC_API_DEVKIT_DIR}/Support/Lib/ACAP_STAT.lib>"
+			"$<$<CONFIG:RelWithDebInfo>:${AC_API_DEVKIT_DIR}/Support/Lib/ACAP_STAT.lib>"
+		)
+	endif ()
 else ()
 	find_library (CocoaFramework Cocoa)
-	target_link_libraries (AddOn
-		"${AC_API_DEVKIT_DIR}/Support/Lib/Mactel/libACAP_STAT.a"
-		${CocoaFramework}
-	)
+	if (${ARCHICAD_VERSION} LESS "27")
+		target_link_libraries (AddOn
+			"${AC_API_DEVKIT_DIR}/Support/Lib/Mactel/libACAP_STAT.a"
+			${CocoaFramework}
+		)
+	else ()
+		target_link_libraries (AddOn
+			"${AC_API_DEVKIT_DIR}/Support/Lib/libACAP_STAT.a"
+			${CocoaFramework}
+		)
+	endif ()
 endif ()
 
-SetCompilerOptions (AddOn)
+SetCompilerOptions (AddOn ARCHICAD_VERSION)
 set_source_files_properties (${AddOnSourceFiles} PROPERTIES LANGUAGE CXX)
 
 file (GLOB ModuleFolders ${AC_API_DEVKIT_DIR}/Support/Modules/*)
@@ -202,3 +234,22 @@ else ()
 	target_link_libraries (AddOn ${FrameworkFilesInFolder})
 endif ()
 add_dependencies (AddOn AddOnResources)
+
+if (WIN32)
+	if (DEFINED REGISTER_ARCHICAD_ADDON_PATH)
+		file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/$<CONFIG>/${AC_ADDON_NAME}.apx" native_path)
+		add_custom_command (
+			TARGET AddOn
+			POST_BUILD
+			COMMAND python "${REGISTER_ARCHICAD_ADDON_PATH}" register "${native_path}" ${ARCHICAD_VERSION}
+	    )
+	endif ()
+else ()
+	if (DEFINED REGISTER_ARCHICAD_ADDON_PATH)
+		add_custom_command (
+			TARGET AddOn
+			POST_BUILD
+			COMMAND python3 "${REGISTER_ARCHICAD_ADDON_PATH}" register "${CMAKE_BINARY_DIR}/$<CONFIG>/${AC_ADDON_NAME}.bundle" ${ARCHICAD_VERSION}
+	    )
+	endif ()
+endif ()

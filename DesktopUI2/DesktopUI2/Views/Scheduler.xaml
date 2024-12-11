@@ -2,14 +2,10 @@
   x:Class="DesktopUI2.Views.Scheduler"
   xmlns="https://github.com/avaloniaui"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-  xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
   xmlns:m="clr-namespace:Material.Styles;assembly=Material.Styles"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-  xmlns:p="clr-namespace:DesktopUI2.Views.Pages"
-  xmlns:reactiveUi="http://reactiveui.net"
-  xmlns:vm="using:DesktopUI2.ViewModels"
   Title="{Binding TitleFull}"
   Width="400"
   Icon="/Assets/icon.ico"
@@ -23,23 +19,16 @@
           Orientation="Horizontal"
           Spacing="6">
           <TextBlock
-            FontFamily="/Assets/SpaceGrotesk-VariableFont_wght.ttf"
+            Classes="SpeckleFont"
             FontSize="18"
             FontWeight="Bold"
             Foreground="{DynamicResource PrimaryHueMidBrush}"
             Text="SPECKLE SCHEDULER" />
           <TextBlock
-            FontFamily="/Assets/SpaceGrotesk-VariableFont_wght.ttf"
+            Classes="SpeckleFont"
             FontSize="18"
             FontWeight="Medium"
             Text="{Binding Title}" />
-
-          <TextBlock
-            Margin="0,0,0,3"
-            VerticalAlignment="Bottom"
-            FontSize="8"
-            Foreground="Gray"
-            Text="beta" />
         </StackPanel>
       </Grid>
     </m:Card>
@@ -57,11 +46,11 @@
         HorizontalContentAlignment="Stretch"
         Classes="Mini">
         <StackPanel>
-          <TextBlock Text="Speckle Scheduler lets you schedule when to automatically send to a stream based on a few triggers." TextWrapping="Wrap" />
+          <TextBlock Text="Speckle Scheduler lets you schedule when to automatically send to a project based on a few triggers." TextWrapping="Wrap" />
           <TextBlock
             Margin="0,15,0,0"
             IsVisible="{Binding HasSavedSenders, Converter={x:Static BoolConverters.Not}}"
-            Text="Please save a stream form the main Connector UI ⚠ to continue."
+            Text="⚠ Please save a Sender Project form the main Connector UI to continue."
             TextWrapping="Wrap" />
         </StackPanel>
       </m:Card>
@@ -88,8 +77,8 @@
           VerticalAlignment="Center"
           Foreground="Gray"
           Kind="InfoCircle"
-          ToolTip.Tip="Data in a stream can be organized in branches,&#x0a;for instance, to have multiple design options&#x0a;or to store data by discipline.&#x0a;The default branch is called main." />
-        <TextBlock Text="Stream:" />
+          ToolTip.Tip="Data in a project can be organized in models,&#x0a;for instance, to have multiple design options&#x0a;or to store data by discipline.&#x0a;The default model is called main." />
+        <TextBlock Text="Project:" />
       </StackPanel>
 
       <StackPanel
@@ -101,7 +90,7 @@
           VerticalAlignment="Center"
           Foreground="Gray"
           Kind="InfoCircle"
-          ToolTip.Tip="A commit is a snapshot in time&#x0a;of the data inside a branch.&#x0a;Every time you send to Speckle from a connector,&#x0a;a commit is created." />
+          ToolTip.Tip="A version is a snapshot in time&#x0a;of the data inside a model.&#x0a;Every time you send to Speckle from a connector,&#x0a;a version is created." />
         <TextBlock Text="Trigger:" />
       </StackPanel>
 
@@ -119,7 +108,7 @@
         HorizontalAlignment="Stretch"
         VerticalAlignment="Center"
         Items="{Binding SavedSenders}"
-        PlaceholderText="Select a stream"
+        PlaceholderText="Select a project"
         SelectedItem="{Binding SelectedStream}">
         <ComboBox.ItemTemplate>
           <DataTemplate>

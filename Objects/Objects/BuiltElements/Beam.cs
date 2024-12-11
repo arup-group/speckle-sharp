@@ -1,118 +1,35 @@
-﻿using Objects.Geometry;
-using Objects.Structural.Materials;
-using Objects.Structural.Properties.Profiles;
-using Objects.Utils;
+using System.Collections.Generic;
+using Objects.Geometry;
 using Speckle.Core.Kits;
 using Speckle.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Speckle.Newtonsoft.Json;
 
-namespace Objects.BuiltElements
+namespace Objects.BuiltElements;
+
+public class Beam : Base, IDisplayValue<IReadOnlyList<Base>>
 {
-  public class Beam : Base, IDisplayMesh, IDisplayValue<List<Mesh>>
+  public Beam() { }
+
+  public Beam(ICurve baseLine, Level? level, string? units, IReadOnlyList<Mesh>? displayValue = null)
   {
-    public ICurve baseLine { get; set; }
-
-    [DetachProperty]
-    public List<Mesh> displayValue { get; set; }
-
-    public string units { get; set; }
-
-    public Beam() { }
-
-    [SchemaInfo("Beam", "Creates a Speckle beam", "BIM", "Structure")]
-    public Beam([SchemaMainParam] ICurve baseLine)
-    {
-      this.baseLine = baseLine;
-    }
-
-    #region Obsolete Members
-    [JsonIgnore, Obsolete("Use " + nameof(displayValue) + " instead")]
-    public Mesh displayMesh
-    {
-      get => displayValue?.FirstOrDefault();
-      set => displayValue = new List<Mesh> { value };
-    }
-    #endregion
+    this.baseLine = baseLine;
+    this.level = level;
+    this.units = units;
+    this.displayValue = ((IReadOnlyList<Base>?)displayValue) ?? new[] { (Base)baseLine };
   }
-}
 
-namespace Objects.BuiltElements.Revit
-{
-  public class RevitBeam : Beam
-  {
-    public string family { get; set; }
-    public string type { get; set; }
-    public Base parameters { get; set; }
-    public string elementId { get; set; }
-    public Level level { get; set; }
+  public ICurve baseLine { get; set; }
 
-    public RevitBeam() { }
+  public virtual Level? level { get; internal set; }
 
-    [SchemaInfo("RevitBeam", "Creates a Revit beam by curve and base level.", "Revit", "Structure")]
-    public RevitBeam(string family, string type, [SchemaMainParam] ICurve baseLine, Level level, List<Parameter> parameters = null)
-    {
-      this.family = family;
-      this.type = type;
-      this.baseLine = baseLine;
-      this.parameters = parameters.ToBase();
-      this.level = level;
-    }
-  }
-}
+  public string? units { get; set; }
 
-namespace Objects.BuiltElements.TeklaStructures
-{
-  public class TeklaBeam : Beam, IHasVolume, IHasArea
-  {
-    public string name { get; set; }
-    [DetachProperty]
-    public SectionProfile profile { get; set; }
-    [DetachProperty]
-    public Material material { get; set; }
-        [DetachProperty]
-        public string finish { get; set; }
-        [DetachProperty]
-        public string classNumber { get; set; }
-    public Vector alignmentVector { get; set; } // This can be set to get proper rotation if coming from an application that doesn't have positioning
-        [DetachProperty]
-        public TeklaPosition position { get; set; }
-    public Base userProperties { get; set; }
+  [DetachProperty]
+  public IReadOnlyList<Base> displayValue { get; set; }
 
-    [DetachProperty]
-    public Base rebars { get; set; }
+  #region Schema Info Constructors
+  [SchemaInfo("Beam", "Creates a Speckle beam", "BIM", "Structure")]
+  public Beam([SchemaMainParam] ICurve baseLine)
+    : this(baseLine, null, null) { }
 
-    public TeklaBeamType TeklaBeamType { get; set; }
-    public double volume { get; set; }
-    public double area { get; set ; }
-
-    public TeklaBeam() { }
-
-    [SchemaInfo("TeklaBeam", "Creates a Tekla Structures beam by curve.", "Tekla", "Structure")]
-    public TeklaBeam([SchemaMainParam] ICurve baseLine, SectionProfile profile, Material material)
-    {
-      this.baseLine = baseLine;
-      this.profile = profile;
-      this.material = material;
-    }
-  }
-  public class SpiralBeam : TeklaBeam
-  {
-    public SpiralBeam()
-    {
-    }
-
-    public Point startPoint { get; set; }
-    public Point rotationAxisPt1 { get; set; }
-    public Point rotationAxisPt2 { get; set; }
-    public double totalRise { get; set; }
-    public double rotationAngle { get; set; }
-    public double twistAngleStart { get; set; }
-    public double twistAngleEnd { get; set; }
-
-
-  }
+  #endregion
 }

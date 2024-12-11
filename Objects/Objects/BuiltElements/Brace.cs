@@ -1,62 +1,29 @@
-﻿using Objects.Geometry;
-using Objects.Utils;
+using System.Collections.Generic;
+using Objects.Geometry;
 using Speckle.Core.Kits;
 using Speckle.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Speckle.Newtonsoft.Json;
 
-namespace Objects.BuiltElements
+namespace Objects.BuiltElements;
+
+public class Brace : Base, IDisplayValue<IReadOnlyList<Base>>
 {
-  public class Brace : Base, IDisplayMesh, IDisplayValue<List<Mesh>>
+  public Brace() { }
+
+  public Brace(ICurve baseLine, string? units, IReadOnlyList<Mesh>? displayValue = null)
   {
-    public ICurve baseLine { get; set; }
-
-    [DetachProperty]
-    public List<Mesh> displayValue { get; set; }
-
-    public string units { get; set; }
-
-    public Brace() { }
-
-    [SchemaInfo("Brace", "Creates a Speckle brace", "BIM", "Structure")]
-    public Brace([SchemaMainParam] ICurve baseLine)
-    {
-      this.baseLine = baseLine;
-    }
-    
-    #region Obsolete Members
-    [JsonIgnore, Obsolete("Use " + nameof(displayValue) + " instead")]
-    public Mesh displayMesh {
-      get => displayValue?.FirstOrDefault();
-      set => displayValue = new List<Mesh> {value};
-    }
-    #endregion
+    this.baseLine = baseLine;
+    this.units = units;
+    this.displayValue = ((IReadOnlyList<Base>?)displayValue) ?? new[] { (Base)baseLine };
   }
-}
 
-namespace Objects.BuiltElements.Revit
-{
-  public class RevitBrace : Brace
-  {
-    public string family { get; set; }
-    public string type { get; set; }
-    public Base parameters { get; set; }
-    public string elementId { get; set; }
-    public Level level { get; set; }
+  public ICurve baseLine { get; set; }
 
-    public RevitBrace() { }
+  public string? units { get; set; }
 
-    [SchemaInfo("RevitBrace", "Creates a Revit brace by curve and base level.", "Revit", "Structure")]
-    public RevitBrace(string family, string type, [SchemaMainParam] ICurve baseLine, Level level, List<Parameter> parameters = null)
-    {
-      this.family = family;
-      this.type = type;
-      this.baseLine = baseLine;
-      this.parameters = parameters.ToBase();
-      this.level = level;
-    }
-  }
+  [DetachProperty]
+  public IReadOnlyList<Base> displayValue { get; set; }
+
+  [SchemaInfo("Brace", "Creates a Speckle brace", "BIM", "Structure")]
+  public Brace([SchemaMainParam] ICurve baseLine)
+    : this(baseLine, null) { }
 }

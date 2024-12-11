@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>ConnectorGrasshopper</RootNamespace>
+    <AssemblyName>SpeckleConnectorGrasshopper</AssemblyName>
+    <TargetFramework>net462</TargetFramework>
+    <TargetExt>.gha</TargetExt>
+    <Configurations>Debug;Release;Debug Mac;Release Mac</Configurations>
+    <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
+    <DefineConstants>$(DefineConstants);RHINO6;RHINO6_OR_GREATER</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Debug Mac' Or '$(Configuration)'=='Release Mac'">
+    <DefineConstants>$(DefineConstants);MAC</DefineConstants>
+  </PropertyGroup>
+
+  <Import Project="..\ConnectorGrasshopperShared\ConnectorGrasshopperShared.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\Core\Core.csproj"/>
+    <ProjectReference Include="..\..\Core\Transports\DiskTransport\DiskTransport.csproj" />
+    <ProjectReference Include="..\ConnectorGrasshopperUtils\ConnectorGrasshopperUtils.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Grasshopper" Version="6.28.20199.17141" IncludeAssets="compile;build" />
+    <PackageReference Include="GrasshopperAsyncComponent" Version="1.2.3" />
+    <PackageReference Include="System.Resources.Extensions" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+
+  <Target Name="GenerateT4">
+    <Message Text="Restoring T4 tool..." Importance="high" />
+    <Exec Command="dotnet tool restore" />
+    <Message Text="Generating T4 templates..." Importance="high" />
+    <Exec Command="dotnet t4 -o $(ProjectDir)..\ConnectorGrasshopperShared\SchemaBuilder\SchemaBuilderGen.cs $(ProjectDir)..\ConnectorGrasshopperShared\SchemaBuilder\SchemaBuilderGen.tt -P=$(ProjectDir)" />
+  </Target>
+</Project>

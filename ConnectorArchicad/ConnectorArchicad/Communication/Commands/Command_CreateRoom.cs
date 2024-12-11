@@ -1,40 +1,41 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Objects.BuiltElements.Archicad;
+using Speckle.Core.Models;
+using Speckle.Newtonsoft.Json;
 
-namespace Archicad.Communication.Commands
+namespace Archicad.Communication.Commands;
+
+sealed internal class CreateRoom : ICommand<IEnumerable<ApplicationObject>>
 {
-  sealed internal class CreateRoom : ICommand<IEnumerable<string>>
+  [JsonObject(MemberSerialization.OptIn)]
+  public sealed class Parameters
   {
-    [JsonObject(MemberSerialization.OptIn)]
-    public sealed class Parameters
-    {
-      [JsonProperty("zones")] private IEnumerable<Room> Datas { get; }
+    [JsonProperty("zones")]
+    private IEnumerable<Archicad.Room> Datas { get; }
 
-      public Parameters(IEnumerable<Room> datas)
-      {
-        Datas = datas;
-      }
-    }
-
-    [JsonObject(MemberSerialization.OptIn)]
-    private sealed class Result
-    {
-      [JsonProperty("applicationIds")] public IEnumerable<string> ApplicationIds { get; private set; }
-    }
-
-    private IEnumerable<Room> Datas { get; }
-
-    public CreateRoom(IEnumerable<Room> datas)
+    public Parameters(IEnumerable<Archicad.Room> datas)
     {
       Datas = datas;
     }
+  }
 
-    public async Task<IEnumerable<string>> Execute()
-    {
-      Result result = await HttpCommandExecutor.Execute<Parameters, Result>("CreateZone", new Parameters(Datas));
-      return result?.ApplicationIds;
-    }
+  [JsonObject(MemberSerialization.OptIn)]
+  private sealed class Result
+  {
+    [JsonProperty("applicationObjects")]
+    public IEnumerable<ApplicationObject> ApplicationObjects { get; private set; }
+  }
+
+  private IEnumerable<Archicad.Room> Datas { get; }
+
+  public CreateRoom(IEnumerable<Archicad.Room> datas)
+  {
+    Datas = datas;
+  }
+
+  public async Task<IEnumerable<ApplicationObject>> Execute()
+  {
+    Result result = await HttpCommandExecutor.Execute<Parameters, Result>("CreateZone", new Parameters(Datas));
+    return result == null ? null : result.ApplicationObjects;
   }
 }

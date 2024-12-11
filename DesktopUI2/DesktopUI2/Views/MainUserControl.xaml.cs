@@ -1,20 +1,23 @@
+using System.Collections.Generic;
+using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
+using DesktopUI2.Models;
 using DesktopUI2.ViewModels;
 using ReactiveUI;
 using Speckle.Core.Logging;
-using System.Collections.Generic;
 
-namespace DesktopUI2.Views
+namespace DesktopUI2.Views;
+
+public class MainUserControl : ReactiveUserControl<MainViewModel>
 {
-  public partial class MainUserControl : ReactiveUserControl<MainViewModel>
-  {
-    public MainUserControl()
-    {
-      this.WhenActivated(disposables => { });
-      AvaloniaXamlLoader.Load(this);
+  public static NotificationManager NotificationManager;
 
-      Analytics.TrackEvent(Analytics.Events.DUIAction, new Dictionary<string, object>() { { "name", "Launched" } });
-    }
+  public MainUserControl()
+  {
+    this.WhenActivated(disposables => { });
+    AvaloniaXamlLoader.Load(this);
+
+    NotificationManager = this.FindControl<NotificationManager>("NotificationManager");
   }
 }

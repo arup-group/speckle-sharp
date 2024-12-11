@@ -1,66 +1,92 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Text;
+#nullable disable
+using System;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading;
+using Speckle.Core.Credentials;
 using Speckle.Core.Kits;
 
-namespace Speckle.Core.Logging
+namespace Speckle.Core.Logging;
+
+/// <summary>
+///  Anonymous telemetry to help us understand how to make a better Speckle.
+///  This really helps us to deliver a better open source project and product!
+/// </summary>
+[SuppressMessage(
+  "Naming",
+  "CA1708:Identifiers should differ by more than case",
+  Justification = "Class contains obsolete members that are kept for backwards compatiblity"
+)]
+public static class Setup
 {
-  /// <summary>
-  ///  Anonymous telemetry to help us understand how to make a better Speckle.
-  ///  This really helps us to deliver a better open source project and product!
-  /// </summary>
-  public static class Setup
+  public static Mutex Mutex { get; set; }
+
+  private static bool s_initialized;
+
+  static Setup()
   {
-    private readonly static string _suuidPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Speckle", "suuid");
-
-    public static void Init(string versionedHostApplication, string hostApplication)
+    //Set fallback values
+    try
     {
-      HostApplication = hostApplication;
-      VersionedHostApplication = versionedHostApplication;
+      HostApplication = Process.GetCurrentProcess().ProcessName;
+    }
+    catch (InvalidOperationException)
+    {
+      HostApplication = "other (.NET)";
+    }
+  }
 
-      #if !NETSTANDARD1_5_OR_GREATER
-      //needed by older .net frameworks, eg Revit 2019
-      ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
-      #endif
+  /// <summary>
+  /// Set from the connectors, defines which current host application we're running on.
+  /// </summary>
+  internal static string HostApplication { get; private set; }
 
+  /// <summary>
+  /// Set from the connectors, defines which current host application we're running on - includes the version.
+  /// </summary>
+  internal static string VersionedHostApplication { get; private set; } = HostApplications.Other.Slug;
 
-      Log.Initialize();
+  public static void Init(
+    string versionedHostApplication,
+    string hostApplication,
+    SpeckleLogConfiguration logConfiguration = null
+  )
+  {
+    if (s_initialized)
+    {
+      SpeckleLog.Logger
+        .ForContext("newVersionedHostApplication", versionedHostApplication)
+        .ForContext("newHostApplication", hostApplication)
+        .Information(
+          "Setup was already initialized with {currentHostApp} {currentVersionedHostApp}",
+          hostApplication,
+          versionedHostApplication
+        );
+      return;
     }
 
-    /// <summary>
-    /// Set from the connectors, defines which current host application we're running on.
-    /// </summary>
-    internal static string HostApplication { get; private set; } = "other";
-    /// <summary>
-    /// Set from the connectors, defines which current host application we're running on - includes the version.
-    /// </summary>
-    internal static string VersionedHostApplication { get; private set; } = VersionedHostApplications.Other;
+    s_initialized = true;
 
-    private static string _suuid { get; set; }
+    HostApplication = hostApplication;
+    VersionedHostApplication = versionedHostApplication;
 
-    /// <summary>
-    /// Tries to get the SUUID set by the Manager
-    /// </summary>
-    internal static string SUUID
+    //start mutex so that Manager can detect if this process is running
+    Mutex = new Mutex(false, "SpeckleConnector-" + hostApplication);
+
+    SpeckleLog.Initialize(hostApplication, versionedHostApplication, logConfiguration);
+
+    foreach (var account in AccountManager.GetAccounts())
     {
-      get
-      {
-        if (_suuid == null)
-        {
-          try
-          {
-            _suuid = File.ReadAllText(_suuidPath);
-            if (!string.IsNullOrEmpty(_suuid))
-              return _suuid;
-          }
-          catch { }
-
-          _suuid = "unknown-suuid";
-        }
-        return _suuid;
-      }
+      Analytics.AddConnectorToProfile(account.GetHashedEmail(), hostApplication);
+      Analytics.IdentifyProfile(account.GetHashedEmail(), hostApplication);
     }
+  }
+
+  [Obsolete("Use " + nameof(Mutex))]
+  [SuppressMessage("Style", "IDE1006:Naming Styles")]
+  public static Mutex mutex
+  {
+    get => Mutex;
+    set => Mutex = value;
   }
 }

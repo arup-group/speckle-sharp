@@ -1,4 +1,7 @@
-﻿using Objects.Other;
+using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.DatabaseServices;
+using Objects.BuiltElements;
+using Objects.Other;
 using Speckle.Core.Kits;
 using Speckle.Core.Models;
 using System;
@@ -9,7 +12,6 @@ using AcadDB = Autodesk.AutoCAD.DatabaseServices;
 using Alignment = Objects.BuiltElements.Alignment;
 using Arc = Objects.Geometry.Arc;
 using BlockDefinition = Objects.Other.BlockDefinition;
-using BlockInstance = Objects.Other.BlockInstance;
 using Circle = Objects.Geometry.Circle;
 using Curve = Objects.Geometry.Curve;
 using Dimension = Objects.Other.Dimension;
@@ -22,504 +24,572 @@ using Point = Objects.Geometry.Point;
 using Polycurve = Objects.Geometry.Polycurve;
 using Polyline = Objects.Geometry.Polyline;
 using Spiral = Objects.Geometry.Spiral;
-using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.DatabaseServices;
-#if CIVIL2021 || CIVIL2022 || CIVIL2023
-using Civil = Autodesk.Civil;
+using Speckle.Core.Logging;
+
+#if CIVIL
 using CivilDB = Autodesk.Civil.DatabaseServices;
 #endif
 
+namespace Objects.Converter.AutocadCivil;
 
-namespace Objects.Converter.AutocadCivil
+public partial class ConverterAutocadCivil : ISpeckleConverter
 {
-  public partial class ConverterAutocadCivil : ISpeckleConverter
-  {
 #if AUTOCAD2021
-    public static string AutocadAppName = VersionedHostApplications.Autocad2021;
+  public static string AutocadAppName = HostApplications.AutoCAD.GetVersion(HostAppVersion.v2021);
 #elif AUTOCAD2022
-    public static string AutocadAppName = VersionedHostApplications.Autocad2022;
+  public static string AutocadAppName = HostApplications.AutoCAD.GetVersion(HostAppVersion.v2022);
 #elif AUTOCAD2023
-    public static string AutocadAppName = VersionedHostApplications.Autocad2023;
+  public static string AutocadAppName = HostApplications.AutoCAD.GetVersion(HostAppVersion.v2023);
+#elif AUTOCAD2024
+  public static string AutocadAppName = HostApplications.AutoCAD.GetVersion(HostAppVersion.v2024);
+#elif AUTOCAD2025
+  public static string AutocadAppName = HostApplications.AutoCAD.GetVersion(HostAppVersion.v2025);
 #elif CIVIL2021
-    public static string AutocadAppName = VersionedHostApplications.Civil2021;
+  public static string AutocadAppName = HostApplications.Civil.GetVersion(HostAppVersion.v2021);
 #elif CIVIL2022
-    public static string AutocadAppName = VersionedHostApplications.Civil2022;
+  public static string AutocadAppName = HostApplications.Civil.GetVersion(HostAppVersion.v2022);
 #elif CIVIL2023
-    public static string AutocadAppName = VersionedHostApplications.Civil2023;
+  public static string AutocadAppName = HostApplications.Civil.GetVersion(HostAppVersion.v2023);
+#elif CIVIL2024
+  public static string AutocadAppName = HostApplications.Civil.GetVersion(HostAppVersion.v2024);
+#elif CIVIL2025
+  public static string AutocadAppName = HostApplications.Civil.GetVersion(HostAppVersion.v2025);
+#elif ADVANCESTEEL2023
+  public static string AutocadAppName = HostApplications.AdvanceSteel.GetVersion(HostAppVersion.v2023);
+#elif ADVANCESTEEL2024
+  public static string AutocadAppName = HostApplications.AdvanceSteel.GetVersion(HostAppVersion.v2024);
 #endif
 
-    public ConverterAutocadCivil()
+  public ConverterAutocadCivil()
+  {
+    var ver = System.Reflection.Assembly.GetAssembly(typeof(ConverterAutocadCivil)).GetName().Version;
+  }
+
+  #region ISpeckleConverter props
+  public string Description => "Default Speckle Kit for AutoCAD";
+  public string Name => nameof(ConverterAutocadCivil);
+  public string Author => "Speckle";
+  public string WebsiteOrEmail => "https://speckle.systems";
+  public ProgressReport Report { get; private set; } = new ProgressReport();
+
+  public IEnumerable<string> GetServicedApplications() => new string[] { AutocadAppName };
+
+  public Document Doc { get; private set; }
+  public Transaction Trans { get; private set; } // TODO: evaluate if this should be here
+  public Dictionary<string, string> Settings { get; private set; } = new Dictionary<string, string>();
+  #endregion ISpeckleConverter props
+
+  public ReceiveMode ReceiveMode { get; set; }
+
+  public List<ApplicationObject> ContextObjects { get; set; } = new List<ApplicationObject>();
+
+  public void SetContextObjects(List<ApplicationObject> objects) => ContextObjects = objects;
+
+  public void SetPreviousContextObjects(List<ApplicationObject> objects) => throw new NotImplementedException();
+
+  public void SetConverterSettings(object settings)
+  {
+    Settings = settings as Dictionary<string, string>;
+  }
+
+  public void SetContextDocument(object doc)
+  {
+    Doc = (Document)doc;
+    Trans = Doc.TransactionManager.TopTransaction; // set the stream transaction here! make sure it is the top level transaction
+  }
+
+  private string ApplicationIdKey = "applicationId";
+
+  public Base ConvertToSpeckle(object @object)
+  {
+    Base @base = null;
+    ApplicationObject reportObj = null;
+    DisplayStyle style = null;
+    Base extensionDictionary = null;
+    List<string> notes = new();
+
+    try
     {
-      var ver = System.Reflection.Assembly.GetAssembly(typeof(ConverterAutocadCivil)).GetName().Version;
-      Report.Log($"Using converter: {Name} v{ver}");
-    }
-
-    #region ISpeckleConverter props
-    public string Description => "Default Speckle Kit for AutoCAD";
-    public string Name => nameof(ConverterAutocadCivil);
-    public string Author => "Speckle";
-    public string WebsiteOrEmail => "https://speckle.systems";
-    public ProgressReport Report { get; private set; } = new ProgressReport();
-    public IEnumerable<string> GetServicedApplications() => new string[] { AutocadAppName };
-    public Document Doc { get; private set; }
-    public Transaction Trans { get; private set; } // TODO: evaluate if this should be here
-    #endregion ISpeckleConverter props
-
-    public ReceiveMode ReceiveMode { get; set; }
-
-    public List<ApplicationPlaceholderObject> ContextObjects { get; set; } = new List<ApplicationPlaceholderObject>();
-
-    public void SetContextObjects(List<ApplicationPlaceholderObject> objects) => ContextObjects = objects;
-
-    public void SetPreviousContextObjects(List<ApplicationPlaceholderObject> objects) => throw new NotImplementedException();
-    public void SetConverterSettings(object settings)
-    {
-      throw new NotImplementedException("This converter does not have any settings.");
-    }
-
-    public void SetContextDocument(object doc)
-    {
-      Doc = (Document)doc;
-      Trans = Doc.TransactionManager.TopTransaction; // set the stream transaction here! make sure it is the top level transaction
-      Report.Log($"Using document: {Doc.Name}");
-      Report.Log($"Using units: {ModelUnits}");
-    }
-
-    public Base ConvertToSpeckle(object @object)
-    {
-      Base @base = null;
       switch (@object)
       {
         case DBObject obj:
-          /*
-          // check for speckle schema xdata
-          string schema = GetSpeckleSchema(o.XData);
-          if (schema != null)
-            return ObjectToSpeckleBuiltElement(o);
-          */
+
+          var appId = obj.ObjectId.ToString(); // TODO: UPDATE THIS WITH STORED APP ID IF IT EXISTS
+
+          //Use the Handle object to update progressReport object.
+          //In an AutoCAD session, you can get the Handle of a DBObject from its ObjectId using the ObjectId.Handle or Handle property.
+          reportObj = new ApplicationObject(obj.Handle.ToString(), obj.GetType().Name) { applicationId = appId };
+          style = DisplayStyleToSpeckle(obj as Entity); // note layer display styles are converted in the layer method
+          extensionDictionary = obj.GetObjectExtensionDictionaryAsBase();
+
           switch (obj)
           {
             case DBPoint o:
               @base = PointToSpeckle(o);
-              Report.Log($"Converted Point3d {o}");
               break;
             case AcadDB.Line o:
               @base = LineToSpeckle(o);
-              Report.Log($"Converted Line");
               break;
             case AcadDB.Arc o:
               @base = ArcToSpeckle(o);
-              Report.Log($"Converted Arc");
               break;
             case AcadDB.Circle o:
               @base = CircleToSpeckle(o);
-              Report.Log($"Converted Circle");
               break;
             case AcadDB.Ellipse o:
               @base = EllipseToSpeckle(o);
-              Report.Log($"Converted Ellipse");
               break;
             case AcadDB.Hatch o:
               @base = HatchToSpeckle(o);
-              Report.Log($"Converted Hatch");
               break;
             case AcadDB.Spline o:
               @base = SplineToSpeckle(o);
-              Report.Log($"Converted Spline");
               break;
             case AcadDB.Polyline o:
-              if (o.IsOnlyLines) // db polylines can have arc segments, decide between polycurve or polyline conversion
-              {
-                @base = PolylineToSpeckle(o);
-                Report.Log($"Converted Polyline as Polyline");
-              }
-              else
-              {
-                @base = PolycurveToSpeckle(o);
-                Report.Log($"Converted Polyline as Polycurve");
-              }
+              @base = o.IsOnlyLines ? PolylineToSpeckle(o) : (Base)PolycurveToSpeckle(o);
               break;
             case AcadDB.Polyline3d o:
               @base = PolylineToSpeckle(o);
-              Report.Log($"Converted Polyline3d");
               break;
-            case AcadDB.Polyline2d o:
+            case Polyline2d o:
               @base = PolycurveToSpeckle(o);
-              Report.Log($"Converted Polyline2d as Polycurve");
               break;
             case Region o:
-              @base = RegionToSpeckle(o);
-              Report.Log($"Converted Region as Mesh");
+              @base = RegionToSpeckle(o, out notes);
               break;
             case AcadDB.Surface o:
-              @base = SurfaceToSpeckle(o);
-              Report.Log($"Converted Surface as Mesh");
+              @base = SurfaceToSpeckle(o, out notes);
               break;
-            case AcadDB.PolyFaceMesh o:
+            case PolyFaceMesh o:
               @base = MeshToSpeckle(o);
-              Report.Log($"Converted PolyFace Mesh");
+              break;
+            case ProxyEntity o:
+              @base = ProxyEntityToSpeckle(o);
               break;
             case SubDMesh o:
               @base = MeshToSpeckle(o);
-              Report.Log($"Converted SubD Mesh");
               break;
             case Solid3d o:
               if (o.IsNull)
               {
-                Report.Log($"Skipped null Solid");
-                return null;
+                notes.Add($"Solid was null");
               }
-              @base = SolidToSpeckle(o);
-              Report.Log($"Converted Solid as Mesh");
+              else
+              {
+                @base = SolidToSpeckle(o, out notes);
+              }
+
               break;
             case AcadDB.Dimension o:
               @base = DimensionToSpeckle(o);
-              Report.Log($"Converted Dimension");
               break;
             case BlockReference o:
               @base = BlockReferenceToSpeckle(o);
-              Report.Log($"Converted Block Instance");
               break;
             case BlockTableRecord o:
               @base = BlockRecordToSpeckle(o);
-              Report.Log($"Converted Block Definition");
               break;
-            case AcadDB.DBText o:
+            case DBText o:
               @base = TextToSpeckle(o);
-              Report.Log($"Converted Text");
               break;
-            case AcadDB.MText o:
+            case MText o:
               @base = TextToSpeckle(o);
-              Report.Log($"Converted Text");
               break;
-#if CIVIL2021 || CIVIL2022 || CIVIL2023
+            case LayerTableRecord o:
+              @base = LayerToSpeckle(o);
+              break;
+#if CIVIL
             case CivilDB.Alignment o:
               @base = AlignmentToSpeckle(o);
-              Report.Log($"Converted Alignment");
               break;
             case CivilDB.Corridor o:
               @base = CorridorToSpeckle(o);
-              Report.Log($"Converted Corridor as Base");
               break;
             case CivilDB.FeatureLine o:
-              @base = FeatureLineToSpeckle(o);
-              Report.Log($"Converted FeatureLine");
+              @base = FeaturelineToSpeckle(o);
               break;
             case CivilDB.Structure o:
               @base = StructureToSpeckle(o);
-              Report.Log($"Converted Structure");
               break;
             case CivilDB.Pipe o:
               @base = PipeToSpeckle(o);
-              Report.Log($"Converted Pipe");
               break;
             case CivilDB.PressurePipe o:
               @base = PipeToSpeckle(o);
-              Report.Log($"Converted Pressure Pipe");
               break;
             case CivilDB.Profile o:
               @base = ProfileToSpeckle(o);
-              Report.Log($"Converted Profile as Base");
               break;
             case CivilDB.TinSurface o:
               @base = SurfaceToSpeckle(o);
-              Report.Log($"Converted TIN Surface as mesh");
               break;
 #endif
+            default:
+#if ADVANCESTEEL
+              try
+              {
+                @base = ConvertASToSpeckle(obj, reportObj, notes);
+              }
+              catch (Exception e) when (!e.IsFatal())
+              {
+                //Update report because AS object type
+                Report.UpdateReportObject(reportObj);
+                throw;
+              }
+              break;
+#else
+              throw new ConversionNotSupportedException(
+                $"AutocadCivil3D object of type {@object.GetType()} is not supported for conversion."
+              );
+#endif
           }
-
-          DisplayStyle style = DisplayStyleToSpeckle(obj as Entity);
-          if (style != null)
-            @base["displayStyle"] = style;
           break;
-
         case Acad.Geometry.Point3d o:
           @base = PointToSpeckle(o);
-          Report.Log($"Converted Point3d {o}");
           break;
-
         case Acad.Geometry.Vector3d o:
           @base = VectorToSpeckle(o);
-          Report.Log($"Converted Vector3d {o}");
           break;
-
         case Acad.Geometry.Line3d o:
           @base = LineToSpeckle(o);
-          Report.Log($"Converted Line3d");
           break;
-
         case Acad.Geometry.LineSegment3d o:
           @base = LineToSpeckle(o);
-          Report.Log($"Converted LineSegment");
           break;
-
         case Acad.Geometry.CircularArc3d o:
           @base = ArcToSpeckle(o);
-          Report.Log($"Converted Arc3d");
           break;
-
         case Acad.Geometry.Plane o:
           @base = PlaneToSpeckle(o);
-          Report.Log($"Converted Plane");
           break;
-
         case Acad.Geometry.Curve3d o:
           @base = CurveToSpeckle(o) as Base;
-          Report.Log($"Converted Curve3d");
           break;
-
         default:
-          Report.Log($"Skipped not supported type: {@object.GetType()}");
-          throw new NotSupportedException();
+          throw new ConversionNotSupportedException(
+            $"AutocadCivil object of type {@object.GetType()} is not supported for conversion."
+          );
       }
+    }
+    catch (ConversionNotSupportedException e)
+    {
+      SpeckleLog.Logger.Information(e, "{exceptionMessage}");
+      reportObj?.Update(status: ApplicationObject.State.Skipped, logItem: e.Message);
+    }
+    catch (SpeckleException e)
+    {
+      SpeckleLog.Logger.Warning(e, "{exceptionMessage}");
+      reportObj?.Update(
+        status: ApplicationObject.State.Failed,
+        logItem: $"{@object.GetType()} unhandled conversion error: {e.Message}\n{e.StackTrace}"
+      );
+    }
+    catch (Exception e) when (!e.IsFatal())
+    {
+      reportObj?.Update(
+        status: ApplicationObject.State.Failed,
+        logItem: $"{@object.GetType()} unhandled conversion error: {e.Message}\n{e.StackTrace}"
+      );
+    }
+
+    if (@base is null)
+    {
       return @base;
     }
 
-    private Base ObjectToSpeckleBuiltElement(DBObject o)
+    if (style != null)
     {
-      throw new NotImplementedException();
+      @base["displayStyle"] = style;
     }
 
-    public List<Base> ConvertToSpeckle(List<object> objects)
+    if (extensionDictionary != null)
     {
-      return objects.Select(x => ConvertToSpeckle(x)).ToList();
+      @base["extensionDictionary"] = extensionDictionary;
     }
 
-    public object ConvertToNative(Base @object)
+    if (reportObj != null)
     {
-      // determine if this object has autocad props
-      bool isFromAutoCAD = @object[AutocadPropName] != null ? true : false; 
-      object acadObj = null;
+      reportObj.Update(log: notes);
+      Report.UpdateReportObject(reportObj);
+    }
+    return @base;
+  }
+
+  private Base ObjectToSpeckleBuiltElement(DBObject o)
+  {
+    throw new NotImplementedException();
+  }
+
+  public List<Base> ConvertToSpeckle(List<object> objects)
+  {
+    return objects.Select(ConvertToSpeckle).ToList();
+  }
+
+  public object ConvertToNative(Base @object)
+  {
+    // determine if this object has autocad props
+    bool isFromAutoCAD = @object[AutocadPropName] != null;
+    bool isFromCivil = @object[CivilPropName] != null;
+    object acadObj = null;
+    var reportObj = Report.ReportObjects.ContainsKey(@object.id)
+      ? new ApplicationObject(@object.id, @object.speckle_type)
+      : null;
+    List<string> notes = new();
+    try
+    {
       switch (@object)
       {
         case Point o:
           acadObj = PointToNativeDB(o);
-          Report.Log($"Created Point {o.id}");
           break;
 
         case Line o:
           acadObj = LineToNativeDB(o);
-          Report.Log($"Created Line {o.id}");
           break;
 
         case Arc o:
           acadObj = ArcToNativeDB(o);
-          Report.Log($"Created Arc {o.id}");
           break;
 
         case Circle o:
           acadObj = CircleToNativeDB(o);
-          Report.Log($"Created Circle {o.id}");
           break;
 
         case Ellipse o:
           acadObj = EllipseToNativeDB(o);
-          Report.Log($"Created Ellipse {o.id}");
           break;
 
         case Spiral o:
           acadObj = PolylineToNativeDB(o.displayValue);
-          Report.Log($"Created Spiral {o.id} as Polyline");
           break;
 
         case Hatch o:
           acadObj = HatchToNativeDB(o);
-          Report.Log($"Created Hatch {o.id}");
           break;
 
         case Polyline o:
           acadObj = PolylineToNativeDB(o);
-          Report.Log($"Created Polyline {o.id}");
           break;
 
         case Polycurve o:
-          bool convertAsSpline = (o.segments.Where(s => !(s is Line) && !(s is Arc)).Count() > 0) ? true : false;
-          if (!convertAsSpline) convertAsSpline = IsPolycurvePlanar(o) ? false : true;
-          if (convertAsSpline)
-          {
-            acadObj = PolycurveSplineToNativeDB(o);
-            if (acadObj == null)
-              Report.Log($"Created Polycurve {o.id} as individual segments");
-            else
-              Report.Log($"Created Polycurve {o.id} as Spline");
-            break;
-          }
-          else
-          {
-            acadObj = PolycurveToNativeDB(o);
-            Report.Log($"Created Polycurve {o.id} as Polyline");
-            break;
-          }
+          bool convertAsSpline = o.segments.Any(s => s is not Line and not Arc);
+          acadObj = convertAsSpline || !IsPolycurvePlanar(o) ? PolycurveSplineToNativeDB(o) : PolycurveToNativeDB(o);
+
+          break;
 
         case Curve o:
           acadObj = CurveToNativeDB(o);
-          Report.Log($"Created Curve {o.id}");
           break;
-
-        /*
-        case Surface o: 
-          return SurfaceToNative(o);
-
-        case Brep o:
-          acadObj = (o.displayMesh != null) ? MeshToNativeDB(o.displayMesh) : null;
-          Report.Log($"Created Brep {o.id} as Mesh");
-          break;
-        */
 
         case Mesh o:
+#if CIVIL
+          acadObj = isFromCivil ? CivilSurfaceToNative(o) : MeshToNativeDB(o);
+#else
           acadObj = MeshToNativeDB(o);
-          Report.Log($"Created Mesh {o.id}");
+#endif
           break;
 
         case Dimension o:
           acadObj = isFromAutoCAD ? AcadDimensionToNative(o) : DimensionToNative(o);
-          Report.Log($"Created Dimension {o.id}");
           break;
 
-        case BlockInstance o:
-          acadObj = BlockInstanceToNativeDB(o, out BlockReference reference);
-          Report.Log($"Created Block Instance {o.id}");
+        case Instance o:
+          acadObj = InstanceToNativeDB(o);
           break;
 
         case BlockDefinition o:
-          acadObj = BlockDefinitionToNativeDB(o);
-          Report.Log($"Created Block Definition {o.id}");
+          acadObj = DefinitionToNativeDB(o, out notes);
           break;
 
         case Text o:
           acadObj = isFromAutoCAD ? AcadTextToNative(o) : TextToNative(o);
-          Report.Log($"Created Text {o.id}");
           break;
 
-        case Alignment o:
-          string fallback = " as Polyline";
-          if (o.curves is null) // TODO: remove after a few releases, this is for backwards compatibility
-          {
-            acadObj = CurveToNativeDB(o.baseCurve);
-            Report.Log($"Created Alignment {o.id} as Curve");
-            break;
-          }
-#if CIVIL2021 || CIVIL2022 || CIVIL2023
-          acadObj = AlignmentToNative(o);
-          if (acadObj != null)
-            fallback = string.Empty;
-#endif
-          if (acadObj == null)
-            acadObj = PolylineToNativeDB(o.displayValue);
-          Report.Log($"Created Alignment {o.id}{fallback}");
+        case Collection o:
+          acadObj = CollectionToNative(o);
           break;
+
+#if CIVIL
+        case Alignment o:
+          acadObj = AlignmentToNative(o);
+          break;
+#endif
 
         case ModelCurve o:
           acadObj = CurveToNativeDB(o.baseCurve);
-          Report.Log($"Created ModelCurve {o.id} as Curve");
+          break;
+
+        case GridLine o:
+          acadObj = CurveToNativeDB(o.baseLine);
           break;
 
         default:
-          Report.Log($"Skipped not supported type: {@object.GetType()} {@object.id}");
-          throw new NotSupportedException();
+          throw new ConversionNotSupportedException(
+            $"Speckle object of type {@object.GetType()} is not supported for conversion."
+          );
       }
-
-      return acadObj;
+    }
+    catch (ConversionNotSupportedException e)
+    {
+      SpeckleLog.Logger.Information(e, "{exceptionMessage}");
+      reportObj?.Update(status: ApplicationObject.State.Skipped, logItem: e.Message);
+    }
+    catch (SpeckleException e)
+    {
+      SpeckleLog.Logger.Warning(e, "{exceptionMessage}");
+      reportObj?.Update(
+        status: ApplicationObject.State.Failed,
+        logItem: $"{@object.GetType()} unhandled conversion error: {e.Message}\n{e.StackTrace}"
+      );
+    }
+    catch (Exception e) when (!e.IsFatal())
+    {
+      SpeckleLog.Logger.Error(e, $"{@object.GetType()} unhandled conversion error");
+      reportObj?.Update(
+        status: ApplicationObject.State.Failed,
+        logItem: $"{@object.GetType()} unhandled conversion error: {e.Message}\n{e.StackTrace}"
+      );
     }
 
-    public List<object> ConvertToNative(List<Base> objects)
+    switch (acadObj)
     {
-      return objects.Select(x => ConvertToNative(x)).ToList();
+      case ApplicationObject o: // some to native methods return an application object (if object is baked to doc during conv)
+        acadObj = o.Converted.Count != 0 ? o.Converted : null;
+        reportObj?.Update(
+          status: o.Status,
+          createdIds: o.CreatedIds,
+          converted: o.Converted,
+          container: o.Container,
+          log: o.Log
+        );
+        break;
+      default:
+        reportObj?.Update(log: notes);
+        break;
     }
 
-    public bool CanConvertToSpeckle(object @object)
+    if (reportObj != null)
     {
-      switch (@object)
-      {
-        case DBObject o:
-          switch (o)
-          {
-            case DBPoint _:
-            case AcadDB.Line _:
-            case AcadDB.Arc _:
-            case AcadDB.Circle _:
-            case AcadDB.Dimension _:
-            case AcadDB.Ellipse _:
-            case AcadDB.Hatch _:
-            case AcadDB.Spline _:
-            case AcadDB.Polyline _:
-            case AcadDB.Polyline2d _:
-            case AcadDB.Polyline3d _:
-            case AcadDB.Surface _:
-            case AcadDB.PolyFaceMesh _:
-            case AcadDB.Region _:
-            case SubDMesh _:
-            case Solid3d _:
-              return true;
+      Report.UpdateReportObject(reportObj);
+    }
 
-            case BlockReference _:
-            case BlockTableRecord _:
-            case AcadDB.DBText _:
-            case AcadDB.MText _:
-              return true;
+    return acadObj;
+  }
 
-#if CIVIL2021 || CIVIL2022 || CIVIL2023
-            // NOTE: C3D pressure pipes and pressure fittings API under development
-            case CivilDB.FeatureLine _:
-            case CivilDB.Corridor _:
-            case CivilDB.Structure _:
-            case CivilDB.Alignment _:
-            case CivilDB.Pipe _:
-            case CivilDB.PressurePipe _:
-            case CivilDB.Profile _:
-            case CivilDB.TinSurface _:
-              return true;
+  public object ConvertToNativeDisplayable(Base @object)
+  {
+    throw new NotImplementedException();
+  }
+
+  public List<object> ConvertToNative(List<Base> objects)
+  {
+    return objects.Select(ConvertToNative).ToList();
+  }
+
+  public bool CanConvertToSpeckle(object @object)
+  {
+    switch (@object)
+    {
+      case DBObject o:
+        switch (o)
+        {
+          case DBPoint:
+          case AcadDB.Line:
+          case AcadDB.Arc:
+          case AcadDB.Circle:
+          case AcadDB.Dimension:
+          case AcadDB.Ellipse:
+          case AcadDB.Hatch:
+          case AcadDB.Spline:
+          case AcadDB.Polyline:
+          case Polyline2d:
+          case Polyline3d:
+          case AcadDB.Surface:
+          case PolyFaceMesh:
+          case ProxyEntity:
+          case AcadDB.Region:
+          case SubDMesh:
+          case Solid3d:
+            return true;
+
+          case BlockReference:
+          case BlockTableRecord:
+          case DBText:
+          case MText:
+          case LayerTableRecord:
+            return true;
+
+#if CIVIL
+          // NOTE: C3D pressure pipes and pressure fittings API under development
+          case CivilDB.FeatureLine:
+          case CivilDB.Corridor:
+          case CivilDB.Structure:
+          case CivilDB.Alignment:
+          case CivilDB.Pipe:
+          case CivilDB.PressurePipe:
+          case CivilDB.Profile:
+          case CivilDB.TinSurface:
+            return true;
 #endif
 
-            default:
-              return false;
+          default:
+          {
+#if ADVANCESTEEL
+              return CanConvertASToSpeckle(o);
+#else
+            return false;
+#endif
           }
+        }
 
-        case Acad.Geometry.Point3d _:
-        case Acad.Geometry.Vector3d _:
-        case Acad.Geometry.Plane _:
-        case Acad.Geometry.Line3d _:
-        case Acad.Geometry.LineSegment3d _:
-        case Acad.Geometry.CircularArc3d _:
-        case Acad.Geometry.Curve3d _:
-          return true;
+      case Acad.Geometry.Point3d:
+      case Acad.Geometry.Vector3d:
+      case Acad.Geometry.Plane:
+      case Acad.Geometry.Line3d:
+      case Acad.Geometry.LineSegment3d:
+      case Acad.Geometry.CircularArc3d:
+      case Acad.Geometry.Curve3d:
+        return true;
 
-        default:
-          return false;
-      }
+      default:
+        return false;
     }
+  }
 
-    public bool CanConvertToNative(Base @object)
+  public bool CanConvertToNative(Base @object)
+  {
+    switch (@object)
     {
-      switch (@object)
-      {
-        case Point _:
-        case Line _:
-        case Arc _:
-        case Circle _:
-        case Ellipse _:
-        case Spiral _:
-        case Hatch _:
-        case Polyline _:
-        case Polycurve _:
-        case Curve _:
-        //case Brep _:
-        case Mesh _:
+      case Point:
+      case Line:
+      case Arc:
+      case Circle:
+      case Ellipse:
+      case Spiral:
+      case Hatch:
+      case Polyline:
+      case Polycurve:
+      case Curve:
+      case Mesh:
 
-        case Dimension _:
-        case BlockDefinition _:
-        case BlockInstance _:
-        case Text _:
+      case Dimension:
+      case BlockDefinition:
+      case Instance:
+      case Text:
+      case Collection:
 
-        case Alignment _:
+      case Alignment:
+      case ModelCurve:
+      case GridLine:
+        return true;
 
-        case ModelCurve _:
-          return true;
-
-        default:
-          return false;
-      }
+      default:
+        return false;
     }
+  }
 
+  public bool CanConvertToNativeDisplayable(Base @object)
+  {
+    return false;
   }
 }

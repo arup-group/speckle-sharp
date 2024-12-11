@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ConvertorOpenRoads": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Program Files\\Bentley\\OpenRoads Designer CE 10.10\\OpenRoadsDesigner\\OpenRoadsDesigner.exe"
+    }
+  }
+}

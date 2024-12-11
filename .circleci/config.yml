@@ -6,9 +6,8 @@ setup: true
 # the path-filtering orb is required to continue a pipeline based on
 # the path of an updated fileset
 orbs:
-  path-filtering: circleci/path-filtering@0.1.3
-  continuation: circleci/continuation@0.3.1
-  python: circleci/python@2.0.3
+  continuation: circleci/continuation@1.0.0
+  python: circleci/python@2.1.1
 
 jobs:
   setup:
@@ -30,25 +29,26 @@ jobs:
                     value: << pipeline.git.tag >>
           steps:
             - run: git branch internal_circleci
-            - path-filtering/set-parameters:
-                mapping: |
-                  Core/.* run_core true
-                  (Core|Objects|ConnectorRhino|ConnectorGrasshopper|.*/ConverterRhinoGh)/.* rhino true
-                  (Core|Objects|ConnectorRevit|.*/ConverterRevit)/.* revit true
-                  (Core|Objects|ConnectorDynamo|.*/ConverterDynamo)/.* dynamo true
-                  (Core|Objects|ConnectorAutocadCivil|.*/ConverterAutocadCivil)/.* autocadcivil true
-                  (Core|Objects|ConnectorCSI|.*/ConverterCSI)/.* csi true
-                  (Core|Objects|ConnectorMicroStation|.*/ConverterMicroStation)/.* microstation true
-                  (Core|Objects|ConnectorTeklaStructures|.*/ConverterTeklaStructures)/.* teklastructures true
-                  (Core|Objects|ConnectorArchicad)/.* archicad true
-                base-revision: main
-                output-path: .circleci/scripts/parameters.json
+            # - path-filtering/set-parameters:
+            #     mapping: |
+            #       Core/.* core true
+            #       (Core|Objects|ConnectorRhino|ConnectorGrasshopper|.*/ConverterRhinoGh)/.* rhino true
+            #       (Core|Objects|ConnectorRevit|.*/ConverterRevit)/.* revit true
+            #       (Core|Objects|ConnectorDynamo|.*/ConverterDynamo)/.* dynamo true
+            #       (Core|Objects|ConnectorAutocadCivil|.*/ConverterAutocadCivil)/.* autocadcivil true
+            #       (Core|Objects|ConnectorCSI|.*/ConverterCSI)/.* csi true
+            #       (Core|Objects|ConnectorBentley|.*/ConverterBentley)/.* bentley true
+            #       (Core|Objects|ConnectorTeklaStructures|.*/ConverterTeklaStructures)/.* teklastructures true
+            #       (Core|Objects|ConnectorArchicad)/.* archicad true
+            #       (Core|Objects|ConnectorNavisworks|.*/ConverterNavisworks)/.* navisworks true
+            #     base-revision: main
+            #     output-path: .circleci/scripts/parameters.json
       - run: cat .circleci/scripts/parameters.json
       - run: pip install pyyaml
       - run: # run a command
           name: Generate config
           command: |
-            python .circleci/scripts/config-generator.py -d ${CIRCLE_TAG:-none} -o .circleci/continuation-config.yml
+            python .circleci/scripts/config-generator.py -d ${CIRCLE_TAG:-none} -o .circleci/continuation-config.yml -e ${CIRCLE_PR_REPONAME:-none}
       - continuation/continue:
           configuration_path: .circleci/continuation-config.yml # use newly generated config to continue
 workflows:

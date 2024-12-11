@@ -1,11 +1,12 @@
-﻿namespace AvaloniaHwndHost
-{
-    using System;
-    using System.Runtime.InteropServices;
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 
-    internal unsafe static class UnmanagedMethods
-    {
-        [DllImport("user32.dll")]
-        public static extern bool SetParent(IntPtr hWnd, IntPtr hWndNewParent);
-    }
+namespace AvaloniaHwndHost;
+
+internal static class UnmanagedMethods
+{
+  [DllImport("user32.dll")]
+  [SuppressMessage("Security", "CA5392:Use DefaultDllImportSearchPaths attribute for P/Invokes")]
+  public static extern bool SetParent(IntPtr hWnd, IntPtr hWndNewParent);
 }

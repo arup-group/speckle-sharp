@@ -1,69 +1,50 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
+using Speckle.Core.Models;
+using Speckle.Newtonsoft.Json;
+using Objects.BuiltElements.Archicad;
 
-namespace Archicad.Communication.Commands
+namespace Archicad.Communication.Commands;
+
+sealed internal class CreateDirectShape : ICommand<IEnumerable<ApplicationObject>>
 {
-  sealed internal class CreateDirectShapes : ICommand<IEnumerable<string>>
+  [JsonObject(MemberSerialization.OptIn)]
+  public sealed class Parameters
   {
-    #region --- Classes ---
+    [JsonProperty("directShapes")]
+    private IEnumerable<DirectShape> DirectShapes { get; }
 
-    [JsonObject(MemberSerialization.OptIn)]
-    public sealed class Parameters
+    public Parameters(IEnumerable<DirectShape> directShapes)
     {
-      #region --- Fields ---
+      DirectShapes = directShapes;
+    }
+  }
 
-      [JsonProperty("models")]
-      private IEnumerable<Model.ElementModelData> Models { get; }
+  [JsonObject(MemberSerialization.OptIn)]
+  private sealed class Result
+  {
+    [JsonProperty("applicationObjects")]
+    public IEnumerable<ApplicationObject> ApplicationObjects { get; private set; }
+  }
 
-      #endregion
+  private IEnumerable<DirectShape> DirectShapes { get; }
 
-      #region --- Ctor \ Dtor ---
-
-      public Parameters(IEnumerable<Model.ElementModelData> models)
-      {
-        Models = models;
-      }
-
-      #endregion
+  public CreateDirectShape(IEnumerable<DirectShape> directShapes)
+  {
+    foreach (var directShape in directShapes)
+    {
+      directShape.displayValue = null;
     }
 
-    [JsonObject(MemberSerialization.OptIn)]
-    private sealed class Result
-    {
-      #region --- Fields ---
+    DirectShapes = directShapes;
+  }
 
-      [JsonProperty("applicationIds")]
-      public IEnumerable<string> ApplicationIds { get; private set; }
-
-      #endregion
-    }
-
-    #endregion
-
-    #region --- Fields ---
-
-    private IEnumerable<Model.ElementModelData> Models { get; }
-
-    #endregion
-
-    #region --- Ctor \ Dtor ---
-
-    public CreateDirectShapes(IEnumerable<Model.ElementModelData> models)
-    {
-      Models = models;
-    }
-
-    #endregion
-
-    #region --- Functions ---
-
-    public async Task<IEnumerable<string>> Execute()
-    {
-      Result result = await HttpCommandExecutor.Execute<Parameters, Result>("CreateDirectShapes", new Parameters(Models));
-      return result.ApplicationIds;
-    }
-
-    #endregion
+  public async Task<IEnumerable<ApplicationObject>> Execute()
+  {
+    var result = await HttpCommandExecutor.Execute<Parameters, Result>(
+      "CreateDirectShape",
+      new Parameters(DirectShapes)
+    );
+    return result == null ? null : result.ApplicationObjects;
   }
 }

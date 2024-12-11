@@ -1,178 +1,230 @@
-﻿using System;
+#nullable disable
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Speckle.Core.Api;
+using Speckle.Core.Helpers;
 using Speckle.Core.Kits;
+using Speckle.Core.Logging;
+using Speckle.Core.Serialisation;
 using Speckle.Core.Transports;
 using Speckle.Newtonsoft.Json;
 using Speckle.Newtonsoft.Json.Linq;
 
-namespace Speckle.Core.Models
+namespace Speckle.Core.Models;
+
+/// <summary>
+/// Base class for all Speckle object definitions. Provides unified hashing, type extraction and serialisation.
+/// <para>When developing a speckle kit, use this class as a parent class.</para>
+/// <para><b>Dynamic properties naming conventions:</b></para>
+/// <para>👉 "__" at the start of a property means it will be ignored, both for hashing and serialisation (e.g., "__ignoreMe").</para>
+/// <para>👉 "@" at the start of a property name means it will be detached (when serialised with a transport) (e.g.((dynamic)obj)["@meshEquivalent"] = ...) .</para>
+/// </summary>
+[Serializable]
+[SuppressMessage("ReSharper", "InconsistentNaming")]
+[SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Serialized property names are camelCase by design")]
+public class Base : DynamicBase
 {
+  private static readonly Regex s_chunkSyntax = Constants.ChunkPropertyNameRegex;
+
+  private string _type;
 
   /// <summary>
-  /// Base class for all Speckle object definitions. Provides unified hashing, type extraction and serialisation.
-  /// <para>When developing a speckle kit, use this class as a parent class.</para>
-  /// <para><b>Dynamic properties naming conventions:</b></para>
-  /// <para>👉 "__" at the start of a property means it will be ignored, both for hashing and serialisation (e.g., "__ignoreMe").</para>
-  /// <para>👉 "@" at the start of a property name means it will be detached (when serialised with a transport) (e.g.((dynamic)obj)["@meshEquivalent"] = ...) .</para>
+  /// A speckle object's id is an unique hash based on its properties. <b>NOTE: this field will be null unless the object was deserialised from a source. Use the <see cref="GetId(bool)"/> function to get it.</b>
   /// </summary>
-  [Serializable]
-  public class Base : DynamicBase
+  [SchemaIgnore]
+  public virtual string id { get; set; }
+
+#nullable enable //Starting nullability syntax here so that `id` null oblivious,
+
+  /// <summary>
+  /// This property will only be populated if the object is retreieved from storage. Use <see cref="GetTotalChildrenCount"/> otherwise.
+  /// </summary>
+  [SchemaIgnore]
+  public virtual long totalChildrenCount { get; set; }
+
+  /// <summary>
+  /// Secondary, ideally host application driven, object identifier.
+  /// </summary>
+  [SchemaIgnore]
+  public string? applicationId { get; set; }
+
+  /// <summary>
+  /// Holds the type information of this speckle object, derived automatically
+  /// from its assembly name and inheritance.
+  /// </summary>
+  [SchemaIgnore]
+  public virtual string speckle_type
   {
-    /// <summary>
-    /// A speckle object's id is an unique hash based on its properties. <b>NOTE: this field will be null unless the object was deserialised from a source. Use the <see cref="GetId(bool)"/> function to get it.</b>
-    /// </summary>
-    [SchemaIgnore]
-    public virtual string id
+    get
     {
-      get; set;
-    }
-
-    /// <summary>
-    /// Gets the id (a unique hash) of this object. ⚠️ This method fully serializes the object, which in the case of large objects (with many sub-objects), has a tangible cost. Avoid using it!
-    /// <para><b>Hint:</b> Objects that are retrieved/pulled from a server/local cache do have an id (hash) property pre-populated.</para>
-    /// <para><b>Note:</b>The hash of a decomposed object differs from the hash of a non-decomposed object.</para>
-    /// </summary>
-    /// <param name="decompose">If true, will decompose the object in the process of hashing.</param>
-    /// <returns></returns>
-    public string GetId(bool decompose = false, SerializerVersion serializerVersion = SerializerVersion.V2)
-    {
-      if (serializerVersion == SerializerVersion.V1)
+      if (_type == null)
       {
-        var (s, t) = Operations.GetSerializerInstance();
-        if (decompose)
+        List<string> bases = new();
+        Type myType = GetType();
+
+        while (myType.Name != nameof(Base))
         {
-          s.WriteTransports = new List<ITransport>() { new MemoryTransport() };
+          if (!myType.IsAbstract)
+          {
+            bases.Add(myType.FullName);
+          }
+
+          myType = myType.BaseType!;
         }
-        var obj = JsonConvert.SerializeObject(this, t);
-        return JObject.Parse(obj).GetValue("id").ToString();
-      }
-      else
-      {
-        var s = new Serialisation.BaseObjectSerializerV2();
-        if (decompose)
+
+        if (bases.Count == 0)
         {
-          s.WriteTransports = new List<ITransport>() { new MemoryTransport() };
+          _type = nameof(Base);
         }
-        var obj = s.Serialize(this);
-        return JObject.Parse(obj).GetValue("id").ToString();
-      }
-    }
-
-    /// <summary>
-    /// Attempts to count the total number of detachable objects.
-    /// </summary>
-    /// <returns>The total count of the detachable children + 1 (itself).</returns>
-    public long GetTotalChildrenCount()
-    {
-      var parsed = new HashSet<int>();
-      return 1 + CountDescendants(this, parsed);
-    }
-
-    private long CountDescendants(Base @base, HashSet<int> parsed)
-    {
-      if (parsed.Contains(@base.GetHashCode()))
-      {
-        return 0;
+        else
+        {
+          bases.Reverse();
+          _type = string.Join(":", bases);
+        }
       }
 
-      parsed.Add(@base.GetHashCode());
+      return _type;
+    }
+  }
 
-      long count = 0;
-      var typedProps = @base.GetInstanceMembers();
-      foreach (var prop in typedProps.Where(p => p.CanRead))
+  /// <summary>
+  /// Calculates the id (a unique hash) of this object.
+  /// </summary>
+  /// <remarks>
+  /// This method fully serialize the object and any referenced objects. This has a tangible cost and should be avoided.<br/>
+  /// Objects retrieved from a <see cref="ITransport"/> already have a <see cref="id"/> property populated<br/>
+  /// The hash of a decomposed object differs from the hash of a non-decomposed object.
+  /// </remarks>
+  /// <param name="decompose">If <see langword="true"/>, will decompose the object in the process of hashing.</param>
+  /// <returns>the resulting id (hash)</returns>
+  public string GetId(bool decompose = false)
+  {
+    var transports = decompose ? new[] { new MemoryTransport() } : Array.Empty<ITransport>();
+    var serializer = new BaseObjectSerializerV2(transports);
+
+    string obj = serializer.Serialize(this);
+    return JObject.Parse(obj).GetValue(nameof(id))!.ToString();
+  }
+
+  /// <summary>
+  /// Attempts to count the total number of detachable objects.
+  /// </summary>
+  /// <returns>The total count of the detachable children + 1 (itself).</returns>
+  public long GetTotalChildrenCount()
+  {
+    var parsed = new HashSet<int>();
+    return 1 + CountDescendants(this, parsed);
+  }
+
+  private static long CountDescendants(Base @base, ISet<int> parsed)
+  {
+    if (parsed.Contains(@base.GetHashCode()))
+    {
+      return 0;
+    }
+
+    parsed.Add(@base.GetHashCode());
+
+    long count = 0;
+    var typedProps = @base.GetInstanceMembers();
+    foreach (var prop in typedProps.Where(p => p.CanRead))
+    {
+      bool isIgnored =
+        prop.IsDefined(typeof(ObsoleteAttribute), true) || prop.IsDefined(typeof(JsonIgnoreAttribute), true);
+      if (isIgnored)
       {
-        var detachAttribute = prop.GetCustomAttribute<DetachProperty>(true);
+        continue;
+      }
+
+      var detachAttribute = prop.GetCustomAttribute<DetachProperty>(true);
+
+      object value = prop.GetValue(@base);
+
+      if (detachAttribute is { Detachable: true })
+      {
         var chunkAttribute = prop.GetCustomAttribute<Chunkable>(true);
-
-        object value = prop.GetValue(@base);
-
-        if (detachAttribute != null && detachAttribute.Detachable && chunkAttribute == null)
+        if (chunkAttribute == null)
         {
           count += HandleObjectCount(value, parsed);
         }
-        else if (detachAttribute != null && detachAttribute.Detachable && chunkAttribute != null)
+        else
         {
           // Simplified chunking count handling.
-          var asList = value as IList;
-          if (asList != null)
+          if (value is IList asList)
           {
             count += asList.Count / chunkAttribute.MaxObjCountPerChunk;
-            continue;
-          }
-          var asArray = value as Array;
-          if (asArray != null)
-          {
-            count += asArray.Length / chunkAttribute.MaxObjCountPerChunk;
-            continue;
           }
         }
       }
-
-      var dynamicProps = @base.GetDynamicMembers();
-      var chunkSyntax = new System.Text.RegularExpressions.Regex(@"^@\((\d*)\)");
-      foreach (var propName in dynamicProps)
-      {
-        if (!propName.StartsWith("@"))
-        {
-          continue;
-        }
-
-        // Simplfied dynamic prop chunking handling
-        if (chunkSyntax.IsMatch(propName))
-        {
-          int chunkSize = -1;
-          var match = chunkSyntax.Match(propName);
-          int.TryParse(match.Groups[match.Groups.Count - 1].Value, out chunkSize);
-          
-          var asList = @base[propName] as IList;
-          if(chunkSize != -1 && asList != null)
-          {
-            count += asList.Count / chunkSize;
-            continue;
-          }
-
-          var asArr = @base[propName] as Array;
-          if(chunkSize != -1 && asArr != null)
-          {
-            count += asArr.Length / chunkSize;
-            continue;
-          }
-        }
-
-        count += HandleObjectCount(@base[propName], parsed);
-      }
-
-      return count;
     }
 
-    private long HandleObjectCount(object value, HashSet<int> parsed)
+    var dynamicProps = @base.GetDynamicMembers();
+    foreach (var propName in dynamicProps)
     {
-      long count = 0;
-      if (value == null)
+      if (!propName.StartsWith("@"))
       {
-        return count;
+        continue;
       }
 
-      if (value is Base)
+      // Simplfied dynamic prop chunking handling
+      if (s_chunkSyntax.IsMatch(propName))
       {
-        count++;
-        count += CountDescendants(value as Base, parsed);
-        return count;
-      }
+        var match = s_chunkSyntax.Match(propName);
+        _ = int.TryParse(match.Groups[match.Groups.Count - 1].Value, out int chunkSize);
 
-      var propType = value.GetType();
-      if (typeof(IEnumerable).IsAssignableFrom(propType) && !typeof(IDictionary).IsAssignableFrom(propType) && propType != typeof(string))
-      {
-        foreach (var arrValue in ((IEnumerable)value))
+        if (chunkSize != -1 && @base[propName] is IList asList)
         {
-          if (arrValue is Base)
+          count += asList.Count / chunkSize;
+          continue;
+        }
+      }
+
+      count += HandleObjectCount(@base[propName], parsed);
+    }
+
+    return count;
+  }
+
+  private static long HandleObjectCount(object? value, ISet<int> parsed)
+  {
+    long count = 0;
+    switch (value)
+    {
+      case Base b:
+        count++;
+        count += CountDescendants(b, parsed);
+        return count;
+      case IDictionary d:
+      {
+        foreach (DictionaryEntry kvp in d)
+        {
+          if (kvp.Value is Base b)
           {
             count++;
-            count += CountDescendants(arrValue as Base, parsed);
+            count += CountDescendants(b, parsed);
+          }
+          else
+          {
+            count += HandleObjectCount(kvp.Value, parsed);
+          }
+        }
+
+        return count;
+      }
+      case IEnumerable e
+      and not string:
+      {
+        foreach (var arrValue in e)
+        {
+          if (arrValue is Base b)
+          {
+            count++;
+            count += CountDescendants(b, parsed);
           }
           else
           {
@@ -182,107 +234,75 @@ namespace Speckle.Core.Models
 
         return count;
       }
-
-      if (typeof(IDictionary).IsAssignableFrom(propType))
-      {
-        foreach (DictionaryEntry kvp in (IDictionary)value)
-        {
-          if (kvp.Value is Base)
-          {
-            count++;
-            count += CountDescendants(kvp.Value as Base, parsed);
-          }
-          else
-          {
-            count += HandleObjectCount(kvp.Value, parsed);
-          }
-        }
+      default:
         return count;
-      }
-
-      return count;
-    }
-
-    /// <summary>
-    /// Creates a shallow copy of the current base object.
-    /// This operation does NOT copy/duplicate the data inside each prop.
-    /// The new object's property values will be pointers to the original object's property value.
-    /// </summary>
-    /// <returns>A shallow copy of the original object.</returns>
-    public Base ShallowCopy()
-    {
-      var myDuplicate = (Base)Activator.CreateInstance(GetType());
-      myDuplicate.id = id;
-      myDuplicate.applicationId = applicationId;
-
-      foreach (var prop in GetDynamicMemberNames())
-      {
-        var p = GetType().GetProperty(prop);
-        if (p != null && !p.CanWrite)
-        {
-          continue;
-        }
-
-        try
-        {
-          myDuplicate[prop] = this[prop];
-        }
-        catch
-        {
-          // avoids any last ditch unsettable or strange props.
-        }
-      }
-
-      return myDuplicate;
-    }
-
-    /// <summary>
-    /// This property will only be populated if the object is retreieved from storage. Use <see cref="GetTotalChildrenCount"/> otherwise. 
-    /// </summary>
-    [SchemaIgnore]
-    public virtual long totalChildrenCount { get; set; }
-
-    /// <summary>
-    /// Secondary, ideally host application driven, object identifier.
-    /// </summary>
-    [SchemaIgnore]
-    public string applicationId { get; set; }
-
-
-    private string __type;
-
-    /// <summary>
-    /// Holds the type information of this speckle object, derived automatically
-    /// from its assembly name and inheritance.
-    /// </summary>
-    [SchemaIgnore]
-    public virtual string speckle_type
-    {
-      get
-      {
-        if (__type == null)
-        {
-          List<string> bases = new List<string>();
-          Type myType = this.GetType();
-
-          while (myType.Name != nameof(Base))
-          {
-            bases.Add(myType.FullName);
-            myType = myType.BaseType;
-          }
-
-          if (bases.Count == 0)
-          {
-            __type = nameof(Base);
-          }
-          else
-          {
-            bases.Reverse();
-            __type = string.Join(":", bases);
-          }
-        }
-        return __type;
-      }
     }
   }
+
+  /// <summary>
+  /// Creates a shallow copy of the current base object.
+  /// This operation does NOT copy/duplicate the data inside each prop.
+  /// The new object's property values will be pointers to the original object's property value.
+  /// </summary>
+  /// <returns>A shallow copy of the original object.</returns>
+  public Base ShallowCopy()
+  {
+    Type type = GetType();
+    Base myDuplicate = (Base)Activator.CreateInstance(type);
+    myDuplicate.id = id;
+    myDuplicate.applicationId = applicationId;
+
+    foreach (
+      var kvp in GetMembers(
+        DynamicBaseMemberType.Instance | DynamicBaseMemberType.Dynamic | DynamicBaseMemberType.SchemaIgnored
+      )
+    )
+    {
+      var propertyInfo = type.GetProperty(kvp.Key);
+      if (propertyInfo is not null && !propertyInfo.CanWrite)
+      {
+        continue;
+      }
+
+      try
+      {
+        myDuplicate[kvp.Key] = kvp.Value;
+      }
+      catch (Exception ex) when (!ex.IsFatal())
+      {
+        // avoids any last ditch unsettable or strange props.
+        SpeckleLog.Logger
+          .ForContext("canWrite", propertyInfo?.CanWrite)
+          .ForContext("canRead", propertyInfo?.CanRead)
+          .Warning(
+            "Shallow copy of {type} failed to copy {propertyName} of type {propertyType} with value {valueType}",
+            type,
+            kvp.Key,
+            propertyInfo?.PropertyType,
+            kvp.Value?.GetType()
+          );
+      }
+    }
+
+    return myDuplicate;
+  }
+
+  #region Obsolete
+  /// <inheritdoc cref="GetId(bool)"/>
+  [Obsolete("Serializer v1 is deprecated, use other overload(s)", true)]
+  public string GetId(SerializerVersion serializerVersion)
+  {
+    return GetId(false, serializerVersion);
+  }
+
+  /// <inheritdoc cref="GetId(bool)"/>
+  [Obsolete("Serializer v1 is deprecated, use other overload(s)", true)]
+  public string GetId(bool decompose, SerializerVersion serializerVersion)
+  {
+    throw new NotImplementedException(
+      "Overload has been deprecated along with SerializerV1, use other overload (uses SerializerV2)"
+    );
+  }
+
+  #endregion
 }

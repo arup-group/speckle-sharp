@@ -1,3 +1,4 @@
+#include "APIMigrationHelper.hpp"
 #include "GetProjectInfo.hpp"
 #include "ResourceIds.hpp"
 #include "ObjectState.hpp"
@@ -5,46 +6,50 @@
 namespace AddOnCommands
 {
 
-  static const char* Untitled = "Untitled";
-  static const char* ProjectNameFieldName = "name";
-  static const char* ProjectLocationFieldName = "location";
-  static const char* ProjectLengthUnitsFieldName = "lengthUnit";
-  static const char* ProjectAreaUnitsFieldName = "areaUnit";
-  static const char* ProjectVolumeUnitsFieldName = "volumeUnit";
-  static const char* ProjectAngleUnitsFieldName = "angleUnit";
+namespace FieldNames
+{
+static const char* ProjectName = "name";
+static const char* ProjectLocation = "location";
+static const char* ProjectLengthUnits = "lengthUnit";
+static const char* ProjectAreaUnits = "areaUnit";
+static const char* ProjectVolumeUnits = "volumeUnit";
+static const char* ProjectAngleUnits = "angleUnit";
+}
 
-  GS::String GetProjectInfo::GetName() const
-  {
-    return GetProjectInfoCommandName;
-  }
 
-  GS::ObjectState GetProjectInfo::Execute(const GS::ObjectState& /*parameters*/, GS::ProcessControl& /*processControl*/) const
-  {
-    API_ProjectInfo projectInfo{};
+GS::String GetProjectInfo::GetName () const
+{
+	return GetProjectInfoCommandName;
+}
 
-    const GSErrCode err = ACAPI_Environment(APIEnv_ProjectID, &projectInfo, nullptr);
-    if (err != NoError)
-    {
-      return GS::ObjectState{};
-    }
 
-    //if (projectInfo.untitled)
-    //{
-    //  return GS::ObjectState{ProjectNameFieldName, Untitled};
-    //}
+GS::ObjectState GetProjectInfo::Execute (const GS::ObjectState& /*parameters*/, GS::ProcessControl& /*processControl*/) const
+{
+	API_ProjectInfo projectInfo{};
 
-    GS::ObjectState os;
-    os.Add(ProjectNameFieldName, *projectInfo.projectName);
-    os.Add(ProjectLocationFieldName, *projectInfo.projectPath);
+	const GSErrCode err = ACAPI_ProjectOperation_Project (&projectInfo);
+	if (err != NoError) {
+		return GS::ObjectState{};
+	}
 
-    API_WorkingUnitPrefs unitPrefs;
-    ACAPI_Environment(APIEnv_GetPreferencesID, &unitPrefs, (void*)APIPrefs_WorkingUnitsID);
-    os.Add(ProjectLengthUnitsFieldName, unitPrefs.lengthUnit);
-    os.Add(ProjectAreaUnitsFieldName, unitPrefs.areaUnit);
-    os.Add(ProjectVolumeUnitsFieldName, unitPrefs.volumeUnit);
-    os.Add(ProjectAngleUnitsFieldName, unitPrefs.angleUnit);
+	//if (projectInfo.untitled)
+	//{
+	//  return GS::ObjectState{ProjectName, Untitled};
+	//}
 
-    return os;
-  }
+	GS::ObjectState os;
+	os.Add (FieldNames::ProjectName, *projectInfo.projectName);
+	os.Add (FieldNames::ProjectLocation, *projectInfo.projectPath);
+
+	API_WorkingUnitPrefs unitPrefs;
+	ACAPI_ProjectSetting_GetPreferences (&unitPrefs, APIPrefs_WorkingUnitsID);
+	os.Add (FieldNames::ProjectLengthUnits, unitPrefs.lengthUnit);
+	os.Add (FieldNames::ProjectAreaUnits, unitPrefs.areaUnit);
+	os.Add (FieldNames::ProjectVolumeUnits, unitPrefs.volumeUnit);
+	os.Add (FieldNames::ProjectAngleUnits, unitPrefs.angleUnit);
+
+	return os;
+}
+
 
 }

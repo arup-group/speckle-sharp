@@ -1,21 +1,40 @@
 using System;
 using System.Collections.Generic;
-using Archicad.Converters;
-using Objects.BuiltElements.Archicad;
+using Beam = Objects.BuiltElements.Archicad.ArchicadBeam;
+using Column = Objects.BuiltElements.Archicad.ArchicadColumn;
 using DirectShape = Objects.BuiltElements.Archicad.DirectShape;
-using Floor = Objects.BuiltElements.Archicad.Floor;
-using Room = Objects.BuiltElements.Archicad.Room;
-using Wall = Objects.BuiltElements.Archicad.Wall;
+using Door = Objects.BuiltElements.Archicad.ArchicadDoor;
+using Floor = Objects.BuiltElements.Archicad.ArchicadFloor;
+using Roof = Objects.BuiltElements.Archicad.ArchicadRoof;
+using Shell = Objects.BuiltElements.Archicad.ArchicadShell;
+using Wall = Objects.BuiltElements.Archicad.ArchicadWall;
+using Window = Objects.BuiltElements.Archicad.ArchicadWindow;
+using Skylight = Objects.BuiltElements.Archicad.ArchicadSkylight;
+using Opening = Objects.BuiltElements.Archicad.ArchicadOpening;
 
-namespace Archicad
+namespace Archicad;
+
+public static class ElementTypeProvider
 {
-  public static class ElementTypeProvider
-  {
-    private static Dictionary<string, Type> _nameToType = new()  { { "Wall", typeof(Wall) }, { "Slab", typeof(Floor) }, {"Zone", typeof(Room)} };
-
-    public static Type GetTypeByName(string name)
+  private static Dictionary<string, Type> _nameToType =
+    new()
     {
-      return _nameToType.TryGetValue(name, out var value) ? value : typeof(DirectShape);
-    }
+      { "Wall", typeof(Wall) },
+      { "Slab", typeof(Floor) },
+      { "Roof", typeof(Roof) },
+      { "Shell", typeof(Shell) },
+      { "Zone", typeof(Room) },
+      { "Beam", typeof(Beam) },
+      { "Column", typeof(Column) },
+      { "Door", typeof(Door) },
+      { "Window", typeof(Window) },
+      { "Skylight", typeof(Skylight) },
+      { "GridElement", typeof(GridElement) },
+      { "Opening", typeof(Opening) }
+    };
+
+  public static Type GetTypeByName(string name)
+  {
+    return _nameToType.TryGetValue(name, out var value) ? value : typeof(DirectShape);
   }
 }

@@ -1,47 +1,21 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Objects.BuiltElements.Archicad;
-using Speckle.Core.Kits;
+using ConnectorArchicad.Communication.Commands;
 
-namespace Archicad.Communication.Commands
+namespace Archicad.Communication.Commands;
+
+internal sealed class GetFloorData : GetDataBase, ICommand<Speckle.Newtonsoft.Json.Linq.JArray>
 {
-  internal sealed class GetFloorData : ICommand<IEnumerable<Floor>>
+  public GetFloorData(IEnumerable<string> applicationIds, bool sendProperties, bool sendListingParameters)
+    : base(applicationIds, sendProperties, sendListingParameters) { }
+
+  public async Task<Speckle.Newtonsoft.Json.Linq.JArray> Execute()
   {
-    [JsonObject(MemberSerialization.OptIn)]
-    public sealed class Parameters
-    {
-      [JsonProperty("applicationIds")]
-      private IEnumerable<string> ApplicationIds { get; }
+    dynamic result = await HttpCommandExecutor.Execute<Parameters, dynamic>(
+      "GetSlabData",
+      new Parameters(ApplicationIds, SendProperties, SendListingParameters)
+    );
 
-      public Parameters(IEnumerable<string> applicationIds)
-      {
-        ApplicationIds = applicationIds;
-      }
-    }
-
-    [JsonObject(MemberSerialization.OptIn)]
-    private sealed class Result
-    {
-      [JsonProperty("slabs")]
-      public IEnumerable<Floor> Datas { get; private set; }
-    }
-
-    private IEnumerable<string> ApplicationIds { get; }
-
-    public GetFloorData(IEnumerable<string> applicationIds)
-    {
-      ApplicationIds = applicationIds;
-    }
-
-    public async Task<IEnumerable<Floor>> Execute()
-    {
-      Result result = await HttpCommandExecutor.Execute<Parameters, Result>("GetSlabData", new Parameters(ApplicationIds));
-      foreach (var floor in result.Datas)
-        floor.units = Units.Meters;
-
-      return result.Datas;
-    }
-
+    return (Speckle.Newtonsoft.Json.Linq.JArray)result["slabs"];
   }
 }

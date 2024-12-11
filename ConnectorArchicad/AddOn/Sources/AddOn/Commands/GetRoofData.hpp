@@ -1,17 +1,22 @@
 ﻿#ifndef GET_ROOF_DATA_HPP
 #define GET_ROOF_DATA_HPP
 
-#include "BaseCommand.hpp"
+#include "GetDataCommand.hpp"
 
 
 namespace AddOnCommands {
 
 
-  class GetRoofData : public BaseCommand {
-  public:
-    virtual GS::String							GetName() const override;
-    virtual GS::ObjectState						Execute(const GS::ObjectState& parameters, GS::ProcessControl& processControl) const override;
-  };
+class GetRoofData : public GetDataCommand {
+	GS::String			GetFieldName () const override;
+	API_ElemTypeID		GetElemTypeID () const override;
+	GS::ErrCode			SerializeElementType (const API_Element& elem,
+							const API_ElementMemo& memo,
+							GS::ObjectState& os) const override;
+
+public:
+	virtual GS::String	GetName () const override;
+};
 
 
 }

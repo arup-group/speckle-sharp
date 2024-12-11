@@ -1,141 +1,109 @@
-﻿#include "CreateZone.hpp"
+#include "CreateZone.hpp"
 #include "ResourceIds.hpp"
 #include "ObjectState.hpp"
 #include "Utility.hpp"
+#include "Objects/Level.hpp"
 #include "Objects/Polyline.hpp"
 #include "FieldNames.hpp"
 #include "AngleData.h"
 #include "OnExit.hpp"
+using namespace FieldNames;
 
 
 namespace AddOnCommands
 {
-  static GSErrCode CreateNewZone(API_Element& zone, API_ElementMemo& zoneMemo)
-  {
-    return ACAPI_Element_Create(&zone, &zoneMemo);
-  }
 
 
-  static GSErrCode ModifyExistingZone(API_Element& zone, API_Element& mask, API_ElementMemo& zoneMemo,
-                                      GS::UInt64 memoMask)
-  {
-    return ACAPI_Element_Change(&zone, &mask, &zoneMemo, memoMask, true);
-  }
-
-
-  static GSErrCode GetZoneFromObjectState(const GS::ObjectState& os,
-                                          API_Element& element,
-                                          API_Element& mask,
-                                          API_ElementMemo& zoneMemo,
-                                          GS::UInt64& memoMask)
-  {
-    GS::UniString guidString;
-    os.Get(ApplicationIdFieldName, guidString);
-    element.header.guid = APIGuidFromString(guidString.ToCStr());
-    element.header.typeID = API_ZoneID;
-
-    GSErrCode err = Utility::GetBaseElementData(element, &zoneMemo);
-    if (err != NoError)
-      return err;
-
-    memoMask = APIMemoMask_Polygon;
-
-    ACAPI_ELEMENT_MASK_SET(mask, API_ZoneType, poly.nSubPolys);
-    ACAPI_ELEMENT_MASK_SET(mask, API_ZoneType, poly.nCoords);
-    ACAPI_ELEMENT_MASK_SET(mask, API_ZoneType, poly.nArcs);
-    ACAPI_ELEMENT_MASK_SET(mask, API_ZoneType, roomBaseLev);
-    ACAPI_ELEMENT_MASK_SET(mask, API_Elem_Head, floorInd);
-
-    // The shape of the zone
-    Objects::ElementShape zoneShape;
-
-    if (os.Contains(ShapeFieldName))
-    {
-      os.Get(ShapeFieldName, zoneShape);
-      element.zone.poly.nSubPolys = zoneShape.SubpolyCount();
-      element.zone.poly.nCoords = zoneShape.VertexCount();
-      element.zone.poly.nArcs = zoneShape.ArcCount();
-
-      zoneShape.SetToMemo(zoneMemo);
-    }
-
-    if (os.Contains(Room::HeightFieldName))
-    {
-      os.Get(Room::HeightFieldName, element.zone.roomHeight);
-      ACAPI_ELEMENT_MASK_SET(mask, API_ZoneType, roomHeight);
-    }
-
-    // The name and number of the zone
-    if (os.Contains(Room::NameFieldName))
-    {
-      os.Get(Room::NameFieldName, element.zone.roomName);
-      ACAPI_ELEMENT_MASK_SET(mask, API_ZoneType, roomName);
-    }
-    if (os.Contains(Room::NumberFieldName))
-    {
-      os.Get(Room::NumberFieldName, element.zone.roomNoStr);
-      ACAPI_ELEMENT_MASK_SET(mask, API_ZoneType, roomNoStr);
-    }
-
-    // The floor index and level of the zone
-    if (os.Contains(FloorIndexFieldName))
-    {
-      os.Get(FloorIndexFieldName, element.header.floorInd);
-      Utility::SetStoryLevel(zoneShape.Level(), element.header.floorInd, element.zone.roomBaseLev);
-    }
-    else
-    {
-      Utility::SetStoryLevelAndFloor(zoneShape.Level(), element.header.floorInd, element.zone.roomBaseLev);
-    }
-    return NoError;
-  }
-
-
-  GS::String CreateZone::GetName() const
-  {
-    return CreateZoneCommandName
-  }
-
-
-  GS::ObjectState CreateZone::Execute(const GS::ObjectState& parameters, GS::ProcessControl& /*processControl*/) const
-  {
-    GS::ObjectState result;
-
-    GS::Array<GS::ObjectState> zones;
-    parameters.Get(ZonesFieldName, zones);
-
-    const auto& listAdder = result.AddList<GS::UniString>(ApplicationIdsFieldName);
-
-    ACAPI_CallUndoableCommand("CreateSpeckleZone", [&]() -> GSErrCode
-    {
-      for (const GS::ObjectState& zoneOs : zones)
-      {
-        API_Element zone{};
-        API_Element zoneMask{};
-        API_ElementMemo zoneMemo{};
-        GS::UInt64 memoMask = 0;
-        GS::OnExit memoDisposer([&zoneMemo] { ACAPI_DisposeElemMemoHdls(&zoneMemo); });
-
-        GSErrCode err = GetZoneFromObjectState(zoneOs, zone, zoneMask, zoneMemo, memoMask);
-        if (err != NoError)
-          continue;
-
-        bool zoneExists = Utility::ElementExists(zone.header.guid);
-        if (zoneExists)
-          err = ModifyExistingZone(zone, zoneMask, zoneMemo, memoMask);
-        else
-          err = CreateNewZone(zone, zoneMemo);
-
-
-        if (err == NoError)
-        {
-          GS::UniString elemId = APIGuidToString(zone.header.guid);
-          listAdder(elemId);
-        }
-      }
-      return NoError;
-    });
-
-    return result;
-  }
+GS::String CreateZone::GetFieldName () const
+{
+	return Zones;
 }
+
+
+GS::UniString CreateZone::GetUndoableCommandName () const
+{
+	return "CreateSpeckleZone";
+}
+
+
+GSErrCode CreateZone::GetElementFromObjectState (const GS::ObjectState& os,
+	API_Element& element,
+	API_Element& mask,
+	API_ElementMemo& memo,
+	GS::UInt64& memoMask,
+	API_SubElement** /*marker*/,
+	AttributeManager& /*attributeManager*/,
+	LibpartImportManager& /*libpartImportManager*/,
+	GS::Array<GS::UniString>& log) const
+{
+	GSErrCode err = NoError;
+	
+	Utility::SetElementType (element.header, API_ZoneID);
+	err = Utility::GetBaseElementData (element, &memo, nullptr, log);
+	if (err != NoError)
+		return err;
+
+	err = GetElementBaseFromObjectState (os, element, mask);
+	if (err != NoError)
+		return err;
+
+	memoMask = APIMemoMask_Polygon;
+
+	// The shape of the zone
+	Objects::ElementShape zoneShape;
+
+	if (os.Contains (ElementBase::Shape)) {
+		os.Get (ElementBase::Shape, zoneShape);
+		element.zone.poly.nSubPolys = zoneShape.SubpolyCount ();
+		element.zone.poly.nCoords = zoneShape.VertexCount ();
+		element.zone.poly.nArcs = zoneShape.ArcCount ();
+
+		ACAPI_ELEMENT_MASK_SET (mask, API_ZoneType, poly.nSubPolys);
+		ACAPI_ELEMENT_MASK_SET (mask, API_ZoneType, poly.nCoords);
+		ACAPI_ELEMENT_MASK_SET (mask, API_ZoneType, poly.nArcs);
+
+		zoneShape.SetToMemo (memo, Objects::ElementShape::MemoMainPolygon);
+		
+		element.zone.manual = true;
+		ACAPI_ELEMENT_MASK_SET (mask, API_ZoneType, manual);
+	}
+
+	if (os.Contains (Room::Height)) {
+		os.Get (Room::Height, element.zone.roomHeight);
+		ACAPI_ELEMENT_MASK_SET (mask, API_ZoneType, roomHeight);
+	}
+
+	// The name and number of the zone
+	if (os.Contains (Room::Name)) {
+		GS::UniString str;
+		os.Get (Room::Name, str);
+		GS::ucscpy (element.zone.roomName, str.ToUStr ());
+		ACAPI_ELEMENT_MASK_SET (mask, API_ZoneType, roomName);
+	}
+	if (os.Contains (Room::Number)) {
+		GS::UniString str;
+		os.Get (Room::Number, str);
+		GS::ucscpy (element.zone.roomNoStr, str.ToUStr ());
+		ACAPI_ELEMENT_MASK_SET (mask, API_ZoneType, roomNoStr);
+	}
+
+	// The floor index and level of the zone
+	if (os.Contains (ElementBase::Level)) {
+		GetStoryFromObjectState (os, zoneShape.Level (), element.header.floorInd, element.zone.roomBaseLev);
+	} else {
+		Utility::SetStoryLevelAndFloor (zoneShape.Level (), element.header.floorInd, element.zone.roomBaseLev);
+	}
+	ACAPI_ELEMENT_MASK_SET (mask, API_ZoneType, roomBaseLev);
+	ACAPI_ELEMENT_MASK_SET (mask, API_Elem_Head, floorInd);
+
+	return NoError;
+}
+
+
+GS::String CreateZone::GetName () const
+{
+	return CreateZoneCommandName;
+}
+
+
+} // namespace AddOnCommands

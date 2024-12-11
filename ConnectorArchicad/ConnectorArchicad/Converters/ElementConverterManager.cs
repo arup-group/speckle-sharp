@@ -1,195 +1,331 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Archicad.Communication;
-using Archicad.Model;
-using Objects.BuiltElements;
-using Objects.BuiltElements.Archicad;
-using Objects.Geometry;
-using Speckle.Core.Kits;
+using DesktopUI2.ViewModels;
+using Speckle.Core.Logging;
 using Speckle.Core.Models;
+using Beam = Objects.BuiltElements.Beam;
 using Ceiling = Objects.BuiltElements.Ceiling;
+using Column = Objects.BuiltElements.Column;
+using Door = Objects.BuiltElements.Archicad.ArchicadDoor;
+using Fenestration = Objects.BuiltElements.Archicad.ArchicadFenestration;
+using Opening = Objects.BuiltElements.Opening;
 using Floor = Objects.BuiltElements.Floor;
-using Room = Objects.BuiltElements.Archicad.Room;
+using Roof = Objects.BuiltElements.Roof;
 using Wall = Objects.BuiltElements.Wall;
+using Window = Objects.BuiltElements.Archicad.ArchicadWindow;
+using Skylight = Objects.BuiltElements.Archicad.ArchicadSkylight;
+using GridLine = Objects.BuiltElements.GridLine;
+using DesktopUI2.Models;
+using Objects.BuiltElements.Archicad;
 
-namespace Archicad
+namespace Archicad;
+
+public sealed partial class ElementConverterManager
 {
-  public sealed class ElementConverterManager
+  #region --- Fields ---
+
+  public static ElementConverterManager Instance { get; } = new();
+
+  private Dictionary<Type, Converters.IConverter> Converters { get; } = new();
+
+  private Converters.IConverter DefaultConverterForSend { get; } = new Converters.DirectShape();
+  private Converters.IConverter DefaultConverterForReceive { get; } = new Converters.Object();
+
+  private Dictionary<Type, IEnumerable<Base>> ReceivedObjects { get; set; }
+  private Dictionary<string, IEnumerable<string>> SelectedObjects { get; set; }
+
+  private List<string> CanHaveSubElements = new() { "Wall", "Roof", "Shell" }; // Hardcoded until we know whats the shared property that defines wether elements may be have subelements or not.
+  #endregion
+
+  #region --- Ctor \ Dtor ---
+
+  private ElementConverterManager()
   {
-    #region --- Fields ---
+    RegisterConverters();
+  }
 
-    public static ElementConverterManager Instance { get; } = new();
+  #endregion
 
-    private Dictionary<Type, Converters.IConverter> Converters { get; } = new();
+  #region --- Functions ---
 
-    private Converters.IConverter DefaultConverter { get; } = new Converters.DirectShape();
+  public async Task<Base?> ConvertToSpeckle(StreamState state, ProgressViewModel progress)
+  {
+    var objectToCommit = new Collection("Archicad model", "model");
 
-    #endregion
+    var conversionOptions = new ConversionOptions(state.Settings);
 
-    #region --- Ctor \ Dtor ---
-
-    private ElementConverterManager()
+    IEnumerable<string> elementIds = state.Filter.Selection;
+    if (state.Filter.Slug == "all")
     {
-      RegisterConverters();
+      elementIds = AsyncCommandProcessor
+        .Execute(new Communication.Commands.GetElementIds(Communication.Commands.GetElementIds.ElementFilter.All))
+        ?.Result;
+    }
+    else if (state.Filter.Slug == "elementType")
+    {
+      var elementTypes = state.Filter.Summary.Split(",").Select(elementType => elementType.Trim()).ToList();
+      elementIds = AsyncCommandProcessor
+        .Execute(
+          new Communication.Commands.GetElementIds(
+            Communication.Commands.GetElementIds.ElementFilter.ElementType,
+            elementTypes
+          )
+        )
+        ?.Result;
     }
 
-    #endregion
+    SelectedObjects = await GetElementsType(elementIds, progress.CancellationToken); // Gets all selected objects
+    SelectedObjects = SortSelectedObjects();
 
-    #region --- Functions ---
+    SpeckleLog.Logger.Debug("Conversion started (element types: {0})", SelectedObjects.Count);
 
-    public async Task<Base?> ConvertToSpeckle(IEnumerable<string> elementIds, CancellationToken token)
+    progress.Max = SelectedObjects.Sum(x => x.Value.Count());
+    progress.Value = 0;
+
+    List<Base> allObjects = new();
+    foreach (var (element, guids) in SelectedObjects) // For all kind of selected objects (like window, door, wall, etc.)
     {
-      IEnumerable<ElementModelData> rawModels =
-        await AsyncCommandProcessor.Execute(new Communication.Commands.GetModelForElements(elementIds), token);
-      if ( rawModels is null )
-        return null;
+      SpeckleLog.Logger.Debug("{0}: {1}", element, guids.Count());
 
-      var elementTypeTable =
-        await AsyncCommandProcessor.Execute(new Communication.Commands.GetElementsType(elementIds), token);
-      if ( elementTypeTable is null )
-        return null;
+      Type elemenType = ElementTypeProvider.GetTypeByName(element);
+      var objects = await ConvertOneTypeToSpeckle(guids, elemenType, progress, conversionOptions); // Deserialize all objects with given type
+      allObjects.AddRange(objects);
 
-      var converted = new Dictionary<string, List<Base>>();
-      foreach ( var (key, value)in elementTypeTable )
+      // subelements translated into "elements" property of the parent
+      if (typeof(Fenestration).IsAssignableFrom(elemenType) || typeof(Opening).IsAssignableFrom(elemenType))
       {
-        var converter = GetConverterForElement(ElementTypeProvider.GetTypeByName(key));
-        var bases = await converter.ConvertToSpeckle(
-          rawModels.Where(model => value.Contains(model.applicationId)), token);
-        if ( bases.Count > 0 )
-          converted[ key ] = bases;
-      }
+        Collection elementCollection = null;
 
-      if ( converted.Count == 0 )
-        return null;
-
-      var commitObject = new Base();
-      foreach ( var (key, bases) in converted )
-      {
-        commitObject[ "@" + key ] = bases;
-      }
-
-      return commitObject;
-    }
-
-    public async Task<List<string>> ConvertToNative(Base obj, CancellationToken token)
-    {
-      var result = new List<string>();
-
-      var elements = FlattenCommitObject(obj);
-      Console.WriteLine(String.Join(", ", elements.Select(el => $"{el.speckle_type}: {el.id}")));
-
-      var elementTypeTable = elements.GroupBy(element => element.GetType())
-        .ToDictionary(group => group.Key, group => group.Cast<Base>());
-      foreach ( var (key, value)in elementTypeTable )
-      {
-        var converter = GetConverterForElement(key);
-        var convertedElementIds = await converter.ConvertToArchicad(value, token);
-        result.AddRange(convertedElementIds);
-      }
-
-      return result;
-    }
-
-    private void RegisterConverters()
-    {
-      IEnumerable<Type> convertes = Assembly.GetExecutingAssembly().GetTypes().Where(t =>
-        t.IsClass && !t.IsAbstract && typeof(Converters.IConverter).IsAssignableFrom(t));
-
-      foreach ( Type converterType in convertes )
-      {
-        var converter = Activator.CreateInstance(converterType) as Converters.IConverter;
-        if ( converter?.Type is null )
-          continue;
-
-        Converters.Add(converter.Type, converter);
-      }
-    }
-
-    private Converters.IConverter GetConverterForElement(Type elementType)
-    {
-      if ( Converters.ContainsKey(elementType) )
-        return Converters[ elementType ];
-      if ( elementType.IsSubclassOf(typeof(Wall)) )
-        return Converters[ typeof(Wall) ];
-      if ( elementType.IsSubclassOf(typeof(Floor)) || elementType.IsSubclassOf(typeof(Ceiling)) )
-        return Converters[ typeof(Floor) ];
-      if ( elementType.IsSubclassOf(typeof(Objects.BuiltElements.Room)) )
-        return Converters[ typeof(Objects.BuiltElements.Room) ];
-
-      return DefaultConverter;
-    }
-
-    public static bool CanConvertToNative(Base @object)
-    {
-      return @object
-        switch
+        foreach (Base item in objects)
         {
-          Wall _ => true,
-          Floor _ => true,
-          Ceiling _ => true,
-          Room _ => true,
-          DirectShape _ => true,
-          Mesh _ => true,
-          _ => false
-        };
-    }
+          string parentApplicationId = null;
 
-    /// <summary>
-    /// Recurses through the commit object and flattens it.
-    /// TODO extract somewhere generic for other connectors to use?
-    /// </summary>
-    /// <param name="obj"></param>
-    /// <param name="converter"></param>
-    /// <returns></returns>
-    private List<Base> FlattenCommitObject(object obj)
-    {
-      List<Base> objects = new List<Base>();
+          if (item is Fenestration fenestration)
+          {
+            parentApplicationId = fenestration.parentApplicationId;
+          }
+          else if (item is ArchicadOpening opening)
+          {
+            parentApplicationId = opening.parentApplicationId;
+          }
 
-      switch ( obj )
-      {
-        case Base @base when CanConvertToNative(@base):
-          objects.Add(@base);
+          Base parent = allObjects.Find(x => x.applicationId == parentApplicationId);
 
-          return objects;
-        case Base @base:
-        {
-          foreach ( var prop in @base.GetDynamicMembers() )
-            objects.AddRange(FlattenCommitObject(@base[ prop ]));
+          if (parent == null)
+          {
+            // parent skipped, so add to collection
+            if (elementCollection == null)
+            {
+              elementCollection = new Collection(element, "Element Type");
+              elementCollection.applicationId = element;
+              objectToCommit.elements.Add(elementCollection);
+            }
 
-          var specialKeys = @base.GetMembers();
-          if ( specialKeys.ContainsKey("displayValue") )
-            objects.AddRange(FlattenCommitObject(specialKeys[ "displayValue" ]));
-          else if ( specialKeys.ContainsKey("displayMesh") )   // to be depreciated
-            objects.AddRange(FlattenCommitObject(specialKeys[ "displayMesh" ]));
-          if ( specialKeys.ContainsKey("elements") ) // for built elements like roofs, walls, and floors.
-            objects.AddRange(FlattenCommitObject(specialKeys[ "elements" ]));
-
-          return objects;
+            elementCollection.elements.Add(item);
+          }
+          else
+          {
+            if (parent["elements"] == null)
+            {
+              parent["elements"] = new List<Base>() { item };
+            }
+            else
+            {
+              var elements = parent["elements"] as List<Base>;
+              elements.Add(item);
+            }
+          }
         }
-        case IReadOnlyList<object> list:
-        {
-          foreach ( var listObj in list )
-            objects.AddRange(FlattenCommitObject(listObj));
-
-          return objects;
-        }
-        case IDictionary dict:
-        {
-          foreach ( DictionaryEntry kvp in dict )
-            objects.AddRange(FlattenCommitObject(kvp.Value));
-
-          return objects;
-        }
-        default:
-          return objects;
+      }
+      // parents translated as new collections
+      else
+      {
+        Collection elementCollection = new(element, "Element Type");
+        elementCollection.applicationId = element;
+        elementCollection.elements = objects;
+        objectToCommit.elements.Add(elementCollection);
       }
     }
 
-    #endregion
+    SpeckleLog.Logger.Debug("Conversion done");
+
+    return objectToCommit;
+  }
+
+  Dictionary<string, IEnumerable<string>> SortSelectedObjects()
+  {
+    var retval = new Dictionary<string, IEnumerable<string>>();
+    var canHave = SelectedObjects.Where(e => CanHaveSubElements.Contains(e.Key));
+    var cannotHave = SelectedObjects.Where(e => !CanHaveSubElements.Contains(e.Key));
+
+    foreach (var (key, value) in canHave)
+    {
+      retval[key] = value;
+    }
+
+    foreach (var (key, value) in cannotHave)
+    {
+      retval[key] = value;
+    }
+
+    return retval;
+  }
+
+  private void RegisterConverters()
+  {
+    IEnumerable<Type> convertes = Assembly
+      .GetExecutingAssembly()
+      .GetTypes()
+      .Where(t => t.IsClass && !t.IsAbstract && typeof(Converters.IConverter).IsAssignableFrom(t));
+
+    foreach (Type converterType in convertes)
+    {
+      var converter = Activator.CreateInstance(converterType) as Converters.IConverter;
+      if (converter?.Type is null)
+      {
+        continue;
+      }
+
+      Converters.Add(converter.Type, converter);
+    }
+  }
+
+  public Converters.IConverter GetConverterForElement(
+    Type elementType,
+    ConversionOptions conversionOptions,
+    bool forReceive
+  )
+  {
+    if (forReceive)
+    {
+      // always convert to Archicad GridElement
+      if (elementType.IsAssignableFrom(typeof(GridLine)))
+      {
+        return Converters[typeof(Archicad.GridElement)];
+      }
+
+      if (conversionOptions != null && !conversionOptions.ReceiveParametric)
+      {
+        return DefaultConverterForReceive;
+      }
+    }
+
+    if (Converters.ContainsKey(elementType))
+    {
+      return Converters[elementType];
+    }
+
+    if (elementType.IsSubclassOf(typeof(Wall)))
+    {
+      return Converters[typeof(Wall)];
+    }
+
+    if (elementType.IsSubclassOf(typeof(Beam)))
+    {
+      return Converters[typeof(Beam)];
+    }
+
+    if (elementType.IsSubclassOf(typeof(Column)))
+    {
+      return Converters[typeof(Column)];
+    }
+
+    if (elementType.IsSubclassOf(typeof(Door)))
+    {
+      return Converters[typeof(Door)];
+    }
+
+    if (elementType.IsSubclassOf(typeof(Window)))
+    {
+      return Converters[typeof(Window)];
+    }
+
+    if (elementType.IsSubclassOf(typeof(Skylight)))
+    {
+      return Converters[typeof(Skylight)];
+    }
+
+    if (elementType.IsSubclassOf(typeof(Floor)) || elementType.IsSubclassOf(typeof(Ceiling)))
+    {
+      return Converters[typeof(Floor)];
+    }
+
+    if (elementType.IsSubclassOf(typeof(Roof)))
+    {
+      return Converters[typeof(Roof)];
+    }
+
+    if (elementType.IsSubclassOf(typeof(Opening)))
+    {
+      return Converters[typeof(Opening)];
+    }
+
+    if (elementType.IsAssignableFrom(typeof(Objects.BuiltElements.Room)))
+    {
+      return Converters[typeof(Archicad.Room)];
+    }
+
+    if (elementType.IsAssignableFrom(typeof(Archicad.GridElement)))
+    {
+      return Converters[typeof(Archicad.GridElement)];
+    }
+
+    return forReceive ? DefaultConverterForReceive : DefaultConverterForSend;
+  }
+
+  #endregion
+
+  private async Task<Dictionary<string, IEnumerable<string>>?> GetElementsType(
+    IEnumerable<string> applicationIds,
+    CancellationToken token
+  )
+  {
+    var retval = await AsyncCommandProcessor.Execute(new Communication.Commands.GetElementsType(applicationIds), token);
+    return retval;
+  }
+
+  public async Task<List<Base>?> ConvertOneTypeToSpeckle(
+    IEnumerable<string> applicationIds,
+    Type elementType,
+    ProgressViewModel progress,
+    ConversionOptions conversionOptions
+  )
+  {
+    var rawModels = await GetModelForElements(applicationIds, progress.CancellationToken); // Model data, like meshes
+    var elementConverter = ElementConverterManager.Instance.GetConverterForElement(elementType, null, false); // Object converter
+    var convertedObjects = await elementConverter.ConvertToSpeckle(
+      rawModels,
+      progress.CancellationToken,
+      conversionOptions
+    ); // Deserialization
+
+    foreach (Base convertedObject in convertedObjects)
+    {
+      ApplicationObject applicationObject = new(convertedObject.applicationId, elementType.Name);
+      applicationObject.Update(status: ApplicationObject.State.Created);
+
+      progress.Report.Log(applicationObject);
+    }
+
+    progress.Value = progress.Value + convertedObjects.Count();
+
+    return convertedObjects;
+  }
+
+  private async Task<IEnumerable<Model.ElementModelData>> GetModelForElements(
+    IEnumerable<string> applicationIds,
+    CancellationToken token
+  )
+  {
+    var retval = await AsyncCommandProcessor.Execute(
+      new Communication.Commands.GetModelForElements(applicationIds),
+      token
+    );
+    return retval;
   }
 }

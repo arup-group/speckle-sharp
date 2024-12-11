@@ -9,6 +9,8 @@
 *.user
 *.userosscache
 *.sln.docstates
+*.tsep
+*.tool-versions
 
 # Intellij Crap
 .idea
@@ -144,6 +146,9 @@ _TeamCity*
 *.coverage
 *.coveragexml
 
+# Visual Studio code settings folder
+ConnectorArchicad/.vscode/
+
 # NCrunch
 _NCrunch_*
 .*crunch*.local.xml
@@ -223,6 +228,8 @@ _pkginfo.txt
 !?*.[Cc]ache/
 
 # Others
+Records/
+Sandbox/
 ClientBin/
 ~$*
 *~
@@ -366,3 +373,7 @@ speckle-sharp-ci-tools
 
 .circleci/continuation-config.yml
 .circleci/contiuation-config.yml
+ConnectorNavisworks/ConnectorNavisworks/Sample Models
+ConnectorArchicad/AddOn/Build*
+**/dist/
+

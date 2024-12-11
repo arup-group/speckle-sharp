@@ -7,13 +7,15 @@ import getopt
 
 
 def runCommand(argv: List[str]):
-    deploy = False
-    output_filepath = ".circleci/continuation-config.yml"
+
+    deploy: bool = False
+    external_build: bool = False
+    output_filepath: str = ".circleci/continuation-config.yml"
     arg_help = "{0} -d <deploy?> -o <output>".format(argv[0])
 
     print(argv)
     try:
-        opts, _ = getopt.getopt(argv[1:], "hd:o:")
+        opts, _ = getopt.getopt(argv[1:], "hd:o:e:")
     except:
         print(arg_help)
         sys.exit(2)
@@ -33,8 +35,16 @@ def runCommand(argv: List[str]):
             print("deploy arg -- " + str(arg) + " -- " + str(deploy))
         elif opt in ("-o", "--output"):
             output_filepath = arg
-
-    createConfigFile(deploy, output_filepath)
+        elif opt in ("-e", "--external"):
+            external_build = arg is not None and arg not in [
+                "none",
+                "None",
+                "False",
+                "false",
+                "f",
+            ]
+            print("Building for external PR " + str(external_build))
+    createConfigFile(deploy, output_filepath, external_build)
 
 
 def setup():
@@ -58,12 +68,7 @@ def setup():
         common_jobs = yaml.safe_load(cf)
 
 
-def getTagRegexString(connector_names: List[str]):
-    # version_regex = "([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-\\w+)?"
-    # tags = connector_names + ["all"]
-    # tagExpression = "(" + "|".join(tags) + ")"
-    # return f"/^{version_regex}\\/{tagExpression}$/"
-
+def getTagRegexString(connector_names: List[str]) -> str:
     # Version format 'x.y.z' with optional suffix '-{SUFFIX_NAME}' and optional '/all' ending to force build all tags
     return "/^([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-\\w+)?(\\/all)?$/"
 
@@ -75,10 +80,10 @@ def getTagFilter(connector_names: List[str]):
     }
 
 
-def createConfigFile(deploy: bool, outputPath: str):
+def createConfigFile(deploy: bool, outputPath: str, external_build: bool):
     print("---- Started creating config ----")
     print(
-        f"\n  -- Settings --\n  Deploy: {deploy}\n  Output path: {outputPath}\n  --\n"
+        f"\n  -- Settings --\n  Deploy: {deploy}\n  Output path: {outputPath}\n  External build: {external_build}\n  --\n"
     )
     setup()
 
@@ -124,24 +129,23 @@ def createConfigFile(deploy: bool, outputPath: str):
                     if "requires" not in jobAttrs.keys():
                         jobAttrs["requires"] = []
                     # Require objects to build for all connectors
-                    jobAttrs["requires"] += ["build-objects"]
-                    if build_core:
-                        # Require core tests too if core needs rebuilding.
-                        jobAttrs["requires"] += ["test-core"]
+                    jobAttrs["requires"] += ["build-sdk"]
+
                     # Add name to all jobs
                     name = f"{slug}-build"
-                    jobAttrs["name"] = name
-                    jobs_before_deploy.append(name)
-                    print(f"    Added connector job: {name}")
-                    # Add tags if marked for deployment
-                    if deploy:
-                        jobAttrs["installer"] = True
+                    if "name" not in jobAttrs.keys():
+                        jobAttrs["name"] = name
+                    n = jobAttrs["name"]
+                    jobs_before_deploy.append(n)
+                    print(f"    Added connector job: {n}")
                 if deploy:
                     jobAttrs["filters"] = getTagFilter([connector])
 
             # Append connector jobs to main workflow jobs
             main_workflow["jobs"] += connector_jobs[connector]
-
+    if build_core:
+        # Require core tests too if core needs rebuilding.
+        jobs_before_deploy.append("test-core")
     # Modify jobs for deployment
     if deploy:
         deploy_job = {}
@@ -150,10 +154,13 @@ def createConfigFile(deploy: bool, outputPath: str):
         main_workflow["jobs"] += [{"deploy-connectors": deploy_job}]
         print("Added deploy job: deployment")
 
-        if "get-ci-tools" in main_workflow["jobs"]:
-            main_workflow["jobs"].remove("get-ci-tools")
+        if main_workflow["jobs"][0]["get-ci-tools"] != None:
+            main_workflow["jobs"].pop(0)
 
-        ci_tools_job = {"filters": getTagFilter(slugs_to_match)}
+        ci_tools_job = {
+            "filters": getTagFilter(slugs_to_match),
+            "context": "github-dev-bot",
+        }
         main_workflow["jobs"] += [{"get-ci-tools": ci_tools_job}]
         print("Modified job for deploy: get-ci-tools")
 
@@ -164,8 +171,25 @@ def createConfigFile(deploy: bool, outputPath: str):
                 jobAttrs["filters"] = getTagFilter(slugs_to_match)
                 print(f"Added missing filter to job: {x[0]}")
 
+        jobsToWait = []
         for jobName in jobs_before_deploy:
-            main_workflow["jobs"] += [getNewDeployJob(jobName)]
+            if jobName == "test-core":
+                continue
+            job = getNewDeployJob(jobName)
+            if job["deploy-connector-new"]:
+                jobsToWait.append(job["deploy-connector-new"]["name"])
+            main_workflow["jobs"] += [job]
+        main_workflow["jobs"] += [
+            {
+                "notify-deploy": {
+                    "requires": jobsToWait,
+                    "context": "discord",
+                    "filters": getTagFilter(slugs_to_match),
+                }
+            }
+        ]
+    if external_build:
+        removeStepsThatUseSecrets(config)
     # Output continuation file
     with open(outputPath, "w") as file:
         yaml.dump(config, file, sort_keys=False)
@@ -173,16 +197,37 @@ def createConfigFile(deploy: bool, outputPath: str):
     print("---- Finished creating config ----")
 
 
+def removeStepsThatUseSecrets(config):
+    jobs: dict[str, dict[str, dict]] = config["workflows"]["build"]["jobs"]
+    filteredJobs = []
+
+    for jobItem in jobs:
+        key = next(iter(jobItem.keys()))
+        if key == "get-ci-tools":
+            continue
+        jobDict: dict = jobItem[key]
+        requires = jobDict["requires"]
+        if requires:
+            if "get-ci-tools" in requires:
+                requires.pop(requires.index("get-ci-tools"))
+        filteredJobs.append({f"{key}": jobDict})
+
+    config["workflows"]["build"]["jobs"] = filteredJobs
+    print("Cleaned up config for external build")
+
+
 def getNewDeployJob(jobName: str):
-    slug = jobName.split("-build")[0]
-    isMac = slug.find("-mac") != -1
+    slug: str = jobName.split("-build")[0]
+    isMac: bool = jobName.find("-mac") != -1
     deployJob: Dict[str, Any] = {
         "slug": slug.split("-mac")[0] if isMac else slug,
-        "name": slug + "-deploy",
+        "name": slug + "-deploy-mac" if isMac else slug + "-deploy",
         "os": "OSX" if isMac else "Win",
+        "arch": "Any",
         "extension": "zip" if isMac else "exe",
         "requires": ["deploy-connectors", jobName],
         "filters": getTagFilter([jobName]),
+        "context": ["do-spaces-speckle-releases"],
     }
     return {"deploy-connector-new": deployJob}
 

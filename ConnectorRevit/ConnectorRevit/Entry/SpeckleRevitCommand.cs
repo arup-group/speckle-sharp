@@ -1,69 +1,132 @@
-﻿using System;
-using System.IO;
-using System.Reflection;
-using System.Windows;
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
+using System.Threading;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.ReactiveUI;
+using DesktopUI2.ViewModels;
+using DesktopUI2.Views;
 using Speckle.ConnectorRevit.UI;
-using Speckle.DesktopUI;
-using Stylet.Xaml;
 
-namespace Speckle.ConnectorRevit.Entry
+namespace Speckle.ConnectorRevit.Entry;
+
+[Transaction(TransactionMode.Manual)]
+public class SpeckleRevitCommand : IExternalCommand
 {
-  [Transaction(TransactionMode.Manual)]
-  public class SpeckleRevitCommand : IExternalCommand
+  public static bool UseDockablePanel = true;
+
+  //window stuff
+  [DllImport("user32.dll", SetLastError = true)]
+  [SuppressMessage("Security", "CA5392:Use DefaultDllImportSearchPaths attribute for P/Invokes")]
+  static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr value);
+
+  const int GWL_HWNDPARENT = -8;
+  public static Window MainWindow { get; private set; }
+  private static Avalonia.Application AvaloniaApp { get; set; }
+
+  //end window stuff
+
+  public static ConnectorBindingsRevit Bindings { get; set; }
+
+  private static Panel _panel { get; set; }
+
+  internal static DockablePaneId PanelId = new(new Guid("{0A866FB8-8FD5-4DE8-B24B-56F4FA5B0836}"));
+
+  public static void InitAvalonia()
   {
-    public static Bootstrapper Bootstrapper { get; set; }
-    public static ConnectorBindingsRevit Bindings { get; set; }
+    BuildAvaloniaApp().SetupWithoutStarting();
+  }
 
-    public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+  public static AppBuilder BuildAvaloniaApp() =>
+    AppBuilder
+      .Configure<DesktopUI2.App>()
+      .UsePlatformDetect()
+      .With(new SkiaOptions { MaxGpuResourceSizeBytes = 8096000 })
+      .With(new Win32PlatformOptions { AllowEglInitialization = true, EnableMultitouch = false })
+      .LogToTrace()
+      .UseReactiveUI();
+
+  public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+  {
+    if (UseDockablePanel)
     {
-      OpenOrFocusSpeckle(commandData.Application);
-      return Result.Succeeded;
+      RegisterPane();
+      var panel = App.AppInstance.GetDockablePane(PanelId);
+      panel.Show();
+    }
+    else
+    {
+      CreateOrFocusSpeckle();
     }
 
-    public static void OpenOrFocusSpeckle(UIApplication app)
+    return Result.Succeeded;
+  }
+
+  internal static void RegisterPane()
+  {
+    if (!UseDockablePanel)
     {
-      try
-      {
-        AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(OnAssemblyResolve);
-
-        if (Bootstrapper != null)
-        {
-          Bootstrapper.ShowRootView();
-          return;
-        }
-
-        Bootstrapper = new Bootstrapper() { Bindings = Bindings };
-
-        if (Application.Current != null)
-          new StyletAppLoader() { Bootstrapper = Bootstrapper };
-        else
-          new DesktopUI.App(Bootstrapper);
-
-        Bootstrapper.Start(Application.Current);
-        Bootstrapper.SetParent(app.MainWindowHandle);
-      }
-      catch (Exception e)
-      {
-        Bootstrapper = null;
-      }
+      return;
     }
 
-    static Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
+    var registered = DockablePane.PaneIsRegistered(PanelId);
+    var created = DockablePane.PaneExists(PanelId);
+
+    if (registered && created)
     {
-      Assembly a = null;
-      var name = args.Name.Split(',')[0];
-      string path = Path.GetDirectoryName(typeof(App).Assembly.Location);
+      _panel.Init();
+      return;
+    }
 
-      string assemblyFile = Path.Combine(path, name + ".dll");
-
-      if (File.Exists(assemblyFile))
-        a = Assembly.LoadFrom(assemblyFile);
-
-      return a;
+    if (!registered)
+    {
+      //Register dockable panel
+      var viewModel = new MainViewModel(Bindings);
+      _panel = new Panel { DataContext = viewModel };
+      App.AppInstance.RegisterDockablePane(PanelId, "Speckle", _panel);
+      _panel.Init();
     }
   }
 
+  public static void CreateOrFocusSpeckle(bool showWindow = true)
+  {
+    if (MainWindow == null)
+    {
+      var viewModel = new MainViewModel(Bindings);
+      MainWindow = new MainWindow { DataContext = viewModel };
+
+      //massive hack: we start the avalonia main loop and stop it immediately (since it's thread blocking)
+      //to avoid an annoying error when closing revit
+      var cts = new CancellationTokenSource();
+      cts.CancelAfter(100);
+      AvaloniaApp.Run(cts.Token);
+    }
+
+    if (showWindow)
+    {
+      MainWindow.Show();
+      MainWindow.Activate();
+
+      //required to gracefully quit avalonia and the skia processes
+      //can also be used to manually do so
+      //https://github.com/AvaloniaUI/Avalonia/wiki/Application-lifetimes
+
+
+      if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+      {
+        var parentHwnd = App.AppInstance.MainWindowHandle;
+        var hwnd = MainWindow.PlatformImpl.Handle.Handle;
+        SetWindowLongPtr(hwnd, GWL_HWNDPARENT, parentHwnd);
+      }
+    }
+  }
+
+  private static void AppMain(Avalonia.Application app, string[] args)
+  {
+    AvaloniaApp = app;
+  }
 }

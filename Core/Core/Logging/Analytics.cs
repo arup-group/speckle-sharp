@@ -1,223 +1,347 @@
-﻿using System;
+#nullable disable
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using Speckle.Core.Credentials;
+using Speckle.Core.Helpers;
 using Speckle.Newtonsoft.Json;
 
-namespace Speckle.Core.Logging
+namespace Speckle.Core.Logging;
+
+/// <summary>
+///  Anonymous telemetry to help us understand how to make a better Speckle.
+///  This really helps us to deliver a better open source project and product!
+/// </summary>
+public static class Analytics
 {
   /// <summary>
-  ///  Anonymous telemetry to help us understand how to make a better Speckle.
-  ///  This really helps us to deliver a better open source project and product!
+  /// Default Mixpanel events
   /// </summary>
-  public static class Analytics
+  public enum Events
   {
-    private const string MixpanelToken = "acd87c5a50b56df91a795e999812a3a4";
-    private const string MixpanelServer = "https://analytics.speckle.systems";
+    /// <summary>
+    /// Event triggered when data is sent to a Speckle Server
+    /// </summary>
+    Send,
 
     /// <summary>
-    /// Default Mixpanel events
+    /// Event triggered when data is received from a Speckle Server
     /// </summary>
-    public enum Events
+    Receive,
+
+    /// <summary>
+    /// Event triggered when a node is executed in a visual programming environment, it should contain the name of the action and the host application
+    /// </summary>
+    NodeRun,
+
+    /// <summary>
+    /// Event triggered when an action is executed in Desktop UI, it should contain the name of the action and the host application
+    /// </summary>
+    DUIAction,
+
+    /// <summary>
+    /// Event triggered when a node is first created in a visual programming environment, it should contain the name of the action and the host application
+    /// </summary>
+    NodeCreate,
+
+    /// <summary>
+    /// Event triggered when the import/export alert is launched or closed
+    /// </summary>
+    ImportExportAlert,
+
+    /// <summary>
+    /// Event triggered when the connector is registered
+    /// </summary>
+    Registered,
+
+    /// <summary>
+    /// Event triggered by the Mapping Tool
+    /// </summary>
+    MappingsAction,
+
+    /// <summary>
+    /// Event triggered when user selects object to convert to Speckle on Send
+    /// </summary>
+    ConvertToSpeckle,
+
+    /// <summary>
+    /// Event triggered when user selects object to convert to Native on Receive
+    /// </summary>
+    ConvertToNative
+  }
+
+  private const string MIXPANEL_TOKEN = "acd87c5a50b56df91a795e999812a3a4";
+  private const string MIXPANEL_SERVER = "https://analytics.speckle.systems";
+
+  /// <summary>
+  /// Cached email
+  /// </summary>
+  private static string LastEmail { get; set; }
+
+  /// <summary>
+  /// Cached server URL
+  /// </summary>
+  private static string LastServer { get; set; }
+
+  /// <summary>
+  /// <see langword="false"/> when the DEBUG pre-processor directive is <see langword="true"/>, <see langword="false"/> otherwise
+  /// </summary>
+  /// <remarks>This must be kept as a computed property, not a compile time const</remarks>
+  internal static bool IsReleaseMode =>
+#if DEBUG
+    false;
+#else
+    true;
+#endif
+
+  /// <summary>
+  /// Tracks an event without specifying the email and server.
+  /// It's not always possible to know which account the user has selected, especially in visual programming.
+  /// Therefore we are caching the email and server values so that they can be used also when nodes such as "Serialize" are used.
+  /// If no account info is cached, we use the default account data.
+  /// </summary>
+  /// <param name="eventName">Name of the even</param>
+  /// <param name="customProperties">Additional parameters to pass in to event</param>
+  /// <param name="isAction">True if it's an action performed by a logged user</param>
+  public static void TrackEvent(
+    Events eventName,
+    Dictionary<string, object> customProperties = null,
+    bool isAction = true
+  )
+  {
+    string email;
+    string server;
+
+    if (LastEmail != null && LastServer != null && LastServer != "no-account-server")
     {
-      /// <summary>
-      /// Event triggered when data is sent to a Speckle Server
-      /// </summary>
-      Send,
-      /// <summary>
-      /// Event triggered when data is received from a Speckle Server
-      /// </summary>
-      Receive,
-      /// <summary>
-      /// Event triggered when a node is executed in a visual programming environment, it should contain the name of the action and the host application
-      /// </summary>
-      NodeRun,
-      /// <summary>
-      /// Event triggered when an action is executed in Desktop UI, it should contain the name of the action and the host application
-      /// </summary>
-      DUIAction,
-      /// <summary>
-      /// Event triggered when a node is first created in a visual programming environment, it should contain the name of the action and the host application
-      /// </summary>
-      NodeCreate,
-    };
-
-
-    /// <summary>
-    /// Cached email
-    /// </summary>
-    private static string LastEmail { get; set; }
-    /// <summary>
-    /// Cached server URL
-    /// </summary>
-    private static string LastServer { get; set; }
-
-    /// <summary>
-    /// Tracks an event without specifying the email and server.
-    /// It's not always possible to know which account the user has selected, especially in visual programming.
-    /// Therefore we are caching the email and server values so that they can be used also when nodes such as "Serialize" are used.
-    /// If no account info is cached, we use the default account data.
-    /// </summary>
-    /// <param name="eventName">Name of the even</param>
-    /// <param name="customProperties">Additional parameters to pass in to event</param>
-    public static void TrackEvent(Events eventName, Dictionary<string, object> customProperties = null)
+      email = LastEmail;
+      server = LastServer;
+    }
+    else
     {
-      string email = "";
-      string server = "";
-
-      if (LastEmail != null && LastServer != null)
+      var acc = AccountManager.GetDefaultAccount();
+      if (acc == null)
       {
-        email = LastEmail;
-        server = LastServer;
+        var macAddr = NetworkInterface
+          .GetAllNetworkInterfaces()
+          .Where(
+            nic =>
+              nic.OperationalStatus == OperationalStatus.Up && nic.NetworkInterfaceType != NetworkInterfaceType.Loopback
+          )
+          .Select(nic => nic.GetPhysicalAddress().ToString())
+          .FirstOrDefault();
+
+        email = macAddr;
+        server = "no-account-server";
+        isAction = false;
       }
       else
       {
-        var acc = Credentials.AccountManager.GetDefaultAccount();
-        if (acc == null)
-          return;
-
-        email = acc.userInfo.email;
-        server = acc.serverInfo.url;
+        email = acc.GetHashedEmail();
+        server = acc.GetHashedServer();
       }
-
-      TrackEvent(email, server, eventName, customProperties);
     }
 
-    /// <summary>
-    /// Tracks an event from a specified account, anonymizes personal information
-    /// </summary>
-    /// <param name="account">Account to use, it will be anonymized</param>
-    /// <param name="eventName">Name of the event</param>
-    /// <param name="customProperties">Additional parameters to pass to the event</param>
-    public static void TrackEvent(Account account, Events eventName, Dictionary<string, object> customProperties = null)
-    {
-      string email = account?.userInfo?.email ?? "unknown";
-      string url = account?.serverInfo?.url ?? "https://speckle.xyz/";
+    TrackEvent(email, server, eventName, customProperties, isAction);
+  }
 
-      TrackEvent(email, url, eventName, customProperties);
+  /// <summary>
+  /// Tracks an event from a specified account, anonymizes personal information
+  /// </summary>
+  /// <param name="account">Account to use, it will be anonymized</param>
+  /// <param name="eventName">Name of the event</param>
+  /// <param name="customProperties">Additional parameters to pass to the event</param>
+  /// <param name="isAction">True if it's an action performed by a logged user</param>
+  public static void TrackEvent(
+    Account account,
+    Events eventName,
+    Dictionary<string, object> customProperties = null,
+    bool isAction = true
+  )
+  {
+    if (account == null)
+    {
+      TrackEvent(eventName, customProperties, isAction);
     }
-
-    /// <summary>
-    /// Tracks an event from a specified email and server, anonymizes personal information
-    /// </summary>
-    /// <param name="email">Email of the user, it will be anonymized</param>
-    /// <param name="server">Server URL, it will be anonymized</param>
-    /// <param name="eventName">Name of the event</param>
-    /// <param name="customProperties">Additional parameters to pass to the event</param>
-    private static void TrackEvent(string email, string server, Events eventName, Dictionary<string, object> customProperties = null)
+    else
     {
-      LastEmail = email;
-      LastServer = server;
+      TrackEvent(account.GetHashedEmail(), account.GetHashedServer(), eventName, customProperties, isAction);
+    }
+  }
 
-#if DEBUG
+  /// <summary>
+  /// Tracks an event from a specified email and server, anonymizes personal information
+  /// </summary>
+  /// <param name="hashedEmail">Email of the user anonymized</param>
+  /// <param name="hashedServer">Server URL anonymized</param>
+  /// <param name="eventName">Name of the event</param>
+  /// <param name="customProperties">Additional parameters to pass to the event</param>
+  /// <param name="isAction">True if it's an action performed by a logged user</param>
+  private static void TrackEvent(
+    string hashedEmail,
+    string hashedServer,
+    Events eventName,
+    Dictionary<string, object> customProperties = null,
+    bool isAction = true
+  )
+  {
+    LastEmail = hashedEmail;
+    LastServer = hashedServer;
+
+    if (!IsReleaseMode)
+    {
       //only track in prod
-      //return;
-#endif
+      return;
+    }
 
-      Task.Run(() =>
+    Task.Run(async () =>
+    {
+      try
       {
-
-        try
+        var executingAssembly = Assembly.GetExecutingAssembly();
+        var properties = new Dictionary<string, object>
         {
-          var httpWebRequest = (HttpWebRequest)WebRequest.Create(MixpanelServer + "/track?ip=1");
-          httpWebRequest.ContentType = "application/x-www-form-urlencoded";
-          httpWebRequest.Accept = "text/plain";
-          httpWebRequest.Method = "POST";
-          ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-
-          server = CleanURL(server);
-
-          var hashedEmail = "@" + Hash(email); //prepending an @ so we distinguish logged and non-logged users
-          var hashedServer = Hash(server);
-
-          var properties = new Dictionary<string, object>()
+          { "distinct_id", hashedEmail },
+          { "server_id", hashedServer },
+          { "token", MIXPANEL_TOKEN },
+          { "hostApp", Setup.HostApplication },
+          { "hostAppVersion", Setup.VersionedHostApplication },
           {
-            { "distinct_id", hashedEmail },
-            { "server_id", hashedServer },
-            { "token", MixpanelToken },
-            { "hostApp", Setup.HostApplication },
-            { "hostAppVersion", Setup.VersionedHostApplication },
-            { "core_version", Assembly.GetExecutingAssembly().GetName().Version.ToString()},
-            { "$os",  GetOs() },
-            { "type", "action" }
-          };
+            "core_version",
+            FileVersionInfo.GetVersionInfo(executingAssembly.Location).ProductVersion
+              ?? executingAssembly.GetName().Version.ToString()
+          },
+          { "$os", GetOs() }
+        };
 
-          if (customProperties != null)
-            properties = properties.Concat(customProperties).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        if (isAction)
+        {
+          properties.Add("type", "action");
+        }
 
-
-          using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+        if (customProperties != null)
+        {
+          foreach (KeyValuePair<string, object> customProp in customProperties)
           {
-            string json = JsonConvert.SerializeObject(new
+            properties[customProp.Key] = customProp.Value;
+          }
+        }
+
+        string json = JsonConvert.SerializeObject(new { @event = eventName.ToString(), properties });
+
+        var query = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("data=" + HttpUtility.UrlEncode(json))));
+
+        using HttpClient client = new();
+        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
+        query.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        var res = await client.PostAsync(MIXPANEL_SERVER + "/track?ip=1", query).ConfigureAwait(false);
+        res.EnsureSuccessStatusCode();
+      }
+      catch (Exception ex) when (!ex.IsFatal())
+      {
+        SpeckleLog.Logger
+          .ForContext("eventName", eventName.ToString())
+          .ForContext("isAction", isAction)
+          .Warning(ex, "Analytics event failed {exceptionMessage}", ex.Message);
+      }
+    });
+  }
+
+  internal static void AddConnectorToProfile(string hashedEmail, string connector)
+  {
+    Task.Run(async () =>
+    {
+      try
+      {
+        var data = new Dictionary<string, object>
+        {
+          { "$token", MIXPANEL_TOKEN },
+          { "$distinct_id", hashedEmail },
+          {
+            "$union",
+            new Dictionary<string, object>
             {
-
-              @event = eventName.ToString(),
-              properties
-            });
-
-            streamWriter.Write("data=" + HttpUtility.UrlEncode(json));
-            streamWriter.Flush();
-            streamWriter.Close();
+              {
+                "Connectors",
+                new List<string> { connector }
+              }
+            }
           }
+        };
+        string json = JsonConvert.SerializeObject(data);
 
-          var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-          using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+        var query = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("data=" + HttpUtility.UrlEncode(json))));
+        using HttpClient client = Http.GetHttpProxyClient();
+        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
+        query.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        var res = await client.PostAsync(MIXPANEL_SERVER + "/engage#profile-union", query).ConfigureAwait(false);
+        res.EnsureSuccessStatusCode();
+      }
+      catch (Exception ex) when (!ex.IsFatal())
+      {
+        SpeckleLog.Logger.ForContext("connector", connector).Warning(ex, "Failed add connector to profile");
+      }
+    });
+  }
+
+  internal static void IdentifyProfile(string hashedEmail, string connector)
+  {
+    Task.Run(async () =>
+    {
+      try
+      {
+        var data = new Dictionary<string, object>
+        {
+          { "$token", MIXPANEL_TOKEN },
+          { "$distinct_id", hashedEmail },
           {
-            var result = streamReader.ReadToEnd();
+            "$set",
+            new Dictionary<string, object> { { "Identified", true } }
           }
-        }
-        catch (Exception e)
-        {
-          // POKEMON: Gotta catch 'em all!
-        }
+        };
+        string json = JsonConvert.SerializeObject(data);
 
-      });
-
-    }
-
-    private static string CleanURL(string server)
-    {
-      Uri NewUri;
-
-      if (Uri.TryCreate(server, UriKind.Absolute, out NewUri))
-      {
-        server = NewUri.Authority;
+        var query = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("data=" + HttpUtility.UrlEncode(json))));
+        using HttpClient client = Http.GetHttpProxyClient();
+        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
+        query.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        var res = await client.PostAsync(MIXPANEL_SERVER + "/engage#profile-set", query).ConfigureAwait(false);
+        res.EnsureSuccessStatusCode();
       }
-      return server;
-    }
-
-    private static string Hash(string input)
-    {
-
-      using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create())
+      catch (Exception ex) when (!ex.IsFatal())
       {
-        byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input.ToLowerInvariant());
-        byte[] hashBytes = md5.ComputeHash(inputBytes);
-
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < hashBytes.Length; i++)
-        {
-          sb.Append(hashBytes[i].ToString("X2"));
-        }
-        return sb.ToString();
+        SpeckleLog.Logger.ForContext("connector", connector).Warning(ex, "Failed identify profile");
       }
+    });
+  }
 
-    }
-
-    private static string GetOs()
+  private static string GetOs()
+  {
+    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
     {
-      if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return "Windows";
-      if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "Mac OS X";
-      if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return "Linux";
-      return "Unknown";
+      return "Windows";
     }
 
+    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+    {
+      return "Mac OS X";
+    }
+
+    if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+    {
+      return "Linux";
+    }
+
+    return "Unknown";
   }
 }

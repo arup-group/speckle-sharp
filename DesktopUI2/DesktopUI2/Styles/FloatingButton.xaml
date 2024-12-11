@@ -1,7 +1,6 @@
 <Styles
   xmlns="https://github.com/avaloniaui"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-  xmlns:animations="clr-namespace:Material.Styles.Additional.Animations;assembly=Material.Styles"
   xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
   xmlns:cc="clr-namespace:Material.Styles;assembly=Material.Styles"
   xmlns:converters="clr-namespace:Material.Styles.Converters;assembly=Material.Styles"
@@ -159,6 +158,10 @@
     <Setter Property="Height" Value="32" />
     <Setter Property="Width" Value="NaN" />
     <Setter Property="Padding" Value="5" />
+  </Style>
+  <Style Selector="cc|FloatingButton.Invisible">
+    <Setter Property="assists:ShadowAssist.ShadowDepth" Value="Depth0" />
+    <Setter Property="assists:ButtonAssist.HoverColor" Value="Transparent" />
   </Style>
 
   <!--  Extended state transition (currently it doesnt works due AvaloniaUI bug)  -->
